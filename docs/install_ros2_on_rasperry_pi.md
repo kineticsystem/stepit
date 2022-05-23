@@ -1,4 +1,4 @@
-# How to install ROS2 on Rasperry Pi
+# How to install ROS2 on Rasperry Pi 4
 
 ## Prerequisites
 
