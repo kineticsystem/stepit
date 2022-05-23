@@ -166,7 +166,7 @@ Update and install ROS2 packages.
 
 `sudo apt install ros-humble-ros-base`
 
-## Cunfiguring ROS2 environment
+## Configuring ROS2 environment
 
 To make ROS2 packages avaiable for development, type the following command:
 
