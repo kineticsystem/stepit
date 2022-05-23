@@ -129,7 +129,6 @@ PING 192.168.1.100 (192.168.1.100) 56(84) bytes of data.
 64 bytes from 192.168.1.100: icmp_seq=1 ttl=64 time=20.9 ms
 64 bytes from 192.168.1.100: icmp_seq=2 ttl=64 time=7.67 ms
 ```
-
 ## Log into the Rasperry Pi
 
 Open a terminal on the main computer and SSH into the Rasperry Pi using default user (ubuntu) and password (ubuntu). In our case the IP of the device is 192.168.1.100.
