@@ -6,7 +6,7 @@ A PC running Ubuntu Desktop 22.04LTS and an empty Micro SD card with a minimum 6
 
 ## Write a Rasperry Pi image
 
-On the Rasperry Pi we will install Ubuntu Mate Server 22.04 LTS. We do not need a desktop version of Ubuntu because we do not plan any user interface running on it.
+On the Rasperry Pi we will install Ubuntu Server 22.04 LTS. We do not need a desktop version of Ubuntu because we do not plan any user interface running on it.
 
 The simplest way to write an image onto the SD card is using a software called `rpi-image`. To install the software, open a terminal and type the follwing command:
 
