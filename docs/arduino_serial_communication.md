@@ -2,13 +2,15 @@
 
 ## Introduction
 
+To control stepper motors attached to an Arduino board via motor drivers, we need first a solution to send commands to the Arduino using the serial port. Because ROS is the most common opensource framework in robotics, we would like to create a ROS node to deal with the low-level communication with Arduino, and use it as a proxy in all our robotics projects.
+
 In ROS1 there is a useful library to exchange information to and from Arduino: this library is [rosserial](http://wiki.ros.org/rosserial). The official library description is that rosserial is a protocol for wrapping standard ROS serialized messages and multiplexing multiple topics and services over a character device such as a serial port or network socket.
 
 This library is not available in ROS2 and the closest option is [Micro-ROS](https://micro.ros.org/docs/overview/features/). Unfortunately, Micro-ROS does not support AVR 8-bit microcontrollers, which include Arduino Uno and Arduino Nano.
 
-For this reason, to send and receive data to and from Arduino over a serial connection, we implemented a simple Point-to-Point Protocol (PPP) data link layer from scratch. On top of it, we implemented a Request/Response communication pattern between a C++ ROS2 node and Arduino. Please refer to [Point-to-PointProtocol.pdf (PPP)](<./lectures/Point-to-Point%20Protocol%20(PPP).pdf>).
+For this reason, to send and receive data to and from Arduino over a serial connection, we implemented a simple Point-to-Point Protocol (PPP) data link layer from scratch. On top of it, we implemented a Request/Response communication pattern between a C++ ROS2 node and Arduino. Please refer to [Point-to-PointProtocol.pdf (PPP)](<./lectures/Point-to-Point%20Protocol%20(PPP).pdf>) for more information.
 
-PPP delimits frames by using the delimeter flag 0x7e. Should the same byte code appear in the frame data, the escape flag 0x7D will be inserted in place followed by the delimeter flag XOR'd with 0x20, resulting in the sequence of two bytes 0x7d 0x5e.
+PPP separate frames by using the delimeter flag 0x7e. Should the same byte code appear in the frame data, the escape flag 0x7D will be inserted in place followed by the delimeter flag XOR'd with 0x20, resulting in the sequence of two bytes 0x7d 0x5e. Following a table of a single communication frame.
 
 <table align="center" border="2px">
   <tr><td><b>PPP frame</b></td></tr>
@@ -20,7 +22,54 @@ PPP delimits frames by using the delimeter flag 0x7e. Should the same byte code 
   <tr><td>delimeter flag</td></tr>
 </table>
 
-## Arduino base types
+In this implementation, each frame contains a command and all required parameters in binary format. In the following example we show a Move Command request to move motor 1 forward 23156 steps.
+
+<table align="center" border="2px">
+  <tr>
+    <td align="center"><b>Delimiter</b></td>
+    <td align="center"><b>Request id</b></td>
+    <td align="center"><b>Move command</b></td>
+    <td align="center"><b>Motor id</b></td>
+    <td align="center" colspan="4"><b>Steps</b></td>
+    <td align="center" colspan="2"><b>Checksum</b></td>
+    <td align="center"><b>Delimiter</b></td>
+  </tr>
+  <tr>
+    <td align="center">0x7e</td>
+    <td align="center">0xAF</td>
+    <td align="center">0x70</td>
+    <td align="center">0x01</td>
+    <td align="center">0x00</td>
+    <td align="center">0x00</td>
+    <td align="center">0x5A</td>
+    <td align="center">0x74</td>
+    <td align="center">0x7D</td>
+    <td align="center">0x53</td>
+    <td align="center">0x7e</td>
+  </tr>
+</table>
+
+The response to the above command is a simple acknowledgment frame. As a general rule in network communication, when int, long or float are sent, the Most Significant Byte (MSB) is sent first.
+
+<table align="center" border="2px">
+  <tr>
+    <td align="center"><b>Delimiter</b></td>
+    <td align="center"><b>Request id</b></td>
+    <td align="center"><b>Ack command</b></td>
+    <td align="center" colspan="2"><b>Checksum</b></td>
+    <td align="center"><b>Delimiter</b></td>
+  </tr>
+  <tr>
+    <td align="center">0x7e</td>
+    <td align="center">0xAF</td>
+    <td align="center">0x7F</td>
+    <td align="center">0x10</td>
+    <td align="center">0x3C</td>
+    <td align="center">0x7e</td>
+  </tr>
+</table>
+
+Following a short list of all numeric Arduino data types.
 
 <table align="center" border="2px">
   <tr><td><b>type</b></td><td><b>bytes</b></td></tr>
@@ -40,32 +89,11 @@ PPP delimits frames by using the delimeter flag 0x7e. Should the same byte code 
 
 </table>
 
-## Arduino base types
-
-boolean 1 byte
-
-byte 1 byte
-
-char 1 byte
-unsigned char 1 byte
-
-int 2 bytes
-unsigned int 2 bytes
-
-short 2 bytes
-unsigned short 2 bytes
-
-long 4 bytes
-unsigned long 4 bytes
-
-float 4 bytes
-double 4 bytes
-
-word 2 bytes
-
 ## Commands
 
-Following a list of commands to control steppers motors attached to an Arduino board.
+As stated at the beginning of the document, the main scope of the project is to control stepper motors connected to an Arduino board via a motor driver circuit. A motor does not move instantaneously at maximum speed, but it accelerates, maintains a predefined speed and then decelerates until the target position is reached. To control the motor movement with acceleration and deceleration, we use an Arduino well known library called [AccelStepper](https://www.airspayce.com/mikem/arduino/AccelStepper/).
+
+Following a list of all desired commands implemented to control the motor movements.
 
 <table align="center" border="2px">
     <tr>
@@ -94,7 +122,7 @@ Following a list of commands to control steppers motors attached to an Arduino b
     <tr>
         <td>Move to<b></td>
         <td>0x71</td>
-        <td rowspan="2">Move a stepper to a given absolute position.</td>
+        <td rowspan="2">Move a motor to a given absolute position.</td>
         <td>motorId</td>
         <td>uchar</td>
         <td>The motor id.</td>
@@ -105,14 +133,6 @@ Following a list of commands to control steppers motors attached to an Arduino b
         <td>position</td>
         <td>long</td>
         <td>The absolute position.</td>
-    </tr>
-    <tr>
-        <td>Keep alive<b></td>
-        <td>0x73</td>
-        <td >Safety command to keep the motors alive.</td>
-        <td></td>
-        <td></td>
-        <td></td>
     </tr>
     <tr>
         <td>Stop all<b></td>
@@ -163,7 +183,7 @@ Following a list of commands to control steppers motors attached to an Arduino b
     <tr>
         <td>Enable motors<b></td>
         <td>0x7A</td>
-        <td>Enable the motors loop.</td>
+        <td>Enable motors Service Interrupt Routine (SIR) call.</td>
         <td></td>
         <td></td>
         <td></td>
@@ -171,7 +191,7 @@ Following a list of commands to control steppers motors attached to an Arduino b
     <tr>
         <td>Disable motors<b></td>
         <td>0x7B</td>
-        <td>Disable the motors loop.</td>
+        <td>Disable motors Service Interrupt Routine (SIR) call.</td>
         <td></td>
         <td></td>
         <td></td>
@@ -190,5 +210,13 @@ Following a list of commands to control steppers motors attached to an Arduino b
         <td>position</td>
         <td>long</td>
         <td>The motor absolute position.</td>
+    </tr>
+    <tr>
+        <td>Keep alive<b></td>
+        <td>0x73</td>
+        <td >Safety command to keep the motors moving.</td>
+        <td></td>
+        <td></td>
+        <td></td>
     </tr>
 </table>
