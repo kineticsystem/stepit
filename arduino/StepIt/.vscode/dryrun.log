@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/giovanni/repo/stepit/arduino/StepIt'
+make: Leaving directory '/home/giovanni/repo/stepit/arduino/StepIt'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+

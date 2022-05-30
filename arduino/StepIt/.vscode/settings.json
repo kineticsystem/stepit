@@ -1,0 +1,4 @@
+{
+  "makefile.extensionOutputFolder": "./.vscode",
+  "arduino.path": "/snap/arduino/current"
+}
