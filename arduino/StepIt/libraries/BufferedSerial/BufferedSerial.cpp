@@ -23,9 +23,9 @@
 
 BufferedSerial::BufferedSerial(unsigned int readBuffersize, unsigned int writeBufferSize)
 {
-    readBuffer = (RoundBuffer *)malloc(sizeof(RoundBuffer));
+    readBuffer = (DataBuffer *)malloc(sizeof(DataBuffer));
     readBuffer->init(readBuffersize);
-    writeBuffer = (RoundBuffer *)malloc(sizeof(RoundBuffer));
+    writeBuffer = (DataBuffer *)malloc(sizeof(DataBuffer));
     writeBuffer->init(writeBufferSize);
     state = WAITING_STATE;
 }
@@ -44,21 +44,21 @@ void BufferedSerial::flush()
 {
     while (writeBuffer->getSize() > 0)
     {
-        Serial.write(writeBuffer->removeByte(RoundBuffer::FRONT));
+        Serial.write(writeBuffer->removeByte(Location::FRONT));
     }
     Serial.flush();
 }
 
-void BufferedSerial::addEscapedByte(RoundBuffer *buffer, byte value)
+void BufferedSerial::addEscapedByte(DataBuffer *buffer, byte value)
 {
     if (value == ESCAPE_FLAG || value == DELIMITER_FLAG)
     {
-        buffer->addByte(ESCAPE_FLAG, RoundBuffer::END);
-        buffer->addByte(value ^ ESCAPED_XOR, RoundBuffer::END);
+        buffer->addByte(ESCAPE_FLAG, Location::END);
+        buffer->addByte(value ^ ESCAPED_XOR, Location::END);
     }
     else
     {
-        buffer->addByte(value, RoundBuffer::END);
+        buffer->addByte(value, Location::END);
     }
 }
 
@@ -77,14 +77,14 @@ void BufferedSerial::addEscapedByte(RoundBuffer *buffer, byte value)
  * serial communication neither a Delimiter Flag nor an Escape Flag
  * is part of the packet message.
  */
-void BufferedSerial::write(RoundBuffer *buffer)
+void BufferedSerial::write(DataBuffer *buffer)
 {
     unsigned short outCRC = 0;
-    writeBuffer->addByte(DELIMITER_FLAG, RoundBuffer::END);
+    writeBuffer->addByte(DELIMITER_FLAG, Location::END);
 
     while (buffer->getSize() > 0)
     {
-        byte out = buffer->removeByte(RoundBuffer::FRONT);
+        byte out = buffer->removeByte(Location::FRONT);
         outCRC = CrcUtils::updateCRC(outCRC, out);
         addEscapedByte(writeBuffer, out);
     }
@@ -95,32 +95,7 @@ void BufferedSerial::write(RoundBuffer *buffer)
     addEscapedByte(writeBuffer, crcMSB);
     addEscapedByte(writeBuffer, crcLSB);
 
-    writeBuffer->addByte(DELIMITER_FLAG, RoundBuffer::END);
-}
-
-/**
- * When Arduino receives a command from the client it immediately sends
- * back an acknowledgment packet.
- * TODO: this method does not belong here: move it into StepIt.ino.
- */
-void BufferedSerial::sendAck(byte cmdId)
-{
-    unsigned short outCRC = 0;
-    writeBuffer->addByte(DELIMITER_FLAG, RoundBuffer::END);
-
-    outCRC = CrcUtils::updateCRC(outCRC, cmdId);
-    addEscapedByte(writeBuffer, cmdId);
-
-    outCRC = CrcUtils::updateCRC(outCRC, ACK);
-    writeBuffer->addByte(ACK, RoundBuffer::END);
-
-    // Conversion of CRC-16 from Little Endian to Big Endian.
-    unsigned char crcLSB = (outCRC & 0xff00) >> 8;
-    unsigned char crcMSB = (outCRC & 0x00ff);
-    addEscapedByte(writeBuffer, crcMSB);
-    addEscapedByte(writeBuffer, crcLSB);
-
-    writeBuffer->addByte(DELIMITER_FLAG, RoundBuffer::END);
+    writeBuffer->addByte(DELIMITER_FLAG, Location::END);
 }
 
 /**
@@ -128,7 +103,7 @@ void BufferedSerial::sendAck(byte cmdId)
  * Once a data frame is identified, the actual unescaped data in the
  * frame is sent to the callback function for further processing.
  */
-void BufferedSerial::setCallback(void (*callback)(byte cmdId, RoundBuffer *))
+void BufferedSerial::setCallback(void (*callback)(byte responseId, DataBuffer *))
 {
     this->callback = callback;
 }
@@ -174,16 +149,14 @@ void BufferedSerial::update()
                     // 2 - a command (1 byte);
                     // 3 - a CRC (2 bytes).
 
+                    // CRC calculated on frame data is zero when the frame data
+                    // is correct.
                     if (inCRC == 0)
                     {
-
                         // Remove the CRC from the buffer.
-                        readBuffer->removeInt(RoundBuffer::END);
+                        readBuffer->removeInt(Location::END);
 
-                        // Send ACK.
-                        byte requestId = readBuffer->removeByte(RoundBuffer::FRONT);
-                        sendAck(requestId);
-
+                        byte requestId = readBuffer->removeByte(Location::FRONT);
                         callback(requestId, readBuffer);
                     }
                     state = WAITING_STATE;
@@ -194,13 +167,13 @@ void BufferedSerial::update()
             else
             {
                 inCRC = CrcUtils::updateCRC(inCRC, in);
-                readBuffer->addByte(in, RoundBuffer::END);
+                readBuffer->addByte(in, Location::END);
             }
             break;
 
         case ESCAPING_BYTE_STATE:
             inCRC = CrcUtils::updateCRC(inCRC, in ^ ESCAPED_XOR);
-            readBuffer->addByte(in ^ ESCAPED_XOR, RoundBuffer::END);
+            readBuffer->addByte(in ^ ESCAPED_XOR, Location::END);
             state = READING_MESSAGE_STATE;
             break;
         }
@@ -210,6 +183,6 @@ void BufferedSerial::update()
 
     if (writeBuffer->getSize() > 0)
     {
-        Serial.write(writeBuffer->removeByte(RoundBuffer::FRONT));
+        Serial.write(writeBuffer->removeByte(Location::FRONT));
     }
 }

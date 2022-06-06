@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Remigi Giovanni
+ * Copyright (C) 2022 Remigi Giovanni
  * g.remigi@kineticsystem.org
  * www.kineticsystem.org
  *
@@ -22,9 +22,11 @@
 #define BUFFERED_SERIAL_H
 
 #include <Arduino.h>
-#include "RoundBuffer.h"
+#include "DataBuffer.h"
 
-// This class read and write PPP frames through the serial port.
+// This class reads and writes PPP frames received from the serial port.
+// We calculate CRC of all incoming frames, but in case of error we simply ignore
+// the request.
 // As a general rule, when int, long or float are sent, the Most Significant
 // Byte (MSB) is sent first.
 
@@ -35,8 +37,11 @@ public:
     BufferedSerial(unsigned int inBuffersize, unsigned int outBufferSize);
 
     boolean isBusyWriting();
-    void setCallback(void (*callback)(byte requestId, RoundBuffer *));
+    void setCallback(void (*callback)(byte requestId, DataBuffer *));
 
+    /**
+     * Initialize the serial connection communication speed.
+     */
     void init(int baudRate);
 
     /**
@@ -45,10 +50,14 @@ public:
      */
     void update();
 
-    /** Write the given buffer. */
-    void write(RoundBuffer *buffer);
+    /**
+     * Write the given data buffer.
+     * @param buffer The buffer contains a sequence of bytes representing
+     * a message to the client.
+     */
+    void write(DataBuffer *buffer);
 
-    /** Write all data until the output buffer is empty. */
+    /** Write the data buffer. */
     void flush();
 
 private:
@@ -60,23 +69,20 @@ private:
     static const byte ESCAPE_FLAG = 0x7D;
     static const byte ESCAPED_XOR = 0x20;
 
-    // This is a reserved command indicating a low level response acknowledgement.
-    static const byte ACK = 0x7F; // 255 - 128
-
     // Buffer to read requests.
-    RoundBuffer *readBuffer;
+    DataBuffer *readBuffer;
 
     // Buffer to write responses.
-    RoundBuffer *writeBuffer;
+    DataBuffer *writeBuffer;
 
     // Function to be called when a command is received.
-    void (*callback)(byte requestId, RoundBuffer *);
+    void (*callback)(byte requestId, DataBuffer *);
 
     // Escape bytes that are equal to the DELIMITER_FLAG or ESCAPE_FLAG.
-    static void addEscapedByte(RoundBuffer *buffer, byte value);
+    static void addEscapedByte(DataBuffer *buffer, byte value);
 
-    // Send client data packed acknowledgement.
-    void sendAck(byte requestId);
+    // Send data frame acknowledgement.
+    void sendAck(byte requestId, byte message);
 
     // Receiver current state.
 

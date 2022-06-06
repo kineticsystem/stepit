@@ -16,5 +16,5 @@ data
 CCITT CRC-16 (Kermit)
 DELIMITER-TAG
 
-For each call to the method BufferedSerial::update() a single byte is read and write.
-This minimize the time Arduino spend managing data on the serial port.
+For each call to the method BufferedSerial::update() a single byte is read and written.
+This minimizes the time Arduino spends managing data on the serial port.

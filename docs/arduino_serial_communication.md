@@ -49,22 +49,22 @@ In this implementation, each frame contains a command and all required parameter
   </tr>
 </table>
 
-The response to the above command is a simple acknowledgment frame. As a general rule in network communication, when int, long or float are sent, the Most Significant Byte (MSB) is sent first.
+If the command is executed succesfully, the response to the above command is the following frame. As a general rule in network communication, when int, long or float are sent, the Most Significant Byte (MSB) is sent first.
 
 <table align="center" border="2px">
   <tr>
     <td align="center"><b>Delimiter</b></td>
     <td align="center"><b>Request id</b></td>
-    <td align="center"><b>Ack command</b></td>
+    <td align="center"><b>Success reponse</b></td>
     <td align="center" colspan="2"><b>Checksum</b></td>
     <td align="center"><b>Delimiter</b></td>
   </tr>
   <tr>
     <td align="center">0x7e</td>
     <td align="center">0xAF</td>
-    <td align="center">0x7F</td>
-    <td align="center">0x10</td>
-    <td align="center">0x3C</td>
+    <td align="center">0x00</td>
+    <td align="center">0xF0</td>
+    <td align="center">0x7D</td>
     <td align="center">0x7e</td>
   </tr>
 </table>
@@ -91,7 +91,7 @@ Following a short list of all numeric Arduino data types.
 
 ## Commands
 
-As stated at the beginning of the document, the main scope of the project is to control stepper motors connected to an Arduino board via a motor driver circuit. A motor does not move instantaneously at maximum speed, but it accelerates, maintains a predefined speed and then decelerates until the target position is reached. To control the motor movement with acceleration and deceleration, we use an Arduino well known library called [AccelStepper](https://www.airspayce.com/mikem/arduino/AccelStepper/).
+As stated at the beginning of the document, the main scope of the project is to control stepper motors connected to an Arduino board via a motor driver circuit. A motor does not move instantaneously at maximum speed, but it accelerates, maintains a predefined speed and then decelerates until the target position is reached. To control the motor movement with acceleration and deceleration, we use an Arduino well-known library called [AccelStepper](https://www.airspayce.com/mikem/arduino/AccelStepper/).
 
 Following a list of all desired commands implemented to control the motor movements.
 

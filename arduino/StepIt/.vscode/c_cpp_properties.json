@@ -20,7 +20,6 @@
                 "/home/giovanni/repo/stepit/arduino/StepIt/libraries/AccelStepper",
                 "/home/giovanni/repo/stepit/arduino/StepIt/libraries/TimerInterrupt",
                 "/home/giovanni/repo/stepit/arduino/StepIt/libraries/BufferedSerial",
-                "/home/giovanni/repo/stepit/arduino/StepIt/libraries/Freezer",
                 "/snap/arduino/61/hardware/tools/avr/lib/gcc/avr/7.3.0/include",
                 "/snap/arduino/61/hardware/tools/avr/lib/gcc/avr/7.3.0/include-fixed",
                 "/snap/arduino/61/hardware/tools/avr/avr/include"
@@ -534,8 +533,7 @@
                 "__ATOMIC_RELEASE=3",
                 "__BUILTIN_AVR_FMUL=1",
                 "USBCON"
-            ],
-            "configurationProvider": "ms-vscode.makefile-tools"
+            ]
         }
     ]
 }

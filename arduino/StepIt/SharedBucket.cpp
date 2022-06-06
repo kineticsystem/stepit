@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Remigi Giovanni
+ * Copyright (C) 2022 Remigi Giovanni
  * g.remigi@kineticsystem.org
  * www.kineticsystem.org
  *
@@ -20,7 +20,8 @@
 
 #include "SharedBucket.h"
 
-SharedBucket::SharedBucket(float maxSpeed, float acceleration) {
+SharedBucket::SharedBucket(float maxSpeed, float acceleration)
+{
     this->maxSpeed = maxSpeed;
     this->acceleration = acceleration;
     this->speed = 0;
@@ -103,19 +104,23 @@ long SharedBucket::getOldTargetPosition()
     return oldTargetPosition;
 }
 
-void SharedBucket::setAcceleration(float acceleration) {
+void SharedBucket::setAcceleration(float acceleration)
+{
     this->acceleration = acceleration;
 }
 
-float SharedBucket::getAcceleration() {
+float SharedBucket::getAcceleration()
+{
     return acceleration;
 }
 
-void SharedBucket::setMaxSpeed(float maxSpeed) {
+void SharedBucket::setMaxSpeed(float maxSpeed)
+{
     this->maxSpeed = maxSpeed;
 }
 
-float SharedBucket::getMaxSpeed() {
+float SharedBucket::getMaxSpeed()
+{
     return maxSpeed;
 }
 
@@ -123,9 +128,8 @@ void SharedBucket::setDecelerating(bool decelerating)
 {
     this->decelerating = decelerating;
 }
-        
+
 bool SharedBucket::isDecelerating()
 {
     return decelerating;
 }
-

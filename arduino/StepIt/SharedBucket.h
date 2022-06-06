@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Remigi Giovanni
+ * Copyright (C) 2022 Remigi Giovanni
  * g.remigi@kineticsystem.org
  * www.kineticsystem.org
  *
@@ -26,10 +26,10 @@
  * and the main loop.
  * Shared data are declared volatile.
  */
-class SharedBucket {
-    
-public:
+class SharedBucket
+{
 
+public:
     explicit SharedBucket(float maxSpeed, float acceleration);
 
     void setSpeed(float speed);
@@ -38,7 +38,7 @@ public:
     long getCurrentPosition();
     void setDistanceToGo(long distanceToGo);
     long getDistanceToGo();
-    
+
     void setTargetSpeed(float targetSpeed);
     float getTargetSpeed();
     void setTargetPosition(long targetPosition);
@@ -51,27 +51,26 @@ public:
     float getMaxSpeed();
     void setDecelerating(bool decelerating);
     bool isDecelerating();
-    
+
     void setOldTargetSpeed(float oldTargetSpeed);
     float getOldTargetSpeed();
     void setOldTargetPosition(long oldTargetPosition);
     long getOldTargetPosition();
 
 private:
-
     // These values are written by the interrupt routine and read in the main loop.
     volatile float speed;
     volatile long currentPosition;
     volatile long distanceToGo;
-    
+
     // These values are written in the main loop and read by the interrupt routine.
     volatile float targetSpeed;
     volatile long targetPosition;
     volatile float acceleration;
     volatile float maxSpeed;
-    
+
     // These are value used exclusively inside the interrupt routine.
-    
+
     float oldTargetSpeed;
     long oldTargetPosition;
     bool decelerating;

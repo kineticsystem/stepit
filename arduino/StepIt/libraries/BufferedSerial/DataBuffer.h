@@ -18,13 +18,15 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef BYTE_BUFFER_H
-#define BYTE_BUFFER_H
+#ifndef DATA_BUFFER_H
+#define DATA_BUFFER_H
 
 #include <Arduino.h>
+#include "CircularBuffer.h"
+#include "Location.h"
 
 /**
- * This implement a circular byte buffer to be used during a serial port
+ * This implements a circular byte buffer to be used during a serial port
  * communication.
  *
  * IMPORTANT NOTE
@@ -36,17 +38,10 @@
  * We use the above specifications when converting numbers from bytes to
  * primitive types, and back.
  */
-class RoundBuffer
+class DataBuffer
 {
-
 public:
-    enum Location
-    {
-        FRONT,
-        END
-    };
-
-    RoundBuffer();
+    DataBuffer();
 
     // This method initializes the datastore of the buffer which must not be
     // used before this call is made.
@@ -89,16 +84,7 @@ public:
     void dispose();
 
 private:
-    byte *data;
-
-    // The maximum capacity of the buffer
-    unsigned int capacity;
-
-    // This is the position where a byte is read from using the get method.
-    unsigned int position;
-
-    // This record how much data is currently stored in the buffer.
-    unsigned int size;
+    CircularBuffer<byte> m_buffer;
 };
 
-#endif
+#endif // DATA_BUFFER_H

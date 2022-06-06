@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Remigi Giovanni
+ * Copyright (C) 2022 Remigi Giovanni
  * g.remigi@kineticsystem.org
  * www.kineticsystem.org
  *
@@ -21,24 +21,10 @@
 #include <AccelStepper.h>
 #include <TimerInterrupt.h>
 #include <BufferedSerial.h>
-#include <RoundBuffer.h>
-#include <Freezer.h>
+#include <DataBuffer.h>
 #include "SharedBucket.h"
-
-// Freezer conections
-
-// Pin D2 connected to MR of of 74HC595 Shift Register. Low active.
-static const byte OVERRIDING_CLEAR_PIN = 2;
-// Pin D3 connected to SH_CP of 74HC595 Shift Register.
-static const byte CLOCK_PIN = 3; // Connected to SH_CP of 74HC595 Shift Register.
-// Pin D4 connected to DS of 74HC595 Shift Register.
-static const byte DATA_PIN = 4;
-// Pin D5 connected to OE of 74HC595 Shift Register. Low active.
-static const byte OUTPUT_ENABLED_PIN = 5;
-// Pin D6 connected to ST_CP of 74HC595 Shift Register.
-static const byte LATCH_PIN = 6;
-// Pin D7 in read mode.
-static const byte INPUT_PIN = 7;
+#include "MotorGoal.h"
+#include "MotorState.h"
 
 // Motors connections.
 
@@ -48,55 +34,37 @@ static const byte STEPPER1_STEP_PIN = 11;
 static const byte STEPPER1_DIR_PIN = 12;
 
 // This is the information sent by Arduino during the connection handshake.
-const char name[] = "STEPPIT\0";
+const char NAME[] = "STEPPIT\0";
 
 const int INTERRUPT_TIME = 90; // Microseconds.
 
-// VERY IMPORTANT
-// Commands sent from Arduino to client have the most significative bit set to 1.
-// Commands sent from client to Arduino and corresponsing response have the most significative bit set to 0.
-// There is a special reserved internal ACK response 0xFF used both by Arduino and client.
+// Input commands. For each command received a response must be returned.
+// The reponse always contains a success or an error code.
+// If a command requires additional information the success response is
+// followed by the requested data.
+// All messages sent by Arduino have the most significative bit set to 0.
 
-// Input commands.
-
-byte MOVE_CMD = 0x70;                  // Move motors a given amount of steps.
-byte MOVE_TO_CMD = 0x71;               // Move motors to a given position.
-byte STOP_CMD = 0x72;                  // Stop motors.
-byte SET_ACCELERATION_CMD = 0x73;      // Set motors acceleration.
-byte STATUS_CMD = 0x75;                // Request motors status, position and speed.
-byte INFO_CMD = 0x76;                  // Request controller info for connection handshaking.
-byte SET_TARGET_SPEED_CMD = 0x77;      // Set motors target relative speed (0-100).
-byte SET_MAX_SPEED_CMD = 0x78;         // Set motors max absolute speed (step/s).
-byte SET_CURRENT_POSITION_CMD = 0x79;  // Set the motor current position.
-byte SET_INTERRUPT_ENABLED_CMD = 0x7A; // Enable interrupts.
-byte SWITCH_LIGHT_CMD = 0x7B;          // Switch light on/off.
-byte SHOOT_CMD = 0x7C;                 // Shoot the camera.
+byte MOVE_CMD = 0x70;                 // Move motors a given amount of steps.
+byte MOVE_TO_CMD = 0x71;              // Move motors to a given position.
+byte STOP_CMD = 0x72;                 // Stop motors.
+byte SET_ACCELERATION_CMD = 0x73;     // Set motors acceleration.
+byte STATUS_CMD = 0x75;               // Request motors status, position and speed.
+byte INFO_CMD = 0x76;                 // Request controller info for connection handshaking.
+byte SET_TARGET_SPEED_CMD = 0x77;     // Set motors target relative speed (0-100).
+byte SET_MAX_SPEED_CMD = 0x78;        // Set motors max absolute speed (step/s).
+byte SET_CURRENT_POSITION_CMD = 0x79; // Set the motor current position.
+byte SET_MOTORS_ENABLED_CMD = 0x7A;   // Enable interrupt to control the motors.
 
 // When a serial connection is initiated Arduino is rebooted and this takes up to 2 seconds.
-// To notify the client that Arduino is ready to receive and trasmit data, a ready command
+// To notify the client that Arduino is ready to receive and trasmit data, a ready message
 // is sent.
-byte READY_CMD = 0x80; // Command send by Arduino after bootstrap.
+byte READY_MSG = 0x10;
 
-// For each command received a response must be returned as soon as possible.
-// If a command doesn't require a specific response, a default success response is
-// delivered.
-// If a command requires some information (e.g. the internal motor status) a response
-// containing the requested information is delivered.
+// Success response code.
+byte SUCCESS_MSG = 0x11;
 
-// Return a message indicating that a correct command has been successfully received.
-byte SUCCESS_MSG = 0x00;
-
-// Return motors status.
-byte STATUS_MSG = 0x01;
-
-// Return controller info for connection handshaking.
-byte INFO_MSG = 0x03;
-
-// Each time Arduino send a command this number is incremented.
-byte arduinoCommandId = 0;
-
-// This is the component used to control the shift register.
-Freezer freezer(OVERRIDING_CLEAR_PIN, CLOCK_PIN, DATA_PIN, OUTPUT_ENABLED_PIN, LATCH_PIN);
+// Error response code.
+byte ERROR_MSG = 0x12;
 
 // Stepper motors.
 
@@ -104,56 +72,61 @@ AccelStepper stepper[2] = {
     AccelStepper(AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN),
     AccelStepper(AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN)};
 
+// This is a structure which contains the motors goals. It is written by the
+// main thread and read by the interrupt callback.
+MotorGoal motorGoals[2] = {MotorGoal(), MotorGoal()};
+
+// Boolean variable to make motor goals structure thread-safe.
+volatile boolean motorGoalsReady = false;
+
+// This is a structure which contains motors states. It is read by the main
+// thread and written by the interrupt callback.
+MotorState motorStates[2] = {MotorState(), MotorState()};
+
+// Boolean variable to make motor states structure thread-safe.
+volatile boolean motorStatesReady = false;
+
 // This is the structure used to safetly exchange data beween the sub routine and the main loop.
-SharedBucket bucket[2] = {
-    SharedBucket(1000.0, 500.0),
-    SharedBucket(1000.0, 500.0)};
+SharedBucket bucket[2] = {SharedBucket(1000.0, 500.0), SharedBucket(1000.0, 500.0)};
 
-// Buffer to read/write commands.
-
+// Class to read and write over a serial port.
 BufferedSerial serial(256, 256);
-RoundBuffer bufferOut;
 
-// The last delivered reponse.
-// If the client doesn't receive a correct reponse (e.g. the CRC is incorrect) it will reissue
-// the same request after a default timeout for a maximum specified number of times.
-// Arduino doesn't process again the command but simply send back the previous response.
-RoundBuffer cachedResponse;
+// Message to be written to the serial port, usually a response.
+DataBuffer buffer;
 
-void sendReadyCommand()
+void sendReadyMessage()
 {
-    bufferOut.addByte(arduinoCommandId, RoundBuffer::END);
-    bufferOut.addByte(READY_CMD, RoundBuffer::END);
-    serial.write(&bufferOut);
-    arduinoCommandId++;
+    buffer.addByte(READY_MSG, Location::END);
+    serial.write(&buffer);
 }
 
 /**
  * Default reponse when a correct command, not requiring information, has been received.
  */
-void returnCommandSuccess(byte cmdId)
+void returnCommandSuccess(byte requestId)
 {
-    bufferOut.addByte(cmdId, RoundBuffer::END);
-    bufferOut.addByte(SUCCESS_MSG, RoundBuffer::END);
-    serial.write(&bufferOut);
+    buffer.addByte(requestId, Location::END);
+    buffer.addByte(SUCCESS_MSG, Location::END);
+    serial.write(&buffer);
 }
 
 /**
  * When a Status command is received, send back the motors position and
  * speed.
  */
-void returnStatus(byte cmdId)
+void returnStatus(byte requestId)
 {
-    bufferOut.addByte(cmdId, RoundBuffer::END);
-    bufferOut.addByte(STATUS_MSG, RoundBuffer::END);
+    buffer.addByte(requestId, Location::END);
+    buffer.addByte(SUCCESS_MSG, Location::END);
     for (int i = 0; i < 2; i++)
     {
-        bufferOut.addLong(bucket[i].getCurrentPosition(), RoundBuffer::END);
+        buffer.addLong(bucket[i].getCurrentPosition(), Location::END);
         float speed = 100.0 * bucket[i].getSpeed() / bucket[i].getMaxSpeed();
-        bufferOut.addFloat(speed, RoundBuffer::END);
-        bufferOut.addLong(bucket[i].getDistanceToGo(), RoundBuffer::END);
+        buffer.addFloat(speed, Location::END);
+        buffer.addLong(bucket[i].getDistanceToGo(), Location::END);
     }
-    serial.write(&bufferOut);
+    serial.write(&buffer);
 }
 
 /**
@@ -161,42 +134,23 @@ void returnStatus(byte cmdId)
  * to help the client, on the other side of the serial port, identify the
  * correct port where the Arduino is connected.
  */
-void returnControllerInfo(byte cmdId)
+void returnControllerInfo(byte requestId)
 {
-    bufferOut.addByte(cmdId, RoundBuffer::END);
-    bufferOut.addByte(INFO_MSG, RoundBuffer::END);
-    for (int i = 0; name[i] != '\0'; i++)
+    buffer.addByte(requestId, Location::END);
+    buffer.addByte(SUCCESS_MSG, Location::END);
+    for (int i = 0; NAME[i] != '\0'; i++)
     {
-        bufferOut.addByte(name[i], RoundBuffer::END);
+        buffer.addByte(NAME[i], Location::END);
     }
-    serial.write(&bufferOut);
+    serial.write(&buffer);
 }
 
 /**
- * When running this command Arduino becomes irresponsive.
+ * Enable or disable the Service Interrupt Routine (SIR) to move the motros.
+ * @param requestId The request id.
+ * @param enabled True to enable the motors control, false to disable.
  */
-void shootPicture(byte cmdId, long flashTime)
-{
-    // When running this command Arduino becomes irresponsive. We must be sure to empty the
-    // output buffer before running the shooting command.
-    serial.flush();
-
-    TimerInterrupt::stop();
-    freezer.write(170u); // 0000000010101010 Pre charge
-    delay(100);
-    freezer.write(255u); // 0000000011111111 Open shutter
-    delay(500);
-    freezer.write(65535u); // 1111111111111111 Flash On
-    delay(flashTime);
-    freezer.write(255u); // 0000000011111111 Flash off
-    delay(200);
-    freezer.write(0u); // 0000000000000000 Close shutter
-    delay(200);
-    TimerInterrupt::start(INTERRUPT_TIME);
-    returnCommandSuccess(cmdId);
-}
-
-void enableInterrupt(byte cmdId, byte enabled)
+void setMotorsEnabled(byte requestId, byte enabled)
 {
     if (enabled == 0)
     {
@@ -206,75 +160,69 @@ void enableInterrupt(byte cmdId, byte enabled)
     {
         TimerInterrupt::stop();
     }
-    returnCommandSuccess(cmdId);
+    returnCommandSuccess(requestId);
 }
 
-void setMotorTargetSpeed(byte cmdId, byte motorId, float maxSpeedPercentage)
+void setMotorTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
 {
     if (maxSpeedPercentage > 100.0)
     {
         maxSpeedPercentage = 100.0;
     }
     bucket[motorId].setTargetSpeed(bucket[motorId].getMaxSpeed() * maxSpeedPercentage / 100.0);
-    returnCommandSuccess(cmdId);
+    returnCommandSuccess(requestId);
 }
 
-void motorMove(byte cmdId, byte motorId, long steps)
+void motorMove(byte requestId, byte motorId, long steps)
 {
     bucket[motorId].setTargetPosition(bucket[motorId].getCurrentPosition() + steps);
-    returnCommandSuccess(cmdId);
+    returnCommandSuccess(requestId);
 }
 
-void motorMoveTo(byte cmdId, byte motorId, long position)
+void motorMoveTo(byte requestId, byte motorId, long position)
 {
     bucket[motorId].setTargetPosition(position);
-    returnCommandSuccess(cmdId);
+    returnCommandSuccess(requestId);
 }
 
 /**
  * Decode the input command and execute the requested action.
  * @param msg The input message containing the requested command.
  */
-void processBuffer(byte requestId, RoundBuffer *msg)
+void processBuffer(byte requestId, DataBuffer *msg)
 {
     // State machine.
 
     if (msg->getSize() > 0)
     {
-
         // Get the command id.
-        byte cmdId = msg->removeByte(RoundBuffer::FRONT);
+        byte cmdId = msg->removeByte(Location::FRONT);
 
         if (cmdId == STATUS_CMD && msg->getSize() == 0)
         {
             returnStatus(requestId);
         }
-        else if (cmdId == SET_INTERRUPT_ENABLED_CMD && msg->getSize() == 1)
+        else if (cmdId == SET_MOTORS_ENABLED_CMD && msg->getSize() == 1)
         {
-            byte enabled = msg->removeByte(RoundBuffer::FRONT);
-            enableInterrupt(requestId, enabled);
-        }
-        else if (cmdId == SHOOT_CMD && msg->getSize() == 4)
-        { // Shoot a picture.
-            long flashTime = msg->removeLong(RoundBuffer::FRONT);
-            shootPicture(requestId, flashTime);
+            byte enabled = msg->removeByte(Location::FRONT);
+            setMotorsEnabled(requestId, enabled);
         }
         else if (cmdId == SET_TARGET_SPEED_CMD && msg->getSize() == 5)
         { // Set motor speed.
-            byte motorId = msg->removeByte(RoundBuffer::FRONT);
-            float targetSpdPercentage = fabs(msg->removeFloat(RoundBuffer::FRONT)); // Ensure speed is always positive.
+            byte motorId = msg->removeByte(Location::FRONT);
+            float targetSpdPercentage = fabs(msg->removeFloat(Location::FRONT)); // Ensure speed is always positive.
             setMotorTargetSpeed(requestId, motorId, targetSpdPercentage);
         }
         else if (cmdId == MOVE_CMD && msg->getSize() == 5)
         { // Move motor by a specified number for steps.
-            byte motorId = msg->removeByte(RoundBuffer::FRONT);
-            long steps = msg->removeLong(RoundBuffer::FRONT);
+            byte motorId = msg->removeByte(Location::FRONT);
+            long steps = msg->removeLong(Location::FRONT);
             motorMove(requestId, motorId, steps);
         }
         else if (cmdId == MOVE_TO_CMD && msg->getSize() == 5)
         { // Move motor by a specified number for steps.
-            byte motorId = msg->removeByte(RoundBuffer::FRONT);
-            long position = msg->removeLong(RoundBuffer::FRONT);
+            byte motorId = msg->removeByte(Location::FRONT);
+            long position = msg->removeLong(Location::FRONT);
             motorMoveTo(requestId, motorId, position);
         }
         else if (cmdId == STOP_CMD && (msg->getSize() == 0 || msg->getSize() == 1))
@@ -288,22 +236,22 @@ void processBuffer(byte requestId, RoundBuffer *msg)
             }
             else if (msg->getSize() == 1)
             { // Stop a given motor.
-                byte motorId = msg->removeByte(RoundBuffer::FRONT);
+                byte motorId = msg->removeByte(Location::FRONT);
                 bucket[motorId].setTargetSpeed(0);
             }
             returnCommandSuccess(requestId);
         }
         else if (cmdId == SET_ACCELERATION_CMD && msg->getSize() == 5)
         { // Set motor acceleration.
-            byte motorId = msg->removeByte(RoundBuffer::FRONT);
-            float acceleration = msg->removeFloat(RoundBuffer::FRONT);
+            byte motorId = msg->removeByte(Location::FRONT);
+            float acceleration = msg->removeFloat(Location::FRONT);
             bucket[motorId].setAcceleration(acceleration);
             returnCommandSuccess(requestId);
         }
         else if (cmdId == SET_MAX_SPEED_CMD && msg->getSize() == 5)
         { // Set motor max speed acceleration.
-            byte motorId = msg->removeByte(RoundBuffer::FRONT);
-            float maxSpeed = msg->removeFloat(RoundBuffer::FRONT);
+            byte motorId = msg->removeByte(Location::FRONT);
+            float maxSpeed = msg->removeFloat(Location::FRONT);
             bucket[motorId].setMaxSpeed(maxSpeed);
             returnCommandSuccess(requestId);
         }
@@ -315,22 +263,9 @@ void processBuffer(byte requestId, RoundBuffer *msg)
         {
             if (msg->getSize() == 5)
             { // Set position for a given motor.
-                byte motorId = msg->removeByte(RoundBuffer::FRONT);
-                long position = msg->removeLong(RoundBuffer::FRONT);
+                byte motorId = msg->removeByte(Location::FRONT);
+                long position = msg->removeLong(Location::FRONT);
                 stepper[motorId].setCurrentPosition(position);
-            }
-            returnCommandSuccess(requestId);
-        }
-        else if (cmdId = SWITCH_LIGHT_CMD && msg->getSize() == 1)
-        { // Switch light on/off
-            byte lightOn = msg->removeByte(RoundBuffer::FRONT);
-            if (lightOn == 1)
-            {
-                freezer.write(65280u); // On  - 1111111100000000
-            }
-            else
-            {
-                freezer.write(0u); // Off - 0000000000000000
             }
             returnCommandSuccess(requestId);
         }
@@ -349,7 +284,6 @@ void run()
 {
     for (int i = 0; i < 2; i++)
     {
-
         // Read motor status.
 
         float actualSpeed = stepper[i].speed();
@@ -403,11 +337,6 @@ void run()
 
 void setup()
 {
-    // Initialize shif regiter controller.
-
-    freezer.initialize();
-    freezer.write(0u);
-
     // Initialize serial port.
 
     serial.init(9600);
@@ -415,8 +344,7 @@ void setup()
 
     // Initialize command buffer.
 
-    bufferOut.init(256);
-    cachedResponse.init(256);
+    buffer.init(256);
 
     // Initialize stepper motors.
 
@@ -433,7 +361,7 @@ void setup()
 
     // Send a message to the client that Arduino is ready to read/write data.
 
-    sendReadyCommand();
+    sendReadyMessage();
 }
 
 void loop()
