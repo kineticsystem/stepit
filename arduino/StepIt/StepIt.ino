@@ -20,8 +20,9 @@
 
 #include <AccelStepper.h>
 #include <TimerInterrupt.h>
-#include <BufferedSerial.h>
+#include <SerialPort.h>
 #include <DataBuffer.h>
+#include <Buffer.h>
 #include "SharedBucket.h"
 #include "MotorGoal.h"
 #include "MotorState.h"
@@ -76,6 +77,8 @@ AccelStepper stepper[2] = {
 // main thread and read by the interrupt callback.
 MotorGoal motorGoals[2] = {MotorGoal(), MotorGoal()};
 
+Buffer<MotorGoal> motorGoal{2};
+
 // Boolean variable to make motor goals structure thread-safe.
 volatile boolean motorGoalsReady = false;
 
@@ -90,15 +93,15 @@ volatile boolean motorStatesReady = false;
 SharedBucket bucket[2] = {SharedBucket(1000.0, 500.0), SharedBucket(1000.0, 500.0)};
 
 // Class to read and write over a serial port.
-BufferedSerial serial(256, 256);
+SerialPort serialPort{256, 256};
 
 // Message to be written to the serial port, usually a response.
-DataBuffer buffer;
+DataBuffer responseBuffer{256};
 
 void sendReadyMessage()
 {
-    buffer.addByte(READY_MSG, Location::END);
-    serial.write(&buffer);
+    responseBuffer.addByte(READY_MSG, Location::END);
+    serialPort.write(&responseBuffer);
 }
 
 /**
@@ -106,9 +109,9 @@ void sendReadyMessage()
  */
 void returnCommandSuccess(byte requestId)
 {
-    buffer.addByte(requestId, Location::END);
-    buffer.addByte(SUCCESS_MSG, Location::END);
-    serial.write(&buffer);
+    responseBuffer.addByte(requestId, Location::END);
+    responseBuffer.addByte(SUCCESS_MSG, Location::END);
+    serialPort.write(&responseBuffer);
 }
 
 /**
@@ -117,16 +120,16 @@ void returnCommandSuccess(byte requestId)
  */
 void returnStatus(byte requestId)
 {
-    buffer.addByte(requestId, Location::END);
-    buffer.addByte(SUCCESS_MSG, Location::END);
+    responseBuffer.addByte(requestId, Location::END);
+    responseBuffer.addByte(SUCCESS_MSG, Location::END);
     for (int i = 0; i < 2; i++)
     {
-        buffer.addLong(bucket[i].getCurrentPosition(), Location::END);
+        responseBuffer.addLong(bucket[i].getCurrentPosition(), Location::END);
         float speed = 100.0 * bucket[i].getSpeed() / bucket[i].getMaxSpeed();
-        buffer.addFloat(speed, Location::END);
-        buffer.addLong(bucket[i].getDistanceToGo(), Location::END);
+        responseBuffer.addFloat(speed, Location::END);
+        responseBuffer.addLong(bucket[i].getDistanceToGo(), Location::END);
     }
-    serial.write(&buffer);
+    serialPort.write(&responseBuffer);
 }
 
 /**
@@ -136,13 +139,13 @@ void returnStatus(byte requestId)
  */
 void returnControllerInfo(byte requestId)
 {
-    buffer.addByte(requestId, Location::END);
-    buffer.addByte(SUCCESS_MSG, Location::END);
+    responseBuffer.addByte(requestId, Location::END);
+    responseBuffer.addByte(SUCCESS_MSG, Location::END);
     for (int i = 0; NAME[i] != '\0'; i++)
     {
-        buffer.addByte(NAME[i], Location::END);
+        responseBuffer.addByte(NAME[i], Location::END);
     }
-    serial.write(&buffer);
+    serialPort.write(&responseBuffer);
 }
 
 /**
@@ -339,12 +342,8 @@ void setup()
 {
     // Initialize serial port.
 
-    serial.init(9600);
-    serial.setCallback(&processBuffer);
-
-    // Initialize command buffer.
-
-    buffer.init(256);
+    serialPort.init(9600);
+    serialPort.setCallback(&processBuffer);
 
     // Initialize stepper motors.
 
@@ -366,5 +365,5 @@ void setup()
 
 void loop()
 {
-    serial.update(); // Read/write serial port data.
+    serialPort.update(); // Read/write serial port data.
 }

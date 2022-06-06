@@ -2,9 +2,9 @@ BUFFERED SERIAL PORT
 
 Author Giovanni Remigi
 
-This is a library to read/write data using serial port.
+This is a library to read/write data using the serial port.
 
-Incoming and outgoing data are received and sent if form of packets using an implementation of Point-to-Point (PPP) protocol with frame delimiters and escaped bytes.
+Incoming and outgoing data are received and sent in form of packets using an implementation of the Point-to-Point (PPP) protocol with frame delimiters and escaped bytes.
 
 The packet has the following form:
 

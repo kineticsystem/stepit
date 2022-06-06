@@ -22,8 +22,8 @@
 #define DATA_BUFFER_H
 
 #include <Arduino.h>
-#include "CircularBuffer.h"
-#include "Location.h"
+#include <Buffer.h>
+#include <Location.h>
 
 /**
  * This implements a circular byte buffer to be used during a serial port
@@ -41,11 +41,8 @@
 class DataBuffer
 {
 public:
-    DataBuffer();
-
-    // This method initializes the datastore of the buffer which must not be
-    // used before this call is made.
-    void init(unsigned int bufferSize);
+    explicit DataBuffer(unsigned int bufferSize);
+    ~DataBuffer();
 
     // Returns how much data is currently stored in the buffer.
     int getSize();
@@ -80,11 +77,8 @@ public:
     // This method resets the buffer into an original state (with no data).
     void clear();
 
-    // Deallocate all buffer data from memory. The buffer won't be usable anymore.
-    void dispose();
-
 private:
-    CircularBuffer<byte> m_buffer;
+    Buffer<byte> *m_buffer;
 };
 
 #endif // DATA_BUFFER_H

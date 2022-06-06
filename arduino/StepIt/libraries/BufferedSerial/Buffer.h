@@ -18,29 +18,26 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef CIRCULAR_BUFFER_H
-#define CIRCULAR_BUFFER_H
+#ifndef BUFFER_H
+#define BUFFER_H
 
 #include <Arduino.h>
-#include "Location.h"
+#include <Location.h>
 
 /**
  * This template implements a circular buffer.
  */
 template <typename T>
-class CircularBuffer
+class Buffer
 {
 public:
-    CircularBuffer();
+    explicit Buffer(unsigned int bufferSize);
+    ~Buffer();
 
-    // This method initializes the datastore of the buffer which must not be
-    // used before this call is made.
-    void init(unsigned int bufferSize);
-
-    // Returns how much data is currently stored in the buffer.
+    // Return how much data is currently stored in the buffer.
     int size();
 
-    // Returns the maximum capacity of the buffer
+    // Return the maximum capacity of the buffer
     int capacity();
 
     // Insert an item at the give location.
@@ -49,11 +46,8 @@ public:
     // Remove an item from the given location.
     T remove(Location location);
 
-    // This method resets the buffer into an original state (with no data).
+    // Reset the buffer into an original state (with no data).
     void clear();
-
-    // Deallocate all buffer data from memory. The buffer won't be usable anymore.
-    void dispose();
 
 private:
     T *m_data;
@@ -69,41 +63,41 @@ private:
 };
 
 template <typename T>
-CircularBuffer<T>::CircularBuffer()
+Buffer<T>::Buffer(unsigned int bufferSize)
 {
-    m_capacity = 0;
-    m_position = 0;
-    m_size = 0;
-    m_data = 0;
-}
-
-template <typename T>
-int CircularBuffer<T>::size()
-{
-    return m_size;
-}
-
-template <typename T>
-int CircularBuffer<T>::capacity()
-{
-    return m_capacity;
-}
-
-template <typename T>
-void CircularBuffer<T>::clear()
-{
+    m_data = new T[bufferSize];
+    m_capacity = bufferSize;
     m_position = 0;
     m_size = 0;
 }
 
 template <typename T>
-void CircularBuffer<T>::dispose()
+Buffer<T>::~Buffer()
 {
     delete[] m_data;
 }
 
 template <typename T>
-void CircularBuffer<T>::add(T in, Location location)
+int Buffer<T>::size()
+{
+    return m_size;
+}
+
+template <typename T>
+int Buffer<T>::capacity()
+{
+    return m_capacity;
+}
+
+template <typename T>
+void Buffer<T>::clear()
+{
+    m_position = 0;
+    m_size = 0;
+}
+
+template <typename T>
+void Buffer<T>::add(T in, Location location)
 {
     if (m_size < m_capacity)
     {
@@ -129,20 +123,21 @@ void CircularBuffer<T>::add(T in, Location location)
 }
 
 template <typename T>
-T CircularBuffer<T>::remove(Location location)
+T Buffer<T>::remove(Location location)
 {
     T out = 0;
     if (m_size > 0)
     {
         if (location == Location::FRONT)
         {
-            // Remove an item from the beginning of buffer,
+            // Remove an item from the beginning of the buffer.
             out = m_data[m_position];
             m_position = (m_position + 1) % m_capacity;
             m_size--;
         }
         else
         {
+            // Remove an item from the end of the buffer.
             out = m_data[(m_position + m_size - 1) % m_capacity];
             m_size--;
         }
@@ -150,13 +145,4 @@ T CircularBuffer<T>::remove(Location location)
     return out;
 }
 
-template <typename T>
-void CircularBuffer<T>::init(unsigned int bufferSize)
-{
-    m_data = new T[bufferSize];
-    m_capacity = bufferSize;
-    m_position = 0;
-    m_size = 0;
-}
-
-#endif // CIRCULAR_BUFFER_H
+#endif // BUFFER_H

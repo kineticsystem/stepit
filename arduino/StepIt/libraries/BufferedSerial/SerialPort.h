@@ -18,23 +18,24 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef BUFFERED_SERIAL_H
-#define BUFFERED_SERIAL_H
+#ifndef SERIAL_PORT_H
+#define SERIAL_PORT_H
 
 #include <Arduino.h>
-#include "DataBuffer.h"
+#include <DataBuffer.h>
 
 // This class reads and writes PPP frames received from the serial port.
-// We calculate CRC of all incoming frames, but in case of error we simply ignore
-// the request.
+// A callback method is used to process incoming frames.
+// CRC is calculated on all incoming frames and in case of error the frame is
+// dumped.
 // As a general rule, when int, long or float are sent, the Most Significant
 // Byte (MSB) is sent first.
 
-class BufferedSerial
+class SerialPort
 {
-
 public:
-    BufferedSerial(unsigned int inBuffersize, unsigned int outBufferSize);
+    explicit SerialPort(unsigned int inBuffersize, unsigned int outBufferSize);
+    ~SerialPort();
 
     boolean isBusyWriting();
     void setCallback(void (*callback)(byte requestId, DataBuffer *));
@@ -70,10 +71,10 @@ private:
     static const byte ESCAPED_XOR = 0x20;
 
     // Buffer to read requests.
-    DataBuffer *readBuffer;
+    DataBuffer *m_readBuffer;
 
     // Buffer to write responses.
-    DataBuffer *writeBuffer;
+    DataBuffer *m_writeBuffer;
 
     // Function to be called when a command is received.
     void (*callback)(byte requestId, DataBuffer *);
@@ -81,7 +82,7 @@ private:
     // Escape bytes that are equal to the DELIMITER_FLAG or ESCAPE_FLAG.
     static void addEscapedByte(DataBuffer *buffer, byte value);
 
-    // Send data frame acknowledgement.
+    // Send and acknowledgement when a frame is received.
     void sendAck(byte requestId, byte message);
 
     // Receiver current state.
@@ -93,7 +94,7 @@ private:
         ESCAPING_BYTE_STATE
     };
 
-    State state;
+    State m_state;
 };
 
-#endif
+#endif // SERIAL_PORT_H

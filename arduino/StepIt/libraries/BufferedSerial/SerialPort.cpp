@@ -18,38 +18,42 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "BufferedSerial.h"
-#include "CrcUtils.h"
+#include <SerialPort.h>
+#include <CrcUtils.h>
 
-BufferedSerial::BufferedSerial(unsigned int readBuffersize, unsigned int writeBufferSize)
+SerialPort::SerialPort(unsigned int readBuffersize, unsigned int writeBufferSize)
 {
-    readBuffer = (DataBuffer *)malloc(sizeof(DataBuffer));
-    readBuffer->init(readBuffersize);
-    writeBuffer = (DataBuffer *)malloc(sizeof(DataBuffer));
-    writeBuffer->init(writeBufferSize);
-    state = WAITING_STATE;
+    m_readBuffer = new DataBuffer{readBuffersize};
+    m_writeBuffer = new DataBuffer{writeBufferSize};
+    m_state = WAITING_STATE;
 }
 
-void BufferedSerial::init(int baudRate)
+SerialPort::~SerialPort()
+{
+    delete m_readBuffer;
+    delete m_writeBuffer;
+}
+
+void SerialPort::init(int baudRate)
 {
     Serial.begin(baudRate);
 }
 
-boolean BufferedSerial::isBusyWriting()
+boolean SerialPort::isBusyWriting()
 {
-    return (writeBuffer->getSize() > 0);
+    return (m_writeBuffer->getSize() > 0);
 }
 
-void BufferedSerial::flush()
+void SerialPort::flush()
 {
-    while (writeBuffer->getSize() > 0)
+    while (m_writeBuffer->getSize() > 0)
     {
-        Serial.write(writeBuffer->removeByte(Location::FRONT));
+        Serial.write(m_writeBuffer->removeByte(Location::FRONT));
     }
     Serial.flush();
 }
 
-void BufferedSerial::addEscapedByte(DataBuffer *buffer, byte value)
+void SerialPort::addEscapedByte(DataBuffer *buffer, byte value)
 {
     if (value == ESCAPE_FLAG || value == DELIMITER_FLAG)
     {
@@ -77,25 +81,25 @@ void BufferedSerial::addEscapedByte(DataBuffer *buffer, byte value)
  * serial communication neither a Delimiter Flag nor an Escape Flag
  * is part of the packet message.
  */
-void BufferedSerial::write(DataBuffer *buffer)
+void SerialPort::write(DataBuffer *buffer)
 {
     unsigned short outCRC = 0;
-    writeBuffer->addByte(DELIMITER_FLAG, Location::END);
+    m_writeBuffer->addByte(DELIMITER_FLAG, Location::END);
 
     while (buffer->getSize() > 0)
     {
         byte out = buffer->removeByte(Location::FRONT);
         outCRC = CrcUtils::updateCRC(outCRC, out);
-        addEscapedByte(writeBuffer, out);
+        addEscapedByte(m_writeBuffer, out);
     }
 
     // Conversion of CRC-16 from Little Endian to Big Endian.
     unsigned char crcLSB = (outCRC & 0xff00) >> 8;
     unsigned char crcMSB = (outCRC & 0x00ff);
-    addEscapedByte(writeBuffer, crcMSB);
-    addEscapedByte(writeBuffer, crcLSB);
+    addEscapedByte(m_writeBuffer, crcMSB);
+    addEscapedByte(m_writeBuffer, crcLSB);
 
-    writeBuffer->addByte(DELIMITER_FLAG, Location::END);
+    m_writeBuffer->addByte(DELIMITER_FLAG, Location::END);
 }
 
 /**
@@ -103,12 +107,12 @@ void BufferedSerial::write(DataBuffer *buffer)
  * Once a data frame is identified, the actual unescaped data in the
  * frame is sent to the callback function for further processing.
  */
-void BufferedSerial::setCallback(void (*callback)(byte responseId, DataBuffer *))
+void SerialPort::setCallback(void (*callback)(byte responseId, DataBuffer *))
 {
     this->callback = callback;
 }
 
-void BufferedSerial::update()
+void SerialPort::update()
 {
 
     // Read.
@@ -121,27 +125,27 @@ void BufferedSerial::update()
 
         // State machine.
 
-        switch (state)
+        switch (m_state)
         {
 
         case WAITING_STATE:
             if (in == DELIMITER_FLAG)
             {
                 inCRC = 0;
-                readBuffer->clear();
-                state = READING_MESSAGE_STATE;
+                m_readBuffer->clear();
+                m_state = READING_MESSAGE_STATE;
             }
             break;
 
         case READING_MESSAGE_STATE:
             if (in == ESCAPE_FLAG)
             { // Ignore the escape character.
-                state = ESCAPING_BYTE_STATE;
+                m_state = ESCAPING_BYTE_STATE;
             }
             else if (in == DELIMITER_FLAG)
             {
 
-                if (readBuffer->getSize() >= 4)
+                if (m_readBuffer->getSize() >= 4)
                 {
 
                     // A packet must contain minimum:
@@ -154,35 +158,35 @@ void BufferedSerial::update()
                     if (inCRC == 0)
                     {
                         // Remove the CRC from the buffer.
-                        readBuffer->removeInt(Location::END);
+                        m_readBuffer->removeInt(Location::END);
 
-                        byte requestId = readBuffer->removeByte(Location::FRONT);
-                        callback(requestId, readBuffer);
+                        byte requestId = m_readBuffer->removeByte(Location::FRONT);
+                        callback(requestId, m_readBuffer);
                     }
-                    state = WAITING_STATE;
+                    m_state = WAITING_STATE;
                 }
                 inCRC = 0;
-                readBuffer->clear();
+                m_readBuffer->clear();
             }
             else
             {
                 inCRC = CrcUtils::updateCRC(inCRC, in);
-                readBuffer->addByte(in, Location::END);
+                m_readBuffer->addByte(in, Location::END);
             }
             break;
 
         case ESCAPING_BYTE_STATE:
             inCRC = CrcUtils::updateCRC(inCRC, in ^ ESCAPED_XOR);
-            readBuffer->addByte(in ^ ESCAPED_XOR, Location::END);
-            state = READING_MESSAGE_STATE;
+            m_readBuffer->addByte(in ^ ESCAPED_XOR, Location::END);
+            m_state = READING_MESSAGE_STATE;
             break;
         }
     }
 
     // Write.
 
-    if (writeBuffer->getSize() > 0)
+    if (m_writeBuffer->getSize() > 0)
     {
-        Serial.write(writeBuffer->removeByte(Location::FRONT));
+        Serial.write(m_writeBuffer->removeByte(Location::FRONT));
     }
 }

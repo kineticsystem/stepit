@@ -18,40 +18,41 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "DataBuffer.h"
+#include <DataBuffer.h>
 
-DataBuffer::DataBuffer()
+DataBuffer::DataBuffer(unsigned int bufferSize)
 {
+    m_buffer = new Buffer<byte>{bufferSize};
+}
+
+DataBuffer::~DataBuffer()
+{
+    delete m_buffer;
 }
 
 int DataBuffer::getSize()
 {
-    return m_buffer.size();
+    return m_buffer->size();
 }
 
 int DataBuffer::getCapacity()
 {
-    return m_buffer.capacity();
+    return m_buffer->capacity();
 }
 
 void DataBuffer::clear()
 {
-    m_buffer.clear();
-}
-
-void DataBuffer::dispose()
-{
-    m_buffer.dispose();
+    m_buffer->clear();
 }
 
 void DataBuffer::addByte(byte in, Location location)
 {
-    m_buffer.add(in, location);
+    m_buffer->add(in, location);
 }
 
 byte DataBuffer::removeByte(Location location)
 {
-    return m_buffer.remove(location);
+    return m_buffer->remove(location);
 }
 
 // Following IEEE 754 specification a type int is always sent/received
@@ -64,13 +65,13 @@ void DataBuffer::addInt(int in, Location location)
     byte *pointer = (byte *)&in;
     if (location == Location::END)
     {
-        m_buffer.add(pointer[1], Location::END);
-        m_buffer.add(pointer[0], Location::END);
+        m_buffer->add(pointer[1], Location::END);
+        m_buffer->add(pointer[0], Location::END);
     }
     else
     {
-        m_buffer.add(pointer[0], Location::FRONT);
-        m_buffer.add(pointer[1], Location::FRONT);
+        m_buffer->add(pointer[0], Location::FRONT);
+        m_buffer->add(pointer[1], Location::FRONT);
     }
 }
 
@@ -85,13 +86,13 @@ int DataBuffer::removeInt(Location location)
     byte *pointer = (byte *)&ret;
     if (location == Location::FRONT)
     {
-        pointer[1] = m_buffer.remove(Location::FRONT);
-        pointer[0] = m_buffer.remove(Location::FRONT);
+        pointer[1] = m_buffer->remove(Location::FRONT);
+        pointer[0] = m_buffer->remove(Location::FRONT);
     }
     else
     {
-        pointer[0] = m_buffer.remove(Location::END);
-        pointer[1] = m_buffer.remove(Location::END);
+        pointer[0] = m_buffer->remove(Location::END);
+        pointer[1] = m_buffer->remove(Location::END);
     }
     return ret;
 }
@@ -106,17 +107,17 @@ void DataBuffer::addLong(long in, Location location)
     byte *pointer = (byte *)&in;
     if (location == END)
     {
-        m_buffer.add(pointer[3], Location::END);
-        m_buffer.add(pointer[2], Location::END);
-        m_buffer.add(pointer[1], Location::END);
-        m_buffer.add(pointer[0], Location::END);
+        m_buffer->add(pointer[3], Location::END);
+        m_buffer->add(pointer[2], Location::END);
+        m_buffer->add(pointer[1], Location::END);
+        m_buffer->add(pointer[0], Location::END);
     }
     else
     {
-        m_buffer.add(pointer[0], Location::FRONT);
-        m_buffer.add(pointer[1], Location::FRONT);
-        m_buffer.add(pointer[2], Location::FRONT);
-        m_buffer.add(pointer[3], Location::FRONT);
+        m_buffer->add(pointer[0], Location::FRONT);
+        m_buffer->add(pointer[1], Location::FRONT);
+        m_buffer->add(pointer[2], Location::FRONT);
+        m_buffer->add(pointer[3], Location::FRONT);
     }
 }
 
@@ -131,17 +132,17 @@ long DataBuffer::removeLong(Location location)
     byte *pointer = (byte *)&ret;
     if (location == Location::FRONT)
     {
-        pointer[3] = m_buffer.remove(Location::FRONT);
-        pointer[2] = m_buffer.remove(Location::FRONT);
-        pointer[1] = m_buffer.remove(Location::FRONT);
-        pointer[0] = m_buffer.remove(Location::FRONT);
+        pointer[3] = m_buffer->remove(Location::FRONT);
+        pointer[2] = m_buffer->remove(Location::FRONT);
+        pointer[1] = m_buffer->remove(Location::FRONT);
+        pointer[0] = m_buffer->remove(Location::FRONT);
     }
     else
     {
-        pointer[0] = m_buffer.remove(Location::END);
-        pointer[1] = m_buffer.remove(Location::END);
-        pointer[2] = m_buffer.remove(Location::END);
-        pointer[3] = m_buffer.remove(Location::END);
+        pointer[0] = m_buffer->remove(Location::END);
+        pointer[1] = m_buffer->remove(Location::END);
+        pointer[2] = m_buffer->remove(Location::END);
+        pointer[3] = m_buffer->remove(Location::END);
     }
     return ret;
 }
@@ -154,17 +155,17 @@ void DataBuffer::addFloat(float in, Location location)
     byte *pointer = (byte *)&in;
     if (location == Location::END)
     {
-        m_buffer.add(pointer[3], Location::END);
-        m_buffer.add(pointer[2], Location::END);
-        m_buffer.add(pointer[1], Location::END);
-        m_buffer.add(pointer[0], Location::END);
+        m_buffer->add(pointer[3], Location::END);
+        m_buffer->add(pointer[2], Location::END);
+        m_buffer->add(pointer[1], Location::END);
+        m_buffer->add(pointer[0], Location::END);
     }
     else
     {
-        m_buffer.add(pointer[0], Location::FRONT);
-        m_buffer.add(pointer[1], Location::FRONT);
-        m_buffer.add(pointer[2], Location::FRONT);
-        m_buffer.add(pointer[3], Location::FRONT);
+        m_buffer->add(pointer[0], Location::FRONT);
+        m_buffer->add(pointer[1], Location::FRONT);
+        m_buffer->add(pointer[2], Location::FRONT);
+        m_buffer->add(pointer[3], Location::FRONT);
     }
 }
 
@@ -178,22 +179,17 @@ float DataBuffer::removeFloat(Location location)
     byte *pointer = (byte *)&ret;
     if (location == Location::FRONT)
     {
-        pointer[3] = m_buffer.remove(Location::FRONT);
-        pointer[2] = m_buffer.remove(Location::FRONT);
-        pointer[1] = m_buffer.remove(Location::FRONT);
-        pointer[0] = m_buffer.remove(Location::FRONT);
+        pointer[3] = m_buffer->remove(Location::FRONT);
+        pointer[2] = m_buffer->remove(Location::FRONT);
+        pointer[1] = m_buffer->remove(Location::FRONT);
+        pointer[0] = m_buffer->remove(Location::FRONT);
     }
     else
     {
-        pointer[0] = m_buffer.remove(Location::END);
-        pointer[1] = m_buffer.remove(Location::END);
-        pointer[2] = m_buffer.remove(Location::END);
-        pointer[3] = m_buffer.remove(Location::END);
+        pointer[0] = m_buffer->remove(Location::END);
+        pointer[1] = m_buffer->remove(Location::END);
+        pointer[2] = m_buffer->remove(Location::END);
+        pointer[3] = m_buffer->remove(Location::END);
     }
     return ret;
-}
-
-void DataBuffer::init(unsigned int bufferSize)
-{
-    m_buffer.init(bufferSize);
 }
