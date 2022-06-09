@@ -2,37 +2,35 @@
 
 ## Introduction
 
-To control stepper motors attached to an Arduino board via motor drivers, we need first a solution to send commands to the Arduino using the serial port. Because ROS is the most common opensource framework in robotics, we would like to create a ROS node to deal with the low-level communication with Arduino, and use it as a proxy in all our robotics projects.
+To control stepper motors attached to an Arduino board via motor drivers, we need first a solution to send commands to the Arduino using the serial port. Because ROS is the most common opensource framework in robotics, we would like to create a ROS node to deal with the low-level communication with Arduino and use it as a proxy in all our robotics projects.
 
-In ROS1 there is a useful library to exchange information to and from Arduino: this library is [rosserial](http://wiki.ros.org/rosserial). The official library description is that rosserial is a protocol for wrapping standard ROS serialized messages and multiplexing multiple topics and services over a character device such as a serial port or network socket.
+In ROS1, there is a valuable library to exchange information to and from Arduino: this library is [rosserial](http://wiki.ros.org/rosserial). The official library description is that rosserial is a protocol for wrapping standard ROS serialized messages and multiplexing multiple topics and services over a character device such as a serial port or network socket. Unfortunately, this library is unavailable in ROS2; the closest option is [Micro-ROS](https://micro.ros.org/docs/overview/features/). Unfortunately, Micro-ROS does not support AVR 8-bit microcontrollers, including Arduino Uno and Arduino Nano.
 
-This library is not available in ROS2 and the closest option is [Micro-ROS](https://micro.ros.org/docs/overview/features/). Unfortunately, Micro-ROS does not support AVR 8-bit microcontrollers, which include Arduino Uno and Arduino Nano.
+For this reason, we implemented a simple Point-to-Point Protocol (PPP) data link layer from scratch to send and receive data to and from Arduino over a serial connection. On top of it, we implemented a Request/Response communication pattern between a C++ ROS2 node and Arduino. Please refer to [Point-to-PointProtocol.pdf (PPP)](<./lectures/Point-to-Point%20Protocol%20(PPP).pdf>) for more information.
 
-For this reason, to send and receive data to and from Arduino over a serial connection, we implemented a simple Point-to-Point Protocol (PPP) data link layer from scratch. On top of it, we implemented a Request/Response communication pattern between a C++ ROS2 node and Arduino. Please refer to [Point-to-PointProtocol.pdf (PPP)](<./lectures/Point-to-Point%20Protocol%20(PPP).pdf>) for more information.
-
-PPP separate frames by using the delimeter flag 0x7e. Should the same byte code appear in the frame data, the escape flag 0x7D will be inserted in place followed by the delimeter flag XOR'd with 0x20, resulting in the sequence of two bytes 0x7d 0x5e. Following a table of a single communication frame.
+PPP separates frames by using the delimiter flag 0x7e. Should the same byte code appear in the frame data, the escape flag 0x7D will be inserted in place, followed by the delimiter flag XOR'd with 0x20, resulting in the sequence of two bytes 0x7d 0x5e. Following is a table describing a frame structure.
 
 <table align="center" border="2px">
   <tr><td><b>PPP frame</b></td></tr>
-  <tr><td>delimeter flag</td></tr>
+  <tr><td>delimiter flag</td></tr>
   <tr><td>...</td></tr>
   <tr><td>data</td></tr>
   <tr><td>...</td></tr>
   <tr><td>checksum</td></tr>
-  <tr><td>delimeter flag</td></tr>
+  <tr><td>delimiter flag</td></tr>
 </table>
 
-In this implementation, each frame contains a command and all required parameters in binary format. In the following example we show a Move Command request to move motor 1 forward 23156 steps.
+In this implementation, each frame contains a command and all required parameters in binary format. The following example shows a Move Command request to move motor one forward 23156 steps.
 
 <table align="center" border="2px">
   <tr>
-    <td align="center"><b>Delimiter</b></td>
+    <td align="center"><b>delimiterr</b></td>
     <td align="center"><b>Request id</b></td>
     <td align="center"><b>Move command</b></td>
     <td align="center"><b>Motor id</b></td>
     <td align="center" colspan="4"><b>Steps</b></td>
     <td align="center" colspan="2"><b>Checksum</b></td>
-    <td align="center"><b>Delimiter</b></td>
+    <td align="center"><b>delimiterr</b></td>
   </tr>
   <tr>
     <td align="center">0x7e</td>
@@ -49,15 +47,15 @@ In this implementation, each frame contains a command and all required parameter
   </tr>
 </table>
 
-If the command is executed succesfully, the response to the above command is the following frame. As a general rule in network communication, when int, long or float are sent, the Most Significant Byte (MSB) is sent first.
+If the command executes successfully, Arduino will return the following response.
 
 <table align="center" border="2px">
   <tr>
-    <td align="center"><b>Delimiter</b></td>
+    <td align="center"><b>delimiterr</b></td>
     <td align="center"><b>Request id</b></td>
     <td align="center"><b>Success reponse</b></td>
     <td align="center" colspan="2"><b>Checksum</b></td>
-    <td align="center"><b>Delimiter</b></td>
+    <td align="center"><b>delimiterr</b></td>
   </tr>
   <tr>
     <td align="center">0x7e</td>
@@ -69,7 +67,9 @@ If the command is executed succesfully, the response to the above command is the
   </tr>
 </table>
 
-Following a short list of all numeric Arduino data types.
+As a general rule in network communication, when sending int, long, or float, the Most Significant Byte (MSB) is transmitted first.
+
+Following is a short list of all numeric Arduino data types.
 
 <table align="center" border="2px">
   <tr><td><b>type</b></td><td><b>bytes</b></td></tr>
@@ -91,9 +91,9 @@ Following a short list of all numeric Arduino data types.
 
 ## Commands
 
-As stated at the beginning of the document, the main scope of the project is to control stepper motors connected to an Arduino board via a motor driver circuit. A motor does not move instantaneously at maximum speed, but it accelerates, maintains a predefined speed and then decelerates until the target position is reached. To control the motor movement with acceleration and deceleration, we use an Arduino well-known library called [AccelStepper](https://www.airspayce.com/mikem/arduino/AccelStepper/).
+As stated at the beginning of the document, the project's main scope is to control stepper motors connected to an Arduino board via a motor driver circuit. A motor does not move instantaneously at maximum speed but accelerates, maintains a predefined velocity, and then decelerates until reaching the target position. To control the motor movement with acceleration and deceleration, we use an Arduino well-known library called [AccelStepper](https://www.airspayce.com/mikem/arduino/AccelStepper/).
 
-Following a list of all desired commands implemented to control the motor movements.
+Following is a list of all desired commands to control the motor movements.
 
 <table align="center" border="2px">
     <tr>
@@ -153,7 +153,7 @@ Following a list of all desired commands implemented to control the motor moveme
     <tr>
         <td>Set target speed<b></td>
         <td>0x77</td>
-        <td rowspan="2">Set a motor relative speed between 0 and 100.<br/>The motor accelerats or develerates until the relative target speed is reached.</td>
+        <td rowspan="2">Set a motor relative speed between 0 and 100.<br/>The motor accelerates or develerates until reaching the relative target speed.</td>
         <td>motorId</td>
         <td>uchar</td>
         <td>The motor id.</td>
