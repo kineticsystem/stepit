@@ -168,7 +168,7 @@ Update and install ROS2 packages.
 
 ## Configuring ROS2 environment
 
-To make ROS2 packages avaiable for development, type the following command:
+To make ROS2 packages available for development, type the following command:
 
 `source /opt/ros/humble/setup.bash`
 
