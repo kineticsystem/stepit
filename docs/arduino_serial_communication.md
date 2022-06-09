@@ -67,8 +67,6 @@ If the command executes successfully, Arduino will return the following response
   </tr>
 </table>
 
-As a general rule in network communication, when sending int, long, or float, the Most Significant Byte (MSB) is transmitted first.
-
 Following is a short list of all numeric Arduino data types.
 
 <table align="center" border="2px">
@@ -86,8 +84,9 @@ Following is a short list of all numeric Arduino data types.
   <tr><td>unsigned long</td><td>4 bytes</td></tr>
   <tr><td>float</td><td>4 bytes</td></tr>
   <tr><td>double</td><td>4 bytes</td></tr>
-
 </table>
+
+As a general rule in network communication, when sending a value of type int, long, or float, the Most Significant Byte (MSB) is transmitted first.
 
 ## Commands
 
