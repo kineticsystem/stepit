@@ -2,9 +2,9 @@
 
 ## Introduction
 
-To control stepper motors attached to an Arduino board via motor drivers, we need first a solution to send commands to the Arduino using the serial port. Because ROS is the most common opensource framework in robotics, we would like to create a ROS node to deal with the low-level communication with Arduino and use it as a proxy in all our robotics projects.
+To control stepper motors attached to an Arduino board via motor drivers, we need first a solution to send commands to Arduino using the serial port. Because ROS is the most common opensource framework in robotics, we would like to create a ROS node to deal with the low-level communication with Arduino and use it as a proxy in all our robotics projects.
 
-In ROS1, there is a valuable library to exchange information to and from Arduino: this library is [rosserial](http://wiki.ros.org/rosserial). The official library description is that rosserial is a protocol for wrapping standard ROS serialized messages and multiplexing multiple topics and services over a character device such as a serial port or network socket. Unfortunately, this library is unavailable in ROS2; the closest option is [Micro-ROS](https://micro.ros.org/docs/overview/features/). Unfortunately, Micro-ROS does not support AVR 8-bit microcontrollers, including Arduino Uno and Arduino Nano.
+In ROS1, there is a valuable library to exchange information to and from Arduino: this library is [rosserial](http://wiki.ros.org/rosserial). The official library description is that rosserial is a protocol for wrapping standard ROS serialized messages and multiplexing multiple topics and services over a character device such as a serial port or network socket. Unfortunately, this library is unavailable in ROS2; the closest option is [Micro-ROS](https://micro.ros.org/docs/overview/features/), but it does not support AVR 8-bit microcontrollers, including Arduino Uno and Arduino Nano.
 
 For this reason, we implemented a simple Point-to-Point Protocol (PPP) data link layer from scratch to send and receive data to and from Arduino over a serial connection. On top of it, we implemented a Request/Response communication pattern between a C++ ROS2 node and Arduino. Please refer to [Point-to-PointProtocol.pdf (PPP)](<./lectures/Point-to-Point%20Protocol%20(PPP).pdf>) for more information.
 
@@ -20,7 +20,7 @@ PPP separates frames by using the delimiter flag 0x7e. Should the same byte code
   <tr><td>delimiter flag</td></tr>
 </table>
 
-In this implementation, each frame contains a command and all required parameters in binary format. The following example shows a Move Command request to move motor one forward 23156 steps.
+In this implementation, each frame contains a command and all required parameters in binary format. The following example shows a Move Command request to move motor 1 forward 23156 steps.
 
 <table align="center" border="2px">
   <tr>

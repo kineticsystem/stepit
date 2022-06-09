@@ -28,9 +28,11 @@ We will be asked for the root password to write the image onto the SD card.
 
 ## Configure WiFi connection
 
-Before inserting the card into the Raspberry Pi we will configure the WiFi network connection. Mount the system-boot partition on the SD Card and search for the file `network-config`
+Before inserting the card into the Raspberry Pi, we will configure the WiFi network connection.
 
 <img src="pictures/pi-network-config-1.png" width="70%">
+
+Mount the system-boot partition on the SD Card and search for the file `network-config`
 
 ```
 version: 2
@@ -144,11 +146,11 @@ At the first access, we must change the password, log out, and then log in again
 
 ## Install ROS2
 
-Because we are running Ubuntu Mate Server 22.04 LTS, we will install ROS2 Humble Hawksbill. For the details of the installation, please refer to the following link:
+Because we are running Ubuntu Server 22.04 LTS, we will install ROS2 Humble Hawksbill. For the details of the installation, please refer to the following link:
 
 [https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
 
-On Ubuntu Mate Server 22.04 LTS, the commands to install ROS2 are the following.
+On Ubuntu Server 22.04 LTS, the commands to install ROS2 are the following.
 
 Add ROS2 repository authorization keys.
 
@@ -180,6 +182,6 @@ The following package adds autocompletion throughout ROS, making it convenient t
 
 `sudo apt install python3-argcomplete`
 
-To check if ROS is installed, type
+To check if ROS works, type
 
 `ros2`
