@@ -21,12 +21,32 @@
 #ifndef MOTOR_STATE_H
 #define MOTOR_STATE_H
 
+/**
+ * This class is used to exchange motor states between the ISR (Interrupt
+ * Service Routine) and the main thread.
+ * States are written by the ISR when the flag writeReady is true and read by
+ * the main thread.
+ */
 class MotorState
 {
+    float m_speed = 0.0;
+    long m_currentPosition = 0;
+    long m_distanceToGo = 0;
+
+    volatile bool m_writeReady = false;
+
 public:
-    float speed;
-    long currentPosition;
-    long distanceToGo;
+    MotorState();
+
+    void setSpeed(float speed);
+    float getSpeed() const;
+    void setCurrentPosition(long position);
+    long getCurrentPosition() const;
+    void setDistanceToGo(long distanceToGo);
+    long getDistanceToGo() const;
+
+    void setWriteReady(bool writeReady);
+    bool isWriteReady();
 };
 
 #endif // MOTOR_STATE_H

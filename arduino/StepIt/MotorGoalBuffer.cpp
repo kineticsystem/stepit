@@ -18,13 +18,34 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef LOCATION_H
-#define LOCATION_H
+#include "MotorGoalBuffer.h"
+#include <util/atomic.h>
 
-enum class Location
+MotorGoalBuffer::MotorGoalBuffer(unsigned int bufferSize)
 {
-    FRONT,
-    END
-};
+    m_buffer = new Buffer<MotorGoal>{bufferSize};
+}
 
-#endif // LOCATION_H
+MotorGoalBuffer::~MotorGoalBuffer()
+{
+    delete m_buffer;
+}
+
+void MotorGoalBuffer::add(MotorGoal goal)
+{
+    m_buffer->add(goal, Location::END);
+    m_isReadyRead = true;
+}
+
+MotorGoal MotorGoalBuffer::remove()
+{
+    m_buffer->remove(Location::FRONT);
+    m_isReadyRead = false;
+}
+
+bool MotorGoalBuffer::isEmpty() const
+{
+    // The main thread is suspended when the ISR reads this value and removes
+    // an item from the buffer.
+    return !m_isReadyRead;
+}

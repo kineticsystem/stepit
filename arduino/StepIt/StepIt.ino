@@ -39,11 +39,11 @@ const char NAME[] = "STEPPIT\0";
 
 const int INTERRUPT_TIME = 90; // Microseconds.
 
-// Input commands. For each command received a response must be returned.
-// The reponse always contains a success or an error code.
-// If a command requires additional information the success response is
+// Input commands. For each command received, a response must be returned.
+// The response always contains a success or an error code.
+// If a command requires additional information, the success response is
 // followed by the requested data.
-// All messages sent by Arduino have the most significative bit set to 0.
+// All messages sent by Arduino have the most significant bit set to 0.
 
 byte MOVE_CMD = 0x70;                 // Move motors a given amount of steps.
 byte MOVE_TO_CMD = 0x71;              // Move motors to a given position.
@@ -56,8 +56,8 @@ byte SET_MAX_SPEED_CMD = 0x78;        // Set motors max absolute speed (step/s).
 byte SET_CURRENT_POSITION_CMD = 0x79; // Set the motor current position.
 byte SET_MOTORS_ENABLED_CMD = 0x7A;   // Enable interrupt to control the motors.
 
-// When a serial connection is initiated Arduino is rebooted and this takes up to 2 seconds.
-// To notify the client that Arduino is ready to receive and trasmit data, a ready message
+// Arduino reboots in around two seconds when a serial connection is initiated.
+// To notify the client that Arduino is ready to receive and transmit data, a ready message
 // is sent.
 byte READY_MSG = 0x10;
 
@@ -73,30 +73,28 @@ AccelStepper stepper[2] = {
     AccelStepper(AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN),
     AccelStepper(AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN)};
 
-// This is a structure which contains the motors goals. It is written by the
-// main thread and read by the interrupt callback.
-MotorGoal motorGoals[2] = {MotorGoal(), MotorGoal()};
+// A Goal is created by the main thread and read by the ISR.
+// The ISR is way faster than the main thread, so a goal is consumed as soon as
+// it is created.
+// TODO: validate the scenario where two commands a written to the buffer before one is read.
 
-Buffer<MotorGoal> motorGoal{2};
+Buffer<MotorGoal> motorGoals[2] = {
+    Buffer<MotorGoal>{10},
+    Buffer<MotorGoal>{10},
+};
 
-// Boolean variable to make motor goals structure thread-safe.
-volatile boolean motorGoalsReady = false;
-
-// This is a structure which contains motors states. It is read by the main
+// This is a structure that contains motor states. It is read by the main
 // thread and written by the interrupt callback.
-MotorState motorStates[2] = {MotorState(), MotorState()};
-
-// Boolean variable to make motor states structure thread-safe.
-volatile boolean motorStatesReady = false;
-
-// This is the structure used to safetly exchange data beween the sub routine and the main loop.
-SharedBucket bucket[2] = {SharedBucket(1000.0, 500.0), SharedBucket(1000.0, 500.0)};
+Buffer<MotorState> motorState[2] = {
+    Buffer<MotorState>{10},
+    Buffer<MotorState>{10},
+};
 
 // Class to read and write over a serial port.
-SerialPort serialPort{256, 256};
+SerialPort serialPort{255, 255};
 
 // Message to be written to the serial port, usually a response.
-DataBuffer responseBuffer{256};
+DataBuffer responseBuffer{255};
 
 void sendReadyMessage()
 {
@@ -105,7 +103,7 @@ void sendReadyMessage()
 }
 
 /**
- * Default reponse when a correct command, not requiring information, has been received.
+ * Default response when a correct command, not requiring information, has been received.
  */
 void returnCommandSuccess(byte requestId)
 {
@@ -115,7 +113,7 @@ void returnCommandSuccess(byte requestId)
 }
 
 /**
- * When a Status command is received, send back the motors position and
+ * When a Status command is received, send back the position of the motor and
  * speed.
  */
 void returnStatus(byte requestId)
@@ -124,10 +122,10 @@ void returnStatus(byte requestId)
     responseBuffer.addByte(SUCCESS_MSG, Location::END);
     for (int i = 0; i < 2; i++)
     {
-        responseBuffer.addLong(bucket[i].getCurrentPosition(), Location::END);
-        float speed = 100.0 * bucket[i].getSpeed() / bucket[i].getMaxSpeed();
+        responseBuffer.addLong(motorState[i].getCurrentPosition(), Location::END);
+        float speed = 100.0 * motorState[i].getSpeed() / motorState[i].getMaxSpeed();
         responseBuffer.addFloat(speed, Location::END);
-        responseBuffer.addLong(bucket[i].getDistanceToGo(), Location::END);
+        responseBuffer.addLong(motorState[i].getDistanceToGo(), Location::END);
     }
     serialPort.write(&responseBuffer);
 }
@@ -172,19 +170,22 @@ void setMotorTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
     {
         maxSpeedPercentage = 100.0;
     }
-    bucket[motorId].setTargetSpeed(bucket[motorId].getMaxSpeed() * maxSpeedPercentage / 100.0);
+    motorGoals[motorId].setTargetSpeed(bucket[motorId].getMaxSpeed() * maxSpeedPercentage / 100.0);
+    motorGoals->setReadReady(true);
     returnCommandSuccess(requestId);
 }
 
 void motorMove(byte requestId, byte motorId, long steps)
 {
-    bucket[motorId].setTargetPosition(bucket[motorId].getCurrentPosition() + steps);
+    motorGoals[motorId].setTargetPosition(bucket[motorId].getCurrentPosition() + steps);
+    motorGoals->setReadReady(true);
     returnCommandSuccess(requestId);
 }
 
 void motorMoveTo(byte requestId, byte motorId, long position)
 {
-    bucket[motorId].setTargetPosition(position);
+    motorGoals[motorId].setTargetPosition(position);
+    motorGoals->setReadReady(true);
     returnCommandSuccess(requestId);
 }
 

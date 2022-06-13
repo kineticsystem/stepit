@@ -18,13 +18,48 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef LOCATION_H
-#define LOCATION_H
+#include "MotorState.h"
 
-enum class Location
+MotorState::MotorState()
 {
-    FRONT,
-    END
-};
+}
 
-#endif // LOCATION_H
+void MotorState::setSpeed(float speed)
+{
+    m_speed = speed;
+}
+
+float MotorState::getSpeed() const
+{
+    return m_speed;
+}
+
+void MotorState::setCurrentPosition(long position)
+{
+    m_currentPosition = position;
+}
+
+long MotorState::getCurrentPosition() const
+{
+    return m_currentPosition;
+}
+
+void MotorState::setDistanceToGo(long distanceToGo)
+{
+    m_distanceToGo = distanceToGo;
+}
+
+long MotorState::getDistanceToGo() const
+{
+    return m_distanceToGo;
+}
+
+void MotorState::setWriteReady(bool writeReady)
+{
+    m_writeReady = writeReady;
+}
+
+bool MotorState::isWriteReady()
+{
+    return m_writeReady;
+}
