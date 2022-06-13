@@ -33,19 +33,21 @@ MotorGoalBuffer::~MotorGoalBuffer()
 
 void MotorGoalBuffer::add(MotorGoal goal)
 {
-    m_buffer->add(goal, Location::END);
-    m_isReadyRead = true;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        m_buffer->add(goal, Location::END);
+    }
 }
 
 MotorGoal MotorGoalBuffer::remove()
 {
-    m_buffer->remove(Location::FRONT);
-    m_isReadyRead = false;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        m_buffer->remove(Location::FRONT);
+    }
 }
 
 bool MotorGoalBuffer::isEmpty() const
 {
-    // The main thread is suspended when the ISR reads this value and removes
-    // an item from the buffer.
-    return !m_isReadyRead;
+    return m_buffer->size() == 0;
 }
