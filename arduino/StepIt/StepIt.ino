@@ -70,18 +70,18 @@ byte SUCCESS_MSG = 0x11;
 byte ERROR_MSG = 0x12;
 
 // Stepper motors.
-AccelStepper stepper[2] = {
+AccelStepper stepper[] = {
     AccelStepper(AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN),
     AccelStepper(AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN)};
 
 // Stepper motors configuration: acceleration and max speed.
-MotorConfig motorConfig[2] = {
+MotorConfig motorConfig[] = {
     MotorConfig{500.0, 1000.0},
     MotorConfig{500.0, 1000.0}};
 
-// This structure holds motor goals: the main thread updates a goal and the ISR
-// reads it.
-MotorGoal motorGoal[2] = {
+// This structure holds motor goals: the main thread updates the goal and the
+// ISR reads it.
+MotorGoal motorGoal[] = {
     MotorGoal{},
     MotorGoal{}};
 
@@ -91,7 +91,7 @@ volatile bool writingMotorGoals = false;
 
 // This structure holds motor states: the ISR updates the state and the main
 // thread reads it.
-MotorState motorState[2] = {
+MotorState motorState[] = {
     MotorState{},
     MotorState{}};
 
@@ -104,12 +104,6 @@ SerialPort serialPort{255, 255};
 
 // Message to be written to the serial port, usually a response.
 DataBuffer responseBuffer{255};
-
-void sendReadyMessage()
-{
-    responseBuffer.addByte(READY_MSG, Location::END);
-    serialPort.write(&responseBuffer);
-}
 
 /**
  * Default response when a correct command, not requiring information, has been received.
@@ -184,7 +178,6 @@ void setMotorTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
     {
         maxSpeedPercentage = 100.0;
     }
-
     {
         Guard goalGuard{writingMotorGoals};
         motorGoal[motorId].setTargetSpeed(motorConfig[motorId].getMaxSpeed() * maxSpeedPercentage / 100.0);
@@ -203,7 +196,7 @@ void moveMotor(byte requestId, byte motorId, long steps)
     returnCommandSuccess(requestId);
 }
 
-void motorMoveTo(byte requestId, byte motorId, long position)
+void moveMotorTo(byte requestId, byte motorId, long position)
 {
     {
         Guard goalGuard{writingMotorGoals};
@@ -233,17 +226,32 @@ void stopMotor(byte requestId, byte motorId)
     returnCommandSuccess(requestId);
 }
 
+void setMotorAcceleration(byte requestId, byte motorId, float acceleration)
+{
+    bucket[motorId].setAcceleration(acceleration);
+    returnCommandSuccess(requestId);
+}
+
+void setMotorMaxSpeed(byte requestId, byte motorId, float speed)
+{
+    bucket[motorId].setMaxSpeed(speed);
+    returnCommandSuccess(requestId);
+}
+
+void setMotorCurrentPosition(byte requestId, byte motorId, long position)
+{
+    stepper[motorId].setCurrentPosition(position);
+    returnCommandSuccess(requestId);
+}
+
 /**
  * Decode the input command and execute the requested action.
  * @param msg The input message containing the requested command.
  */
 void processBuffer(byte requestId, DataBuffer *msg)
 {
-    // State machine.
-
     if (msg->getSize() > 0)
     {
-        // Get the command id.
         byte cmdId = msg->removeByte(Location::FRONT);
 
         if (cmdId == STATUS_CMD && msg->getSize() == 0)
@@ -256,22 +264,22 @@ void processBuffer(byte requestId, DataBuffer *msg)
             setMotorsEnabled(requestId, enabled);
         }
         else if (cmdId == SET_TARGET_SPEED_CMD && msg->getSize() == 5)
-        { // Set motor speed.
+        {
             byte motorId = msg->removeByte(Location::FRONT);
-            float targetSpdPercentage = fabs(msg->removeFloat(Location::FRONT)); // Ensure speed is always positive.
+            float targetSpdPercentage = fabs(msg->removeFloat(Location::FRONT));
             setMotorTargetSpeed(requestId, motorId, targetSpdPercentage);
         }
         else if (cmdId == MOVE_CMD && msg->getSize() == 5)
-        { // Move motor by a specified number for steps.
+        {
             byte motorId = msg->removeByte(Location::FRONT);
             long steps = msg->removeLong(Location::FRONT);
             moveMotor(requestId, motorId, steps);
         }
         else if (cmdId == MOVE_TO_CMD && msg->getSize() == 5)
-        { // Move motor by a specified number for steps.
+        {
             byte motorId = msg->removeByte(Location::FRONT);
             long position = msg->removeLong(Location::FRONT);
-            motorMoveTo(requestId, motorId, position);
+            moveMotorTo(requestId, motorId, position);
         }
         else if (cmdId == STOP_CMD && (msg->getSize() == 0 || msg->getSize() == 1))
         {
@@ -280,39 +288,35 @@ void processBuffer(byte requestId, DataBuffer *msg)
                 stopAllMotors(requestId);
             }
             else if (msg->getSize() == 1)
-            { // Stop a given motor.
+            {
                 byte motorId = msg->removeByte(Location::FRONT);
                 stopMotor(requestId, motorId);
             }
-            returnCommandSuccess(requestId);
         }
         else if (cmdId == SET_ACCELERATION_CMD && msg->getSize() == 5)
-        { // Set motor acceleration.
+        {
             byte motorId = msg->removeByte(Location::FRONT);
             float acceleration = msg->removeFloat(Location::FRONT);
-            bucket[motorId].setAcceleration(acceleration);
-            returnCommandSuccess(requestId);
+            setMotorAcceleration(requestId, motorId, acceleration);
         }
         else if (cmdId == SET_MAX_SPEED_CMD && msg->getSize() == 5)
-        { // Set motor max speed acceleration.
+        {
             byte motorId = msg->removeByte(Location::FRONT);
-            float maxSpeed = msg->removeFloat(Location::FRONT);
-            bucket[motorId].setMaxSpeed(maxSpeed);
-            returnCommandSuccess(requestId);
+            float speed = msg->removeFloat(Location::FRONT);
+            setMotorMaxSpeed(requestId, motorId, speed);
         }
         else if (cmdId == INFO_CMD && msg->getSize() == 0)
-        { // Return controller info for connection handshaking.
+        {
             returnControllerInfo(requestId);
         }
         else if (cmdId == SET_CURRENT_POSITION_CMD && msg->getSize() == 5)
         {
             if (msg->getSize() == 5)
-            { // Set position for a given motor.
+            {
                 byte motorId = msg->removeByte(Location::FRONT);
                 long position = msg->removeLong(Location::FRONT);
-                stepper[motorId].setCurrentPosition(position);
+                setMotorCurrentPosition(requestId, motorId, position);
             }
-            returnCommandSuccess(requestId);
         }
         msg->clear();
     }
@@ -320,10 +324,8 @@ void processBuffer(byte requestId, DataBuffer *msg)
 
 /*
  * Method called by an interrupt timer to move the stepper motors.
- * AccelStepper library only support acceleration to maximum speed and deceleration
- * to 0 speed. It doesn't support deceleration to a different speed.
- * The following code implements deceleration stopping the stepper until it reaches
- * the target speed.
+ * AccelStepper library only supports acceleration to maximum speed and deceleration
+ * to 0 speed. By default, it does not support deceleration to a target speed.
  */
 void run()
 {
