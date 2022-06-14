@@ -26,6 +26,8 @@
 #include "SharedBucket.h"
 #include "MotorGoal.h"
 #include "MotorState.h"
+#include "MotorConfig.h"
+#include "Guard.h"
 
 // Motors connections.
 
@@ -72,11 +74,16 @@ AccelStepper stepper[2] = {
     AccelStepper(AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN),
     AccelStepper(AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN)};
 
-// This structure holds motor goals: the main thread adds a goal and the ISR
+// Stepper motors configuration: acceleration and max speed.
+MotorConfig motorConfig[2] = {
+    MotorConfig{500.0, 1000.0},
+    MotorConfig{500.0, 1000.0}};
+
+// This structure holds motor goals: the main thread updates a goal and the ISR
 // reads it.
-Buffer<MotorGoal> motorGoals[2] = {
-    Buffer<MotorGoal>{10},
-    Buffer<MotorGoal>{10}};
+MotorGoal motorGoal[2] = {
+    MotorGoal{},
+    MotorGoal{}};
 
 // This variable tells the ISR not to read a goal while the main thread is
 // inserting a new one.
@@ -122,15 +129,18 @@ void returnStatus(byte requestId)
 {
     responseBuffer.addByte(requestId, Location::END);
     responseBuffer.addByte(SUCCESS_MSG, Location::END);
-    readingMotorStates = true;
-    for (int i = 0; i < 2; i++)
+
     {
-        responseBuffer.addLong(motorState[i].getCurrentPosition(), Location::END);
-        float speed = 100.0 * motorState[i].getSpeed() / motorState[i].getMaxSpeed();
-        responseBuffer.addFloat(speed, Location::END);
-        responseBuffer.addLong(motorState[i].getDistanceToGo(), Location::END);
+        Guard stateGuard{readingMotorStates};
+        for (int i = 0; i < 2; i++)
+        {
+            responseBuffer.addLong(motorState[i].getCurrentPosition(), Location::END);
+            float speed = 100.0 * motorState[i].getSpeed() / motorConfig[i].getMaxSpeed();
+            responseBuffer.addFloat(speed, Location::END);
+            responseBuffer.addLong(motorState[i].getDistanceToGo(), Location::END);
+        }
     }
-    readingMotorStates = false;
+
     serialPort.write(&responseBuffer);
 }
 
@@ -174,22 +184,52 @@ void setMotorTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
     {
         maxSpeedPercentage = 100.0;
     }
-    motorGoals[motorId].setTargetSpeed(bucket[motorId].getMaxSpeed() * maxSpeedPercentage / 100.0);
-    motorGoals->setReadReady(true);
+
+    {
+        Guard goalGuard{writingMotorGoals};
+        motorGoal[motorId].setTargetSpeed(motorConfig[motorId].getMaxSpeed() * maxSpeedPercentage / 100.0);
+    }
+
     returnCommandSuccess(requestId);
 }
 
-void motorMove(byte requestId, byte motorId, long steps)
+void moveMotor(byte requestId, byte motorId, long steps)
 {
-    motorGoals[motorId].setTargetPosition(bucket[motorId].getCurrentPosition() + steps);
-    motorGoals->setReadReady(true);
+    {
+        Guard goalGuard{writingMotorGoals};
+        Guard stateGuard{readingMotorStates};
+        motorGoal[motorId].setTargetPosition(motorState[motorId].getCurrentPosition() + steps);
+    }
     returnCommandSuccess(requestId);
 }
 
 void motorMoveTo(byte requestId, byte motorId, long position)
 {
-    motorGoals[motorId].setTargetPosition(position);
-    motorGoals->setReadReady(true);
+    {
+        Guard goalGuard{writingMotorGoals};
+        motorGoal[motorId].setTargetPosition(position);
+    }
+    returnCommandSuccess(requestId);
+}
+
+void stopAllMotors(byte requestId)
+{
+    {
+        Guard goalGuard{writingMotorGoals};
+        for (byte i = 0; i < 2; i++)
+        {
+            motorGoal[i].setTargetSpeed(0);
+        }
+    }
+    returnCommandSuccess(requestId);
+}
+
+void stopMotor(byte requestId, byte motorId)
+{
+    {
+        Guard goalGuard{writingMotorGoals};
+        motorGoal[motorId].setTargetSpeed(0);
+    }
     returnCommandSuccess(requestId);
 }
 
@@ -225,7 +265,7 @@ void processBuffer(byte requestId, DataBuffer *msg)
         { // Move motor by a specified number for steps.
             byte motorId = msg->removeByte(Location::FRONT);
             long steps = msg->removeLong(Location::FRONT);
-            motorMove(requestId, motorId, steps);
+            moveMotor(requestId, motorId, steps);
         }
         else if (cmdId == MOVE_TO_CMD && msg->getSize() == 5)
         { // Move motor by a specified number for steps.
@@ -236,16 +276,13 @@ void processBuffer(byte requestId, DataBuffer *msg)
         else if (cmdId == STOP_CMD && (msg->getSize() == 0 || msg->getSize() == 1))
         {
             if (msg->getSize() == 0)
-            { // Stop all motors.
-                for (byte i = 0; i < 2; i++)
-                {
-                    bucket[i].setTargetSpeed(0);
-                }
+            {
+                stopAllMotors(requestId);
             }
             else if (msg->getSize() == 1)
             { // Stop a given motor.
                 byte motorId = msg->removeByte(Location::FRONT);
-                bucket[motorId].setTargetSpeed(0);
+                stopMotor(requestId, motorId);
             }
             returnCommandSuccess(requestId);
         }

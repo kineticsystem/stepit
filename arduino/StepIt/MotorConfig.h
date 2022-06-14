@@ -18,38 +18,24 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "MotorState.h"
+#ifndef MOTOR_CONFIG_H
+#define MOTOR_CONFIG_H
 
-MotorState::MotorState()
+/**
+ * This class is used to exchange motor goals between the main thread and the
+ * ISR (Interrupt Service Routine). Goals are target speed, acceleration,
+ * target position, maximum speed.
+ */
+class MotorConfig
 {
-}
+    float m_acceleration;
+    float m_maxSpeed;
 
-void MotorState::setSpeed(float speed)
-{
-    m_speed = speed;
-}
+public:
+    explicit MotorConfig(float acceleration, float maxSpeed);
 
-float MotorState::getSpeed() const
-{
-    return m_speed;
-}
+    float getAcceleration() const;
+    float getMaxSpeed() const;
+};
 
-void MotorState::setCurrentPosition(long position)
-{
-    m_currentPosition = position;
-}
-
-long MotorState::getCurrentPosition() const
-{
-    return m_currentPosition;
-}
-
-void MotorState::setDistanceToGo(long distanceToGo)
-{
-    m_distanceToGo = distanceToGo;
-}
-
-long MotorState::getDistanceToGo() const
-{
-    return m_distanceToGo;
-}
+#endif // MOTOR_CONFIG_H

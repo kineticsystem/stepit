@@ -32,7 +32,7 @@ class MotorGoal
     long m_targetPosition = 0;
     long m_targetSteps = 0;
     float m_acceleration = 500.0;
-    float m_maxSpeed = 1000.0;
+    float m_maxAbsoluteSpeed = 1000.0;
 
 public:
     MotorGoal();
@@ -45,8 +45,8 @@ public:
     long getTargetSteps() const;
     void setAcceleration(float acceleration);
     float getAcceleration() const;
-    void setMaxSpeed(float maxSpeed);
-    float getMaxSpeed() const;
+    void setMaxAbsoluteSpeed(float maxSpeed);
+    float getMaxAbsoluteSpeed() const;
 };
 
 #endif // MOTOR_GOAL_H

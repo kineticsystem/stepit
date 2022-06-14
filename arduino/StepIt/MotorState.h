@@ -34,9 +34,6 @@ public:
 
     void setSpeed(float speed);
     float getSpeed() const;
-    void setMaxSpeed(float speed);
-    float getMaxSpeed() const;
-
     void setCurrentPosition(long position);
     long getCurrentPosition() const;
     void setDistanceToGo(long distanceToGo);
@@ -44,7 +41,6 @@ public:
 
 private:
     float m_speed = 0.0;
-    float m_maxSpeed = 0.0;
     long m_currentPosition = 0;
     long m_distanceToGo = 0;
 };

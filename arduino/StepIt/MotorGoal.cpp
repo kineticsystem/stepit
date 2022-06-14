@@ -64,12 +64,12 @@ float MotorGoal::getAcceleration() const
     return m_acceleration;
 }
 
-void MotorGoal::setMaxSpeed(float maxSpeed)
+void MotorGoal::setMaxAbsoluteSpeed(float maxSpeed)
 {
-    m_maxSpeed = maxSpeed;
+    m_maxAbsoluteSpeed = maxSpeed;
 }
 
-float MotorGoal::getMaxSpeed() const
+float MotorGoal::getMaxAbsoluteSpeed() const
 {
-    return m_maxSpeed;
+    return m_maxAbsoluteSpeed;
 }

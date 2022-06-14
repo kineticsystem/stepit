@@ -18,38 +18,33 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "MotorState.h"
+#ifndef GUARD_H
+#define GUARD_H
 
-MotorState::MotorState()
+/**
+ * This class uses RAII to set a volatile boolean variable to true in the
+ * constructor and to false in the destructor.
+ *
+ * Example:
+ *
+ * Guard guard{boolVariable, false};
+ */
+class Guard
 {
-}
+public:
+    Guard(volatile bool &var)
+    {
+        p_var = &var;
+        *p_var = true;
+    }
+    ~Guard()
+    {
+        *p_var = false;
+        p_var = nullptr;
+    }
 
-void MotorState::setSpeed(float speed)
-{
-    m_speed = speed;
-}
+private:
+    volatile bool *p_var = nullptr;
+};
 
-float MotorState::getSpeed() const
-{
-    return m_speed;
-}
-
-void MotorState::setCurrentPosition(long position)
-{
-    m_currentPosition = position;
-}
-
-long MotorState::getCurrentPosition() const
-{
-    return m_currentPosition;
-}
-
-void MotorState::setDistanceToGo(long distanceToGo)
-{
-    m_distanceToGo = distanceToGo;
-}
-
-long MotorState::getDistanceToGo() const
-{
-    return m_distanceToGo;
-}
+#endif // GUARD_H

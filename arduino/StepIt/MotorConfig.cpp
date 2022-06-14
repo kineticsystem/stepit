@@ -18,38 +18,19 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "MotorState.h"
+#include "MotorConfig.h"
 
-MotorState::MotorState()
+MotorConfig::MotorConfig(float acceleration, float maxSpeed)
+    : m_acceleration{acceleration}, m_maxSpeed{m_maxSpeed}
 {
 }
 
-void MotorState::setSpeed(float speed)
+float MotorConfig::getAcceleration() const
 {
-    m_speed = speed;
+    return m_acceleration;
 }
 
-float MotorState::getSpeed() const
+float MotorConfig::getMaxSpeed() const
 {
-    return m_speed;
-}
-
-void MotorState::setCurrentPosition(long position)
-{
-    m_currentPosition = position;
-}
-
-long MotorState::getCurrentPosition() const
-{
-    return m_currentPosition;
-}
-
-void MotorState::setDistanceToGo(long distanceToGo)
-{
-    m_distanceToGo = distanceToGo;
-}
-
-long MotorState::getDistanceToGo() const
-{
-    return m_distanceToGo;
+    return m_maxSpeed;
 }
