@@ -30,11 +30,10 @@
  * communication.
  *
  * IMPORTANT NOTE
- * Arduino follows the Little Endian convention to store numbers, i.e. a
- * pointer to an int or long gives the address of the LSB (Less Significant
- * Byte).
- * Numbers are sent/received through the network following IEEE 754
- * specification, i.e. Most Significant Byte first.
+ * Arduino follows the Little Endian convention to store numbers: a pointer to
+ * an int or long gives the address of the LSB (Less Significant Byte).
+ * Numbers are sent and received to and from the network following IEEE 754
+ * specification, with Most Significant Byte first.
  * We use the above specifications when converting numbers from bytes to
  * primitive types, and back.
  */
@@ -42,7 +41,6 @@ class DataBuffer
 {
 public:
     explicit DataBuffer(unsigned int bufferSize);
-    ~DataBuffer();
 
     // Returns how much data is currently stored in the buffer.
     int getSize();
@@ -50,35 +48,35 @@ public:
     // Returns the maximum capacity of the buffer
     int getCapacity();
 
-    // Insert a byte at the give location.
+    // Insert a byte at the given location.
     void addByte(byte in, Location location);
 
     // Remove a byte from the given location.
     byte removeByte(Location location);
 
-    // Insert an int at the end of the buffer.
+    // Insert an int at the given location.
     void addInt(int in, Location location);
 
-    // Remove an int from at the give location..
+    // Remove an int from the given location.
     int removeInt(Location location);
 
-    // Insert a long (4 bytes) at the give location..
+    // Insert a long (4 bytes) at the given location.
     void addLong(long in, Location location);
 
-    // Remove a long (4 bytes) from the give location..
+    // Remove a long (4 bytes) from the given location.
     long removeLong(Location location);
 
-    // Insert a float (4 bytes) at the give location..
+    // Insert a float (4 bytes) at the given location.
     void addFloat(float in, Location location);
 
-    // Remove a float (4 bytes) at the give location..
+    // Remove a float (4 bytes) from the given location.
     float removeFloat(Location location);
 
     // This method resets the buffer into an original state (with no data).
     void clear();
 
 private:
-    Buffer<byte> *m_buffer;
+    Buffer<byte> m_buffer;
 };
 
 #endif // DATA_BUFFER_H

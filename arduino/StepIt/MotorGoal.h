@@ -25,8 +25,6 @@
  * This class is used to exchange motor goals between the main thread and the
  * ISR (Interrupt Service Routine). Goals are target speed, acceleration,
  * target position, maximum speed.
- * Goals are written by the main thread and read by the ISR when the flag
- * readReady is true, which in turn will set it back to false after reading.
  */
 class MotorGoal
 {
@@ -35,8 +33,6 @@ class MotorGoal
     long m_targetSteps = 0;
     float m_acceleration = 500.0;
     float m_maxSpeed = 1000.0;
-
-    volatile bool m_readReady = false;
 
 public:
     MotorGoal();
@@ -51,9 +47,6 @@ public:
     float getAcceleration() const;
     void setMaxSpeed(float maxSpeed);
     float getMaxSpeed() const;
-
-    void setReadReady(bool readReady);
-    bool isReadReady() const;
 };
 
 #endif // MOTOR_GOAL_H

@@ -73,13 +73,3 @@ float MotorGoal::getMaxSpeed() const
 {
     return m_maxSpeed;
 }
-
-void MotorGoal::setReadReady(bool readReady)
-{
-    m_readReady = readReady;
-}
-
-bool MotorGoal::isReadReady() const
-{
-    return m_readReady;
-}

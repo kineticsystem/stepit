@@ -24,13 +24,13 @@ In this implementation, each frame contains a command and all required parameter
 
 <table align="center" border="2px">
   <tr>
-    <td align="center"><b>delimiterr</b></td>
+    <td align="center"><b>Delimiter</b></td>
     <td align="center"><b>Request id</b></td>
     <td align="center"><b>Move command</b></td>
     <td align="center"><b>Motor id</b></td>
     <td align="center" colspan="4"><b>Steps</b></td>
     <td align="center" colspan="2"><b>Checksum</b></td>
-    <td align="center"><b>delimiterr</b></td>
+    <td align="center"><b>Delimiter</b></td>
   </tr>
   <tr>
     <td align="center">0x7e</td>
@@ -51,11 +51,11 @@ If the command executes successfully, Arduino will return the following response
 
 <table align="center" border="2px">
   <tr>
-    <td align="center"><b>delimiterr</b></td>
+    <td align="center"><b>Delimiter</b></td>
     <td align="center"><b>Request id</b></td>
-    <td align="center"><b>Success reponse</b></td>
+    <td align="center"><b>Success response</b></td>
     <td align="center" colspan="2"><b>Checksum</b></td>
-    <td align="center"><b>delimiterr</b></td>
+    <td align="center"><b>Delimiter</b></td>
   </tr>
   <tr>
     <td align="center">0x7e</td>
@@ -70,7 +70,7 @@ If the command executes successfully, Arduino will return the following response
 Following is a short list of all numeric Arduino data types.
 
 <table align="center" border="2px">
-  <tr><td><b>type</b></td><td><b>bytes</b></td></tr>
+  <tr><td><b>Type</b></td><td><b>Bytes</b></td></tr>
   <tr><td>boolean</td><td>1 byte</td></tr>
   <tr><td>byte</td><td>1 byte</td></tr>
   <tr><td>char</td><td>1 byte</td></tr>
@@ -150,9 +150,9 @@ Following is a list of all desired commands to control the motor movements.
         <td>The motor id.</td>
     </tr>
     <tr>
-        <td>Set target speed<b></td>
+        <td>Set max relative speed<b></td>
         <td>0x77</td>
-        <td rowspan="2">Set a motor relative speed between 0 and 100.<br/>The motor accelerates or develerates until reaching the relative target speed.</td>
+        <td rowspan="2">Set a motor relative speed between 0 and 100.<br/>The motor accelerates or decelerates until reaching the relative max speed.</td>
         <td>motorId</td>
         <td>uchar</td>
         <td>The motor id.</td>
@@ -162,12 +162,12 @@ Following is a list of all desired commands to control the motor movements.
         <td></td>
         <td>speed</td>
         <td>float</td>
-        <td>The relative speed between 0 and 100.</td>
+        <td>The relative max speed between 0 and 100.</td>
     </tr>
     <tr>
-        <td>Set max speed<b></td>
+        <td>Set max absolute speed<b></td>
         <td>0x78</td>
-        <td rowspan="2">Set the maximum possible speed in steps/s.</td>
+        <td rowspan="2">Set the maximum absolute speed in steps/s.</td>
         <td>motorId</td>
         <td>uchar</td>
         <td>The motor id.</td>

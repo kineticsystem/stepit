@@ -34,6 +34,16 @@ float MotorState::getSpeed() const
     return m_speed;
 }
 
+void MotorState::setMaxSpeed(float maxSpeed)
+{
+    m_maxSpeed = maxSpeed;
+}
+
+float MotorState::getMaxSpeed() const
+{
+    return m_maxSpeed;
+}
+
 void MotorState::setCurrentPosition(long position)
 {
     m_currentPosition = position;
@@ -52,14 +62,4 @@ void MotorState::setDistanceToGo(long distanceToGo)
 long MotorState::getDistanceToGo() const
 {
     return m_distanceToGo;
-}
-
-void MotorState::setWriteReady(bool writeReady)
-{
-    m_writeReady = writeReady;
-}
-
-bool MotorState::isWriteReady()
-{
-    return m_writeReady;
 }

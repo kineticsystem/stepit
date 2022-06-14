@@ -68,27 +68,29 @@ byte SUCCESS_MSG = 0x11;
 byte ERROR_MSG = 0x12;
 
 // Stepper motors.
-
 AccelStepper stepper[2] = {
     AccelStepper(AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN),
     AccelStepper(AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN)};
 
-// A Goal is created by the main thread and read by the ISR.
-// The ISR is way faster than the main thread, so a goal is consumed as soon as
-// it is created.
-// TODO: validate the scenario where two commands a written to the buffer before one is read.
-
+// This structure holds motor goals: the main thread adds a goal and the ISR
+// reads it.
 Buffer<MotorGoal> motorGoals[2] = {
     Buffer<MotorGoal>{10},
-    Buffer<MotorGoal>{10},
-};
+    Buffer<MotorGoal>{10}};
 
-// This is a structure that contains motor states. It is read by the main
-// thread and written by the interrupt callback.
-Buffer<MotorState> motorState[2] = {
-    Buffer<MotorState>{10},
-    Buffer<MotorState>{10},
-};
+// This variable tells the ISR not to read a goal while the main thread is
+// inserting a new one.
+volatile bool writingMotorGoals = false;
+
+// This structure holds motor states: the ISR updates the state and the main
+// thread reads it.
+MotorState motorState[2] = {
+    MotorState{},
+    MotorState{}};
+
+// This variable tells the ISR not to override the state while the main thread
+// is reading it.
+volatile bool readingMotorStates = false;
 
 // Class to read and write over a serial port.
 SerialPort serialPort{255, 255};
@@ -114,12 +116,13 @@ void returnCommandSuccess(byte requestId)
 
 /**
  * When a Status command is received, send back the position of the motor and
- * speed.
+ * relative speed.
  */
 void returnStatus(byte requestId)
 {
     responseBuffer.addByte(requestId, Location::END);
     responseBuffer.addByte(SUCCESS_MSG, Location::END);
+    readingMotorStates = true;
     for (int i = 0; i < 2; i++)
     {
         responseBuffer.addLong(motorState[i].getCurrentPosition(), Location::END);
@@ -127,13 +130,14 @@ void returnStatus(byte requestId)
         responseBuffer.addFloat(speed, Location::END);
         responseBuffer.addLong(motorState[i].getDistanceToGo(), Location::END);
     }
+    readingMotorStates = false;
     serialPort.write(&responseBuffer);
 }
 
 /**
- * Send information about the program. It is used at connection handshake
- * to help the client, on the other side of the serial port, identify the
- * correct port where the Arduino is connected.
+ * Send information about the program during a connection handshake to help the
+ * client, on the other side of the serial port, identify the correct port
+ * where the Arduino is connected.
  */
 void returnControllerInfo(byte requestId)
 {
@@ -147,8 +151,8 @@ void returnControllerInfo(byte requestId)
 }
 
 /**
- * Enable or disable the Service Interrupt Routine (SIR) to move the motros.
- * @param requestId The request id.
+ * Enable or disable the Service Interrupt Routine (SIR) to move the motors.
+ * @param requestId The id of the request.
  * @param enabled True to enable the motors control, false to disable.
  */
 void setMotorsEnabled(byte requestId, byte enabled)
