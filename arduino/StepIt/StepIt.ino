@@ -38,13 +38,10 @@ static const byte STEPPER1_DIR_PIN = 12;
 // This is the information sent by Arduino during the connection handshake.
 const char NAME[] = "STEPPIT\0";
 
-const int INTERRUPT_TIME = 90; // Microseconds.
+const int INTERRUPT_TIME_MS = 90;
 
-// Input commands. For each command received, Arduino returns a response
-// which contains a success or an error code.
-// If a command requires additional information, the success response is
-// followed by the requested data.
-// All messages sent by Arduino have the most significant bit set to 0.
+// For each command received, Arduino returns a response with success or error
+// code and possibly some data.
 
 byte MOVE_CMD = 0x70;                 // Move motors a given amount of steps.
 byte MOVE_TO_CMD = 0x71;              // Move motors to a given position.
@@ -109,7 +106,7 @@ SerialPort serialPort{255, 255};
 DataBuffer responseBuffer{255};
 
 /**
- * Send a ready message when the Arduino is ready to communicate.
+ * Send a ready message when Arduino is ready to communicate.
  */
 void sendReadyMessage()
 {
@@ -141,8 +138,8 @@ void returnStatus(byte requestId)
         for (int i = 0; i < 2; i++)
         {
             responseBuffer.addLong(motorState[i].getCurrentPosition(), Location::END);
-            float speed = 100.0 * motorState[i].getSpeed() / motorConfig[i].getMaxSpeed();
-            responseBuffer.addFloat(speed, Location::END);
+            float relativeSpeed = 100.0 * (motorState[i].getSpeed() / motorConfig[i].getMaxSpeed());
+            responseBuffer.addFloat(relativeSpeed, Location::END);
             responseBuffer.addLong(motorState[i].getDistanceToGo(), Location::END);
         }
     }
@@ -150,9 +147,8 @@ void returnStatus(byte requestId)
 }
 
 /**
- * Send information about the program during a connection handshake to help the
- * client, on the other side of the serial port, identify the correct port
- * where the Arduino is connected.
+ * Send information about the software installed on Arduino to help the client
+ * identify the correct port where Arduino is connected.
  */
 void returnControllerInfo(byte requestId)
 {
@@ -174,7 +170,7 @@ void setMotorsEnabled(byte requestId, byte enabled)
 {
     if (enabled == 0)
     {
-        TimerInterrupt::start(INTERRUPT_TIME);
+        TimerInterrupt::start(INTERRUPT_TIME_MS);
     }
     else
     {
@@ -183,7 +179,7 @@ void setMotorsEnabled(byte requestId, byte enabled)
     returnCommandSuccess(requestId);
 }
 
-void setMotorTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
+void setMotorRelativeTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
 {
     if (maxSpeedPercentage > 100.0)
     {
@@ -191,7 +187,7 @@ void setMotorTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
     }
     {
         Guard goalGuard{writingMotorGoals};
-        motorGoal[motorId].setTargetSpeed(motorConfig[motorId].getMaxSpeed() * maxSpeedPercentage / 100.0);
+        motorGoal[motorId].setTargetSpeed(motorConfig[motorId].getMaxSpeed() * (maxSpeedPercentage / 100.0));
     }
     returnCommandSuccess(requestId);
 }
@@ -201,6 +197,8 @@ void moveMotor(byte requestId, byte motorId, long steps)
     {
         Guard goalGuard{writingMotorGoals};
         Guard stateGuard{readingMotorStates};
+        // The motor position may not reflect exactly the one stored in the
+        // state while the motor is moving.
         motorGoal[motorId].setTargetPosition(motorState[motorId].getCurrentPosition() + steps);
     }
     returnCommandSuccess(requestId);
@@ -263,7 +261,7 @@ void processBuffer(byte requestId, DataBuffer *msg)
     {
         byte motorId = msg->removeByte(Location::FRONT);
         float targetSpdPercentage = fabs(msg->removeFloat(Location::FRONT));
-        setMotorTargetSpeed(requestId, motorId, targetSpdPercentage);
+        setMotorRelativeTargetSpeed(requestId, motorId, targetSpdPercentage);
     }
     else if (cmdId == MOVE_CMD)
     {
@@ -310,7 +308,7 @@ void run()
     {
         stepper[i].run();
 
-        // Read motor status.
+        // Read motor states.
 
         float actualSpeed = fabs(stepper[i].speed());
         long currentPosition = stepper[i].currentPosition();
@@ -379,7 +377,7 @@ void setup()
     // Initialize interrupt.
 
     TimerInterrupt::setCallback(&run);
-    TimerInterrupt::start(INTERRUPT_TIME);
+    TimerInterrupt::start(INTERRUPT_TIME_MS);
 
     // Send a message to the client that Arduino is ready to read/write data.
 
