@@ -73,3 +73,23 @@ float MotorGoal::getMaxAbsoluteSpeed() const
 {
     return m_maxAbsoluteSpeed;
 }
+
+void MotorGoal::setOldTargetSpeed(float targetSpeed)
+{
+    m_oldTargetSpeed = targetSpeed;
+}
+
+float MotorGoal::getOldTargetSpeed() const
+{
+    return m_oldTargetSpeed;
+}
+
+void MotorGoal::setOldTargetPosition(long targetPosition)
+{
+    m_oldTargetPosition = targetPosition;
+}
+
+long MotorGoal::getOldTargetPosition() const
+{
+    return m_oldTargetPosition;
+}

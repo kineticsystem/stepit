@@ -39,10 +39,16 @@ public:
     void setDistanceToGo(long distanceToGo);
     long getDistanceToGo() const;
 
+    void setDecelerating(bool isDecelerating);
+    bool isDecelerating() const;
+
 private:
     float m_speed = 0.0;
     long m_currentPosition = 0;
     long m_distanceToGo = 0;
+
+    // Only the ISR uses this.
+    bool m_isDecelerating = false;
 };
 
 #endif // MOTOR_STATE_H

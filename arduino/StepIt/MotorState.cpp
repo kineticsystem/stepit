@@ -53,3 +53,13 @@ long MotorState::getDistanceToGo() const
 {
     return m_distanceToGo;
 }
+
+void MotorState::setDecelerating(bool isDecelerating)
+{
+    m_isDecelerating = isDecelerating;
+}
+
+bool MotorState::isDecelerating() const
+{
+    return m_isDecelerating;
+}

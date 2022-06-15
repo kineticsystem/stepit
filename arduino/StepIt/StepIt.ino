@@ -23,7 +23,6 @@
 #include <SerialPort.h>
 #include <DataBuffer.h>
 #include <Buffer.h>
-#include "SharedBucket.h"
 #include "MotorGoal.h"
 #include "MotorState.h"
 #include "MotorConfig.h"
@@ -41,8 +40,8 @@ const char NAME[] = "STEPPIT\0";
 
 const int INTERRUPT_TIME = 90; // Microseconds.
 
-// Input commands. For each command received, a response must be returned.
-// The response always contains a success or an error code.
+// Input commands. For each command received, Arduino returns a response
+// which contains a success or an error code.
 // If a command requires additional information, the success response is
 // followed by the requested data.
 // All messages sent by Arduino have the most significant bit set to 0.
@@ -51,6 +50,7 @@ byte MOVE_CMD = 0x70;                 // Move motors a given amount of steps.
 byte MOVE_TO_CMD = 0x71;              // Move motors to a given position.
 byte STOP_CMD = 0x72;                 // Stop motors.
 byte SET_ACCELERATION_CMD = 0x73;     // Set motors acceleration.
+byte STOP_ALL_CMD = 0x74;             // Stop all motors.
 byte STATUS_CMD = 0x75;               // Request motors status, position and speed.
 byte INFO_CMD = 0x76;                 // Request controller info for connection handshaking.
 byte SET_TARGET_SPEED_CMD = 0x77;     // Set motors target relative speed (0-100).
@@ -68,6 +68,9 @@ byte SUCCESS_MSG = 0x11;
 
 // Error response code.
 byte ERROR_MSG = 0x12;
+
+// Each time Arduino sends a command, this number increases.
+byte messageId = 0;
 
 // Stepper motors.
 AccelStepper stepper[] = {
@@ -106,7 +109,17 @@ SerialPort serialPort{255, 255};
 DataBuffer responseBuffer{255};
 
 /**
- * Default response when a correct command, not requiring information, has been received.
+ * Send a ready message when the Arduino is ready to communicate.
+ */
+void sendReadyMessage()
+{
+    responseBuffer.addByte(messageId++, Location::END);
+    responseBuffer.addByte(READY_MSG, Location::END);
+    serialPort.write(&responseBuffer);
+}
+
+/**
+ * Send a successful response when Arduino correctly executes a command.
  */
 void returnCommandSuccess(byte requestId)
 {
@@ -123,7 +136,6 @@ void returnStatus(byte requestId)
 {
     responseBuffer.addByte(requestId, Location::END);
     responseBuffer.addByte(SUCCESS_MSG, Location::END);
-
     {
         Guard stateGuard{readingMotorStates};
         for (int i = 0; i < 2; i++)
@@ -134,7 +146,6 @@ void returnStatus(byte requestId)
             responseBuffer.addLong(motorState[i].getDistanceToGo(), Location::END);
         }
     }
-
     serialPort.write(&responseBuffer);
 }
 
@@ -182,7 +193,6 @@ void setMotorTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
         Guard goalGuard{writingMotorGoals};
         motorGoal[motorId].setTargetSpeed(motorConfig[motorId].getMaxSpeed() * maxSpeedPercentage / 100.0);
     }
-
     returnCommandSuccess(requestId);
 }
 
@@ -226,18 +236,6 @@ void stopMotor(byte requestId, byte motorId)
     returnCommandSuccess(requestId);
 }
 
-void setMotorAcceleration(byte requestId, byte motorId, float acceleration)
-{
-    bucket[motorId].setAcceleration(acceleration);
-    returnCommandSuccess(requestId);
-}
-
-void setMotorMaxSpeed(byte requestId, byte motorId, float speed)
-{
-    bucket[motorId].setMaxSpeed(speed);
-    returnCommandSuccess(requestId);
-}
-
 void setMotorCurrentPosition(byte requestId, byte motorId, long position)
 {
     stepper[motorId].setCurrentPosition(position);
@@ -250,76 +248,55 @@ void setMotorCurrentPosition(byte requestId, byte motorId, long position)
  */
 void processBuffer(byte requestId, DataBuffer *msg)
 {
-    if (msg->getSize() > 0)
-    {
-        byte cmdId = msg->removeByte(Location::FRONT);
+    byte cmdId = msg->removeByte(Location::FRONT);
 
-        if (cmdId == STATUS_CMD && msg->getSize() == 0)
-        {
-            returnStatus(requestId);
-        }
-        else if (cmdId == SET_MOTORS_ENABLED_CMD && msg->getSize() == 1)
-        {
-            byte enabled = msg->removeByte(Location::FRONT);
-            setMotorsEnabled(requestId, enabled);
-        }
-        else if (cmdId == SET_TARGET_SPEED_CMD && msg->getSize() == 5)
-        {
-            byte motorId = msg->removeByte(Location::FRONT);
-            float targetSpdPercentage = fabs(msg->removeFloat(Location::FRONT));
-            setMotorTargetSpeed(requestId, motorId, targetSpdPercentage);
-        }
-        else if (cmdId == MOVE_CMD && msg->getSize() == 5)
-        {
-            byte motorId = msg->removeByte(Location::FRONT);
-            long steps = msg->removeLong(Location::FRONT);
-            moveMotor(requestId, motorId, steps);
-        }
-        else if (cmdId == MOVE_TO_CMD && msg->getSize() == 5)
-        {
-            byte motorId = msg->removeByte(Location::FRONT);
-            long position = msg->removeLong(Location::FRONT);
-            moveMotorTo(requestId, motorId, position);
-        }
-        else if (cmdId == STOP_CMD && (msg->getSize() == 0 || msg->getSize() == 1))
-        {
-            if (msg->getSize() == 0)
-            {
-                stopAllMotors(requestId);
-            }
-            else if (msg->getSize() == 1)
-            {
-                byte motorId = msg->removeByte(Location::FRONT);
-                stopMotor(requestId, motorId);
-            }
-        }
-        else if (cmdId == SET_ACCELERATION_CMD && msg->getSize() == 5)
-        {
-            byte motorId = msg->removeByte(Location::FRONT);
-            float acceleration = msg->removeFloat(Location::FRONT);
-            setMotorAcceleration(requestId, motorId, acceleration);
-        }
-        else if (cmdId == SET_MAX_SPEED_CMD && msg->getSize() == 5)
-        {
-            byte motorId = msg->removeByte(Location::FRONT);
-            float speed = msg->removeFloat(Location::FRONT);
-            setMotorMaxSpeed(requestId, motorId, speed);
-        }
-        else if (cmdId == INFO_CMD && msg->getSize() == 0)
-        {
-            returnControllerInfo(requestId);
-        }
-        else if (cmdId == SET_CURRENT_POSITION_CMD && msg->getSize() == 5)
-        {
-            if (msg->getSize() == 5)
-            {
-                byte motorId = msg->removeByte(Location::FRONT);
-                long position = msg->removeLong(Location::FRONT);
-                setMotorCurrentPosition(requestId, motorId, position);
-            }
-        }
-        msg->clear();
+    if (cmdId == STATUS_CMD)
+    {
+        returnStatus(requestId);
     }
+    else if (cmdId == SET_MOTORS_ENABLED_CMD)
+    {
+        byte enabled = msg->removeByte(Location::FRONT);
+        setMotorsEnabled(requestId, enabled);
+    }
+    else if (cmdId == SET_TARGET_SPEED_CMD)
+    {
+        byte motorId = msg->removeByte(Location::FRONT);
+        float targetSpdPercentage = fabs(msg->removeFloat(Location::FRONT));
+        setMotorTargetSpeed(requestId, motorId, targetSpdPercentage);
+    }
+    else if (cmdId == MOVE_CMD)
+    {
+        byte motorId = msg->removeByte(Location::FRONT);
+        long steps = msg->removeLong(Location::FRONT);
+        moveMotor(requestId, motorId, steps);
+    }
+    else if (cmdId == MOVE_TO_CMD)
+    {
+        byte motorId = msg->removeByte(Location::FRONT);
+        long position = msg->removeLong(Location::FRONT);
+        moveMotorTo(requestId, motorId, position);
+    }
+    else if (cmdId == STOP_CMD)
+    {
+        byte motorId = msg->removeByte(Location::FRONT);
+        stopMotor(requestId, motorId);
+    }
+    else if (cmdId == STOP_ALL_CMD)
+    {
+        stopAllMotors(requestId);
+    }
+    else if (cmdId == INFO_CMD)
+    {
+        returnControllerInfo(requestId);
+    }
+    else if (cmdId == SET_CURRENT_POSITION_CMD)
+    {
+        byte motorId = msg->removeByte(Location::FRONT);
+        long position = msg->removeLong(Location::FRONT);
+        setMotorCurrentPosition(requestId, motorId, position);
+    }
+    msg->clear();
 }
 
 /*
@@ -331,54 +308,56 @@ void run()
 {
     for (int i = 0; i < 2; i++)
     {
+        stepper[i].run();
+
         // Read motor status.
 
-        float actualSpeed = stepper[i].speed();
+        float actualSpeed = fabs(stepper[i].speed());
         long currentPosition = stepper[i].currentPosition();
         long distanceToGo = stepper[i].distanceToGo();
 
-        // Save motor status.
-
-        bucket[i].setSpeed(actualSpeed);
-        bucket[i].setCurrentPosition(currentPosition);
-        bucket[i].setDistanceToGo(distanceToGo);
-
-        actualSpeed = fabs(actualSpeed);
-
-        if (bucket[i].getTargetPosition() != bucket[i].getOldTargetPosition())
-        { // Position has changed.
-            bucket[i].setOldTargetPosition(bucket[i].getTargetPosition());
-            if (!bucket[i].isDecelerating())
-            {
-                stepper[i].moveTo(bucket[i].getTargetPosition());
-            }
+        if (!readingMotorStates)
+        {
+            motorState[i].setSpeed(actualSpeed);
+            motorState[i].setCurrentPosition(currentPosition);
+            motorState[i].setDistanceToGo(distanceToGo);
         }
-        else if (bucket[i].getTargetSpeed() != bucket[i].getOldTargetSpeed())
-        { // Target speed has changed
-            bucket[i].setOldTargetSpeed(bucket[i].getTargetSpeed());
-            if (bucket[i].getTargetSpeed() > actualSpeed)
-            {
-                stepper[i].setMaxSpeed(bucket[i].getTargetSpeed());
-                if (bucket[i].isDecelerating())
+
+        if (!writingMotorGoals)
+        {
+            if (motorGoal[i].getTargetPosition() != motorGoal[i].getOldTargetPosition())
+            { // Position has changed.
+                motorGoal[i].setOldTargetPosition(motorGoal[i].getTargetPosition());
+                if (!motorState[i].isDecelerating())
                 {
-                    stepper[i].moveTo(bucket[i].getTargetPosition());
-                    bucket[i].setDecelerating(false);
+                    stepper[i].moveTo(motorGoal[i].getTargetPosition());
                 }
             }
-            else if ((bucket[i].getTargetSpeed() < actualSpeed) && !bucket[i].isDecelerating())
+            else if (motorGoal[i].getTargetSpeed() != motorGoal[i].getOldTargetSpeed())
+            { // Target speed has changed
+                motorGoal[i].setOldTargetSpeed(motorGoal[i].getTargetSpeed());
+                if (motorGoal[i].getTargetSpeed() > actualSpeed)
+                {
+                    stepper[i].setMaxSpeed(motorGoal[i].getTargetSpeed());
+                    if (motorState[i].isDecelerating())
+                    {
+                        stepper[i].moveTo(motorGoal[i].getTargetPosition());
+                        motorState[i].setDecelerating(false);
+                    }
+                }
+                else if ((motorGoal[i].getTargetSpeed() < actualSpeed) && !motorState[i].isDecelerating())
+                {
+                    motorState[i].setDecelerating(true);
+                    stepper[i].stop();
+                }
+            }
+            else if (motorState[i].isDecelerating() && (actualSpeed < motorGoal[i].getTargetSpeed()))
             {
-                bucket[i].setDecelerating(true);
-                stepper[i].stop();
+                motorState[i].setDecelerating(false);
+                stepper[i].setMaxSpeed(motorGoal[i].getTargetSpeed());
+                stepper[i].moveTo(motorGoal[i].getTargetPosition());
             }
         }
-        else if (bucket[i].isDecelerating() && (actualSpeed < bucket[i].getTargetSpeed()))
-        {
-            bucket[i].setDecelerating(false);
-            stepper[i].setMaxSpeed(bucket[i].getTargetSpeed());
-            stepper[i].moveTo(bucket[i].getTargetPosition());
-        }
-
-        stepper[i].run();
     }
 }
 
@@ -393,8 +372,8 @@ void setup()
 
     for (byte i = 0; i < 2; i++)
     {
-        stepper[i].setMaxSpeed(bucket[i].getMaxSpeed());
-        stepper[i].setAcceleration(bucket[i].getAcceleration());
+        stepper[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
+        stepper[i].setAcceleration(motorConfig[i].getAcceleration());
     }
 
     // Initialize interrupt.
