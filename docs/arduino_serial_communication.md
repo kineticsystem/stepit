@@ -20,49 +20,79 @@ PPP separates frames by using the delimiter flag 0x7e. Should the same byte code
   <tr><td>delimiter flag</td></tr>
 </table>
 
-In this implementation, each frame contains a command and all required parameters in binary format. The following example shows a Move Command request to move motor 1 forward 23156 steps.
+In this implementation, each frame contains a command and all required parameters in binary format. The following example shows a Move Command request to move motor 0 forward 20000 steps:
+
+`7e 00 70 00 00 00 4E 20 75 38 7e`
 
 <table align="center" border="2px">
   <tr>
     <td align="center"><b>Delimiter</b></td>
-    <td align="center"><b>Request id</b></td>
-    <td align="center"><b>Move command</b></td>
-    <td align="center"><b>Motor id</b></td>
-    <td align="center" colspan="4"><b>Steps</b></td>
-    <td align="center" colspan="2"><b>Checksum</b></td>
-    <td align="center"><b>Delimiter</b></td>
+    <td align="center">0x7e</td>
   </tr>
   <tr>
-    <td align="center">0x7e</td>
-    <td align="center">0xAF</td>
+    <td align="center"><b>Request id</b></td>
+    <td align="center">0x00</td>
+  </tr>
+  <tr>
+    <td align="center"><b>Move command</b></td>
     <td align="center">0x70</td>
-    <td align="center">0x01</td>
+  </tr>
+  <tr>
+    <td align="center"><b>Motor id</b></td>
     <td align="center">0x00</td>
+  </tr>
+  <tr>
+    <td align="center" rowspan="4"><b>Steps</b></td>
     <td align="center">0x00</td>
-    <td align="center">0x5A</td>
-    <td align="center">0x74</td>
-    <td align="center">0x7D</td>
-    <td align="center">0x53</td>
+  </tr>
+  <tr>
+    <td align="center">0x00</td>
+  </tr>
+  <tr>
+    <td align="center">0x4E</td>
+  </tr>
+  <tr>
+    <td align="center">0x20</td>
+  </tr>
+  <tr>
+    <td align="center" rowspan="2"><b>Checksum</b></td>
+    <td align="center">0xBB</td>
+  </tr>
+  <tr>
+    <td align="center">0xBB</td>
+  </tr>
+  <tr>
+    <td align="center"><b>Delimiter</b></td>
     <td align="center">0x7e</td>
   </tr>
 </table>
 
-If the command executes successfully, Arduino will return the following response.
+If the command executes successfully, Arduino will return the following response:
+
+`7e 00 11 08 01 7e`
 
 <table align="center" border="2px">
   <tr>
     <td align="center"><b>Delimiter</b></td>
-    <td align="center"><b>Request id</b></td>
-    <td align="center"><b>Success response</b></td>
-    <td align="center" colspan="2"><b>Checksum</b></td>
-    <td align="center"><b>Delimiter</b></td>
+    <td align="center">0x7e</td>
   </tr>
   <tr>
-    <td align="center">0x7e</td>
-    <td align="center">0xAF</td>
+    <td align="center"><b>Request id</b></td>
     <td align="center">0x00</td>
-    <td align="center">0xF0</td>
-    <td align="center">0x7D</td>
+  </tr>
+  <tr>
+    <td align="center"><b>Success response</b></td>
+    <td align="center">0x11</td>
+  </tr>
+  <tr>
+    <td align="center" rowspan="2"><b>Checksum</b></td>
+    <td align="center">0x08</td>
+  </tr>
+  <tr>
+    <td align="center">0x01</td>
+  </tr>
+  <tr>
+    <td align="center"><b>Delimiter</b></td>
     <td align="center">0x7e</td>
   </tr>
 </table>
