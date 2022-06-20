@@ -22,6 +22,80 @@ PPP separates frames by using the delimiter flag 0x7e. Should the same byte code
 
 In this implementation, each frame contains a command and all required parameters in binary format. The following example shows a Move Command request to move motor 0 forward 20000 steps and the corresponding response.
 
+<div style="display: flex;">
+    <div style="flex:50%">
+       <table align="center" border="2px">
+        <tr>
+          <td align="center"><b>Delimiter</b></td>
+          <td align="center">0x7e</td>
+        </tr>
+        <tr>
+          <td align="center"><b>Request ID</b></td>
+          <td align="center">0x00</td>
+        </tr>
+       <tr>
+          <td align="center"><b>Move command ID</b></td>
+          <td align="center">0x70</td>
+        </tr>
+        <tr>
+          <td align="center"><b>Motor ID</b></td>
+          <td align="center">0x00</td>
+        </tr>
+        <tr>
+          <td align="center" rowspan="4"><b>Steps</b></td>
+          <td align="center">0x00</td>
+        </tr>
+        <tr>
+          <td align="center">0x00</td>
+        </tr>
+        <tr>
+          <td align="center">0x4E</td>
+        </tr>
+        <tr>
+          <td align="center">0x20</td>
+        </tr>
+        <tr>
+          <td align="center" rowspan="2"><b>Checksum</b></td>
+          <td align="center">0xBB</td>
+        </tr>
+        <tr>
+          <td align="center">0xBB</td>
+        </tr>
+        <tr>
+          <td align="center"><b>Delimiter</b></td>
+          <td align="center">0x7e</td>
+        </tr>
+      </table>
+    </div>
+    <div style="flex:50%">
+      <table align="center" border="2px">
+        <tr>
+          <td align="center"><b>Delimiter</b></td>
+          <td align="center">0x7e</td>
+        </tr>
+        <tr>
+          <td align="center"><b>Request ID</b></td>
+          <td align="center">0x00</td>
+        </tr>
+        <tr>
+          <td align="center"><b>Success response</b></td>
+          <td align="center">0x11</td>
+        </tr>
+        <tr>
+          <td align="center" rowspan="2"><b>Checksum</b></td>
+          <td align="center">0x08</td>
+        </tr>
+        <tr>
+          <td align="center">0x01</td>
+        </tr>
+        <tr>
+          <td align="center"><b>Delimiter</b></td>
+          <td align="center">0x7e</td>
+        </tr>
+      </table>
+    </div>
+</div>
+
 <table align="center" border="0px">
   <tr border="0px">
     <td border="0px">
