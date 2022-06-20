@@ -24,7 +24,7 @@ In this implementation, each frame contains a command and all required parameter
 
 <table align="center" style="border:0px solid black;vertical-align:top;">
   <tr>
-    <td style="vertical-align:top;">
+    <td style="border:0px solid black;vertical-align:top;">
       <table align="center" border="2px">
         <tr>
           <td align="center"><b>Delimiter</b></td>
@@ -68,7 +68,7 @@ In this implementation, each frame contains a command and all required parameter
         </tr>
       </table>
     </td>
-     <td style="vertical-align: top;">
+     <td style="border:0px solid black;vertical-align: top;">
       <table align="center" border="2px">
         <tr>
           <td align="center"><b>Delimiter</b></td>
