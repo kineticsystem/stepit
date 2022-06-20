@@ -38,7 +38,7 @@ static const byte STEPPER1_DIR_PIN = 12;
 // This is the information sent by Arduino during the connection handshake.
 const char NAME[] = "STEPPIT\0";
 
-const int INTERRUPT_TIME_MS = 90;
+const int INTERRUPT_TIME_MICROSECOND = 80;
 
 // For each command received, Arduino returns a response with success or error
 // code and possibly some data.
@@ -46,19 +46,17 @@ const int INTERRUPT_TIME_MS = 90;
 byte MOVE_CMD = 0x70;                 // Move motors a given amount of steps.
 byte MOVE_TO_CMD = 0x71;              // Move motors to a given position.
 byte STOP_CMD = 0x72;                 // Stop motors.
-byte SET_ACCELERATION_CMD = 0x73;     // Set motors acceleration.
 byte STOP_ALL_CMD = 0x74;             // Stop all motors.
 byte STATUS_CMD = 0x75;               // Request motors status, position and speed.
 byte INFO_CMD = 0x76;                 // Request controller info for connection handshaking.
 byte SET_TARGET_SPEED_CMD = 0x77;     // Set motors target relative speed (0-100).
-byte SET_MAX_SPEED_CMD = 0x78;        // Set motors max absolute speed (step/s).
 byte SET_CURRENT_POSITION_CMD = 0x79; // Set the motor current position.
 byte SET_MOTORS_ENABLED_CMD = 0x7A;   // Enable interrupt to control the motors.
 
 // Arduino reboots in around two seconds when a serial connection is initiated.
 // To notify the client that Arduino is ready to receive and transmit data, a ready message
 // is sent.
-byte READY_MSG = 0x10;
+byte READY_MSG = 0x80;
 
 // Success response code.
 byte SUCCESS_MSG = 0x11;
@@ -71,13 +69,13 @@ byte messageId = 0;
 
 // Stepper motors.
 AccelStepper stepper[] = {
-    AccelStepper(AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN),
-    AccelStepper(AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN)};
+    AccelStepper{AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN},
+    AccelStepper{AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN}};
 
 // Stepper motors configuration: acceleration and max speed.
 MotorConfig motorConfig[] = {
-    MotorConfig{500.0, 1000.0},
-    MotorConfig{500.0, 1000.0}};
+    MotorConfig{2500.0, 5000.0},  // 2s to reach to max speed.
+    MotorConfig{2500.0, 5000.0}}; // 2s to reach to max speed.
 
 // This structure holds motor goals: the main thread updates the goal and the
 // ISR reads it.
@@ -170,7 +168,7 @@ void setMotorsEnabled(byte requestId, byte enabled)
 {
     if (enabled == 0)
     {
-        TimerInterrupt::start(INTERRUPT_TIME_MS);
+        TimerInterrupt::start(INTERRUPT_TIME_MICROSECOND);
     }
     else
     {
@@ -179,15 +177,15 @@ void setMotorsEnabled(byte requestId, byte enabled)
     returnCommandSuccess(requestId);
 }
 
-void setMotorRelativeTargetSpeed(byte requestId, byte motorId, float maxSpeedPercentage)
+void setMotorSpeed(byte requestId, byte motorId, float relativeSpeed)
 {
-    if (maxSpeedPercentage > 100.0)
+    if (relativeSpeed > 100.0)
     {
-        maxSpeedPercentage = 100.0;
+        relativeSpeed = 100.0;
     }
     {
         Guard goalGuard{writingMotorGoals};
-        motorGoal[motorId].setTargetSpeed(motorConfig[motorId].getMaxSpeed() * (maxSpeedPercentage / 100.0));
+        motorGoal[motorId].setMaxSpeed(motorConfig[motorId].getMaxSpeed() * relativeSpeed / 100.0);
     }
     returnCommandSuccess(requestId);
 }
@@ -201,6 +199,7 @@ void moveMotor(byte requestId, byte motorId, long steps)
         // state while the motor is moving.
         motorGoal[motorId].setTargetPosition(motorState[motorId].getCurrentPosition() + steps);
     }
+
     returnCommandSuccess(requestId);
 }
 
@@ -219,7 +218,7 @@ void stopAllMotors(byte requestId)
         Guard goalGuard{writingMotorGoals};
         for (byte i = 0; i < 2; i++)
         {
-            motorGoal[i].setTargetSpeed(0);
+            motorGoal[i].setMaxSpeed(0);
         }
     }
     returnCommandSuccess(requestId);
@@ -229,7 +228,7 @@ void stopMotor(byte requestId, byte motorId)
 {
     {
         Guard goalGuard{writingMotorGoals};
-        motorGoal[motorId].setTargetSpeed(0);
+        motorGoal[motorId].setMaxSpeed(0);
     }
     returnCommandSuccess(requestId);
 }
@@ -261,7 +260,7 @@ void processBuffer(byte requestId, DataBuffer *msg)
     {
         byte motorId = msg->removeByte(Location::FRONT);
         float targetSpdPercentage = fabs(msg->removeFloat(Location::FRONT));
-        setMotorRelativeTargetSpeed(requestId, motorId, targetSpdPercentage);
+        setMotorSpeed(requestId, motorId, targetSpdPercentage);
     }
     else if (cmdId == MOVE_CMD)
     {
@@ -310,7 +309,7 @@ void run()
 
         // Read motor states.
 
-        float actualSpeed = fabs(stepper[i].speed());
+        float actualSpeed = stepper[i].speed();
         long currentPosition = stepper[i].currentPosition();
         long distanceToGo = stepper[i].distanceToGo();
 
@@ -331,28 +330,28 @@ void run()
                     stepper[i].moveTo(motorGoal[i].getTargetPosition());
                 }
             }
-            else if (motorGoal[i].getTargetSpeed() != motorGoal[i].getOldTargetSpeed())
+            else if (motorGoal[i].getMaxSpeed() != motorGoal[i].getOldTargetSpeed())
             { // Target speed has changed
-                motorGoal[i].setOldTargetSpeed(motorGoal[i].getTargetSpeed());
-                if (motorGoal[i].getTargetSpeed() > actualSpeed)
+                motorGoal[i].setOldTargetSpeed(motorGoal[i].getMaxSpeed());
+                if (motorGoal[i].getMaxSpeed() > actualSpeed)
                 {
-                    stepper[i].setMaxSpeed(motorGoal[i].getTargetSpeed());
+                    stepper[i].setMaxSpeed(motorGoal[i].getMaxSpeed());
                     if (motorState[i].isDecelerating())
                     {
                         stepper[i].moveTo(motorGoal[i].getTargetPosition());
                         motorState[i].setDecelerating(false);
                     }
                 }
-                else if ((motorGoal[i].getTargetSpeed() < actualSpeed) && !motorState[i].isDecelerating())
+                else if ((motorGoal[i].getMaxSpeed() < actualSpeed) && !motorState[i].isDecelerating())
                 {
                     motorState[i].setDecelerating(true);
                     stepper[i].stop();
                 }
             }
-            else if (motorState[i].isDecelerating() && (actualSpeed < motorGoal[i].getTargetSpeed()))
+            else if (motorState[i].isDecelerating() && (actualSpeed < motorGoal[i].getMaxSpeed()))
             {
                 motorState[i].setDecelerating(false);
-                stepper[i].setMaxSpeed(motorGoal[i].getTargetSpeed());
+                stepper[i].setMaxSpeed(motorGoal[i].getMaxSpeed());
                 stepper[i].moveTo(motorGoal[i].getTargetPosition());
             }
         }
@@ -372,12 +371,13 @@ void setup()
     {
         stepper[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
         stepper[i].setAcceleration(motorConfig[i].getAcceleration());
+        motorGoal[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
     }
 
     // Initialize interrupt.
 
     TimerInterrupt::setCallback(&run);
-    TimerInterrupt::start(INTERRUPT_TIME_MS);
+    TimerInterrupt::start(INTERRUPT_TIME_MICROSECOND);
 
     // Send a message to the client that Arduino is ready to read/write data.
 

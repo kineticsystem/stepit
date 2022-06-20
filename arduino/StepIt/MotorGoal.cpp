@@ -24,14 +24,14 @@ MotorGoal::MotorGoal()
 {
 }
 
-void MotorGoal::setTargetSpeed(float targetSpeed)
+void MotorGoal::setMaxSpeed(float maxSpeed)
 {
-    m_targetSpeed = targetSpeed;
+    m_maxSpeed = maxSpeed;
 }
 
-float MotorGoal::getTargetSpeed() const
+float MotorGoal::getMaxSpeed() const
 {
-    return m_targetSpeed;
+    return m_maxSpeed;
 }
 
 void MotorGoal::setTargetPosition(long targetPosition)
@@ -52,26 +52,6 @@ void MotorGoal::setTargetSteps(long targetSteps)
 long MotorGoal::getTargetSteps() const
 {
     return m_targetSteps;
-}
-
-void MotorGoal::setAcceleration(float acceleration)
-{
-    m_acceleration = acceleration;
-}
-
-float MotorGoal::getAcceleration() const
-{
-    return m_acceleration;
-}
-
-void MotorGoal::setMaxAbsoluteSpeed(float maxSpeed)
-{
-    m_maxAbsoluteSpeed = maxSpeed;
-}
-
-float MotorGoal::getMaxAbsoluteSpeed() const
-{
-    return m_maxAbsoluteSpeed;
 }
 
 void MotorGoal::setOldTargetSpeed(float targetSpeed)

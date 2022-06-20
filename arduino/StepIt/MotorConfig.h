@@ -33,7 +33,6 @@ class MotorConfig
 
 public:
     explicit MotorConfig(float acceleration, float maxSpeed);
-
     float getAcceleration() const;
     float getMaxSpeed() const;
 };

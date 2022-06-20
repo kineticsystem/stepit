@@ -32,16 +32,12 @@ class MotorGoal
 public:
     MotorGoal();
 
-    void setTargetSpeed(float targetSpeed);
-    float getTargetSpeed() const;
+    void setMaxSpeed(float maxSpeed);
+    float getMaxSpeed() const;
     void setTargetPosition(long targetPosition);
     long getTargetPosition() const;
     void setTargetSteps(long targetSteps);
     long getTargetSteps() const;
-    void setAcceleration(float acceleration);
-    float getAcceleration() const;
-    void setMaxAbsoluteSpeed(float maxSpeed);
-    float getMaxAbsoluteSpeed() const;
 
     void setOldTargetSpeed(float targetSpeed);
     float getOldTargetSpeed() const;
@@ -49,11 +45,9 @@ public:
     long getOldTargetPosition() const;
 
 private:
-    float m_targetSpeed = 0.0;
+    float m_maxSpeed = 0.0;
     long m_targetPosition = 0;
     long m_targetSteps = 0;
-    float m_acceleration = 500.0;
-    float m_maxAbsoluteSpeed = 1000.0;
 
     // Only the ISR uses this.
     float m_oldTargetSpeed = 0.0;

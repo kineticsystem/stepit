@@ -21,7 +21,7 @@
 #include "MotorConfig.h"
 
 MotorConfig::MotorConfig(float acceleration, float maxSpeed)
-    : m_acceleration{acceleration}, m_maxSpeed{m_maxSpeed}
+    : m_acceleration{acceleration}, m_maxSpeed{maxSpeed}
 {
 }
 
