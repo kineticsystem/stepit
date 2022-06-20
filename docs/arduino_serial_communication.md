@@ -22,7 +22,7 @@ PPP separates frames by using the delimiter flag 0x7e. Should the same byte code
 
 In this implementation, each frame contains a command and all required parameters in binary format. The following example shows a Move Command request to move motor 0 forward 20000 steps and the corresponding response.
 
-<table align="center">
+<table align="center" border="0px">
   <tr>
     <td style="vertical-align:top;">
       <table align="center" border="2px">
