@@ -333,18 +333,15 @@ void run()
                     motorGoal[i].setOldPosition(motorGoal[i].getPosition());
                     stepper[i].moveTo(motorGoal[i].getPosition());
                 }
-                else if (motorGoal[i].getSpeed() != motorGoal[i].getOldSpeed())
+
+                if (motorGoal[i].getSpeed() > actualSpeed)
                 {
-                    motorGoal[i].setOldSpeed(motorGoal[i].getSpeed());
-                    if (motorGoal[i].getSpeed() > actualSpeed)
-                    {
-                        stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
-                    }
-                    else if ((motorGoal[i].getSpeed() < actualSpeed))
-                    {
-                        motorState[i].setDecelerating(true);
-                        stepper[i].stop();
-                    }
+                    stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
+                }
+                else if ((motorGoal[i].getSpeed() < actualSpeed))
+                {
+                    motorState[i].setDecelerating(true);
+                    stepper[i].stop();
                 }
             }
             else // Decelerating.
