@@ -37,18 +37,9 @@ public:
     void setPosition(long targetPosition);
     long getPosition() const;
 
-    void setOldSpeed(float targetSpeed);
-    float getOldSpeed() const;
-    void setOldPosition(long targetPosition);
-    long getOldPosition() const;
-
 private:
     float m_speed = 0.0;
     long m_position = 0;
-
-    // Only the ISR uses this.
-    float m_oldSpeed = 0.0;
-    long m_oldPosition = 0;
 };
 
 #endif // MOTOR_GOAL_H

@@ -309,7 +309,7 @@ void run()
     {
         stepper[i].run();
 
-        // Read motor states.
+        // Write motor states.
 
         float actualSpeed = stepper[i].speed();
         long currentPosition = stepper[i].currentPosition();
@@ -322,17 +322,15 @@ void run()
             motorState[i].setDistanceToGo(distanceToGo);
         }
 
+        // Read motor goals.
+
         if (!writingMotorGoals)
         {
             actualSpeed = fabs(actualSpeed);
 
             if (!motorState[i].isDecelerating()) // Accelerating or cruise speed.
             {
-                if (motorGoal[i].getPosition() != motorGoal[i].getOldPosition())
-                {
-                    motorGoal[i].setOldPosition(motorGoal[i].getPosition());
-                    stepper[i].moveTo(motorGoal[i].getPosition());
-                }
+                stepper[i].moveTo(motorGoal[i].getPosition());
 
                 if (motorGoal[i].getSpeed() > actualSpeed)
                 {

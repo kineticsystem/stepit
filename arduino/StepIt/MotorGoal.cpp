@@ -43,23 +43,3 @@ long MotorGoal::getPosition() const
 {
     return m_position;
 }
-
-void MotorGoal::setOldSpeed(float speed)
-{
-    m_oldSpeed = speed;
-}
-
-float MotorGoal::getOldSpeed() const
-{
-    return m_oldSpeed;
-}
-
-void MotorGoal::setOldPosition(long position)
-{
-    m_oldPosition = position;
-}
-
-long MotorGoal::getOldPosition() const
-{
-    return m_oldPosition;
-}
