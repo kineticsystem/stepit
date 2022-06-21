@@ -24,52 +24,52 @@ MotorGoal::MotorGoal()
 {
 }
 
-void MotorGoal::setMaxSpeed(float maxSpeed)
+void MotorGoal::setSpeed(float speed)
 {
-    m_maxSpeed = maxSpeed;
+    m_speed = speed;
 }
 
-float MotorGoal::getMaxSpeed() const
+float MotorGoal::getSpeed() const
 {
-    return m_maxSpeed;
+    return m_speed;
 }
 
-void MotorGoal::setTargetPosition(long targetPosition)
+void MotorGoal::setPosition(long position)
 {
-    m_targetPosition = targetPosition;
+    m_position = position;
 }
 
-long MotorGoal::getTargetPosition() const
+long MotorGoal::getPosition() const
 {
-    return m_targetPosition;
+    return m_position;
 }
 
-void MotorGoal::setTargetSteps(long targetSteps)
+void MotorGoal::setSteps(long steps)
 {
-    m_targetSteps = targetSteps;
+    m_steps = steps;
 }
 
-long MotorGoal::getTargetSteps() const
+long MotorGoal::getSteps() const
 {
-    return m_targetSteps;
+    return m_steps;
 }
 
-void MotorGoal::setOldTargetSpeed(float targetSpeed)
+void MotorGoal::setOldSpeed(float speed)
 {
-    m_oldTargetSpeed = targetSpeed;
+    m_oldSpeed = speed;
 }
 
-float MotorGoal::getOldTargetSpeed() const
+float MotorGoal::getOldSpeed() const
 {
-    return m_oldTargetSpeed;
+    return m_oldSpeed;
 }
 
-void MotorGoal::setOldTargetPosition(long targetPosition)
+void MotorGoal::setOldPosition(long position)
 {
-    m_oldTargetPosition = targetPosition;
+    m_oldPosition = position;
 }
 
-long MotorGoal::getOldTargetPosition() const
+long MotorGoal::getOldPosition() const
 {
-    return m_oldTargetPosition;
+    return m_oldPosition;
 }

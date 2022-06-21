@@ -34,8 +34,8 @@ public:
 
     void setSpeed(float speed);
     float getSpeed() const;
-    void setCurrentPosition(long position);
-    long getCurrentPosition() const;
+    void setPosition(long position);
+    long getPosition() const;
     void setDistanceToGo(long distanceToGo);
     long getDistanceToGo() const;
 

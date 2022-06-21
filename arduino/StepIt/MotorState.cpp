@@ -34,12 +34,12 @@ float MotorState::getSpeed() const
     return m_speed;
 }
 
-void MotorState::setCurrentPosition(long position)
+void MotorState::setPosition(long position)
 {
     m_currentPosition = position;
 }
 
-long MotorState::getCurrentPosition() const
+long MotorState::getPosition() const
 {
     return m_currentPosition;
 }

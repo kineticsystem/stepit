@@ -137,7 +137,7 @@ void returnStatus(byte requestId)
         Guard stateGuard{readingMotorStates};
         for (int i = 0; i < 2; i++)
         {
-            responseBuffer.addLong(motorState[i].getCurrentPosition(), Location::END);
+            responseBuffer.addLong(motorState[i].getPosition(), Location::END);
             float relativeSpeed = 100.0 * (motorState[i].getSpeed() / motorConfig[i].getMaxSpeed());
             responseBuffer.addFloat(relativeSpeed, Location::END);
             responseBuffer.addLong(motorState[i].getDistanceToGo(), Location::END);
@@ -187,7 +187,7 @@ void setMotorSpeed(byte requestId, byte motorId, float relativeSpeed)
     }
     {
         Guard goalGuard{writingMotorGoals};
-        motorGoal[motorId].setMaxSpeed(motorConfig[motorId].getMaxSpeed() * relativeSpeed / 100.0);
+        motorGoal[motorId].setSpeed(motorConfig[motorId].getMaxSpeed() * relativeSpeed / 100.0);
     }
     returnCommandSuccess(requestId);
 }
@@ -199,7 +199,7 @@ void moveMotor(byte requestId, byte motorId, long steps)
         Guard stateGuard{readingMotorStates};
         // The motor position may not reflect exactly the one stored in the
         // state while the motor is moving.
-        motorGoal[motorId].setTargetPosition(motorState[motorId].getCurrentPosition() + steps);
+        motorGoal[motorId].setPosition(motorState[motorId].getPosition() + steps);
     }
 
     returnCommandSuccess(requestId);
@@ -209,7 +209,7 @@ void moveMotorTo(byte requestId, byte motorId, long position)
 {
     {
         Guard goalGuard{writingMotorGoals};
-        motorGoal[motorId].setTargetPosition(position);
+        motorGoal[motorId].setPosition(position);
     }
     returnCommandSuccess(requestId);
 }
@@ -220,7 +220,7 @@ void stopAllMotors(byte requestId)
         Guard goalGuard{writingMotorGoals};
         for (byte i = 0; i < 2; i++)
         {
-            motorGoal[i].setMaxSpeed(0);
+            motorGoal[i].setSpeed(0);
         }
     }
     returnCommandSuccess(requestId);
@@ -230,7 +230,7 @@ void stopMotor(byte requestId, byte motorId)
 {
     {
         Guard goalGuard{writingMotorGoals};
-        motorGoal[motorId].setMaxSpeed(0);
+        motorGoal[motorId].setSpeed(0);
     }
     returnCommandSuccess(requestId);
 }
@@ -318,43 +318,45 @@ void run()
         if (!readingMotorStates)
         {
             motorState[i].setSpeed(actualSpeed);
-            motorState[i].setCurrentPosition(currentPosition);
+            motorState[i].setPosition(currentPosition);
             motorState[i].setDistanceToGo(distanceToGo);
         }
 
         if (!writingMotorGoals)
         {
-            if (motorGoal[i].getTargetPosition() != motorGoal[i].getOldTargetPosition())
+            actualSpeed = fabs(actualSpeed);
+
+            if (motorGoal[i].getPosition() != motorGoal[i].getOldPosition())
             { // Position has changed.
-                motorGoal[i].setOldTargetPosition(motorGoal[i].getTargetPosition());
+                motorGoal[i].setOldPosition(motorGoal[i].getPosition());
                 if (!motorState[i].isDecelerating())
                 {
-                    stepper[i].moveTo(motorGoal[i].getTargetPosition());
+                    stepper[i].moveTo(motorGoal[i].getPosition());
                 }
             }
-            else if (motorGoal[i].getMaxSpeed() != motorGoal[i].getOldTargetSpeed())
+            else if (motorGoal[i].getSpeed() != motorGoal[i].getOldSpeed())
             { // Target speed has changed
-                motorGoal[i].setOldTargetSpeed(motorGoal[i].getMaxSpeed());
-                if (motorGoal[i].getMaxSpeed() > actualSpeed)
+                motorGoal[i].setOldSpeed(motorGoal[i].getSpeed());
+                if (motorGoal[i].getSpeed() > actualSpeed)
                 {
-                    stepper[i].setMaxSpeed(motorGoal[i].getMaxSpeed());
+                    stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
                     if (motorState[i].isDecelerating())
                     {
-                        stepper[i].moveTo(motorGoal[i].getTargetPosition());
+                        stepper[i].moveTo(motorGoal[i].getPosition());
                         motorState[i].setDecelerating(false);
                     }
                 }
-                else if ((motorGoal[i].getMaxSpeed() < actualSpeed) && !motorState[i].isDecelerating())
+                else if ((motorGoal[i].getSpeed() < actualSpeed) && !motorState[i].isDecelerating())
                 {
                     motorState[i].setDecelerating(true);
                     stepper[i].stop();
                 }
             }
-            else if (motorState[i].isDecelerating() && (actualSpeed < motorGoal[i].getMaxSpeed()))
+            else if (motorState[i].isDecelerating() && (actualSpeed < motorGoal[i].getSpeed()))
             {
                 motorState[i].setDecelerating(false);
-                stepper[i].setMaxSpeed(motorGoal[i].getMaxSpeed());
-                stepper[i].moveTo(motorGoal[i].getTargetPosition());
+                stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
+                stepper[i].moveTo(motorGoal[i].getPosition());
             }
         }
     }
@@ -373,7 +375,7 @@ void setup()
     {
         stepper[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
         stepper[i].setAcceleration(motorConfig[i].getAcceleration());
-        motorGoal[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
+        motorGoal[i].setSpeed(motorConfig[i].getMaxSpeed());
     }
 
     // Initialize interrupt.
