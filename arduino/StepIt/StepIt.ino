@@ -349,25 +349,11 @@ void run()
             }
             else // Decelerating.
             {
-                if (motorGoal[i].getPosition() != motorGoal[i].getOldPosition())
+                if (motorGoal[i].getSpeed() > actualSpeed)
                 {
-                    motorGoal[i].setOldPosition(motorGoal[i].getPosition());
-                }
-                else if (motorGoal[i].getSpeed() != motorGoal[i].getOldSpeed())
-                {
-                    motorGoal[i].setOldSpeed(motorGoal[i].getSpeed());
-                    if (motorGoal[i].getSpeed() > actualSpeed)
-                    {
-                        stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
-                        stepper[i].moveTo(motorGoal[i].getPosition());
-                        motorState[i].setDecelerating(false);
-                    }
-                }
-                else if (motorGoal[i].getSpeed() > actualSpeed)
-                {
-                    motorState[i].setDecelerating(false);
                     stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
                     stepper[i].moveTo(motorGoal[i].getPosition());
+                    motorState[i].setDecelerating(false);
                 }
             }
         }
