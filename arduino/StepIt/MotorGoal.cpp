@@ -44,16 +44,6 @@ long MotorGoal::getPosition() const
     return m_position;
 }
 
-void MotorGoal::setSteps(long steps)
-{
-    m_steps = steps;
-}
-
-long MotorGoal::getSteps() const
-{
-    return m_steps;
-}
-
 void MotorGoal::setOldSpeed(float speed)
 {
     m_oldSpeed = speed;

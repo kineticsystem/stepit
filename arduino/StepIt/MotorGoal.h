@@ -36,8 +36,6 @@ public:
     float getSpeed() const;
     void setPosition(long targetPosition);
     long getPosition() const;
-    void setSteps(long targetSteps);
-    long getSteps() const;
 
     void setOldSpeed(float targetSpeed);
     float getOldSpeed() const;
@@ -47,7 +45,6 @@ public:
 private:
     float m_speed = 0.0;
     long m_position = 0;
-    long m_steps = 0;
 
     // Only the ISR uses this.
     float m_oldSpeed = 0.0;
