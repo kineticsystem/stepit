@@ -73,7 +73,7 @@ AccelStepper stepper[] = {
     AccelStepper{AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN}};
 
 // Stepper motors configuration: acceleration and max speed.
-// If we make motor run to fast, Arduino will not be able to communicate through
+// If we make motors run too fast, Arduino will not be able to communicate through
 // the serial port.
 MotorConfig motorConfig[] = {
     MotorConfig{500.0, 1000.0},  // 2s to reach to max speed.
