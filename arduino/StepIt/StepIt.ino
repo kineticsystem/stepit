@@ -38,7 +38,7 @@ static const byte STEPPER1_DIR_PIN = 12;
 // This is the information sent by Arduino during the connection handshake.
 const char NAME[] = "STEPPIT\0";
 
-const int INTERRUPT_TIME_MICROSECOND = 80;
+const int INTERRUPT_TIME_MICROSECOND = 90;
 
 // For each command received, Arduino returns a response with success or error
 // code and possibly some data.
@@ -73,9 +73,11 @@ AccelStepper stepper[] = {
     AccelStepper{AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN}};
 
 // Stepper motors configuration: acceleration and max speed.
+// If we make motor run to fast, Arduino will not be able to communicate through
+// the serial port.
 MotorConfig motorConfig[] = {
-    MotorConfig{2500.0, 5000.0},  // 2s to reach to max speed.
-    MotorConfig{2500.0, 5000.0}}; // 2s to reach to max speed.
+    MotorConfig{500.0, 1000.0},  // 2s to reach to max speed.
+    MotorConfig{500.0, 1000.0}}; // 2s to reach to max speed.
 
 // This structure holds motor goals: the main thread updates the goal and the
 // ISR reads it.
