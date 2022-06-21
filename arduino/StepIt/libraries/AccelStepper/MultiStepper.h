@@ -23,7 +23,8 @@ class AccelStepper;
 /// and cause them all to move
 /// to selected positions at such a (constant) speed that they all arrive at their
 /// target position at the same time. This can be used to support devices with multiple steppers
-/// on say multiple axes to cause linear diagonal motion. Suitable for use with X-Y plotters, flatbeds etc
+/// on say multiple axes to cause linear diagonal motion. Suitable for use with X-Y plotters, flatbeds,
+/// 3D printers etc
 /// to get linear straight line movement between arbitrary 2d (or 3d or ...) positions.
 ///
 /// Caution: only constant speed stepper motion is supported: acceleration and deceleration is not supported
@@ -46,7 +47,8 @@ public:
     /// New speeds will be computed for each stepper so they will all arrive at their 
     /// respective targets at very close to the same time.
     /// \param[in] absolute An array of desired absolute stepper positions. absolute[0] will be used to set
-    /// the absolute position of the first stepper added by addStepper() etc.
+    /// the absolute position of the first stepper added by addStepper() etc. The array must be at least as long as 
+    /// the number of steppers that have been added by addStepper, else results are undefined.
     void moveTo(long absolute[]);
     
     /// Calls runSpeed() on all the managed steppers
@@ -55,16 +57,17 @@ public:
     boolean run();
 
     /// Runs all managed steppers until they acheived their target position.
-    /// Blocks until all that position is acheived.
+    /// Blocks until all that position is acheived. If you dont
+    /// want blocking consider using run() instead.
     void    runSpeedToPosition();
     
 private:
-    // Array of pointers to the steppers we are controlling.
-    // Fills from 0 onwards
+    /// Array of pointers to the steppers we are controlling.
+    /// Fills from 0 onwards
     AccelStepper* _steppers[MULTISTEPPER_MAX_STEPPERS];
 
-    // Number of steppers we are controlling and the number
-    // of steppers in _steppers[]
+    /// Number of steppers we are controlling and the number
+    /// of steppers in _steppers[]
     uint8_t       _num_steppers;
 };
 
