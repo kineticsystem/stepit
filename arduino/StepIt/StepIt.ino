@@ -73,10 +73,16 @@ AccelStepper stepper[] = {
 
 // Stepper motors configuration: acceleration and max speed.
 // If we make motors run too fast, Arduino will not be able to communicate through
-// the serial port.
+// the serial port fast anough.
+// AccelStepper library reports that on Arduino at 16Mhz we cannot achieve speeds
+// higher than 4000 steps per second on a single motor. With two motors running
+// at the same time, the maximum speed of each motor is 2000 steps per second.
+// To give Arduino time to read and write from and to the serial port, the speed
+// must be reduced further.
+// http://www.airspayce.com/mikem/arduino/AccelStepper/classAccelStepper.html
 MotorConfig motorConfig[] = {
-    MotorConfig{500.0, 1000.0},  // 2s to reach to max speed.
-    MotorConfig{500.0, 1000.0}}; // 2s to reach to max speed.
+    MotorConfig{1500.0, 1500.0},
+    MotorConfig{1500.0, 1500.0}};
 
 // This structure holds motor goals: the main thread updates the goal and the
 // ISR reads it.
@@ -342,11 +348,10 @@ void run()
 
         if (!writingMotorGoals)
         {
-            actualSpeed = fabs(actualSpeed);
-
+            float absSpeed = fabs(actualSpeed);
             if (motorState[i].isDecelerating())
             {
-                if (motorGoal[i].getSpeed() > actualSpeed)
+                if (motorGoal[i].getSpeed() > absSpeed)
                 {
                     stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
                     stepper[i].moveTo(motorGoal[i].getPosition());
@@ -356,11 +361,11 @@ void run()
             else
             {
                 stepper[i].moveTo(motorGoal[i].getPosition());
-                if (motorGoal[i].getSpeed() > actualSpeed)
+                if (motorGoal[i].getSpeed() > absSpeed)
                 {
                     stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
                 }
-                else if ((motorGoal[i].getSpeed() < actualSpeed))
+                else if ((motorGoal[i].getSpeed() < absSpeed))
                 {
                     motorState[i].setDecelerating(true);
                     stepper[i].stop();
