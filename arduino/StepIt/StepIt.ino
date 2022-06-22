@@ -43,15 +43,14 @@ const int INTERRUPT_TIME_MICROSECOND = 90;
 // For each command received, Arduino returns a response with success or error
 // code and possibly some data.
 
-byte MOVE_CMD = 0x70;                 // Move motors a given amount of steps.
-byte MOVE_TO_CMD = 0x71;              // Move motors to a given position.
-byte STOP_CMD = 0x72;                 // Stop motors.
-byte STOP_ALL_CMD = 0x74;             // Stop all motors.
-byte STATUS_CMD = 0x75;               // Request motors status, position and speed.
-byte INFO_CMD = 0x76;                 // Request controller info for connection handshaking.
-byte SET_TARGET_SPEED_CMD = 0x77;     // Set motors target relative speed (0-100).
-byte SET_CURRENT_POSITION_CMD = 0x79; // Set the motor current position.
-byte SET_MOTORS_ENABLED_CMD = 0x7A;   // Enable interrupt to control the motors.
+byte MOVE_CMD = 0x70;               // Move motors a given amount of steps.
+byte MOVE_TO_CMD = 0x71;            // Move motors to a given position.
+byte STOP_CMD = 0x72;               // Stop motors.
+byte STOP_ALL_CMD = 0x74;           // Stop all motors.
+byte STATUS_CMD = 0x75;             // Request motors status, position and speed.
+byte INFO_CMD = 0x76;               // Request controller info for connection handshaking.
+byte SET_SPEED_CMD = 0x77;          // Set motors target relative speed (0-100).
+byte SET_MOTORS_ENABLED_CMD = 0x7A; // Enable interrupt to control the motors.
 
 // Arduino reboots in around two seconds when a serial connection is initiated.
 // To notify the client that Arduino is ready to receive and transmit data, a ready message
@@ -235,12 +234,6 @@ void stopMotor(byte requestId, byte motorId)
     returnCommandSuccess(requestId);
 }
 
-void setMotorCurrentPosition(byte requestId, byte motorId, long position)
-{
-    stepper[motorId].setCurrentPosition(position);
-    returnCommandSuccess(requestId);
-}
-
 /**
  * Decode the input command and execute the requested action.
  * @param msg The input message containing the requested command.
@@ -258,7 +251,7 @@ void processBuffer(byte requestId, DataBuffer *msg)
         byte enabled = msg->removeByte(Location::FRONT);
         setMotorsEnabled(requestId, enabled);
     }
-    else if (cmdId == SET_TARGET_SPEED_CMD)
+    else if (cmdId == SET_SPEED_CMD)
     {
         byte motorId = msg->removeByte(Location::FRONT);
         float targetSpdPercentage = fabs(msg->removeFloat(Location::FRONT));
@@ -288,12 +281,6 @@ void processBuffer(byte requestId, DataBuffer *msg)
     else if (cmdId == INFO_CMD)
     {
         returnControllerInfo(requestId);
-    }
-    else if (cmdId == SET_CURRENT_POSITION_CMD)
-    {
-        byte motorId = msg->removeByte(Location::FRONT);
-        long position = msg->removeLong(Location::FRONT);
-        setMotorCurrentPosition(requestId, motorId, position);
     }
     msg->clear();
 }
@@ -328,7 +315,16 @@ void run()
         {
             actualSpeed = fabs(actualSpeed);
 
-            if (!motorState[i].isDecelerating()) // Accelerating or cruise speed.
+            if (motorState[i].isDecelerating()) // Decelerating.
+            {
+                if (motorGoal[i].getSpeed() > actualSpeed)
+                {
+                    stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
+                    stepper[i].moveTo(motorGoal[i].getPosition());
+                    motorState[i].setDecelerating(false);
+                }
+            }
+            else // Accelerating or cruise speed.
             {
                 stepper[i].moveTo(motorGoal[i].getPosition());
 
@@ -340,15 +336,6 @@ void run()
                 {
                     motorState[i].setDecelerating(true);
                     stepper[i].stop();
-                }
-            }
-            else // Decelerating.
-            {
-                if (motorGoal[i].getSpeed() > actualSpeed)
-                {
-                    stepper[i].setMaxSpeed(motorGoal[i].getSpeed());
-                    stepper[i].moveTo(motorGoal[i].getPosition());
-                    motorState[i].setDecelerating(false);
                 }
             }
         }
@@ -368,6 +355,7 @@ void setup()
     {
         stepper[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
         stepper[i].setAcceleration(motorConfig[i].getAcceleration());
+        stepper[0].setCurrentPosition(0);
         motorGoal[i].setSpeed(motorConfig[i].getMaxSpeed());
     }
 
