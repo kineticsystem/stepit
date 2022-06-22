@@ -73,7 +73,7 @@ AccelStepper stepper[] = {
 
 // Stepper motors configuration: acceleration and max speed.
 // If we make motors run too fast, Arduino will not be able to communicate through
-// the serial port fast anough.
+// the serial port fast enough.
 // AccelStepper library reports that on Arduino at 16Mhz we cannot achieve speeds
 // higher than 4000 steps per second on a single motor. With two motors running
 // at the same time, the maximum speed of each motor is 2000 steps per second.
