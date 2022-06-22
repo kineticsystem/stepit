@@ -29,10 +29,10 @@
  * two bytes produced must be inverted before sending the CRC-16 to the serial
  * port.
  *
- * A full catalogue of parametrised CRC algorithms with 16 bits is available at
+ * A complete catalog of parametrized CRC algorithms with 16 bits is available at
  * http://reveng.sourceforge.net/crc-catalogue/16.htm
  *
- * A useful CRC calculator online that can be used for testing is available at
+ * A CRC online calculator useful for testing is available at
  * http://www.lammertbies.nl/comm/info/crc-calculation.html
  *
  * For a sample implementation of different CRC-16 see
@@ -44,7 +44,7 @@ class CrcUtils
 public:
     /**
      * Initialize the precomputed table that is used in the CRC calculation.
-     * Initialization is done once when any of the class methods are invoked
+     * Initialization is done when any of the class methods are invoked
      * but, should it be required, this method permits initialization beforehand.
      */
     static void init();
@@ -66,7 +66,7 @@ public:
      * This method calculates the CRC on the given sequence bytes and length.
      * Please note that the calculated CRC is given in Little Endian Form.
      * @param bytes The sequence of bytes to calculate the CRC.
-     * @param length The sequence length in number of bytes.
+     * @param length The sequence length in a number of bytes.
      * @return The CRC calculated on the given sequence of bytes.
      */
     static unsigned short calculateCRC(const char *bytes, int length);
@@ -75,7 +75,7 @@ private:
     // Variable to check if all required data structures are initialized.
     static bool initialized;
 
-    // The algorithm uses a precomputed table for performance reason.
+    // The algorithm uses a precomputed table for performance reasons.
     static unsigned short crcTable[256];
 };
 

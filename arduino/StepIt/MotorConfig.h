@@ -22,9 +22,7 @@
 #define MOTOR_CONFIG_H
 
 /**
- * This class is used to exchange motor goals between the main thread and the
- * ISR (Interrupt Service Routine). Goals are target speed, acceleration,
- * target position, maximum speed.
+ * This class stores motor parameters that do not change during the execution.
  */
 class MotorConfig
 {
