@@ -174,7 +174,7 @@ Following is a list of all desired commands to control the motor movements.
         <td>The motor id.</td>
     </tr>
     <tr>
-        <td>Set max relative speed<b></td>
+        <td>Set speed<b></td>
         <td>0x77</td>
         <td rowspan="2">Set a motor relative speed between 0 and 100.<br/>The motor accelerates or decelerates until reaching the relative max speed.</td>
         <td>motorId</td>
@@ -189,21 +189,6 @@ Following is a list of all desired commands to control the motor movements.
         <td>The relative max speed between 0 and 100.</td>
     </tr>
     <tr>
-        <td>Set max absolute speed<b></td>
-        <td>0x78</td>
-        <td rowspan="2">Set the maximum absolute speed in steps/s.</td>
-        <td>motorId</td>
-        <td>uchar</td>
-        <td>The motor id.</td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td>speed</td>
-        <td>float</td>
-        <td>The maximum achievable speed in steps/s.</td>
-    </tr>
-    <tr>
         <td>Enable motors<b></td>
         <td>0x7A</td>
         <td>Enable motors Service Interrupt Routine (SIR) call.</td>
@@ -215,29 +200,6 @@ Following is a list of all desired commands to control the motor movements.
         <td>Disable motors<b></td>
         <td>0x7B</td>
         <td>Disable motors Service Interrupt Routine (SIR) call.</td>
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>Set motor position<b></td>
-        <td>0x79</td>
-        <td rowspan="2">Set the current motor position to be the given absolute position.</td>
-        <td>motorId</td>
-        <td>uchar</td>
-        <td>The motor id.</td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td>position</td>
-        <td>long</td>
-        <td>The motor absolute position.</td>
-    </tr>
-    <tr>
-        <td>Keep alive<b></td>
-        <td>0x73</td>
-        <td >Safety command to keep the motors moving.</td>
         <td></td>
         <td></td>
         <td></td>
