@@ -16,8 +16,8 @@ find_package(serial REQUIRED)
 
 add_executable(${PROJECT_NAME}
   src/main.cpp
-  src/serial_port.cpp
-  src/serial_port.hpp
+  #src/serial_port.cpp
+  #src/serial_port.hpp
 )
 
 ament_target_dependencies(${PROJECT_NAME}
