@@ -6,10 +6,8 @@
 #define SERIAL_BUFFER_MAX_SIZE 200
 #define FRAME_MAX_SIZE 100
 
-namespace org {
-namespace kineticsystem {
-namespace stepit {
-namespace hardware {
+namespace org::kineticsystem::stepit::hardware {
+
 enum class return_type : std::uint8_t { SUCCESS = 0, ERROR = 1 };
 
 struct SerialHdlcFrame {
@@ -44,9 +42,6 @@ private:
   size_t tx_frame_length_;
   uint16_t tx_frame_crc_;
 };
-} // namespace hardware
-} // namespace stepit
-} // namespace kineticsystem
-} // namespace org
+} // namespace org::kineticsystem::stepit::hardware
 
 #endif // SERIAL_PORT_H
