@@ -1,19 +1,19 @@
 # See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html
 
 cmake_minimum_required(VERSION 3.8)
-
 project(stepit_hardware LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
+find_package(serial REQUIRED)
 
 add_executable(${PROJECT_NAME}
   src/main.cpp
   src/serial_port.cpp
+  src/serial_port.hpp
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
