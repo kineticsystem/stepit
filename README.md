@@ -12,7 +12,11 @@ To install ROS 2, please refer to the document [Install ROS2 Humble on Ubuntu](h
 
 ## StepIt Installation
 
-Open a terminal and create a project folder anywhere inside the home directory, for example
+Open a terminal and run the following command to source the ROS 2 Humble installation.
+
+`source /opt/ros/humble/setup.bash`
+
+Create a project folder anywhere inside the home directory, for example
 
 `<HOME_DIR>/stepit_ws`
 
@@ -29,16 +33,36 @@ Create a source folder and checkout this git repository.
 ```
 mkdir src
 cd src
-git clone
+git clone git@github.com:kineticsystem/stepit.git
+```
+
+Check out the external dependencies.
+
+```
+vcs import --force < stepit/stepit.repos
+vcs pull
+```
+
+Install all required dependencies.
+
+```
+rosdep install --ignore-src --from-paths . -y
+```
+
+Move into the base `<STEPIT_WS>` folder and run Colcon to build the project.
+
+```
+cd ..
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug --symlink-install --event-handlers log-
+```
+
+Execute all tests.
+
+```
+colcon test
 ```
 
 ## Configuration
 
 For Arduino IDE (or Visual Studio Code) to find the included libraries, modify the variable the `sketchbook.path` in the following configuration file:
 `<USER_HOME>/snap/arduino/61/.arduino15/preferences.txt`
-
-## Build
-
-Run the following command in the exact location where this README.md file is.
-
-`colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug --symlink-install --event-handlers log-`
