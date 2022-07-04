@@ -1,0 +1,10 @@
+# VSCode config
+.vscode/*
+
+# log files
+log/*
+
+build
+install
+log
+

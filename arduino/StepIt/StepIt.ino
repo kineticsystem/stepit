@@ -38,7 +38,12 @@ static const byte STEPPER1_DIR_PIN = 12;
 // This is the information sent by Arduino during the connection handshake.
 const char NAME[] = "STEPPIT\0";
 
-const int INTERRUPT_TIME_MICROSECOND = 90;
+// The time between each execution of the run method.
+const int INTERRUPT_TIME_US = 90;
+
+// If no command is received within this time, motors are stopped and the
+// command buffer cleaned.
+const int TIMEOUT_MS = 1000;
 
 // For each command received, Arduino returns a response with success or error
 // code and possibly some data.
@@ -62,6 +67,9 @@ byte SUCCESS_MSG = 0x11;
 
 // Error response code.
 byte ERROR_MSG = 0x12;
+
+// Last time a message was received.
+long int timeMs = 0;
 
 // Each time Arduino sends a command, this number increases.
 byte messageId = 0;
@@ -175,7 +183,7 @@ void setMotorsEnabled(byte requestId, byte enabled)
 {
     if (enabled == 0)
     {
-        TimerInterrupt::start(INTERRUPT_TIME_MICROSECOND);
+        TimerInterrupt::start(INTERRUPT_TIME_US);
     }
     else
     {
@@ -395,14 +403,33 @@ void setup()
     // Initialize interrupt.
 
     TimerInterrupt::setCallback(&run);
-    TimerInterrupt::start(INTERRUPT_TIME_MICROSECOND);
+    TimerInterrupt::start(INTERRUPT_TIME_US);
 
     // Send a message to the client that Arduino is ready to read/write data.
 
     sendReadyMessage();
+
+    timeMs = millis();
 }
 
 void loop()
 {
     serialPort.update(); // Read/write serial port data.
+
+    // This is a safety measure; the client must keep sending messages.
+    // If no command is received within the given timeframe, motors are
+    // stopped.
+
+    long newTimeMs = millis();
+    long timeDiffMs = newTimeMs - timeMs;
+    if (timeDiffMs > TIMEOUT_MS)
+    {
+        // Stop all motors.
+        Guard goalGuard{writingMotorGoals};
+        for (byte i = 0; i < 2; i++)
+        {
+            motorGoal[i].setSpeed(0);
+        }
+    }
+    timeMs = newTimeMs;
 }
