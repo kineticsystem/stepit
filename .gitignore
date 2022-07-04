@@ -1,10 +1,11 @@
-# VSCode config
+# VSCode config.
 .vscode/*
 
-# log files
-log/*
-
+# ROS build folders.
 build
 install
 log
+
+# QtCreator files.
+*.user
 
