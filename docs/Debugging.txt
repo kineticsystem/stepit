@@ -1,0 +1,21 @@
+There is a very nice tool called CuteCom that can be used to talk to the Arduino with sequence of Hexadecimal numbers.
+
+sudo apt install cutecom
+
+
+
+There are two useful online tools to use when connecting to the Arduino using the Serial Monitor.
+
+String to HEX online converter
+https://string-functions.com/string-hex.aspx
+
+On-line CRC calculation and free library
+https://www.lammertbies.nl/comm/info/crc-calculation
+
+With the first you can copy and paste the text received in the Serial Monitor to convert it into a sequence of Hexadecimal numbers.
+
+With the second you can calculate the CRC-16 of a sequence of Hexadecimal numbers.
+
+Correct ready answer: 7e 00 3f 08 3f 7e
+
+Wrong ready answer:   7e 00 10 3f 10 7e

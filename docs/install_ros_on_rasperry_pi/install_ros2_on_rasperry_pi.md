@@ -14,15 +14,15 @@ The simplest way to write an image onto the SD card is using a software called `
 
 The command `rpi-imager` will bring up the following screen.
 
-<img src="pictures/rpi-image-1.png" width="50%">
+<img src="images/rpi-image-1.png" width="75%">
 
 Click the menu "Choose OS", then "Other general-purpose OS", "Ubuntu", and finally select the 64-bit architecture "Ubuntu Server 22.04 LTS (RPi Zero 2/3/4/400)"
 
-<img src="pictures/rpi-image-2.png" width="50%">
+<img src="images/rpi-image-2.png" width="75%">
 
 Choose the empty SD card and then click the button "Write".
 
-<img src="pictures/rpi-image-3.png" width="50%">
+<img src="images/rpi-image-3.png" width="75%">
 
 We will be asked for the root password to write the image onto the SD card.
 
@@ -30,7 +30,7 @@ We will be asked for the root password to write the image onto the SD card.
 
 Before inserting the card into the Raspberry Pi, we will configure the WiFi network connection.
 
-<img src="pictures/pi-network-config-1.png" width="70%">
+<img src="images/pi-network-config-1.png" width="75%">
 
 Mount the system-boot partition on the SD Card and search for the file `network-config`
 
