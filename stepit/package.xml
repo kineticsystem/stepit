@@ -11,7 +11,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <!-- Suport for gtest-based tests in the ament buildsystem in CMake. -->
+  <!-- Support for gtest-based tests in the ament buildsystem in CMake. -->
   <test_depend>ament_cmake_gtest</test_depend>
   <!-- Check code against style conventions using clang-format. -->
   <test_depend>ament_clang_format</test_depend>

@@ -71,7 +71,7 @@ std::array<uint8_t, 4> from_float(const float value);
 float to_float(const std::array<uint8_t, 4>& bytes);
 
 /**
- * Conver a sequence of bytes into a sequence of hex numbers.
+ * Convert a sequence of bytes into a sequence of hex numbers.
  * @param bytes The sequence of bytes.
  * @return A string containing the sequence of hex numbers.
  */

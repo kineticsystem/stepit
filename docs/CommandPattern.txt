@@ -21,4 +21,3 @@ void sendReadyMessage()
     responseBuffer.addByte(READY_MSG, Location::END);
     serialPort.write(&responseBuffer);
 }
-

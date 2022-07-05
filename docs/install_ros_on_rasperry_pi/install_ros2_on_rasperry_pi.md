@@ -79,7 +79,7 @@ wifis:
     - 192.168.1.3/24
     gateway4: 192.168.1.1
     nameservers:
-      addreses: [192.168.1.1, 8.8.8.8]
+      addresses: [192.168.1.1, 8.8.8.8]
     optional: true
     access-points:
       vodafone:

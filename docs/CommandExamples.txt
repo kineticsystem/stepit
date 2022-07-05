@@ -3,14 +3,14 @@ Motor status:
 7e 00 75 2A 24 7e
 
 DEL: 7e         # Delimiter
-REQ: 00         # Request ID      
+REQ: 00         # Request ID
 CMD: 75         # Request Info command ID
 CRC: 2A 24      # CRC-CCITT (Kermit)
 DEL: 7e         # Delimiter
 
 Response:
 
-7e 00 11 00 00 00 00 ff c0 00 00 00 00 00 00 00 00 00 00 ff c0 00 00 00 00 00 00 4d 33 7e        
+7e 00 11 00 00 00 00 ff c0 00 00 00 00 00 00 00 00 00 00 ff c0 00 00 00 00 00 00 4d 33 7e
 
 DEL: 7e          # Delimiter
 REQ: 00          # Request ID
@@ -31,7 +31,7 @@ Move motor 0 steps 20000 forward:
 
 
 DEL: 7e          # Delimiter
-REQ: 00          # Request ID      
+REQ: 00          # Request ID
 CMD: 70          # Move To command ID
 MID: 00          # Motor ID
 STP: 00 00 4E 20 # Steps

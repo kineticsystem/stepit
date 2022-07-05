@@ -2,5 +2,3 @@ repositories:
   serial:
     type: git
     url: https://github.com/RoverRobotics-forks/serial-ros2
-
- 
