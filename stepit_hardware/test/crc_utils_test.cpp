@@ -18,12 +18,17 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/response.h>
+#include <gtest/gtest.h>
+#include <stepit_hardware/crc_utils.h>
 
-namespace stepit_hardware
+namespace stepit_hardware::tests
 {
-const std::vector<uint8_t>& Response::bytes() const
+TEST(crc_utils, calculate_crc)
 {
-  return bytes_;
-}
-}  // namespace stepit_hardware
+  ASSERT_EQ(stepit_hardware::crc_utils::calculate_crc({ 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6 }), 0x3B07);
+  ASSERT_EQ(stepit_hardware::crc_utils::calculate_crc({ 0xE2, 0x12, 0xF1, 0xFF, 0x00, 0xD2 }), 0x7071);
+  ASSERT_EQ(stepit_hardware::crc_utils::calculate_crc({ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }), 0xFBE9);
+  ASSERT_EQ(stepit_hardware::crc_utils::calculate_crc({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }), 0x0000);
+}  // namespace stepit_hardware::tests
+
+}  // namespace stepit_hardware::tests

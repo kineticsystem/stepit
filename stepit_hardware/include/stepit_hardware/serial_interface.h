@@ -20,17 +20,16 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-#include <cstdint>
+#include <stepit_hardware/request.h>
+#include <stepit_hardware/response.h>
+#include <serial/serial.h>
 
-class Request
+namespace stepit_hardware
+{
+class SerialInterface
 {
 public:
-  Request() = default;
-  [[nodiscard]] const std::vector<uint8_t>& bytes() const;
-
-protected:
-  std::vector<uint8_t> bytes_;
-  std::string description_;
+  SerialInterface();
+  Response send(Request& request);
 };
+}  // namespace stepit_hardware

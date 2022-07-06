@@ -21,78 +21,77 @@
 #pragma once
 
 #include <array>
+#include <vector>
 #include <string>
 
 /**
  * Utility class to convert standard types into sequence of bytes and back.
- * Please not that Linux on X86 and Rasperry PI are Little-Endian systems.
- * It is but convention to send data to the network in Big-Endian order.
+ * Please note that Linux on X86 and Rasperry PI are Little-Endian systems.
+ * It is a convention to send data to the network in Big-Endian order.
  * To find out if a system is Little or Big-Endian, type the following command
  * in a terminal.
  *
  * lscpu | grep Endian
  */
-namespace stepit::stepit_hardware::data_utils
+namespace stepit_hardware::data_utils
 {
-constexpr std::array<char, 16> vChars = {
-  '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
-};
+/**
+ * Convert an 8 bits integer into one bytes array.
+ * @param value An 8 bits integer to convert.
+ * @return The resulting one byte array.
+ */
+std::array<uint8_t, 1> from_int8(const int8_t value);
 
 /**
- * Convert a 32 bits integer into a 4 bytes array in Big Endian byte order.
- * @param value A 32 bits integer to convert.
- * @return The resulting 4 bytes array in Big Endian byte order.
+ * Convert a one bytes array into an 8 bits integer.
+ * @param bytes A one bytes array.
+ * @return The resuting 8bits integer.
  */
-std::array<uint8_t, 4> from_int_32(const int32_t value);
-
-/**
- * Convert a 4 bytes array in Big Endian byte order into a 32 bits integer.
- * @param bytes A 4 bytes array in Big Endian byte order.
- * @return The resuting 32 bits integer.
- */
-int32_t to_int_32(const std::array<uint8_t, 4>& bytes);
+int16_t to_int8(const std::array<uint8_t, 1>& bytes);
 
 /**
  * Convert a 16 bits integer into an 2 bytes array in Big Endian byte order.
  * @param value A 16 bits integer to convert.
  * @return The resulting 2 bytes array in Big Endian byte order.
  */
-std::array<uint8_t, 2> from_int_16(const int16_t value);
+std::array<uint8_t, 2> from_int16(const int16_t value);
 
 /**
  * Convert a 2 bytes array in Big Endian byte order into a 16 bits integer.
  * @param bytes A 2 bytes array in Big Endian byte order.
  * @return The resuting 16 bits integer.
  */
-int16_t to_int_16(const std::array<uint8_t, 2>& bytes);
+int16_t to_int16(const std::array<uint8_t, 2>& bytes);
+
+/**
+ * Convert a 32 bits integer into a 4 bytes array in Big Endian byte order.
+ * @param value A 32 bits integer to convert.
+ * @return The resulting 4 bytes array in Big Endian byte order.
+ */
+std::array<uint8_t, 4> from_int32(const int32_t value);
+
+/**
+ * Convert a 4 bytes array in Big Endian byte order into a 32 bits integer.
+ * @param bytes A 4 bytes array in Big Endian byte order.
+ * @return The resuting 32 bits integer.
+ */
+int32_t to_int32(const std::array<uint8_t, 4>& bytes);
 
 std::array<uint8_t, 4> from_float(const float value);
 
 float to_float(const std::array<uint8_t, 4>& bytes);
 
 /**
- * Convert a sequence of bytes into a sequence of hex numbers.
+ * Convert a sequence of uint8_t into a sequence of hex numbers.
  * @param bytes The sequence of bytes.
  * @return A string containing the sequence of hex numbers.
  */
-template <std::size_t SIZE>
-std::string to_hex(const std::array<uint8_t, SIZE>& bytes)
-{
-  std::string hex;
-  for (auto it = std::begin(bytes); it != std::end(bytes); ++it)
-  {
-    if (it != bytes.begin())
-    {
-      hex += " ";
-    }
-    uint8_t ch = *it;
-    char ls = vChars[(ch & 0xF)];
-    char ms = vChars[((ch >> 4) & 0xF)];
-    hex += "0x";
-    hex += ms;
-    hex += ls;
-  }
+std::string to_hex(const std::vector<uint8_t>& bytes);
 
-  return hex;
-}
-}  // namespace stepit::stepit_hardware::data_utils
+/**
+ * Convert a sequence of uint16_t into a sequence of hex numbers.
+ * @param bytes The sequence of bytes.
+ * @return A string containing the sequence of hex numbers.
+ */
+std::string to_hex(const std::vector<uint16_t>& bytes);
+}  // namespace stepit_hardware::data_utils

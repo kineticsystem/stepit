@@ -19,60 +19,63 @@
  */
 
 #include <gtest/gtest.h>
-#include <stepit/stepit_hardware/data_utils.hpp>
+#include <stepit_hardware/data_utils.h>
 
-namespace stepit::stepit_hardware::tests
+namespace stepit_hardware::tests
 {
-TEST(UtilsTest, to_hex_test)
+TEST(data_utils, to_hex_test)
 {
-  std::array<uint8_t, 11> bytes = { 0x7E, 0x00, 0x70, 0x00, 0x00, 0x00, 0x4E, 0x20, 0x75, 0x38, 0x7E };
-  std::string hex = stepit::stepit_hardware::data_utils::to_hex(bytes);
+  std::vector<uint8_t> bytes = { 0x7E, 0x00, 0x70, 0x00, 0x00, 0x00, 0x4E, 0x20, 0x75, 0x38, 0x7E };
+  std::string hex = stepit_hardware::data_utils::to_hex(bytes);
   ASSERT_EQ(hex, "0x7E 0x00 0x70 0x00 0x00 0x00 0x4E 0x20 0x75 0x38 0x7E");
 }
 
-TEST(UtilsTest, from_float)
+TEST(data_utils, from_float)
 {
   // See https://www.h-schmidt.net/FloatConverter/IEEE754.html
   // Convert 4.2 into a sequence of bytes.
-  auto bytes = stepit::stepit_hardware::data_utils::from_float(4.2f);
-  auto hex = stepit::stepit_hardware::data_utils::to_hex(bytes);
+  auto bytes = stepit_hardware::data_utils::from_float(4.2f);
+  std::vector<uint8_t> bytes_v(bytes.begin(), bytes.end());
+  auto hex = stepit_hardware::data_utils::to_hex(bytes_v);
   ASSERT_EQ(hex, "0x40 0x86 0x66 0x66");
 }
 
-TEST(UtilsTest, to_float)
+TEST(data_utils, to_float)
 {
   // See https://www.h-schmidt.net/FloatConverter/IEEE754.html
   // Check if the given sequence of bytes equals to the float 4.2.
   std::array<uint8_t, 4> bytes = { 0x40, 0x86, 0x66, 0x66 };
-  auto value = stepit::stepit_hardware::data_utils::to_float(bytes);
+  auto value = stepit_hardware::data_utils::to_float(bytes);
   ASSERT_FLOAT_EQ(value, 4.2f);
 }
 
-TEST(UtilsTest, from_int32)
+TEST(data_utils, from_int32)
 {
-  auto bytes = stepit::stepit_hardware::data_utils::from_int_32(-1582119980);
-  auto hex = stepit::stepit_hardware::data_utils::to_hex(bytes);
+  auto bytes = stepit_hardware::data_utils::from_int32(-1582119980);
+  std::vector<uint8_t> bytes_v(bytes.begin(), bytes.end());
+  auto hex = stepit_hardware::data_utils::to_hex(bytes_v);
   ASSERT_EQ(hex, "0xA1 0xB2 0xC3 0xD4");
 }
 
-TEST(UtilsTest, to_int32)
+TEST(data_utils, to_int32)
 {
   std::array<uint8_t, 4> bytes = { 0xA1, 0xB2, 0xC3, 0xD4 };
-  auto value = stepit::stepit_hardware::data_utils::to_int_32(bytes);
+  auto value = stepit_hardware::data_utils::to_int32(bytes);
   ASSERT_EQ(value, -1582119980);
 }
 
-TEST(UtilsTest, from_int16)
+TEST(data_utils, from_int16)
 {
-  auto bytes = stepit::stepit_hardware::data_utils::from_int_16(-3937);
-  auto hex = stepit::stepit_hardware::data_utils::to_hex(bytes);
+  auto bytes = stepit_hardware::data_utils::from_int16(-3937);
+  std::vector<uint8_t> bytes_v(bytes.begin(), bytes.end());
+  auto hex = stepit_hardware::data_utils::to_hex(bytes_v);
   ASSERT_EQ(hex, "0xF0 0x9F");
 }
 
-TEST(UtilsTest, to_int16)
+TEST(data_utils, to_int16)
 {
   std::array<uint8_t, 2> bytes = { 0xF0, 0x9F };
-  auto value = stepit::stepit_hardware::data_utils::to_int_16(bytes);
+  auto value = stepit_hardware::data_utils::to_int16(bytes);
   ASSERT_EQ(value, -3937);
 }
-}  // namespace stepit::stepit_hardware::tests
+}  // namespace stepit_hardware::tests

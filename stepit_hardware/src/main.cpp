@@ -1,7 +1,11 @@
 #include "serial/serial.h"
+
+#include <stepit_hardware/data_utils.h>
+
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <array>
 
 void enumerate_ports()
 {
@@ -16,13 +20,16 @@ void enumerate_ports()
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-  enumerate_ports();
+  //  enumerate_ports();
 
-  serial::Serial my_serial("/dev/ttyUSB0", 9600, serial::Timeout::simpleTimeout(1000));
-  if (my_serial.isOpen())
-    std::cout << " Yes." << std::endl;
-  else
-    std::cout << " No." << std::endl;
+  //  serial::Serial my_serial("/dev/ttyUSB0", 9600, serial::Timeout::simpleTimeout(1000));
+  //  if (my_serial.isOpen())
+  //    std::cout << " Yes." << std::endl;
+  //  else
+  //    std::cout << " No." << std::endl;
 
-  return EXIT_SUCCESS;
+  //  const std::vector<uint8_t> x = { 1, 2, 3 };
+  //  my_serial.write(x);
+
+  //  return EXIT_SUCCESS;
 }

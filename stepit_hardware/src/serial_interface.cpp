@@ -18,12 +18,15 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/response.h>
+#include <stepit_hardware/serial_interface.h>
 
 namespace stepit_hardware
 {
-const std::vector<uint8_t>& Response::bytes() const
+SerialInterface::SerialInterface()
 {
-  return bytes_;
+}
+
+Response SerialInterface::send(Request& request)
+{
 }
 }  // namespace stepit_hardware

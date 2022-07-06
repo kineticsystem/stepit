@@ -18,9 +18,12 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "request.hpp"
+#include <stepit_hardware/request.h>
 
+namespace stepit_hardware
+{
 const std::vector<uint8_t>& Request::bytes() const
 {
   return bytes_;
 }
+}  // namespace stepit_hardware

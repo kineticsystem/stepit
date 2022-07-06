@@ -18,12 +18,13 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/response.h>
+#pragma once
 
 namespace stepit_hardware
 {
-const std::vector<uint8_t>& Response::bytes() const
+enum class BufferPosition
 {
-  return bytes_;
+  Head,
+  Tail
+};
 }
-}  // namespace stepit_hardware

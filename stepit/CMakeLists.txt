@@ -1,6 +1,6 @@
 # See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html
 
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.16.3)
 project(stepit LANGUAGES CXX)
 find_package(ament_cmake REQUIRED)
 

@@ -18,15 +18,27 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "motor_move_to_command.hpp"
+#include <stepit_hardware/motor_move_to_command.h>
 
+#include <stepit_hardware/data_utils.h>
+
+namespace stepit_hardware
+{
 constexpr uint8_t kCommandId = 0x71;
 
-MotorMoveToCommand::MotorMoveToCommand(uint8_t motor_id, uint32_t position)
+void MotorMoveToCommand::create(uint8_t motor_id, int32_t position)
 {
-  uint32_t encoded_position = 0;
-
-  bytes_.emplace_back(kCommandId);
-  bytes_.emplace_back(motor_id);
-  // bytes_.emplace_back(encoded_position);
 }
+
+MotorMoveToCommand::MotorMoveToCommand(uint8_t motor_id, int32_t position)
+  : motor_id_{ motor_id }, position_{ position }
+{
+}
+
+void MotorMoveToCommand::write(DataBuffer& buffer)
+{
+  buffer.add_int8(kCommandId, BufferPosition::Tail);
+  buffer.add_int8(motor_id_, BufferPosition::Tail);
+  buffer.add_int16(motor_id_, BufferPosition::Tail);
+}
+}  // namespace stepit_hardware

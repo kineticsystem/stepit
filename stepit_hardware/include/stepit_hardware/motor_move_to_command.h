@@ -20,12 +20,34 @@
 
 #pragma once
 
-#include "request.hpp"
+#include <stepit_hardware/request.h>
+
+#include <stepit_hardware/data_buffer.h>
 
 #include <cstdint>
 
+namespace stepit_hardware
+{
+/**
+ * Command to move a motor to a given position.
+ */
 class MotorMoveToCommand : public Request
 {
 public:
-  explicit MotorMoveToCommand(uint8_t motor_id, uint32_t position);
+  void create(uint8_t motor_id, int32_t position);
+
+  /**
+   * Command to move a motor to a given position.
+   * @param motor_id The motor id.
+   * @param position The target position relative to the motor zero position,
+   * positive or negative.
+   */
+  explicit MotorMoveToCommand(uint8_t motor_id, int32_t position);
+
+  void write(DataBuffer& buffer);
+
+private:
+  uint8_t motor_id_;
+  int32_t position_;
 };
+}  // namespace stepit_hardware

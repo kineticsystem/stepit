@@ -20,8 +20,18 @@
 
 #pragma once
 
+#include <vector>
+#include <cstdint>
+
+namespace stepit_hardware
+{
 class Response
 {
 public:
   Response() = default;
+  [[nodiscard]] const std::vector<uint8_t>& bytes() const;
+
+protected:
+  std::vector<uint8_t> bytes_;
 };
+}  // namespace stepit_hardware
