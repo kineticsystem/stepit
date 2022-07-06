@@ -37,48 +37,58 @@ namespace stepit_hardware::data_utils
 {
 /**
  * Convert an 8 bits integer into one bytes array.
- * @param value An 8 bits integer to convert.
+ * @param value Then 8 bits integer to convert.
  * @return The resulting one byte array.
  */
 std::array<uint8_t, 1> from_int8(const int8_t value);
 
 /**
  * Convert a one bytes array into an 8 bits integer.
- * @param bytes A one bytes array.
+ * @param bytes The one bytes array.
  * @return The resuting 8bits integer.
  */
 int16_t to_int8(const std::array<uint8_t, 1>& bytes);
 
 /**
  * Convert a 16 bits integer into an 2 bytes array in Big Endian byte order.
- * @param value A 16 bits integer to convert.
+ * @param value The 16 bits integer to convert.
  * @return The resulting 2 bytes array in Big Endian byte order.
  */
 std::array<uint8_t, 2> from_int16(const int16_t value);
 
 /**
  * Convert a 2 bytes array in Big Endian byte order into a 16 bits integer.
- * @param bytes A 2 bytes array in Big Endian byte order.
+ * @param bytes The 2 bytes array in Big Endian byte order.
  * @return The resuting 16 bits integer.
  */
 int16_t to_int16(const std::array<uint8_t, 2>& bytes);
 
 /**
  * Convert a 32 bits integer into a 4 bytes array in Big Endian byte order.
- * @param value A 32 bits integer to convert.
+ * @param value The 32 bits integer to convert.
  * @return The resulting 4 bytes array in Big Endian byte order.
  */
 std::array<uint8_t, 4> from_int32(const int32_t value);
 
 /**
  * Convert a 4 bytes array in Big Endian byte order into a 32 bits integer.
- * @param bytes A 4 bytes array in Big Endian byte order.
+ * @param bytes The 4 bytes array in Big Endian byte order.
  * @return The resuting 32 bits integer.
  */
 int32_t to_int32(const std::array<uint8_t, 4>& bytes);
 
+/**
+ * Convert a float into a 4 bytes array.
+ * @param value The float to convert.
+ * @return The resulting 4 bytes array.
+ */
 std::array<uint8_t, 4> from_float(const float value);
 
+/**
+ * Convert a 4 bytes array into a float.
+ * @param bytes The 4 bytes array.
+ * @return The resuting float.
+ */
 float to_float(const std::array<uint8_t, 4>& bytes);
 
 /**
