@@ -35,7 +35,7 @@ SerialInterface::SerialInterface(serial::Serial* serial) : serial_{ serial }
 {
 }
 
-std::vector<uint8_t> SerialInterface::escape(uint8_t byte) const
+const std::vector<uint8_t> SerialInterface::escape(uint8_t byte)
 {
   std::vector<uint8_t> bytes;
   if (byte == DELIMITER_FLAG || byte == ESCAPE_FLAG)
@@ -50,29 +50,34 @@ std::vector<uint8_t> SerialInterface::escape(uint8_t byte) const
   return bytes;
 }
 
+const std::vector<uint8_t> SerialInterface::create_frame(const std::vector<uint8_t>& bytes)
+{
+  std::vector<uint8_t> frame;
+  frame.emplace_back(DELIMITER_FLAG);
+  for (const uint8_t byte : bytes)
+  {
+    const std::vector<uint8_t> escaped_byte = escape(byte);
+    frame.insert(std::end(frame), std::begin(escaped_byte), std::end(escaped_byte));
+  }
+  frame.emplace_back(DELIMITER_FLAG);
+  return frame;
+}
+
 Response SerialInterface::send(const Request& request)
 {
   const std::vector<uint8_t> bytes = request.bytes();
 
-  std::vector<uint8_t> packet_data;
-  packet_data.emplace_back(requestId++);
-  packet_data.insert(std::end(packet_data), std::begin(bytes), std::end(bytes));
+  std::vector<uint8_t> data;
+  data.emplace_back(requestId++);
+  data.insert(std::end(data), std::begin(bytes), std::end(bytes));
   const uint16_t crc = crc_utils::calculate_crc(request.bytes());
   const uint8_t crc_lsb = (crc & 0xff00) >> 8;
   const uint8_t crc_msb = (crc & 0x00ff);
-  packet_data.emplace_back(crc_msb);
-  packet_data.emplace_back(crc_lsb);
+  data.emplace_back(crc_msb);
+  data.emplace_back(crc_lsb);
 
-  std::vector<uint8_t> packet;
-  packet.emplace_back(DELIMITER_FLAG);
-  for (const uint8_t byte : packet_data)
-  {
-    const std::vector<uint8_t> escaped_byte = escape(byte);
-    packet.insert(std::end(packet), std::begin(escaped_byte), std::end(escaped_byte));
-  }
-  packet.emplace_back(DELIMITER_FLAG);
-
-  serial_->write(packet);
+  std::vector<uint8_t> frame = create_frame(data);
+  serial_->write(frame);
 
   return {};
 }
