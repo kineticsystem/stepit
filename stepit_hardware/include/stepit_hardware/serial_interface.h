@@ -24,12 +24,26 @@
 #include <stepit_hardware/response.h>
 #include <serial/serial.h>
 
+#include <vector>
+#include <cstdint>
+
 namespace stepit_hardware
 {
 class SerialInterface
 {
 public:
-  SerialInterface();
-  Response send(Request& request);
+  explicit SerialInterface(serial::Serial* serial);
+  Response send(const Request& request);
+
+private:
+  /**
+   * Escape the given byte according to the PPP specification.
+   * @param value The byte to escape.
+   */
+  std::vector<uint8_t> escape(uint8_t value) const;
+
+  uint8_t requestId = 0;
+
+  serial::Serial* serial_ = nullptr;
 };
 }  // namespace stepit_hardware

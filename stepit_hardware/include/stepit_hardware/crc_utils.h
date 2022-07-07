@@ -57,10 +57,10 @@ uint16_t update_crc(uint16_t crc, uint8_t byte);
 
 /**
  * This method calculates the CRC on the given sequence bytes and length.
- * Please note that the calculated CRC is given in Little Endian Form.
+ * Please note that the calculated CRC is given in Little-Endian order.
  * @param bytes The sequence of bytes to calculate the CRC.
  * @return The CRC calculated on the given sequence of bytes.
  */
-uint16_t calculate_crc(const std::vector<uint8_t> bytes);
+uint16_t calculate_crc(const std::vector<uint8_t>& bytes);
 
 }  // namespace stepit_hardware::crc_utils

@@ -34,8 +34,6 @@ namespace stepit_hardware
 class MotorMoveToCommand : public Request
 {
 public:
-  void create(uint8_t motor_id, int32_t position);
-
   /**
    * Command to move a motor to a given position.
    * @param motor_id The motor id.
@@ -43,8 +41,6 @@ public:
    * positive or negative.
    */
   explicit MotorMoveToCommand(uint8_t motor_id, int32_t position);
-
-  void write(DataBuffer& buffer);
 
 private:
   uint8_t motor_id_;

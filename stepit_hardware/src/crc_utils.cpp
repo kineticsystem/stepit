@@ -71,7 +71,7 @@ uint16_t update_crc(uint16_t crc, uint8_t byte)
   return crc;
 }
 
-uint16_t calculate_crc(const std::vector<uint8_t> bytes)
+uint16_t calculate_crc(const std::vector<uint8_t>& bytes)
 {
   uint16_t crc = 0x0000;
   for (const uint8_t byte : bytes)
