@@ -40,7 +40,7 @@ private:
    * Escape the given byte according to the PPP specification.
    * @param value The byte to escape.
    */
-  std::vector<uint8_t> escape(uint8_t value) const;
+  std::vector<uint8_t> escape(uint8_t byte) const;
 
   uint8_t requestId = 0;
 
