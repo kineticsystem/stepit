@@ -29,6 +29,8 @@ add_library(${PROJECT_NAME} # QCreator needs header files to display them.
   include/stepit_hardware/serial_interface.h
   src/crc_utils.cpp
   include/stepit_hardware/crc_utils.h
+  src/serial_interface_impl.cpp
+  include/stepit_hardware/serial_interface_impl.h
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -48,6 +50,8 @@ add_executable(exec
   src/main.cpp
   src/data_utils.cpp
   include/stepit_hardware/data_utils.h
+  src/serial_interface_impl.cpp
+  include/stepit_hardware/serial_interface_impl.h
 )
 target_include_directories(exec
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

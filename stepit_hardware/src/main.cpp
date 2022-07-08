@@ -1,7 +1,9 @@
 #include "serial/serial.h"
 
 #include <stepit_hardware/data_utils.h>
+#include <stepit_hardware/serial_interface_impl.h>
 
+#include <memory>
 #include <cstdlib>
 #include <iostream>
 #include <vector>
@@ -20,6 +22,8 @@ void enumerate_ports()
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
+  stepit_hardware::SerialInterfaceImpl serial;
+
   enumerate_ports();
 
   serial::Serial my_serial("/dev/ttyUSB0", 9600, serial::Timeout::simpleTimeout(1000));
