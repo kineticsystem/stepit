@@ -18,7 +18,7 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/serial_interface.h>
+#include <stepit_hardware/command_interface.h>
 
 #include <stepit_hardware/crc_utils.h>
 #include <stepit_hardware/data_utils.h>
@@ -26,16 +26,15 @@
 
 namespace stepit_hardware
 {
-
 constexpr uint8_t DELIMITER_FLAG = 0x7E;  // Start and end of a packet
 constexpr uint8_t ESCAPE_FLAG = 0x7D;     // Escaping byte.
 constexpr uint8_t ESCAPED_XOR = 0x20;     // XOR value applied to escaped bytes.
 
-SerialInterface::SerialInterface(serial::Serial* serial) : serial_{ serial }
+CommandInterface::CommandInterface(serial::Serial* serial) : serial_{ serial }
 {
 }
 
-const std::vector<uint8_t> SerialInterface::escape(uint8_t byte)
+const std::vector<uint8_t> CommandInterface::escape(uint8_t byte)
 {
   std::vector<uint8_t> bytes;
   if (byte == DELIMITER_FLAG || byte == ESCAPE_FLAG)
@@ -50,7 +49,7 @@ const std::vector<uint8_t> SerialInterface::escape(uint8_t byte)
   return bytes;
 }
 
-const std::vector<uint8_t> SerialInterface::create_frame(const std::vector<uint8_t>& bytes)
+const std::vector<uint8_t> CommandInterface::create_frame(const std::vector<uint8_t>& bytes)
 {
   std::vector<uint8_t> frame;
   frame.emplace_back(DELIMITER_FLAG);
@@ -63,14 +62,28 @@ const std::vector<uint8_t> SerialInterface::create_frame(const std::vector<uint8
   return frame;
 }
 
-Response SerialInterface::send(const Request& request)
+void CommandInterface::read()
+{
+  // In this method we will read data from the serial port until we find
+  // a start and an end delimiter, or until timeout.
+
+  // We will create a state machine to read the first and the last delimiter.
+  // Once we have the frame entirely written to a buffer std::vector<uint8_t>,
+  // we unescape it, parse it, check the CRC and call the related callback.
+
+  // If by any chance the data is corrupted and we cannot identify the last
+  // delimiter, we will read more bytes than required and this will throw an
+  // exception.
+}
+
+Response CommandInterface::send(const Request& request)
 {
   const std::vector<uint8_t> bytes = request.bytes();
 
   std::vector<uint8_t> data;
   data.emplace_back(requestId++);
   data.insert(std::end(data), std::begin(bytes), std::end(bytes));
-  const uint16_t crc = crc_utils::calculate_crc(request.bytes());
+  const uint16_t crc = crc_utils::crc_ccitt(request.bytes());
   const uint8_t crc_lsb = (crc & 0xff00) >> 8;
   const uint8_t crc_msb = (crc & 0x00ff);
   data.emplace_back(crc_msb);

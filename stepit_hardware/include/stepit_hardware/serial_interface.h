@@ -1,51 +1,58 @@
-/*
- * Copyright (C) 2022 Remigi Giovanni
- * g.remigi@kineticsystem.org
- * www.kineticsystem.org
- *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option) any
- * later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation, Inc.,
- * 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
 #pragma once
-
-#include <stepit_hardware/request.h>
-#include <stepit_hardware/response.h>
-#include <serial/serial.h>
 
 #include <vector>
 #include <cstdint>
+#include <string>
 
-namespace stepit_hardware
-{
 class SerialInterface
 {
 public:
-  explicit SerialInterface(serial::Serial* serial);
-  Response send(const Request& request);
-
-private:
   /**
-   * Escape the given byte according to the PPP specification.
-   * @param value The byte to escape.
+   * Gets the open status of the serial port.
+   * @return Returns true if the port is open, false otherwise.
    */
-  static const std::vector<uint8_t> escape(uint8_t byte);
+  [[nodiscard]] virtual bool isOpen() const = 0;
 
-  static const std::vector<uint8_t> create_frame(const std::vector<uint8_t>& data);
+  /** Closes the serial port. */
+  virtual void close() = 0;
 
-  uint8_t requestId = 0;
+  /**
+   * Read a given amount of bytes from the serial port into a give buffer.
+   *
+   * @param buffer A reference to a std::vector of uint8_t.
+   * @param size A size_t defining how many bytes to be read.
+   * @return A size_t representing the number of bytes read as a result of the
+   *         call to read.
+   * @throw serial::PortNotOpenedException
+   * @throw serial::SerialException
+   */
+  virtual std::size_t read(std::vector<uint8_t>& buffer, size_t size = 1) = 0;
 
-  serial::Serial* serial_ = nullptr;
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param  data A const reference containing the data to be written
+   * to the serial port.
+   * @param  A size_t representing the number of bytes actually written to
+   * the serial port.
+   * @throw serial::PortNotOpenedException
+   * @throw serial::SerialException
+   * @throw serial::IOException
+   */
+  virtual size_t write(const std::vector<uint8_t>& data) = 0;
+
+  /**
+   * Sets the serial port identifier.
+   * @param port A const std::string reference containing the address of the
+   * serial port, which would be something like "COM1" on Windows and
+   * "/dev/ttyS0" on Linux.
+   * @throw std::invalid_argument
+   */
+  virtual void setPort(const std::string& port) = 0;
+
+  /**
+   * Gets the serial port identifier.
+   * @see SerialInterface::setPort
+   * @throw std::invalid_argument
+   */
+  [[nodiscard]] virtual std::string getPort() const = 0;
 };
-}  // namespace stepit_hardware

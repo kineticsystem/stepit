@@ -27,7 +27,7 @@ namespace stepit_hardware::crc_utils
 // Pre-computed crc-table.
 // See https://cs.fit.edu/code/svn/cse2410f13team7/wireshark/wsutil/crc16.c
 // clang-format off
-constexpr std::array<uint16_t, 256> crc16_ccitt_table = {
+constexpr std::array<uint16_t, 256> crc_ccitt_table = {
   0x0000, 0x1189, 0x2312, 0x329B, 0x4624, 0x57AD, 0x6536, 0x74BF,
   0x8C48, 0x9DC1, 0xAF5A, 0xBED3, 0xCA6C, 0xDBE5, 0xE97E, 0xF8F7,
   0x1081, 0x0108, 0x3393, 0x221A, 0x56A5, 0x472C, 0x75B7, 0x643E,
@@ -63,20 +63,17 @@ constexpr std::array<uint16_t, 256> crc16_ccitt_table = {
 };
 // clang-format on
 
-uint16_t update_crc(uint16_t crc, uint8_t byte)
+uint16_t crc_ccitt_byte(uint16_t crc, uint8_t byte)
 {
-  uint16_t tmp;
-  tmp = crc ^ (0x00ff & static_cast<uint16_t>(byte));
-  crc = (crc >> 8) ^ crc16_ccitt_table[tmp & 0xff];
-  return crc;
+  return (crc >> 8) ^ crc_ccitt_table[(crc ^ byte) & 0xff];
 }
 
-uint16_t calculate_crc(const std::vector<uint8_t>& bytes)
+uint16_t crc_ccitt(const std::vector<uint8_t>& bytes)
 {
   uint16_t crc = 0x0000;
   for (const uint8_t byte : bytes)
   {
-    crc = update_crc(crc, byte);
+    crc = crc_ccitt_byte(crc, byte);
   }
   return crc;
 }
