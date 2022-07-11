@@ -4,9 +4,15 @@
 #include <cstdint>
 #include <string>
 
+namespace stepit_hardware
+{
 class SerialInterface
 {
 public:
+  virtual ~SerialInterface()
+  {
+  }
+
   /**
    * Gets the open status of the serial port.
    * @return Returns true if the port is open, false otherwise.
@@ -56,3 +62,4 @@ public:
    */
   [[nodiscard]] virtual std::string getPort() const = 0;
 };
+}  // namespace stepit_hardware

@@ -78,29 +78,7 @@ install(
 )
 
 if (BUILD_TESTING)
-    # Add support for GTest.
-    find_package(ament_cmake_gtest REQUIRED)
-
-    # Add test.
-    ament_add_gtest(data_utils_test test/data_utils_test.cpp)
-    target_include_directories(data_utils_test
-      PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-      PUBLIC $<INSTALL_INTERFACE:include>)
-    target_compile_options(data_utils_test
-      PRIVATE -Wall -Wextra -Wpedantic
-    )
-    target_link_libraries(data_utils_test ${PROJECT_NAME})
-
-    # Add test.
-    ament_add_gtest(crc_utils_test test/crc_utils_test.cpp)
-    target_include_directories(crc_utils_test
-      PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-      PUBLIC $<INSTALL_INTERFACE:include>)
-    target_compile_options(crc_utils_test
-      PRIVATE -Wall -Wextra -Wpedantic
-    )
-    target_link_libraries(crc_utils_test ${PROJECT_NAME})
-
+    add_subdirectory(test)
 endif()
 
 ament_package()

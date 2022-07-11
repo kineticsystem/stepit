@@ -2,8 +2,7 @@
 
 #include <stepit_hardware/request.h>
 #include <stepit_hardware/response.h>
-
-#include <serial/serial.h>
+#include <stepit_hardware/serial_interface.h>
 
 #include <vector>
 #include <cstdint>
@@ -14,7 +13,7 @@ namespace stepit_hardware
 class CommandInterface
 {
 public:
-  explicit CommandInterface(serial::Serial* serial);
+  explicit CommandInterface(SerialInterface* serial);
   Response send(const Request& request);
 
 private:
@@ -30,6 +29,6 @@ private:
 
   uint8_t requestId = 0;
 
-  serial::Serial* serial_ = nullptr;
+  SerialInterface* serial_ = nullptr;
 };
 }  // namespace stepit_hardware

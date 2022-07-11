@@ -18,7 +18,7 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <stepit_hardware/data_utils.h>
 
 namespace stepit_hardware::tests
