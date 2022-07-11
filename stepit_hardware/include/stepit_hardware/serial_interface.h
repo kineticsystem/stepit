@@ -17,7 +17,7 @@ public:
    * Gets the open status of the serial port.
    * @return Returns true if the port is open, false otherwise.
    */
-  [[nodiscard]] virtual bool isOpen() const = 0;
+  [[nodiscard]] virtual bool is_open() const = 0;
 
   /** Closes the serial port. */
   virtual void close() = 0;
@@ -44,7 +44,7 @@ public:
    * @throw serial::SerialException
    * @throw serial::IOException
    */
-  virtual size_t write(const std::vector<uint8_t>& data) = 0;
+  virtual size_t write(const std::vector<uint8_t>& buffer) = 0;
 
   /**
    * Sets the serial port identifier.
@@ -53,13 +53,13 @@ public:
    * "/dev/ttyS0" on Linux.
    * @throw std::invalid_argument
    */
-  virtual void setPort(const std::string& port) = 0;
+  virtual void set_port(const std::string& port) = 0;
 
   /**
    * Gets the serial port identifier.
    * @see SerialInterface::setPort
    * @throw std::invalid_argument
    */
-  [[nodiscard]] virtual std::string getPort() const = 0;
+  [[nodiscard]] virtual std::string get_port() const = 0;
 };
 }  // namespace stepit_hardware

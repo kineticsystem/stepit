@@ -37,7 +37,7 @@ class SerialInterfaceImpl : public SerialInterface
 public:
   SerialInterfaceImpl();
 
-  [[nodiscard]] bool isOpen() const override;
+  [[nodiscard]] bool is_open() const override;
 
   void close() override;
 
@@ -45,9 +45,9 @@ public:
 
   size_t write(const std::vector<uint8_t>& data) override;
 
-  void setPort(const std::string& port) override;
+  void set_port(const std::string& port) override;
 
-  [[nodiscard]] std::string getPort() const override;
+  [[nodiscard]] std::string get_port() const override;
 
 private:
   std::unique_ptr<serial::Serial> pimpl_ = nullptr;

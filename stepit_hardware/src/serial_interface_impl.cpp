@@ -28,7 +28,7 @@ SerialInterfaceImpl::SerialInterfaceImpl() : pimpl_{ new serial::Serial() }
 {
 }
 
-bool SerialInterfaceImpl::isOpen() const
+bool SerialInterfaceImpl::is_open() const
 {
   return pimpl_->isOpen();
 }
@@ -48,12 +48,12 @@ size_t SerialInterfaceImpl::write(const std::vector<uint8_t>& data)
   return pimpl_->write(data);
 }
 
-void SerialInterfaceImpl::setPort(const std::string& port)
+void SerialInterfaceImpl::set_port(const std::string& port)
 {
   pimpl_->setPort(port);
 }
 
-std::string SerialInterfaceImpl::getPort() const
+std::string SerialInterfaceImpl::get_port() const
 {
   return pimpl_->getPort();
 }
