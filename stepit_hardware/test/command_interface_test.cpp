@@ -26,7 +26,6 @@
 namespace stepit_hardware::tests
 {
 using ::testing::_;
-using ::testing::Eq;
 using ::testing::SaveArg;
 
 TEST(command_interface, send)
