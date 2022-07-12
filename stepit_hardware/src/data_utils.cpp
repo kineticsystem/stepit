@@ -100,7 +100,7 @@ std::string to_hex(const std::vector<uint8_t>& bytes)
     {
       hex += " ";
     }
-    hex += "0x";
+    hex += "";
     uint8_t ch = *it;
     hex += vChars[((ch >> 4) & 0xF)];
     hex += vChars[(ch & 0xF)];
@@ -118,7 +118,7 @@ std::string to_hex(const std::vector<uint16_t>& bytes)
     {
       hex += " ";
     }
-    hex += "0x";
+    hex += "";
     uint16_t ch = *it;
     hex += vChars[((ch >> 12) & 0xF)];
     hex += vChars[((ch >> 8) & 0xF)];

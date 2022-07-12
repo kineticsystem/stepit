@@ -27,7 +27,7 @@ TEST(data_utils, to_hex_test)
 {
   std::vector<uint8_t> bytes = { 0x7E, 0x00, 0x70, 0x00, 0x00, 0x00, 0x4E, 0x20, 0x75, 0x38, 0x7E };
   std::string hex = stepit_hardware::data_utils::to_hex(bytes);
-  ASSERT_EQ(hex, "0x7E 0x00 0x70 0x00 0x00 0x00 0x4E 0x20 0x75 0x38 0x7E");
+  ASSERT_EQ(hex, "7E 00 70 00 00 00 4E 20 75 38 7E");
 }
 
 TEST(data_utils, from_float)
@@ -37,7 +37,7 @@ TEST(data_utils, from_float)
   auto bytes = stepit_hardware::data_utils::from_float(4.2f);
   std::vector<uint8_t> bytes_v(bytes.begin(), bytes.end());
   auto hex = stepit_hardware::data_utils::to_hex(bytes_v);
-  ASSERT_EQ(hex, "0x40 0x86 0x66 0x66");
+  ASSERT_EQ(hex, "40 86 66 66");
 }
 
 TEST(data_utils, to_float)
@@ -54,7 +54,7 @@ TEST(data_utils, from_int32)
   auto bytes = stepit_hardware::data_utils::from_int32(-1582119980);
   std::vector<uint8_t> bytes_v(bytes.begin(), bytes.end());
   auto hex = stepit_hardware::data_utils::to_hex(bytes_v);
-  ASSERT_EQ(hex, "0xA1 0xB2 0xC3 0xD4");
+  ASSERT_EQ(hex, "A1 B2 C3 D4");
 }
 
 TEST(data_utils, to_int32)
@@ -69,7 +69,7 @@ TEST(data_utils, from_int16)
   auto bytes = stepit_hardware::data_utils::from_int16(-3937);
   std::vector<uint8_t> bytes_v(bytes.begin(), bytes.end());
   auto hex = stepit_hardware::data_utils::to_hex(bytes_v);
-  ASSERT_EQ(hex, "0xF0 0x9F");
+  ASSERT_EQ(hex, "F0 9F");
 }
 
 TEST(data_utils, to_int16)

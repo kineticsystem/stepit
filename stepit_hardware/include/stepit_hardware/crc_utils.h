@@ -33,6 +33,9 @@
  *
  * A CRC online calculator useful for testing is available at
  * https://crccalc.com
+ *
+ * There are other online website to test a CRC but it seems the one above is
+ * the only one to return the CRC in the correct little-endian order.
  * http://www.lammertbies.nl/comm/info/crc-calculation.html
  *
  * For a sample implementation of different CRC-16 see
