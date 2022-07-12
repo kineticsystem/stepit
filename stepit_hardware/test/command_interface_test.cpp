@@ -23,15 +23,13 @@
 #include <stepit_hardware/command_interface.h>
 #include <mock_serial_interface.h>
 
-namespace stepit_hardware::tests
-{
 using ::testing::_;
 using ::testing::SaveArg;
 
 TEST(command_interface, send)
 {
   MockSerialInterface mock;
-  CommandInterface cmd_interface{ &mock };
+  stepit_hardware::CommandInterface cmd_interface{ &mock };
 
   std::vector<uint8_t> expected = {
     0x7E,  // Delimiter
@@ -50,7 +48,7 @@ TEST(command_interface, send)
 
   EXPECT_CALL(mock, write(_)).WillOnce(SaveArg<0>(&actual));
 
-  MotorMoveToCommand cmd{ 1, 3000 };
+  stepit_hardware::MotorMoveToCommand cmd{ 1, 3000 };
   cmd_interface.send(cmd);
 
   ASSERT_THAT(expected, actual);
@@ -59,7 +57,7 @@ TEST(command_interface, send)
 TEST(command_interface, send_escaped)
 {
   MockSerialInterface mock;
-  CommandInterface cmd_interface{ &mock };
+  stepit_hardware::CommandInterface cmd_interface{ &mock };
 
   std::vector<uint8_t> expected = {
     0x7E,  // Delimiter
@@ -80,11 +78,8 @@ TEST(command_interface, send_escaped)
   EXPECT_CALL(mock, write(_)).WillOnce(SaveArg<0>(&actual));
 
   // Position 32256 in hex is 7e 00 and must be escaped.
-  MotorMoveToCommand cmd{ 1, 32256 };
+  stepit_hardware::MotorMoveToCommand cmd{ 1, 32256 };
   cmd_interface.send(cmd);
 
   ASSERT_THAT(expected, actual);
-
-}  // namespace stepit_hardware::tests
-
-}  // namespace stepit_hardware::tests
+}

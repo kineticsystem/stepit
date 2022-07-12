@@ -21,10 +21,7 @@
 #include <gmock/gmock.h>
 #include <stepit_hardware/serial_interface.h>
 
-namespace stepit_hardware::tests
-{
-
-class MockSerialInterface : public SerialInterface
+class MockSerialInterface : public stepit_hardware::SerialInterface
 {
 public:
   MOCK_METHOD(bool, is_open, (), (const));
@@ -34,4 +31,3 @@ public:
   MOCK_METHOD(void, set_port, (const std::string& port));
   MOCK_METHOD(std::string, get_port, (), (const));
 };
-}  // namespace stepit_hardware::tests

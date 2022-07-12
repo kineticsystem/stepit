@@ -21,8 +21,6 @@
 #include <gmock/gmock.h>
 #include <stepit_hardware/data_utils.h>
 
-namespace stepit_hardware::tests
-{
 TEST(data_utils, to_hex_test)
 {
   std::vector<uint8_t> bytes = { 0x7E, 0x00, 0x70, 0x00, 0x00, 0x00, 0x4E, 0x20, 0x75, 0x38, 0x7E };
@@ -78,4 +76,3 @@ TEST(data_utils, to_int16)
   auto value = stepit_hardware::data_utils::to_int16(bytes);
   ASSERT_EQ(value, -3937);
 }
-}  // namespace stepit_hardware::tests
