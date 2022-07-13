@@ -1,9 +1,7 @@
 #pragma once
 
-#include <stepit_hardware/request.h>
-#include <stepit_hardware/response.h>
 #include <stepit_hardware/serial_interface.h>
-#include <stepit_hardware/data_buffer.h>
+#include <stepit_hardware/buffer.h>
 
 #include <vector>
 #include <cstdint>
@@ -11,11 +9,12 @@
 
 namespace stepit_hardware
 {
-class CommandInterface
+class DataInterface
 {
 public:
-  explicit CommandInterface(SerialInterface* serial);
-  Response write(const Request& request);
+  explicit DataInterface(SerialInterface* serial);
+  void write(const std::vector<uint8_t>& bytes);
+  std::vector<uint8_t> read();
 
 private:
   /**
@@ -25,8 +24,6 @@ private:
   static const std::vector<uint8_t> escape(uint8_t byte);
 
   static const std::vector<uint8_t> create_frame(const std::vector<uint8_t>& data);
-
-  void read();
 
   enum class State
   {
@@ -39,7 +36,7 @@ private:
   uint8_t requestId = 0;
 
   /* Circular buffer to read data from the serial port. */
-  DataBuffer read_buffer_{ 100 };
+  Buffer<uint8_t> read_buffer_{ 100 };
 
   SerialInterface* serial_ = nullptr;
 };

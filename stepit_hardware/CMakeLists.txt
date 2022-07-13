@@ -24,8 +24,8 @@ add_library(${PROJECT_NAME} # QCreator needs header files to display them.
   include/stepit_hardware/buffer_position.h
   src/data_buffer.cpp
   include/stepit_hardware/data_buffer.h
-  src/command_interface.cpp
-  include/stepit_hardware/command_interface.h
+  src/data_interface.cpp
+  include/stepit_hardware/data_interface.h
   include/stepit_hardware/serial_interface.h
   src/crc_utils.cpp
   include/stepit_hardware/crc_utils.h

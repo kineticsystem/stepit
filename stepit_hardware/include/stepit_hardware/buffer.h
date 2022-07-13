@@ -55,6 +55,9 @@ private:
   // The position of the first element of the buffer.
   std::size_t position_ = 0;
 
+  // The buffer capacity.
+  std::size_t capacity_ = 0;
+
   // This records how much data is in the buffer: it is always greater
   // than zero and less than or equal to the capacity.
   // "position_ + size_ - 1" is the position of the last element of the
@@ -63,7 +66,7 @@ private:
 };
 
 template <typename T>
-Buffer<T>::Buffer(std::size_t capacity)
+Buffer<T>::Buffer(std::size_t capacity) : capacity_{ capacity }
 {
   data_.reserve(capacity);
 }
@@ -87,19 +90,19 @@ void Buffer<T>::add(T in, BufferPosition position)
   // Please note that there is no exception thrown in integer arithmetic
   // overflow or underflow.
 
-  if (size_ < data_.size())
+  if (size_ < capacity_)
   {
     if (position == BufferPosition::Tail)
     {
       // Add an item to the end of the buffer.
-      data_[(position_ + size_) % data_.size()] = in;
+      data_[(position_ + size_) % capacity_] = in;
     }
     else
     {
       // Add an item to the front of the buffer.
       if (position_ == 0)
       {
-        position_ = data_.size() - 1;
+        position_ = capacity_ - 1;
       }
       else
       {
@@ -123,13 +126,13 @@ T Buffer<T>::remove(BufferPosition position)
     if (position == BufferPosition::Tail)
     {
       // Remove an item from the end of the buffer.
-      out = data_[(position_ + size_ - 1) % data_.size()];
+      out = data_[(position_ + size_ - 1) % capacity_];
     }
     else
     {
       // Remove an item from the front of the buffer.
       out = data_[position_];
-      position_ = (position_ + 1) % data_.size();
+      position_ = (position_ + 1) % capacity_;
     }
     size_--;
   }

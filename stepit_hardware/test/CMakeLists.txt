@@ -20,13 +20,13 @@ target_compile_options(crc_utils_test
 )
 target_link_libraries(crc_utils_test ${PROJECT_NAME})
 
-ament_add_gmock(command_interface_test command_interface_test.cpp
+ament_add_gmock(data_interface_test data_interface_test.cpp
     mock_serial_interface.h)
-target_include_directories(command_interface_test
+target_include_directories(data_interface_test
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_compile_options(command_interface_test
-  PRIVATE -Wall -Wextra
+target_compile_options(data_interface_test
+  PRIVATE -Wall -Wno-return-type
 )
-target_link_libraries(command_interface_test ${PROJECT_NAME})
+target_link_libraries(data_interface_test ${PROJECT_NAME})
