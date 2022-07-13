@@ -22,6 +22,7 @@
 
 #include <stepit_hardware/crc_utils.h>
 #include <stepit_hardware/data_utils.h>
+
 #include <cstdint>
 
 namespace stepit_hardware
@@ -74,9 +75,54 @@ void CommandInterface::read()
   // If by any chance the data is corrupted and we cannot identify the last
   // delimiter, we will read more bytes than required and this will throw an
   // exception.
+
+  uint16_t crc = 0;
+  state_ = State::StartReading;
+  while (state_ != State::MessageRead)
+  {
+    uint8_t byte;
+    serial_->read(&byte, 1);
+
+    switch (state_)
+    {
+      case State::StartReading:
+        if (byte == DELIMITER_FLAG)
+        {
+          state_ = State::ReadingMessage;
+          read_buffer_.clear();
+        }
+        else
+        {
+          // throw exception
+        }
+        break;
+      case State::ReadingMessage:
+        if (byte == ESCAPE_FLAG)
+        {
+          state_ = State::ReadingEscapedByte;
+        }
+        else if (byte == DELIMITER_FLAG)
+        {
+          state_ = State::MessageRead;
+        }
+        else
+        {
+          crc = crc_utils::crc_ccitt_byte(crc, byte);
+          read_buffer_.add_int8(byte, BufferPosition::Tail);
+        }
+        break;
+      case State::ReadingEscapedByte:
+        crc = crc_utils::crc_ccitt_byte(crc, byte ^ ESCAPED_XOR);
+        read_buffer_.add_int8(byte ^ ESCAPED_XOR, BufferPosition::Tail);
+        state_ = State::ReadingMessage;
+        break;
+      default:;
+        // throw exception.
+    }
+  }
 }
 
-Response CommandInterface::send(const Request& request)
+Response CommandInterface::write(const Request& request)
 {
   const std::vector<uint8_t> bytes = request.bytes();
 

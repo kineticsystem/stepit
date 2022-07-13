@@ -34,6 +34,8 @@ public:
    */
   virtual std::size_t read(std::vector<uint8_t>& buffer, size_t size = 1) = 0;
 
+  virtual std::size_t read(uint8_t* buffer, size_t size) = 0;
+
   /**
    * Write a sequence of bytes to the serial port.
    * @param  data A const reference containing the data to be written

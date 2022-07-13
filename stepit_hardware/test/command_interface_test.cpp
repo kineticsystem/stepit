@@ -49,7 +49,7 @@ TEST(command_interface, send)
   EXPECT_CALL(mock, write(_)).WillOnce(SaveArg<0>(&actual));
 
   stepit_hardware::MotorMoveToCommand cmd{ 1, 3000 };
-  cmd_interface.send(cmd);
+  cmd_interface.write(cmd);
 
   ASSERT_THAT(expected, actual);
 }
@@ -79,7 +79,7 @@ TEST(command_interface, send_escaped)
 
   // Position 32256 in hex is 7e 00 and must be escaped.
   stepit_hardware::MotorMoveToCommand cmd{ 1, 32256 };
-  cmd_interface.send(cmd);
+  cmd_interface.write(cmd);
 
   ASSERT_THAT(expected, actual);
 }

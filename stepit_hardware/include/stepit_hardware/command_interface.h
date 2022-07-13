@@ -3,6 +3,7 @@
 #include <stepit_hardware/request.h>
 #include <stepit_hardware/response.h>
 #include <stepit_hardware/serial_interface.h>
+#include <stepit_hardware/data_buffer.h>
 
 #include <vector>
 #include <cstdint>
@@ -14,7 +15,7 @@ class CommandInterface
 {
 public:
   explicit CommandInterface(SerialInterface* serial);
-  Response send(const Request& request);
+  Response write(const Request& request);
 
 private:
   /**
@@ -27,7 +28,18 @@ private:
 
   void read();
 
+  enum class State
+  {
+    StartReading,
+    ReadingMessage,
+    ReadingEscapedByte,
+    MessageRead
+  } state_ = State::StartReading;
+
   uint8_t requestId = 0;
+
+  /* Circular buffer to read data from the serial port. */
+  DataBuffer read_buffer_{ 100 };
 
   SerialInterface* serial_ = nullptr;
 };

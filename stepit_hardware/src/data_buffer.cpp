@@ -6,14 +6,9 @@ DataBuffer::DataBuffer(std::size_t capacity) : buffer_{ capacity }
 {
 }
 
-int DataBuffer::size()
+int DataBuffer::size() const
 {
   return buffer_.size();
-}
-
-int DataBuffer::capacity()
-{
-  return buffer_.capacity();
 }
 
 void DataBuffer::clear()

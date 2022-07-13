@@ -24,37 +24,42 @@
 
 namespace stepit_hardware
 {
-SerialInterfaceImpl::SerialInterfaceImpl() : pimpl_{ new serial::Serial() }
+SerialInterfaceImpl::SerialInterfaceImpl() : serial_{ new serial::Serial() }
 {
 }
 
 bool SerialInterfaceImpl::is_open() const
 {
-  return pimpl_->isOpen();
+  return serial_->isOpen();
 }
 
 void SerialInterfaceImpl::close()
 {
-  pimpl_->close();
+  serial_->close();
 }
 
 std::size_t SerialInterfaceImpl::read(std::vector<uint8_t>& buffer, size_t size)
 {
-  return pimpl_->read(buffer, size);
+  return serial_->read(buffer, size);
+}
+
+std::size_t SerialInterfaceImpl::read(uint8_t* buffer, size_t size)
+{
+  return serial_->read(buffer, size);
 }
 
 size_t SerialInterfaceImpl::write(const std::vector<uint8_t>& data)
 {
-  return pimpl_->write(data);
+  return serial_->write(data);
 }
 
 void SerialInterfaceImpl::set_port(const std::string& port)
 {
-  pimpl_->setPort(port);
+  serial_->setPort(port);
 }
 
 std::string SerialInterfaceImpl::get_port() const
 {
-  return pimpl_->getPort();
+  return serial_->getPort();
 }
 }  // namespace stepit_hardware

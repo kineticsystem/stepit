@@ -38,9 +38,6 @@ public:
   // Return how much data is in the buffer.
   [[nodiscard]] std::size_t size() const;
 
-  // Return the maximum capacity of the buffer.
-  [[nodiscard]] std::size_t capacity() const;
-
   // Insert an item at the given position.
   void add(T in, BufferPosition position);
 
