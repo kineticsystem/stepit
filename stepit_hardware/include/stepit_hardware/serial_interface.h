@@ -9,9 +9,7 @@ namespace stepit_hardware
 class SerialInterface
 {
 public:
-  virtual ~SerialInterface()
-  {
-  }
+  virtual ~SerialInterface() = default;
 
   /**
    * Gets the open status of the serial port.
@@ -25,15 +23,13 @@ public:
   /**
    * Read a given amount of bytes from the serial port into a give buffer.
    *
-   * @param buffer A reference to a std::vector of uint8_t.
+   * @param buffer The buffer.
    * @param size A size_t defining how many bytes to be read.
    * @return A size_t representing the number of bytes read as a result of the
    *         call to read.
    * @throw serial::PortNotOpenedException
    * @throw serial::SerialException
    */
-  virtual std::size_t read(std::vector<uint8_t>& buffer, size_t size = 1) = 0;
-
   virtual std::size_t read(uint8_t* buffer, size_t size) = 0;
 
   /**

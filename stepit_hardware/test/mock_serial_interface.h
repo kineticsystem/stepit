@@ -18,6 +18,8 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#pragma once
+
 #include <gmock/gmock.h>
 #include <stepit_hardware/serial_interface.h>
 
@@ -26,9 +28,8 @@ class MockSerialInterface : public stepit_hardware::SerialInterface
 public:
   MOCK_METHOD(bool, is_open, (), (const));
   MOCK_METHOD(void, close, ());
-  MOCK_METHOD(std::size_t, read, (std::vector<uint8_t> & buffer, size_t size));
   MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size));
-  MOCK_METHOD(std::size_t, write, (const std::vector<uint8_t>& buffer));
+  MOCK_METHOD(std::size_t, write, (const std::vector<uint8_t>& bufferz));
   MOCK_METHOD(void, set_port, (const std::string& port));
   MOCK_METHOD(std::string, get_port, (), (const));
 };

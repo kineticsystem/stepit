@@ -41,8 +41,6 @@ public:
 
   void close() override;
 
-  std::size_t read(std::vector<uint8_t>& buffer, size_t size = 1) override;
-
   std::size_t read(uint8_t* buffer, size_t size = 1) override;
 
   size_t write(const std::vector<uint8_t>& data) override;

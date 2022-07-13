@@ -18,43 +18,22 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/serial_interface_impl.h>
+#pragma once
 
-#include <serial/serial.h>
+#include <gmock/gmock.h>
 
-namespace stepit_hardware
+/**
+ * This is a custom action that uses an iterator to take a value from a vector
+ * and pass it to a method output parameter.
+ */
+ACTION_TEMPLATE(SetArgFromVector, HAS_1_TEMPLATE_PARAMS(unsigned, param_index), AND_1_VALUE_PARAMS(p_iterator))
 {
-SerialInterfaceImpl::SerialInterfaceImpl() : serial_{ new serial::Serial() }
-{
+  // param_index indicates the position of the output parameter and
+  // p_interator is a pointer to a vector iterator.
+
+  static_assert(std::is_same<decltype(p_iterator), std::vector<uint8_t>::iterator*>::value,
+                "p_iterator must be a std::vector<uint8_t>::iterator");
+
+  *std::get<param_index>(args) = **p_iterator;
+  ++(*p_iterator);
 }
-
-bool SerialInterfaceImpl::is_open() const
-{
-  return serial_->isOpen();
-}
-
-void SerialInterfaceImpl::close()
-{
-  serial_->close();
-}
-
-std::size_t SerialInterfaceImpl::read(uint8_t* buffer, size_t size)
-{
-  return serial_->read(buffer, size);
-}
-
-size_t SerialInterfaceImpl::write(const std::vector<uint8_t>& data)
-{
-  return serial_->write(data);
-}
-
-void SerialInterfaceImpl::set_port(const std::string& port)
-{
-  serial_->setPort(port);
-}
-
-std::string SerialInterfaceImpl::get_port() const
-{
-  return serial_->getPort();
-}
-}  // namespace stepit_hardware
