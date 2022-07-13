@@ -111,13 +111,15 @@ TEST(command_interface, write_escaped)
 }
 
 /**
- * This is a custom action that takes a value from a vector and use it to set
- * an output parameter.
+ * This is a custom action that uses an iterator to take a value from a vector
+ * and gives the value to a method output parameter.
  */
-ACTION_TEMPLATE(SetArgFromVector, HAS_1_TEMPLATE_PARAMS(unsigned, param_index), AND_1_VALUE_PARAMS(it))
+ACTION_TEMPLATE(SetArgFromVector, HAS_1_TEMPLATE_PARAMS(unsigned, param_index), AND_1_VALUE_PARAMS(p_iterator))
 {
-  *std::get<param_index>(args) = **it;
-  ++(*it);
+  // param_index indicates the position of the output parameter and
+  // p_interator is a pointer to a vector iterator.
+  *std::get<param_index>(args) = **p_iterator;
+  ++(*p_iterator);
 }
 
 /**
