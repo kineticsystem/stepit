@@ -68,76 +68,66 @@ std::vector<uint8_t> DataInterface::read()
 {
   uint16_t crc = 0;
   state_ = State::StartReading;
-  while (state_ != State::MessageRead)
-  {
-    uint8_t byte;
-    std::size_t size = serial_->read(&byte, 1);
+  uint8_t byte = 0;
 
-    if (size == 0)
+  while (true)
+  {
+    if (serial_->read(&byte, 1) == 0)
     {
       throw SerialException("timeout");
     }
 
-    switch (state_)
+    if (state_ == State::StartReading)
     {
-      case State::StartReading:
-        if (byte == DELIMITER_FLAG)
-        {
-          state_ = State::ReadingMessage;
-          read_buffer_.clear();
-        }
-        else
-        {
-          throw SerialException("start delimiter missing");
-        }
-        break;
-      case State::ReadingMessage:
-        if (byte == ESCAPE_FLAG)
-        {
-          state_ = State::ReadingEscapedByte;
-        }
-        else if (byte == DELIMITER_FLAG)
-        {
-          if (read_buffer_.size() >= 4)
-          {
-            // A packet must contain minimum:
-            // 1 - a request id (1 byte);
-            // 2 - a command (1 byte);
-            // 3 - a CRC (2 bytes).
-
-            if (crc == 0)
-            {
-              // Remove CRC from buffer.
-              read_buffer_.remove(BufferPosition::Tail);
-              read_buffer_.remove(BufferPosition::Tail);
-
-              // Remove request ID.
-              read_buffer_.remove(BufferPosition::Head);
-            }
-            else
-            {
-              throw SerialException("CRC error");
-            }
-          }
-          else
-          {
-            throw SerialException("incorrect frame length");
-          }
-          state_ = State::MessageRead;
-        }
-        else
-        {
-          crc = crc_utils::crc_ccitt_byte(crc, byte);
-          read_buffer_.add(byte, BufferPosition::Tail);
-        }
-        break;
-      case State::ReadingEscapedByte:
-        crc = crc_utils::crc_ccitt_byte(crc, byte ^ ESCAPED_XOR);
-        read_buffer_.add(byte ^ ESCAPED_XOR, BufferPosition::Tail);
+      if (byte == DELIMITER_FLAG)
+      {
+        read_buffer_.clear();
         state_ = State::ReadingMessage;
-        break;
-      case State::MessageRead:
-        throw SerialException("incorrect state");
+      }
+      else
+      {
+        throw SerialException("start delimiter missing");
+      }
+    }
+    else if (state_ == State::ReadingMessage)
+    {
+      if (byte == ESCAPE_FLAG)
+      {
+        state_ = State::ReadingEscapedByte;
+      }
+      else if (byte == DELIMITER_FLAG)
+      {
+        if (read_buffer_.size() < 4)
+        {
+          throw SerialException("incorrect frame length");
+        }
+        else if (crc != 0)
+        {
+          throw SerialException("CRC error");
+        }
+        else
+        {
+          // Remove request ID.
+          read_buffer_.remove(BufferPosition::Head);
+
+          // Remove CRC from buffer.
+          read_buffer_.remove(BufferPosition::Tail);
+          read_buffer_.remove(BufferPosition::Tail);
+
+          break;
+        }
+      }
+      else
+      {
+        crc = crc_utils::crc_ccitt_byte(crc, byte);
+        read_buffer_.add(byte, BufferPosition::Tail);
+      }
+    }
+    else if (state_ == State::ReadingEscapedByte)
+    {
+      crc = crc_utils::crc_ccitt_byte(crc, byte ^ ESCAPED_XOR);
+      read_buffer_.add(byte ^ ESCAPED_XOR, BufferPosition::Tail);
+      state_ = State::ReadingMessage;
     }
   }
 

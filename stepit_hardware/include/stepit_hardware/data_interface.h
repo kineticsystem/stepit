@@ -49,8 +49,7 @@ private:
   {
     StartReading,
     ReadingMessage,
-    ReadingEscapedByte,
-    MessageRead
+    ReadingEscapedByte
   } state_ = State::StartReading;
 
   uint8_t requestId = 0;
