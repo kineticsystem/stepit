@@ -22,6 +22,7 @@
 
 #include <stepit_hardware/crc_utils.h>
 #include <stepit_hardware/data_utils.h>
+#include <stepit_hardware/serial_exception.h>
 
 #include <cstdint>
 
@@ -65,23 +66,17 @@ const std::vector<uint8_t> DataInterface::create_frame(const std::vector<uint8_t
 
 std::vector<uint8_t> DataInterface::read()
 {
-  // In this method we will read data from the serial port until we find
-  // a start and an end delimiter, or until timeout.
-
-  // We will create a state machine to read the first and the last delimiter.
-  // Once we have the frame entirely written to a buffer std::vector<uint8_t>,
-  // we unescape it, parse it, check the CRC and call the related callback.
-
-  // If by any chance the data is corrupted and we cannot identify the last
-  // delimiter, we will read more bytes than required and this will throw an
-  // exception.
-
   uint16_t crc = 0;
   state_ = State::StartReading;
   while (state_ != State::MessageRead)
   {
     uint8_t byte;
-    serial_->read(&byte, 1);
+    std::size_t size = serial_->read(&byte, 1);
+
+    if (size == 0)
+    {
+      throw SerialException("timeout");
+    }
 
     switch (state_)
     {
@@ -93,7 +88,7 @@ std::vector<uint8_t> DataInterface::read()
         }
         else
         {
-          // throw exception
+          throw SerialException("start delimiter missing");
         }
         break;
       case State::ReadingMessage:
@@ -103,6 +98,31 @@ std::vector<uint8_t> DataInterface::read()
         }
         else if (byte == DELIMITER_FLAG)
         {
+          if (read_buffer_.size() >= 4)
+          {
+            // A packet must contain minimum:
+            // 1 - a request id (1 byte);
+            // 2 - a command (1 byte);
+            // 3 - a CRC (2 bytes).
+
+            if (crc == 0)
+            {
+              // Remove CRC from buffer.
+              read_buffer_.remove(BufferPosition::Tail);
+              read_buffer_.remove(BufferPosition::Tail);
+
+              // Remove request ID.
+              read_buffer_.remove(BufferPosition::Head);
+            }
+            else
+            {
+              throw SerialException("CRC error");
+            }
+          }
+          else
+          {
+            throw SerialException("incorrect frame length");
+          }
           state_ = State::MessageRead;
         }
         else
@@ -116,17 +136,10 @@ std::vector<uint8_t> DataInterface::read()
         read_buffer_.add(byte ^ ESCAPED_XOR, BufferPosition::Tail);
         state_ = State::ReadingMessage;
         break;
-      default:;
-        // throw exception.
+      case State::MessageRead:
+        throw SerialException("incorrect state");
     }
   }
-
-  // Remove response ID.
-  read_buffer_.remove(BufferPosition::Head);
-
-  // Remove CRC.
-  read_buffer_.remove(BufferPosition::Tail);
-  read_buffer_.remove(BufferPosition::Tail);
 
   std::vector<uint8_t> buffer;
   buffer.reserve(read_buffer_.size());
@@ -150,7 +163,7 @@ void DataInterface::write(const std::vector<uint8_t>& bytes)
   data.emplace_back(crc_lsb);
 
   std::vector<uint8_t> frame = create_frame(data);
-  serial_->write(frame);
+  std::size_t size = serial_->write(frame);
 }
 
 }  // namespace stepit_hardware

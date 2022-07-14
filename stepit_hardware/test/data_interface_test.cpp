@@ -21,6 +21,7 @@
 #include <gmock/gmock.h>
 #include <stepit_hardware/data_interface.h>
 #include <stepit_hardware/data_utils.h>
+#include <stepit_hardware/serial_exception.h>
 #include <mock_serial_interface.h>
 #include <custom_actions.h>
 
@@ -185,6 +186,157 @@ TEST(command_interface, read_escaped)
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
 }
 
-TEST(command_interface, read_wrong_crc)
+/**
+ * Test that an exception is thrown when a CRC error is found.
+ */
+TEST(command_interface, read_crc_error)
 {
+  MockSerialInterface mock;
+  stepit_hardware::DataInterface cmd_interface{ &mock };
+
+  std::vector<uint8_t> frame = {
+    0x7E,  // Delimiter
+    0x00,  // Request ID
+    0x71,  // Motor Move To command ID
+    0x01,  // Motor ID
+    0x00,  // Position escaped (MSB)
+    0x00,  // Position escaped
+    0x7D,  // Position escaped
+    0x5E,  // Position escaped
+    0x00,  // Position escaped (LSB)
+    0xB1,  // CRC (MSB) - incorrect
+    0xA0,  // CRC (LSB)
+    0x7E   // Delimiter
+  };
+
+  auto it = std::begin(frame);
+  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          std::vector<uint8_t> actual_data = cmd_interface.read();
+        }
+        catch (const stepit_hardware::SerialException& e)
+        {
+          EXPECT_STREQ("SerialException: CRC error.", e.what());
+          throw;
+        }
+      },
+      stepit_hardware::SerialException);
+}
+
+/**
+ * Test that an exception is thrown when the packet is too short.
+ */
+TEST(command_interface, read_incorrect_frame_length)
+{
+  MockSerialInterface mock;
+  stepit_hardware::DataInterface cmd_interface{ &mock };
+
+  std::vector<uint8_t> frame = {
+    0x7E,  // Delimiter
+    0x00,  // Request ID
+    0x7E   // Delimiter
+  };
+
+  auto it = std::begin(frame);
+  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          std::vector<uint8_t> actual_data = cmd_interface.read();
+        }
+        catch (const stepit_hardware::SerialException& e)
+        {
+          EXPECT_STREQ("SerialException: incorrect frame length.", e.what());
+          throw;
+        }
+      },
+      stepit_hardware::SerialException);
+}
+
+/**
+ * Test that an exception is thrown when there is no start delimiter.
+ */
+TEST(command_interface, read_start_delimiter_missing)
+{
+  MockSerialInterface mock;
+  stepit_hardware::DataInterface cmd_interface{ &mock };
+
+  std::vector<uint8_t> frame = {
+    // Missing delimiter
+    0x00,  // Request ID
+    0x71,  // Motor Move To command ID
+    0x01,  // Motor ID
+    0x00,  // Position escaped (MSB)
+    0x00,  // Position escaped
+    0x7D,  // Position escaped
+    0x5E,  // Position escaped
+    0x00,  // Position escaped (LSB)
+    0xBA,  // CRC (MSB)
+    0xA0,  // CRC (LSB)
+    0x7E   // Delimiter
+  };
+
+  auto it = std::begin(frame);
+  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          std::vector<uint8_t> actual_data = cmd_interface.read();
+        }
+        catch (const stepit_hardware::SerialException& e)
+        {
+          EXPECT_STREQ("SerialException: start delimiter missing.", e.what());
+          throw;
+        }
+      },
+      stepit_hardware::SerialException);
+}
+
+/**
+ * Test that an exception is thrown when a full frame is not found.
+ */
+TEST(command_interface, read_timeout)
+{
+  MockSerialInterface mock;
+  stepit_hardware::DataInterface cmd_interface{ &mock };
+
+  std::vector<uint8_t> frame = {
+    0x7E,  // Delimiter
+    0x00,  // Request ID
+    0x71,  // Motor Move To command ID
+    0x01,  // Motor ID
+    0x00,  // Position escaped (MSB)
+    0x00,  // Position escaped
+    0x7D,  // Position escaped
+    0x5E,  // Position escaped
+    0x00,  // Position escaped (LSB)
+    0xBA,  // CRC (MSB)
+    0xA0   // CRC (LSB)
+    // Missing delimiter
+  };
+
+  auto it = std::begin(frame);
+  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          std::vector<uint8_t> actual_data = cmd_interface.read();
+        }
+        catch (const stepit_hardware::SerialException& e)
+        {
+          EXPECT_STREQ("SerialException: start delimiter missing.", e.what());
+          throw;
+        }
+      },
+      stepit_hardware::SerialException);
 }

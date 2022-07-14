@@ -30,7 +30,7 @@ public:
    * @throw serial::PortNotOpenedException
    * @throw serial::SerialException
    */
-  virtual std::size_t read(uint8_t* buffer, size_t size) = 0;
+  [[nodiscard]] virtual std::size_t read(uint8_t* buffer, size_t size) = 0;
 
   /**
    * Write a sequence of bytes to the serial port.
@@ -42,7 +42,7 @@ public:
    * @throw serial::SerialException
    * @throw serial::IOException
    */
-  virtual size_t write(const std::vector<uint8_t>& buffer) = 0;
+  [[nodiscard]] virtual size_t write(const std::vector<uint8_t>& buffer) = 0;
 
   /**
    * Sets the serial port identifier.
