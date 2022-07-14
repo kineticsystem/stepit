@@ -22,7 +22,7 @@
 #include <stepit_hardware/data_interface.h>
 #include <stepit_hardware/data_utils.h>
 #include <stepit_hardware/serial_exception.h>
-#include <mock_serial_interface.h>
+#include <mock_serial.h>
 
 using ::testing::_;
 using ::testing::Invoke;
@@ -34,7 +34,7 @@ using ::testing::Return;
  */
 TEST(command_interface, write)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface data_interface{ &mock };
 
   std::vector<uint8_t> data{
@@ -79,7 +79,7 @@ TEST(command_interface, write)
  */
 TEST(command_interface, write_escaped)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface data_interface{ &mock };
 
   std::vector<uint8_t> data{
@@ -124,7 +124,7 @@ TEST(command_interface, write_escaped)
  */
 TEST(command_interface, write_error)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
@@ -150,7 +150,7 @@ TEST(command_interface, write_error)
  */
 TEST(command_interface, read)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
   std::vector<uint8_t> frame = {
@@ -194,7 +194,7 @@ TEST(command_interface, read)
  */
 TEST(command_interface, read_escaped)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
   std::vector<uint8_t> frame = {
@@ -239,7 +239,7 @@ TEST(command_interface, read_escaped)
  */
 TEST(command_interface, read_crc_error)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
   std::vector<uint8_t> frame = {
@@ -291,7 +291,7 @@ TEST(command_interface, read_crc_error)
  */
 TEST(command_interface, read_incorrect_frame_length)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
   std::vector<uint8_t> frame = {
@@ -328,7 +328,7 @@ TEST(command_interface, read_incorrect_frame_length)
  */
 TEST(command_interface, read_start_delimiter_missing)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
   std::vector<uint8_t> frame = {
@@ -374,7 +374,7 @@ TEST(command_interface, read_start_delimiter_missing)
  */
 TEST(command_interface, read_timeout)
 {
-  MockSerialInterface mock;
+  MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
