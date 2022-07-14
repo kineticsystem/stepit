@@ -301,30 +301,15 @@ TEST(command_interface, read_start_delimiter_missing)
 }
 
 /**
- * Test that an exception is thrown when a full frame is not found.
+ * Test that an exception is thrown when no data is read.
  */
 TEST(command_interface, read_timeout)
 {
   MockSerialInterface mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
-  std::vector<uint8_t> frame = {
-    0x7E,  // Delimiter
-    0x00,  // Request ID
-    0x71,  // Motor Move To command ID
-    0x01,  // Motor ID
-    0x00,  // Position escaped (MSB)
-    0x00,  // Position escaped
-    0x7D,  // Position escaped
-    0x5E,  // Position escaped
-    0x00,  // Position escaped (LSB)
-    0xBA,  // CRC (MSB)
-    0xA0   // CRC (LSB)
-    // Missing delimiter
-  };
-
-  auto it = std::begin(frame);
-  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+  // We mock the read to simulate a timeout by returning 0 bytes.
+  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillOnce(Return(0));
 
   EXPECT_THROW(
       {
@@ -334,7 +319,7 @@ TEST(command_interface, read_timeout)
         }
         catch (const stepit_hardware::SerialException& e)
         {
-          EXPECT_STREQ("SerialException: start delimiter missing.", e.what());
+          EXPECT_STREQ("SerialException: timeout.", e.what());
           throw;
         }
       },
