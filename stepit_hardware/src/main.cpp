@@ -1,7 +1,7 @@
 #include "serial/serial.h"
 
 #include <stepit_hardware/data_utils.h>
-#include <stepit_hardware/serial_interface_impl.h>
+#include <stepit_hardware/serial_interface.h>
 
 #include <memory>
 #include <cstdlib>
@@ -22,7 +22,7 @@ void enumerate_ports()
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
-  stepit_hardware::SerialInterfaceImpl serial;
+  stepit_hardware::SerialInterface serial;
 
   enumerate_ports();
 

@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <stepit_hardware/serial_interface.h>
+#include <stepit_hardware/serial.h>
 #include <stepit_hardware/buffer.h>
 
 #include <vector>
@@ -32,7 +32,7 @@ namespace stepit_hardware
 class DataInterface
 {
 public:
-  explicit DataInterface(SerialInterface* serial);
+  explicit DataInterface(Serial* serial);
   void write(const std::vector<uint8_t>& bytes);
   std::vector<uint8_t> read();
 
@@ -50,6 +50,6 @@ private:
   /* Circular buffer to write data to the serial port. */
   Buffer<uint8_t> write_buffer_{ 100 };
 
-  SerialInterface* serial_ = nullptr;
+  Serial* serial_ = nullptr;
 };
 }  // namespace stepit_hardware

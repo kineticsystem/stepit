@@ -21,9 +21,9 @@
 #pragma once
 
 #include <gmock/gmock.h>
-#include <stepit_hardware/serial_interface.h>
+#include <stepit_hardware/serial.h>
 
-class MockSerialInterface : public stepit_hardware::SerialInterface
+class MockSerialInterface : public stepit_hardware::Serial
 {
 public:
   MOCK_METHOD(bool, is_open, (), (const));

@@ -18,42 +18,42 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/serial_interface_impl.h>
+#include <stepit_hardware/serial_interface.h>
 
 #include <serial/serial.h>
 
 namespace stepit_hardware
 {
-SerialInterfaceImpl::SerialInterfaceImpl() : serial_{ new serial::Serial() }
+SerialInterface::SerialInterface() : serial_{ new serial::Serial() }
 {
 }
 
-bool SerialInterfaceImpl::is_open() const
+bool SerialInterface::is_open() const
 {
   return serial_->isOpen();
 }
 
-void SerialInterfaceImpl::close()
+void SerialInterface::close()
 {
   serial_->close();
 }
 
-std::size_t SerialInterfaceImpl::read(uint8_t* buffer, size_t size)
+std::size_t SerialInterface::read(uint8_t* buffer, size_t size)
 {
   return serial_->read(buffer, size);
 }
 
-std::size_t SerialInterfaceImpl::write(const uint8_t* buffer, size_t size)
+std::size_t SerialInterface::write(const uint8_t* buffer, size_t size)
 {
   return serial_->write(buffer, size);
 }
 
-void SerialInterfaceImpl::set_port(const std::string& port)
+void SerialInterface::set_port(const std::string& port)
 {
   serial_->setPort(port);
 }
 
-std::string SerialInterfaceImpl::get_port() const
+std::string SerialInterface::get_port() const
 {
   return serial_->getPort();
 }
