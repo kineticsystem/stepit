@@ -53,7 +53,7 @@ namespace stepit_hardware::crc_utils
  *     the given CRC was computed.
  * @return The new CRC computed on the full sequence of bytes.
  */
-uint16_t crc_ccitt_byte(uint16_t crc, uint8_t byte);
+[[nodiscard]] uint16_t crc_ccitt_byte(uint16_t crc, uint8_t byte);
 
 /**
  * This method calculates the CRC on the given sequence bytes and length
@@ -61,6 +61,6 @@ uint16_t crc_ccitt_byte(uint16_t crc, uint8_t byte);
  * @param bytes The sequence of bytes to calculate the CRC.
  * @return The CRC calculated on the given sequence of bytes.
  */
-uint16_t crc_ccitt(const std::vector<uint8_t>& bytes);
+[[nodiscard]] uint16_t crc_ccitt(const std::vector<uint8_t>& bytes);
 
 }  // namespace stepit_hardware::crc_utils

@@ -23,12 +23,10 @@
 #include <stepit_hardware/data_utils.h>
 #include <stepit_hardware/serial_exception.h>
 #include <mock_serial_interface.h>
-#include <custom_actions.h>
 
 using ::testing::_;
-using ::testing::Matcher;
+using ::testing::Invoke;
 using ::testing::Return;
-using ::testing::SaveArg;
 
 /**
  * Write some data and expect a request frame to be created including
@@ -40,6 +38,7 @@ TEST(command_interface, write)
   stepit_hardware::DataInterface data_interface{ &mock };
 
   std::vector<uint8_t> data{
+    0x00,  // Request ID
     0x71,  // Motor Move To command ID
     0x01,  // Motor ID
     0x00,  // Position (MSB) = 3000
@@ -61,9 +60,14 @@ TEST(command_interface, write)
     0x17,  // CRC (LSB)
     0x7E   // Delimiter
   };
-  std::vector<uint8_t> actual_frame;
 
-  EXPECT_CALL(mock, write(_)).WillOnce(SaveArg<0>(&actual_frame));
+  // Use a lambda function to populate a vector with the buffer values.
+  std::vector<uint8_t> actual_frame;
+  auto write = [&actual_frame](const uint8_t* buffer, std::size_t size) -> std::size_t {
+    actual_frame.emplace_back(buffer[0]);
+    return 1;
+  };
+  EXPECT_CALL(mock, write(_, _)).WillRepeatedly(Invoke(write));
 
   data_interface.write(data);
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
@@ -76,9 +80,10 @@ TEST(command_interface, write)
 TEST(command_interface, write_escaped)
 {
   MockSerialInterface mock;
-  stepit_hardware::DataInterface cmd_interface{ &mock };
+  stepit_hardware::DataInterface data_interface{ &mock };
 
   std::vector<uint8_t> data{
+    0x00,  // Request ID
     0x71,  // Motor Move To command ID
     0x01,  // Motor ID
     0x00,  // Position (MSB) = 32256
@@ -92,21 +97,52 @@ TEST(command_interface, write_escaped)
     0x00,  // Request ID
     0x71,  // Motor Move To command ID
     0x01,  // Motor ID
-    0x00,  // Position escaped (MSB)
-    0x00,  // Position escaped
-    0x7D,  // Position escaped
+    0x00,  // Position (MSB)
+    0x00,  // Position
+    0x7D,  // Escape flag
     0x5E,  // Position escaped
-    0x00,  // Position escaped (LSB)
+    0x00,  // Position (LSB)
     0xBA,  // CRC (MSB)
     0xA0,  // CRC (LSB)
     0x7E   // Delimiter
   };
+
+  // Use a lambda function to populate a vector with the buffer values.
   std::vector<uint8_t> actual_frame;
+  auto write = [&actual_frame](const uint8_t* buffer, std::size_t size) -> std::size_t {
+    actual_frame.emplace_back(buffer[0]);
+    return 1;
+  };
+  EXPECT_CALL(mock, write(_, _)).WillRepeatedly(Invoke(write));
 
-  EXPECT_CALL(mock, write(_)).WillOnce(SaveArg<0>(&actual_frame));
-
-  cmd_interface.write(data);
+  data_interface.write(data);
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
+}
+
+/**
+ * Test that an exception is thrown is no data are written.
+ */
+TEST(command_interface, write_error)
+{
+  MockSerialInterface mock;
+  stepit_hardware::DataInterface cmd_interface{ &mock };
+
+  // We mock the read to simulate a timeout by returning 0 bytes.
+  EXPECT_CALL(mock, write(_, _)).WillOnce(Return(0));
+
+  EXPECT_THROW(
+      {
+        try
+        {
+          cmd_interface.write({ 0, 0 });
+        }
+        catch (const stepit_hardware::SerialException& e)
+        {
+          EXPECT_STREQ("SerialException: error writing to the serial port.", e.what());
+          throw;
+        }
+      },
+      stepit_hardware::SerialException);
 }
 
 /**
@@ -132,6 +168,7 @@ TEST(command_interface, read)
   };
 
   std::vector<uint8_t> expected_data{
+    0x00,  // Response ID
     0x71,  // Status command ID
     0x01,  // Motor ID
     0x00,  // Position (MSB) = 3000
@@ -140,8 +177,13 @@ TEST(command_interface, read)
     0xB8   // Position (LSB)
   };
 
+  // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+    buffer[0] = *it++;
+    return 1;
+  };
+  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   std::vector<uint8_t> actual_data = cmd_interface.read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
@@ -157,7 +199,7 @@ TEST(command_interface, read_escaped)
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
-    0x00,  // Request ID
+    0x00,  // Response ID
     0x71,  // Motor Move To command ID
     0x01,  // Motor ID
     0x00,  // Position escaped (MSB)
@@ -171,6 +213,7 @@ TEST(command_interface, read_escaped)
   };
 
   std::vector<uint8_t> expected_data{
+    0x00,  // Response ID
     0x71,  // Status command ID
     0x01,  // Motor ID
     0x00,  // Position (MSB) = 32256
@@ -179,8 +222,13 @@ TEST(command_interface, read_escaped)
     0x00   // Position (LSB)
   };
 
+  // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+    buffer[0] = *it++;
+    return 1;
+  };
+  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   std::vector<uint8_t> actual_data = cmd_interface.read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
@@ -196,21 +244,26 @@ TEST(command_interface, read_crc_error)
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
-    0x00,  // Request ID
+    0x00,  // Response ID
     0x71,  // Motor Move To command ID
     0x01,  // Motor ID
-    0x00,  // Position escaped (MSB)
-    0x00,  // Position escaped
-    0x7D,  // Position escaped
+    0x00,  // Position (MSB)
+    0x00,  // Position
+    0x7D,  // Escape flaf
     0x5E,  // Position escaped
-    0x00,  // Position escaped (LSB)
+    0x00,  // Position (LSB)
     0xB1,  // CRC (MSB) - incorrect
     0xA0,  // CRC (LSB)
     0x7E   // Delimiter
   };
 
+  // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+    buffer[0] = *it++;
+    return 1;
+  };
+  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   EXPECT_THROW(
       {
@@ -229,6 +282,12 @@ TEST(command_interface, read_crc_error)
 
 /**
  * Test that an exception is thrown when the packet is too short.
+ * We always expect:
+ * 1) a delimiter;
+ * 2) at least one byte of data;
+ * 3) crc;
+ * 4) crc
+ * 5) a delimiter.
  */
 TEST(command_interface, read_incorrect_frame_length)
 {
@@ -241,8 +300,13 @@ TEST(command_interface, read_incorrect_frame_length)
     0x7E   // Delimiter
   };
 
+  // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+    buffer[0] = *it++;
+    return 1;
+  };
+  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   EXPECT_THROW(
       {
@@ -282,8 +346,13 @@ TEST(command_interface, read_start_delimiter_missing)
     0x7E   // Delimiter
   };
 
+  // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillRepeatedly(SetArgFromVector<0>(&it));
+  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+    buffer[0] = *it++;
+    return 1;
+  };
+  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   EXPECT_THROW(
       {
@@ -309,7 +378,7 @@ TEST(command_interface, read_timeout)
   stepit_hardware::DataInterface cmd_interface{ &mock };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
-  EXPECT_CALL(mock, read(Matcher<uint8_t*>(_), _)).WillOnce(Return(0));
+  EXPECT_CALL(mock, read(_, _)).WillOnce(Return(0));
 
   EXPECT_THROW(
       {

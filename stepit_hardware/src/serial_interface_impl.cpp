@@ -43,9 +43,9 @@ std::size_t SerialInterfaceImpl::read(uint8_t* buffer, size_t size)
   return serial_->read(buffer, size);
 }
 
-size_t SerialInterfaceImpl::write(const std::vector<uint8_t>& data)
+std::size_t SerialInterfaceImpl::write(const uint8_t* buffer, size_t size)
 {
-  return serial_->write(data);
+  return serial_->write(buffer, size);
 }
 
 void SerialInterfaceImpl::set_port(const std::string& port)

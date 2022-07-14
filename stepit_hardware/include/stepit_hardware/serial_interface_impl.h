@@ -41,9 +41,9 @@ public:
 
   void close() override;
 
-  std::size_t read(uint8_t* buffer, size_t size = 1) override;
+  [[nodiscard]] std::size_t read(uint8_t* buffer, size_t size = 1) override;
 
-  size_t write(const std::vector<uint8_t>& data) override;
+  [[nodiscard]] std::size_t write(const uint8_t* buffer, size_t size) override;
 
   void set_port(const std::string& port) override;
 

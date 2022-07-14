@@ -36,36 +36,10 @@ DataInterface::DataInterface(SerialInterface* serial) : serial_{ serial }
 {
 }
 
-const std::vector<uint8_t> DataInterface::escape(uint8_t byte)
-{
-  std::vector<uint8_t> bytes;
-  if (byte == DELIMITER_FLAG || byte == ESCAPE_FLAG)
-  {
-    bytes.emplace_back(ESCAPE_FLAG);
-    bytes.emplace_back(byte ^ ESCAPED_XOR);
-  }
-  else
-  {
-    bytes.emplace_back(byte);
-  }
-  return bytes;
-}
-
-const std::vector<uint8_t> DataInterface::create_frame(const std::vector<uint8_t>& bytes)
-{
-  std::vector<uint8_t> frame;
-  frame.emplace_back(DELIMITER_FLAG);
-  for (const uint8_t byte : bytes)
-  {
-    const std::vector<uint8_t> escaped_byte = escape(byte);
-    frame.insert(std::end(frame), std::begin(escaped_byte), std::end(escaped_byte));
-  }
-  frame.emplace_back(DELIMITER_FLAG);
-  return frame;
-}
-
 std::vector<uint8_t> DataInterface::read()
 {
+  read_buffer_.clear();
+
   uint16_t crc = 0;
   state_ = State::StartReading;
   uint8_t byte = 0;
@@ -81,7 +55,6 @@ std::vector<uint8_t> DataInterface::read()
     {
       if (byte == DELIMITER_FLAG)
       {
-        read_buffer_.clear();
         state_ = State::ReadingMessage;
       }
       else
@@ -97,8 +70,9 @@ std::vector<uint8_t> DataInterface::read()
       }
       else if (byte == DELIMITER_FLAG)
       {
-        if (read_buffer_.size() < 4)
+        if (read_buffer_.size() < 3)
         {
+          // We expect at least one byte of data and two bytes for the CRC.
           throw SerialException("incorrect frame length");
         }
         else if (crc != 0)
@@ -107,13 +81,9 @@ std::vector<uint8_t> DataInterface::read()
         }
         else
         {
-          // Remove request ID.
-          read_buffer_.remove(BufferPosition::Head);
-
           // Remove CRC from buffer.
           read_buffer_.remove(BufferPosition::Tail);
           read_buffer_.remove(BufferPosition::Tail);
-
           break;
         }
       }
@@ -143,17 +113,38 @@ std::vector<uint8_t> DataInterface::read()
 
 void DataInterface::write(const std::vector<uint8_t>& bytes)
 {
-  std::vector<uint8_t> data;
-  data.emplace_back(requestId++);
-  data.insert(std::end(data), std::begin(bytes), std::end(bytes));
-  const uint16_t crc = crc_utils::crc_ccitt(bytes);
+  write_buffer_.clear();
+  uint16_t crc = 0;
+
+  write_buffer_.add(DELIMITER_FLAG, BufferPosition::Tail);
+  for (const uint8_t& byte : bytes)
+  {
+    crc = crc_utils::crc_ccitt_byte(crc, byte);
+    if (byte == DELIMITER_FLAG || byte == ESCAPE_FLAG)
+    {
+      write_buffer_.add(ESCAPE_FLAG, BufferPosition::Tail);
+      write_buffer_.add(byte ^ ESCAPED_XOR, BufferPosition::Tail);
+    }
+    else
+    {
+      write_buffer_.add(byte, BufferPosition::Tail);
+    }
+  }
   const uint8_t crc_lsb = (crc & 0xff00) >> 8;
   const uint8_t crc_msb = (crc & 0x00ff);
-  data.emplace_back(crc_msb);
-  data.emplace_back(crc_lsb);
+  write_buffer_.add(crc_msb, BufferPosition::Tail);
+  write_buffer_.add(crc_lsb, BufferPosition::Tail);
+  write_buffer_.add(DELIMITER_FLAG, BufferPosition::Tail);
 
-  std::vector<uint8_t> frame = create_frame(data);
-  std::size_t size = serial_->write(frame);
+  while (write_buffer_.size() > 0)
+  {
+    const uint8_t byte = write_buffer_.remove(BufferPosition::Head);
+    std::size_t size = serial_->write(&byte, 1);
+    if (size == 0)
+    {
+      throw SerialException("error writing to the serial port");
+    }
+  }
 }
 
 }  // namespace stepit_hardware

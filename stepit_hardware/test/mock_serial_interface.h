@@ -29,7 +29,7 @@ public:
   MOCK_METHOD(bool, is_open, (), (const));
   MOCK_METHOD(void, close, ());
   MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size));
-  MOCK_METHOD(std::size_t, write, (const std::vector<uint8_t>& bufferz));
+  MOCK_METHOD(std::size_t, write, (const uint8_t* buffer, size_t size));
   MOCK_METHOD(void, set_port, (const std::string& port));
   MOCK_METHOD(std::string, get_port, (), (const));
 };

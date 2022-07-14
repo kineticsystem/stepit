@@ -42,7 +42,7 @@ public:
    * @throw serial::SerialException
    * @throw serial::IOException
    */
-  [[nodiscard]] virtual size_t write(const std::vector<uint8_t>& buffer) = 0;
+  [[nodiscard]] virtual std::size_t write(const uint8_t* buffer, size_t size) = 0;
 
   /**
    * Sets the serial port identifier.
