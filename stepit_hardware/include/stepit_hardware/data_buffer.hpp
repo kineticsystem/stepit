@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <stepit_hardware/buffer.h>
+#include <stepit_hardware/buffer.hpp>
 #include <cstdint>
 
 namespace stepit_hardware

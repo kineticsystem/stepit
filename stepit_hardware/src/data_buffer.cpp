@@ -1,4 +1,4 @@
-#include <stepit_hardware/data_buffer.h>
+#include <stepit_hardware/data_buffer.hpp>
 
 namespace stepit_hardware
 {

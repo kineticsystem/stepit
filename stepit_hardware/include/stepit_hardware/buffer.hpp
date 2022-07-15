@@ -21,7 +21,7 @@
 #pragma once
 
 #include <vector>
-#include <stepit_hardware/buffer_position.h>
+#include <stepit_hardware/buffer_position.hpp>
 
 namespace stepit_hardware
 {

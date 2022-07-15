@@ -18,7 +18,7 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/crc_utils.h>
+#include <stepit_hardware/crc_utils.hpp>
 
 #include <array>
 

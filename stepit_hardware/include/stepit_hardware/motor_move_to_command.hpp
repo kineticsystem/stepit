@@ -20,49 +20,30 @@
 
 #pragma once
 
-#include <stepit_hardware/serial.h>
-#include <stepit_hardware/buffer.h>
+#include <stepit_hardware/request.hpp>
 
-#include <vector>
+#include <stepit_hardware/data_buffer.hpp>
+
 #include <cstdint>
-#include <string>
 
 namespace stepit_hardware
 {
-class DataInterface
+/**
+ * Command to move a motor to a given position.
+ */
+class MotorMoveToCommand : public Request
 {
 public:
-  explicit DataInterface(Serial* serial);
-
   /**
-   * Write a sequence of bytes to the serial port.
-   * @param bytes The bytes to read.
-   * @throw stepit_hardware::SerialException
+   * Command to move a motor to a given position.
+   * @param motor_id The motor id.
+   * @param position The target position relative to the motor zero position,
+   * positive or negative.
    */
-  void write(const std::vector<uint8_t>& bytes);
-
-  /**
-   * Read a sequence of bytes from the serial port.
-   * @return The bytes read.
-   * @throw stepit_hardware::SerialException
-   */
-  std::vector<uint8_t> read();
+  explicit MotorMoveToCommand(uint8_t motor_id, int32_t position);
 
 private:
-  /* States used while reading and parsiong a frame. */
-  enum class ReadState
-  {
-    StartReading,
-    ReadingMessage,
-    ReadingEscapedByte
-  } state_ = ReadState::StartReading;
-
-  /* Circular buffer to read data from the serial port. */
-  Buffer<uint8_t> read_buffer_{ 100 };
-
-  /* Circular buffer to write data to the serial port. */
-  Buffer<uint8_t> write_buffer_{ 100 };
-
-  Serial* serial_ = nullptr;
+  uint8_t motor_id_;
+  int32_t position_;
 };
 }  // namespace stepit_hardware

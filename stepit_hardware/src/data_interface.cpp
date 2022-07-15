@@ -18,11 +18,11 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/data_interface.h>
+#include <stepit_hardware/data_interface.hpp>
 
-#include <stepit_hardware/crc_utils.h>
-#include <stepit_hardware/data_utils.h>
-#include <stepit_hardware/serial_exception.h>
+#include <stepit_hardware/crc_utils.hpp>
+#include <stepit_hardware/data_utils.hpp>
+#include <stepit_hardware/serial_exception.hpp>
 
 #include <cstdint>
 

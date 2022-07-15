@@ -1,7 +1,7 @@
 #include "serial/serial.h"
 
-#include <stepit_hardware/data_utils.h>
-#include <stepit_hardware/serial_interface.h>
+#include <stepit_hardware/data_utils.hpp>
+#include <stepit_hardware/serial_interface.hpp>
 
 #include <memory>
 #include <cstdlib>

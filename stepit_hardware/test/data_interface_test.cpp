@@ -19,10 +19,10 @@
  */
 
 #include <gmock/gmock.h>
-#include <stepit_hardware/data_interface.h>
-#include <stepit_hardware/data_utils.h>
-#include <stepit_hardware/serial_exception.h>
-#include <mock_serial.h>
+#include <stepit_hardware/data_interface.hpp>
+#include <stepit_hardware/data_utils.hpp>
+#include <stepit_hardware/serial_exception.hpp>
+#include <mock_serial.hpp>
 
 using ::testing::_;
 using ::testing::Invoke;

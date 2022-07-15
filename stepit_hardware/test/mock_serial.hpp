@@ -21,7 +21,7 @@
 #pragma once
 
 #include <gmock/gmock.h>
-#include <stepit_hardware/serial.h>
+#include <stepit_hardware/serial.hpp>
 
 class MockSerial : public stepit_hardware::Serial
 {

@@ -18,9 +18,9 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/motor_move_to_command.h>
+#include <stepit_hardware/motor_move_to_command.hpp>
 
-#include <stepit_hardware/data_utils.h>
+#include <stepit_hardware/data_utils.hpp>
 
 namespace stepit_hardware
 {

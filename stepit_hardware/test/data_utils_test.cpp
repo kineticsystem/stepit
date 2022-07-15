@@ -19,7 +19,7 @@
  */
 
 #include <gmock/gmock.h>
-#include <stepit_hardware/data_utils.h>
+#include <stepit_hardware/data_utils.hpp>
 
 TEST(data_utils, to_hex_test)
 {

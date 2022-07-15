@@ -1,6 +1,6 @@
-#include <stepit_hardware/motor_status.h>
+#include <stepit_hardware/motor_status.hpp>
 
-#include <stepit_hardware/data_utils.h>
+#include <stepit_hardware/data_utils.hpp>
 
 namespace stepit_hardware
 {

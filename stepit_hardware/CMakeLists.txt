@@ -11,29 +11,29 @@ find_package(serial REQUIRED)
 
 add_library(${PROJECT_NAME} # QCreator needs header files to display them.
   src/request.cpp
-  include/stepit_hardware/request.h
+  include/stepit_hardware/request.hpp
   src/response.cpp
-  include/stepit_hardware/response.h
+  include/stepit_hardware/response.hpp
   src/motor_move_to_command.cpp
-  include/stepit_hardware/motor_move_to_command.h
+  include/stepit_hardware/motor_move_to_command.hpp
   src/motor_status.cpp
-  include/stepit_hardware/motor_status.h
+  include/stepit_hardware/motor_status.hpp
   src/data_utils.cpp
-  include/stepit_hardware/data_utils.h
-  include/stepit_hardware/buffer.h
-  include/stepit_hardware/buffer_position.h
+  include/stepit_hardware/data_utils.hpp
+  include/stepit_hardware/buffer.hpp
+  include/stepit_hardware/buffer_position.hpp
   src/data_buffer.cpp
-  include/stepit_hardware/data_buffer.h
+  include/stepit_hardware/data_buffer.hpp
   src/data_interface.cpp
-  include/stepit_hardware/data_interface.h
-  include/stepit_hardware/serial.h
+  include/stepit_hardware/data_interface.hpp
+  include/stepit_hardware/serial.hpp
   src/crc_utils.cpp
-  include/stepit_hardware/crc_utils.h
+  include/stepit_hardware/crc_utils.hpp
   src/serial_interface.cpp
-  include/stepit_hardware/serial_interface.h
-  include/stepit_hardware/serial_exception.h
+  include/stepit_hardware/serial_interface.hpp
+  include/stepit_hardware/serial_exception.hpp
   src/hardware_interface.cpp
-  include/stepit_hardware/hardware_interface.h
+  include/stepit_hardware/hardware_interface.hpp
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -52,9 +52,9 @@ target_compile_features(${PROJECT_NAME}
 add_executable(exec
   src/main.cpp
   src/data_utils.cpp
-  include/stepit_hardware/data_utils.h
+  include/stepit_hardware/data_utils.hpp
   src/serial_interface.cpp
-  include/stepit_hardware/serial_interface.h
+  include/stepit_hardware/serial_interface.hpp
 )
 target_include_directories(exec
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

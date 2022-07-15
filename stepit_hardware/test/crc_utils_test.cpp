@@ -19,7 +19,7 @@
  */
 
 #include <gmock/gmock.h>
-#include <stepit_hardware/crc_utils.h>
+#include <stepit_hardware/crc_utils.hpp>
 
 TEST(crc_utils, calculate_crc)
 {

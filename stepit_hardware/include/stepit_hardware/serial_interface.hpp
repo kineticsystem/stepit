@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <stepit_hardware/serial.h>
+#include <stepit_hardware/serial.hpp>
 
 #include <memory>
 #include "serial/serial.h"

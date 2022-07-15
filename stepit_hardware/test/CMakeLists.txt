@@ -21,7 +21,7 @@ target_compile_options(crc_utils_test
 target_link_libraries(crc_utils_test ${PROJECT_NAME})
 
 ament_add_gmock(data_interface_test data_interface_test.cpp
-    mock_serial.h
+    mock_serial.hpp
 )
 target_include_directories(data_interface_test
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
