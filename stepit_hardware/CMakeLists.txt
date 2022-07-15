@@ -36,8 +36,8 @@ add_library(${PROJECT_NAME} # QCreator needs header files to display them.
   src/serial_interface.cpp
   include/stepit_hardware/serial_interface.hpp
   include/stepit_hardware/serial_exception.hpp
-  src/hardware_interface.cpp
-  include/stepit_hardware/hardware_interface.hpp
+  src/stepit_hardware.cpp
+  include/stepit_hardware/stepit_hardware.hpp
 )
 target_include_directories(${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
