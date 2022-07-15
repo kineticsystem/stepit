@@ -24,8 +24,13 @@
 
 namespace stepit_hardware
 {
-SerialInterface::SerialInterface() : serial_{ new serial::Serial() }
+SerialInterface::SerialInterface() : serial_{ new serial::Serial }
 {
+}
+
+void SerialInterface::open()
+{
+  serial_->open();
 }
 
 bool SerialInterface::is_open() const
@@ -45,7 +50,9 @@ std::size_t SerialInterface::read(uint8_t* buffer, size_t size)
 
 std::size_t SerialInterface::write(const uint8_t* buffer, size_t size)
 {
-  return serial_->write(buffer, size);
+  std::size_t write_size = serial_->write(buffer, size);
+  serial_->flush();
+  return write_size;
 }
 
 void SerialInterface::set_port(const std::string& port)
@@ -56,5 +63,27 @@ void SerialInterface::set_port(const std::string& port)
 std::string SerialInterface::get_port() const
 {
   return serial_->getPort();
+}
+
+void SerialInterface::set_timeout(uint32_t timeout_ms)
+{
+  timeout_ms_ = timeout_ms;
+  serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
+  serial_->setTimeout(timeout);
+}
+
+uint32_t SerialInterface::get_timeout() const
+{
+  return timeout_ms_;
+}
+
+void SerialInterface::set_baudrate(uint32_t baudrate)
+{
+  serial_->setBaudrate(baudrate);
+}
+
+uint32_t SerialInterface::get_baudrate() const
+{
+  return serial_->getBaudrate();
 }
 }  // namespace stepit_hardware

@@ -28,8 +28,6 @@ namespace stepit_hardware
 {
 class SerialException : public std::exception
 {
-  // Disable copy constructors
-  SerialException& operator=(const SerialException&);
   std::string what_;
 
 public:
@@ -44,11 +42,12 @@ public:
   {
   }
 
-  virtual ~SerialException() throw() override
-  {
-  }
+  ~SerialException() override = default;
 
-  virtual const char* what() const throw() override
+  // Disable copy constructors
+  SerialException& operator=(const SerialException&) = delete;
+
+  [[nodiscard]] const char* what() const throw() override
   {
     return what_.c_str();
   }

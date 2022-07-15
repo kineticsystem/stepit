@@ -12,6 +12,12 @@ public:
   virtual ~Serial() = default;
 
   /**
+   * Opens the serial port as long as the port is set and the port isn't
+   * already open.
+   */
+  virtual void open() = 0;
+
+  /**
    * Gets the open status of the serial port.
    * @return Returns true if the port is open, false otherwise.
    */
@@ -59,5 +65,29 @@ public:
    * @throw std::invalid_argument
    */
   [[nodiscard]] virtual std::string get_port() const = 0;
+
+  /**
+   * Set read timeout in milliseconds.
+   * @param timeout Read timeout in milliseconds.
+   */
+  virtual void set_timeout(uint32_t timeout) = 0;
+
+  /**
+   * Get read timeout in milliseconds.
+   * @return Read timeout in milliseconds.
+   */
+  [[nodiscard]] virtual uint32_t get_timeout() const = 0;
+
+  /**
+   * Sets the baudrate for the serial port.
+   * @param baudrate An integer that sets the baud rate for the serial port.
+   */
+  virtual void set_baudrate(uint32_t baudrate) = 0;
+
+  /**
+   * Gets the baudrate for the serial port.
+   * @return An integer that sets the baud rate for the serial port.
+   */
+  [[nodiscard]] virtual uint32_t get_baudrate() const = 0;
 };
 }  // namespace stepit_hardware

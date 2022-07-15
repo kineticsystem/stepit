@@ -41,7 +41,7 @@ std::vector<uint8_t> DataInterface::read()
   read_buffer_.clear();
 
   uint16_t crc = 0;
-  state_ = State::StartReading;
+  state_ = ReadState::StartReading;
   uint8_t byte = 0;
 
   while (true)
@@ -51,22 +51,22 @@ std::vector<uint8_t> DataInterface::read()
       throw SerialException("timeout");
     }
 
-    if (state_ == State::StartReading)
+    if (state_ == ReadState::StartReading)
     {
       if (byte == DELIMITER_FLAG)
       {
-        state_ = State::ReadingMessage;
+        state_ = ReadState::ReadingMessage;
       }
       else
       {
         throw SerialException("start delimiter missing");
       }
     }
-    else if (state_ == State::ReadingMessage)
+    else if (state_ == ReadState::ReadingMessage)
     {
       if (byte == ESCAPE_FLAG)
       {
-        state_ = State::ReadingEscapedByte;
+        state_ = ReadState::ReadingEscapedByte;
       }
       else if (byte == DELIMITER_FLAG)
       {
@@ -93,11 +93,11 @@ std::vector<uint8_t> DataInterface::read()
         read_buffer_.add(byte, BufferPosition::Tail);
       }
     }
-    else if (state_ == State::ReadingEscapedByte)
+    else if (state_ == ReadState::ReadingEscapedByte)
     {
       crc = crc_utils::crc_ccitt_byte(crc, byte ^ ESCAPED_XOR);
       read_buffer_.add(byte ^ ESCAPED_XOR, BufferPosition::Tail);
-      state_ = State::ReadingMessage;
+      state_ = ReadState::ReadingMessage;
     }
   }
 
