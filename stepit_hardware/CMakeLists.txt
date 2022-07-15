@@ -4,8 +4,12 @@ cmake_minimum_required(VERSION 3.16.3)
 project(stepit_hardware LANGUAGES CXX)
 
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
 find_package(serial REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(lifecycle_msgs REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
 
 # Build stepit_hardware library.
 
@@ -39,9 +43,14 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PUBLIC $<INSTALL_INTERFACE:include>)
 ament_target_dependencies(${PROJECT_NAME}
-  rclcpp
   serial
+  rclcpp
+  rclcpp_lifecycle
+  lifecycle_msgs
+  hardware_interface
+  pluginlib
 )
+pluginlib_export_plugin_description_file(hardware_interface stepit_hardware.xml)
 target_compile_options(${PROJECT_NAME}
   PRIVATE -Wall -Wextra -Wpedantic
 )
@@ -78,6 +87,19 @@ install(
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
+)
+
+ament_export_include_directories(
+  include
+)
+ament_export_libraries(
+  ${PROJECT_NAME}
+)
+ament_export_dependencies(
+  rclcpp
+  hardware_interface
+  pluginlib
+  dynamixel_workbench_toolbox
 )
 
 if (BUILD_TESTING)

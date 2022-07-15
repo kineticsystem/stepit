@@ -1,0 +1,8 @@
+<library path="stepit_hardware">
+  <class name="stepit_hardware/StepitHardware"
+         type="stepit_hardware::StepitHardware"
+         base_class_type="stepit_hardware::SystemInterface">
+    <description>
+      The ROBOTIS Dynamixel system interface.
+    </description>
+  </class>
