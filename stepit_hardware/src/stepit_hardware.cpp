@@ -24,6 +24,48 @@
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
 #include <rclcpp/rclcpp.hpp>
 
-HardwareInterface::HardwareInterface()
+namespace stepit_hardware
 {
+constexpr auto kStepitHardware = "StepitHardware";
+
+CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
+{
+  auto usb_port = info_.hardware_parameters.at("usb_port");
+  auto baud_rate = std::stoi(info_.hardware_parameters.at("baud_rate"));
+
+  RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "usb_port: %s", usb_port.c_str());
+  RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "baud_rate: %d", baud_rate);
+  return {};
 }
+
+std::vector<hardware_interface::StateInterface> StepitHardware::export_state_interfaces()
+{
+  return {};
+}
+
+std::vector<hardware_interface::CommandInterface> StepitHardware::export_command_interfaces()
+{
+  return {};
+}
+
+CallbackReturn StepitHardware::on_activate(const rclcpp_lifecycle::State& previous_state)
+{
+  return {};
+}
+
+CallbackReturn StepitHardware::on_deactivate(const rclcpp_lifecycle::State& previous_state)
+{
+  return {};
+}
+
+return_type StepitHardware::read()
+{
+  return {};
+}
+
+return_type StepitHardware::write()
+{
+  return {};
+}
+
+}  // namespace stepit_hardware
