@@ -30,42 +30,98 @@ constexpr auto kStepitHardware = "StepitHardware";
 
 CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
 {
+  RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "on_init");
+  if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
+  {
+    return CallbackReturn::ERROR;
+  }
+
+  // Initialize as many joint states as specified in the configuration.
+
+  joint_ids_.resize(info_.joints.size(), 0);
+  joints_.resize(info_.joints.size(), Joint{});
+
+  for (uint i = 0; i < info_.joints.size(); i++)
+  {
+    joint_ids_[i] = std::stoi(info_.joints[i].parameters.at("id"));
+    joints_[i].state.position = std::numeric_limits<double>::quiet_NaN();
+    joints_[i].state.velocity = std::numeric_limits<double>::quiet_NaN();
+    joints_[i].command.position = std::numeric_limits<double>::quiet_NaN();
+    joints_[i].command.velocity = std::numeric_limits<double>::quiet_NaN();
+    RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "joint_id %d: %d", i, joint_ids_[i]);
+  }
+
+  // Read serial port connection parameters.
+
   auto usb_port = info_.hardware_parameters.at("usb_port");
   auto baud_rate = std::stoi(info_.hardware_parameters.at("baud_rate"));
 
   RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "usb_port: %s", usb_port.c_str());
   RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "baud_rate: %d", baud_rate);
-  return {};
+
+  // TODO: initialize the serial connection.
+
+  return CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface> StepitHardware::export_state_interfaces()
 {
+  RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "export_state_interfaces");
   return {};
 }
 
 std::vector<hardware_interface::CommandInterface> StepitHardware::export_command_interfaces()
 {
+  RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "export_command_interfaces");
   return {};
 }
 
-CallbackReturn StepitHardware::on_activate(const rclcpp_lifecycle::State& previous_state)
+CallbackReturn StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
-  return {};
+  RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "start");
+
+  // Make goals match current joint states.
+  read();
+  for (auto& joint : joints_)
+  {
+    joint.command.position = joint.state.position;
+    joint.command.velocity = 0.0;
+  }
+  write();
+
+  return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn StepitHardware::on_deactivate(const rclcpp_lifecycle::State& previous_state)
+CallbackReturn StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
-  return {};
+  RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "stop");
+  return CallbackReturn::SUCCESS;
 }
 
 return_type StepitHardware::read()
 {
-  return {};
+  std::vector<uint8_t> ids(info_.joints.size(), 0);
+  std::vector<int32_t> positions(info_.joints.size(), 0);
+  std::vector<int32_t> velocities(info_.joints.size(), 0);
+
+  std::copy(joint_ids_.begin(), joint_ids_.end(), ids.begin());
+
+  // TODO: call the command interface and read the stepper motor states.
+  // Upate the joint states with the information coming from the hardware.
+
+  return return_type::OK;
 }
 
 return_type StepitHardware::write()
 {
-  return {};
+  std::vector<uint8_t> joint_ids(info_.joints.size(), 0);
+  std::vector<int32_t> joint_commands(info_.joints.size(), 0);
+
+  std::copy(joint_ids_.begin(), joint_ids_.end(), joint_ids.begin());
+
+  // TODO: send goals to the hardware.
+
+  return return_type::OK;
 }
 
 }  // namespace stepit_hardware

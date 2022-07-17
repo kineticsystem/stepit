@@ -34,10 +34,24 @@ using hardware_interface::return_type;
 
 namespace stepit_hardware
 {
+// This stores values representing joint states or targets.
+struct JointValue
+{
+  double position{ 0.0 };
+  double velocity{ 0.0 };
+};
+
+// This stores joint states and targets.
+struct Joint
+{
+  JointValue state{};
+  JointValue command{};
+};
+
 class StepitHardware : public hardware_interface::SystemInterface
 {
 public:
-  RCLCPP_SHARED_PTR_DEFINITIONS(StepitHardware);
+  RCLCPP_SHARED_PTR_DEFINITIONS(StepitHardware)
 
   STEPIT_HARDWARE_PUBLIC
   CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
@@ -61,6 +75,12 @@ public:
   return_type write() override;
 
 private:
+  // Store joint ids.
+  std::vector<uint8_t> joint_ids_;
+
+  // Store information about current joint states and targets.
+  std::vector<Joint> joints_;
+
   // Interface to send binary data.
   // I think we should use a CommandInterface because the DataInterface
   // is too generic: it deals with bytes sequences wrapped in data frames.
