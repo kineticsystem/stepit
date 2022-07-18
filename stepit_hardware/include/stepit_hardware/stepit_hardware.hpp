@@ -34,20 +34,6 @@ using hardware_interface::return_type;
 
 namespace stepit_hardware
 {
-// This stores values representing joint states or targets.
-struct JointValue
-{
-  double position{ 0.0 };
-  double velocity{ 0.0 };
-};
-
-// This stores joint states and targets.
-struct Joint
-{
-  JointValue state{};
-  JointValue command{};
-};
-
 class StepitHardware : public hardware_interface::SystemInterface
 {
 public:
@@ -56,9 +42,15 @@ public:
   STEPIT_HARDWARE_PUBLIC
   CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
 
+  /**
+   * This method exposes position and velocity of joints for reading.
+   */
   STEPIT_HARDWARE_PUBLIC
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
+  /**
+   * This method exposes the joints targets for writing.
+   */
   STEPIT_HARDWARE_PUBLIC
   std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
@@ -75,6 +67,20 @@ public:
   return_type write() override;
 
 private:
+  // Internal structure to store joint states or targets.
+  struct JointValue
+  {
+    double position{ 0.0 };
+    double velocity{ 0.0 };
+  };
+
+  // Internal structure to store joint states and targets.
+  struct Joint
+  {
+    JointValue state{};
+    JointValue command{};
+  };
+
   // Store joint ids.
   std::vector<uint8_t> joint_ids_;
 

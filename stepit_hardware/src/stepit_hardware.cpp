@@ -59,7 +59,13 @@ CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& i
   RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "usb_port: %s", usb_port.c_str());
   RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "baud_rate: %d", baud_rate);
 
-  // TODO: initialize the serial connection.
+  // TODO: initialize the serial connection and check the steppers.
+
+  //  if (!data_interface_.init(usb_port.c_str(), baud_rate, &log))
+  //  {
+  //    RCLCPP_FATAL(rclcpp::get_logger(kStepitHardware), "%s", log);
+  //    return CallbackReturn::ERROR;
+  //  }
 
   return CallbackReturn::SUCCESS;
 }
@@ -67,13 +73,29 @@ CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& i
 std::vector<hardware_interface::StateInterface> StepitHardware::export_state_interfaces()
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "export_state_interfaces");
-  return {};
+  std::vector<hardware_interface::StateInterface> state_interfaces;
+  for (uint i = 0; i < info_.joints.size(); i++)
+  {
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joints_[i].state.position));
+    state_interfaces.emplace_back(hardware_interface::StateInterface(
+        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joints_[i].state.velocity));
+  }
+  return state_interfaces;
 }
 
 std::vector<hardware_interface::CommandInterface> StepitHardware::export_command_interfaces()
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "export_command_interfaces");
-  return {};
+  std::vector<hardware_interface::CommandInterface> command_interfaces;
+  for (uint i = 0; i < info_.joints.size(); i++)
+  {
+    command_interfaces.emplace_back(hardware_interface::CommandInterface(
+        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joints_[i].command.position));
+    command_interfaces.emplace_back(hardware_interface::CommandInterface(
+        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joints_[i].command.velocity));
+  }
+  return command_interfaces;
 }
 
 CallbackReturn StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
