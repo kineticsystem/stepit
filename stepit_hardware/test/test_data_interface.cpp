@@ -32,7 +32,7 @@ using ::testing::Return;
  * Write some data and expect a request frame to be created including
  * delimiters, request ID and CRC.
  */
-TEST(command_interface, write)
+TEST(TestCommandInterface, write)
 {
   MockSerial mock;
   stepit_hardware::DataInterface data_interface{ &mock };
@@ -77,7 +77,7 @@ TEST(command_interface, write)
  * Write some data and expect a request frame, with escaped bytes, to be
  * created including delimiters, request ID and CRC.
  */
-TEST(command_interface, write_escaped)
+TEST(TestCommandInterface, write_escaped)
 {
   MockSerial mock;
   stepit_hardware::DataInterface data_interface{ &mock };
@@ -122,7 +122,7 @@ TEST(command_interface, write_escaped)
 /**
  * Test that an exception is thrown is no data are written.
  */
-TEST(command_interface, write_error)
+TEST(TestCommandInterface, write_error)
 {
   MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
@@ -148,7 +148,7 @@ TEST(command_interface, write_error)
 /**
  * Read a response frame and expect data to be returned.
  */
-TEST(command_interface, read)
+TEST(TestCommandInterface, read)
 {
   MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
@@ -192,7 +192,7 @@ TEST(command_interface, read)
 /**
  * Read a response frame with escaped bytes and expect data to be returned.
  */
-TEST(command_interface, read_escaped)
+TEST(TestCommandInterface, read_escaped)
 {
   MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
@@ -237,7 +237,7 @@ TEST(command_interface, read_escaped)
 /**
  * Test that an exception is thrown when a CRC error is found.
  */
-TEST(command_interface, read_crc_error)
+TEST(TestCommandInterface, read_crc_error)
 {
   MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
@@ -289,7 +289,7 @@ TEST(command_interface, read_crc_error)
  * 4) crc
  * 5) a delimiter.
  */
-TEST(command_interface, read_incorrect_frame_length)
+TEST(TestCommandInterface, read_incorrect_frame_length)
 {
   MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
@@ -326,7 +326,7 @@ TEST(command_interface, read_incorrect_frame_length)
 /**
  * Test that an exception is thrown when there is no start delimiter.
  */
-TEST(command_interface, read_start_delimiter_missing)
+TEST(TestCommandInterface, read_start_delimiter_missing)
 {
   MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };
@@ -372,7 +372,7 @@ TEST(command_interface, read_start_delimiter_missing)
 /**
  * Test that an exception is thrown when no data is read.
  */
-TEST(command_interface, read_timeout)
+TEST(TestCommandInterface, read_timeout)
 {
   MockSerial mock;
   stepit_hardware::DataInterface cmd_interface{ &mock };

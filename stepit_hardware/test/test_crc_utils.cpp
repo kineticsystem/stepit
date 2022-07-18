@@ -21,7 +21,7 @@
 #include <gmock/gmock.h>
 #include <stepit_hardware/crc_utils.hpp>
 
-TEST(crc_utils, calculate_crc)
+TEST(TestCRCUtils, calculate_crc)
 {
   ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6 }), 0x3B07);
   ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0xE2, 0x12, 0xF1, 0xFF, 0x00, 0xD2 }), 0x7071);

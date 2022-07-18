@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <stepit_hardware/visibility_control.hpp>
 #include <stepit_hardware/data_interface.hpp>
+#include <stepit_hardware/visibility_control.hpp>
 
 #include <hardware_interface/handle.hpp>
 #include <hardware_interface/hardware_info.hpp>

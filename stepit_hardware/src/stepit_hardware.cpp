@@ -22,7 +22,13 @@
 
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
+
 #include <rclcpp/rclcpp.hpp>
+#include <pluginlib/class_list_macros.hpp>
+
+#include <limits>
+#include <vector>
+#include <string>
 
 namespace stepit_hardware
 {
@@ -147,3 +153,5 @@ return_type StepitHardware::write()
 }
 
 }  // namespace stepit_hardware
+
+PLUGINLIB_EXPORT_CLASS(stepit_hardware::StepitHardware, hardware_interface::SystemInterface)

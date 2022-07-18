@@ -21,14 +21,14 @@
 #include <gmock/gmock.h>
 #include <stepit_hardware/data_utils.hpp>
 
-TEST(data_utils, to_hex_test)
+TEST(TestDataUtils, to_hex_test)
 {
   std::vector<uint8_t> bytes = { 0x7E, 0x00, 0x70, 0x00, 0x00, 0x00, 0x4E, 0x20, 0x75, 0x38, 0x7E };
   std::string hex = stepit_hardware::data_utils::to_hex(bytes);
   ASSERT_EQ(hex, "7E 00 70 00 00 00 4E 20 75 38 7E");
 }
 
-TEST(data_utils, from_float)
+TEST(TestDataUtils, from_float)
 {
   // See https://www.h-schmidt.net/FloatConverter/IEEE754.html
   // Convert 4.2 into a sequence of bytes.
@@ -38,7 +38,7 @@ TEST(data_utils, from_float)
   ASSERT_EQ(hex, "40 86 66 66");
 }
 
-TEST(data_utils, to_float)
+TEST(TestDataUtils, to_float)
 {
   // See https://www.h-schmidt.net/FloatConverter/IEEE754.html
   // Check if the given sequence of bytes equals to the float 4.2.
@@ -47,7 +47,7 @@ TEST(data_utils, to_float)
   ASSERT_FLOAT_EQ(value, 4.2f);
 }
 
-TEST(data_utils, from_int32)
+TEST(TestDataUtils, from_int32)
 {
   auto bytes = stepit_hardware::data_utils::from_int32(-1582119980);
   std::vector<uint8_t> bytes_v(bytes.begin(), bytes.end());
@@ -55,14 +55,14 @@ TEST(data_utils, from_int32)
   ASSERT_EQ(hex, "A1 B2 C3 D4");
 }
 
-TEST(data_utils, to_int32)
+TEST(TestDataUtils, to_int32)
 {
   std::array<uint8_t, 4> bytes = { 0xA1, 0xB2, 0xC3, 0xD4 };
   auto value = stepit_hardware::data_utils::to_int32(bytes);
   ASSERT_EQ(value, -1582119980);
 }
 
-TEST(data_utils, from_int16)
+TEST(TestDataUtils, from_int16)
 {
   auto bytes = stepit_hardware::data_utils::from_int16(-3937);
   std::vector<uint8_t> bytes_v(bytes.begin(), bytes.end());
@@ -70,7 +70,7 @@ TEST(data_utils, from_int16)
   ASSERT_EQ(hex, "F0 9F");
 }
 
-TEST(data_utils, to_int16)
+TEST(TestDataUtils, to_int16)
 {
   std::array<uint8_t, 2> bytes = { 0xF0, 0x9F };
   auto value = stepit_hardware::data_utils::to_int16(bytes);

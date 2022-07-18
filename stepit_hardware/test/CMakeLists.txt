@@ -1,33 +1,49 @@
 # Add support for GTest.
 find_package(ament_cmake_gtest REQUIRED)
 find_package(ament_cmake_gmock REQUIRED)
+find_package(ros2_control_test_assets REQUIRED)
 
-ament_add_gmock(data_utils_test data_utils_test.cpp)
-target_include_directories(data_utils_test
+ament_add_gmock(test_data_utils test_data_utils.cpp)
+target_include_directories(test_data_utils
   PRIVATE {CMAKE_CURRENT_SOURCE_DIR}/include
 )
-target_compile_options(data_utils_test
+target_compile_options(test_data_utils
   PRIVATE -Wall -Wextra
 )
-target_link_libraries(data_utils_test ${PROJECT_NAME})
+target_link_libraries(test_data_utils ${PROJECT_NAME})
 
-ament_add_gmock(crc_utils_test crc_utils_test.cpp)
-target_include_directories(crc_utils_test
+ament_add_gmock(test_crc_utils test_crc_utils.cpp)
+target_include_directories(test_crc_utils
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-target_compile_options(crc_utils_test
+target_compile_options(test_crc_utils
   PRIVATE -Wall -Wextra
 )
-target_link_libraries(crc_utils_test ${PROJECT_NAME})
+target_link_libraries(test_crc_utils ${PROJECT_NAME})
 
-ament_add_gmock(data_interface_test data_interface_test.cpp
+ament_add_gmock(test_data_interface test_data_interface.cpp
     mock_serial.hpp
 )
-target_include_directories(data_interface_test
+target_include_directories(test_data_interface
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_compile_options(data_interface_test
+target_compile_options(test_data_interface
   PRIVATE -Wall -Wno-return-type
 )
-target_link_libraries(data_interface_test ${PROJECT_NAME})
+target_link_libraries(test_data_interface ${PROJECT_NAME})
+
+ament_add_gmock(test_load_stepit_hardware test_load_stepit_hardware.cpp
+)
+target_include_directories(test_load_stepit_hardware
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_compile_options(test_load_stepit_hardware
+  PRIVATE -Wall -Wno-return-type
+)
+target_link_libraries(test_load_stepit_hardware ${PROJECT_NAME})
+ament_target_dependencies(test_load_stepit_hardware
+  pluginlib
+  ros2_control_test_assets
+)
