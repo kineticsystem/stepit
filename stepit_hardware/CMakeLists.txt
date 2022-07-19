@@ -7,17 +7,30 @@
 cmake_minimum_required(VERSION 3.16.3)
 project(stepit_hardware LANGUAGES CXX)
 
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
 find_package(ament_cmake REQUIRED)
-find_package(serial REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
-find_package(lifecycle_msgs REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(serial REQUIRED)
+
+set(THIS_PACKAGE_INCLUDE_DEPENDS
+  hardware_interface
+  pluginlib
+  rclcpp
+  rclcpp_lifecycle
+  serial
+)
 
 # Build stepit_hardware library.
 
-add_library(${PROJECT_NAME} # QCreator needs header files to display them.
+add_library(
+  ${PROJECT_NAME} # QCreator needs header files to display them.
+  SHARED
   src/request.cpp
   include/stepit_hardware/request.hpp
   src/response.cpp
@@ -44,76 +57,87 @@ add_library(${PROJECT_NAME} # QCreator needs header files to display them.
   include/stepit_hardware/stepit_hardware.hpp
   include/stepit_hardware/visibility_control.hpp
 )
-target_include_directories(${PROJECT_NAME}
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  PUBLIC $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(${PROJECT_NAME}
-  serial
-  rclcpp
-  rclcpp_lifecycle
-  lifecycle_msgs
-  hardware_interface
-  pluginlib
+target_include_directories(
+  ${PROJECT_NAME}
+  PRIVATE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
 )
+ament_target_dependencies(
+  ${PROJECT_NAME}
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
+)
+target_compile_features(${PROJECT_NAME}
+  PRIVATE cxx_std_17
+)
+
+#add_executable(my_exe
+#  src/main.cpp
+#  src/data_utils.cpp
+#  include/stepit_hardware/data_utils.hpp
+#  src/serial_interface.cpp
+#  include/stepit_hardware/serial_interface.hpp
+#)
+#target_include_directories(
+#  my_exe
+#  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#  PUBLIC $<INSTALL_INTERFACE:include>)
+#ament_target_dependencies(my_exe
+#  rclcpp
+#  serial
+#)
+
+#target_compile_features(${PROJECT_NAME}
+#  PRIVATE cxx_std_17
+#)
+
+###############################################################################
+# PLUGINS
+
 pluginlib_export_plugin_description_file(hardware_interface stepit_hardware.xml)
-target_compile_options(${PROJECT_NAME}
-  PRIVATE -Wall -Wextra -Wpedantic
+
+###############################################################################
+# TESTS
+
+if (BUILD_TESTING)
+    add_subdirectory(test)
+endif()
+
+###############################################################################
+# INSTALL
+
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib/${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
 )
-target_compile_features(${PROJECT_NAME}
-  PRIVATE cxx_std_17
+install(
+  DIRECTORY include/
+  DESTINATION include
 )
 
-add_executable(exec
-  src/main.cpp
-  src/data_utils.cpp
-  include/stepit_hardware/data_utils.hpp
-  src/serial_interface.cpp
-  include/stepit_hardware/serial_interface.hpp
-)
-target_include_directories(exec
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  PUBLIC $<INSTALL_INTERFACE:include>)
-ament_target_dependencies(exec
-  rclcpp
-  serial
-)
-target_compile_options(${PROJECT_NAME}
-  PRIVATE -Wall -Wextra -Wpedantic
-)
-target_compile_features(${PROJECT_NAME}
-  PRIVATE cxx_std_17
-)
+###############################################################################
+# EXPORTS
 
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_include_directories(
+  include
+)
+ament_export_libraries(
+  ${PROJECT_NAME}
+)
+ament_export_targets(
+  export_${PROJECT_NAME}
+)
 
 ## Export all dependencies required by a package to use this library.
 ## When a package calls find_package(stepit_hardware), CMake looks for a file
 ## called stepit_hardwareConfig.cmake which sets up everything another project
 ## would need to depend on this one.
 ament_export_dependencies(
-  rclcpp
-  hardware_interface
-  pluginlib
-)
-
-if (BUILD_TESTING)
-    add_subdirectory(test)
-endif()
-
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
-
-# Install targets.
-install(
-  TARGETS
-    ${PROJECT_NAME}
-  EXPORT export_${PROJECT_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
 ament_package()

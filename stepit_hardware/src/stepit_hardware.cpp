@@ -127,7 +127,7 @@ StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& pr
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-return_type StepitHardware::read(const rclcpp::Time& time, const rclcpp::Duration& period)
+hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time, const rclcpp::Duration& period)
 {
   std::vector<uint8_t> ids(info_.joints.size(), 0);
   std::vector<int32_t> positions(info_.joints.size(), 0);
@@ -138,10 +138,10 @@ return_type StepitHardware::read(const rclcpp::Time& time, const rclcpp::Duratio
   // TODO: call the command interface and read the stepper motor states.
   // Update the joint states with the information coming from the hardware.
 
-  return return_type::OK;
+  return hardware_interface::return_type::OK;
 }
 
-return_type StepitHardware::write(const rclcpp::Time& time, const rclcpp::Duration& period)
+hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time, const rclcpp::Duration& period)
 {
   std::vector<uint8_t> joint_ids(info_.joints.size(), 0);
   std::vector<int32_t> joint_commands(info_.joints.size(), 0);
@@ -150,7 +150,7 @@ return_type StepitHardware::write(const rclcpp::Time& time, const rclcpp::Durati
 
   // TODO: send goals to the hardware.
 
-  return return_type::OK;
+  return hardware_interface::return_type::OK;
 }
 
 }  // namespace stepit_hardware

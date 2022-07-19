@@ -45,6 +45,7 @@ protected:
         <ros2_control name="StepitHardware" type="system">
           <hardware>
             <plugin>stepit_hardware/StepitHardware</plugin>
+            <param name="port">/dev/whatever</param>
           </hardware>
           <joint name="joint1">
             <command_interface name="position"/>
