@@ -80,27 +80,16 @@ target_compile_features(${PROJECT_NAME}
   PRIVATE cxx_std_20
 )
 
-# Install targets.
-install(
-  TARGETS
-    ${PROJECT_NAME}
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
-ament_export_include_directories(
-  include
-)
-ament_export_libraries(
-  ${PROJECT_NAME}
-)
+## Export all dependencies required by a package to use this library.
+## When a package calls find_package(stepit_hardware), CMake looks for a file
+## called stepit_hardwareConfig.cmake which sets up everything another project
+## would need to depend on this one.
 ament_export_dependencies(
   rclcpp
   hardware_interface
   pluginlib
-  dynamixel_workbench_toolbox
 )
 
 if (BUILD_TESTING)
@@ -108,3 +97,19 @@ if (BUILD_TESTING)
 endif()
 
 ament_package()
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
+# Install targets.
+install(
+  TARGETS
+    ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
