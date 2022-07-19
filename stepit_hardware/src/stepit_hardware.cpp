@@ -23,7 +23,6 @@
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
 
-#include <rclcpp/rclcpp.hpp>
 #include <pluginlib/class_list_macros.hpp>
 
 #include <limits>
@@ -34,7 +33,7 @@ namespace stepit_hardware
 {
 constexpr auto kStepitHardware = "StepitHardware";
 
-CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
+hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "on_init");
   if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
@@ -104,29 +103,31 @@ std::vector<hardware_interface::CommandInterface> StepitHardware::export_command
   return command_interfaces;
 }
 
-CallbackReturn StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
+hardware_interface::CallbackReturn
+StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "start");
 
   // Make goals match current joint states.
-  read();
-  for (auto& joint : joints_)
-  {
-    joint.command.position = joint.state.position;
-    joint.command.velocity = 0.0;
-  }
-  write();
+  //  read();
+  //  for (auto& joint : joints_)
+  //  {
+  //    joint.command.position = joint.state.position;
+  //    joint.command.velocity = 0.0;
+  //  }
+  //  write();
 
   return CallbackReturn::SUCCESS;
 }
 
-CallbackReturn StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
+hardware_interface::CallbackReturn
+StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "stop");
-  return CallbackReturn::SUCCESS;
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-return_type StepitHardware::read()
+return_type StepitHardware::read(const rclcpp::Time& time, const rclcpp::Duration& period)
 {
   std::vector<uint8_t> ids(info_.joints.size(), 0);
   std::vector<int32_t> positions(info_.joints.size(), 0);
@@ -135,12 +136,12 @@ return_type StepitHardware::read()
   std::copy(joint_ids_.begin(), joint_ids_.end(), ids.begin());
 
   // TODO: call the command interface and read the stepper motor states.
-  // Upate the joint states with the information coming from the hardware.
+  // Update the joint states with the information coming from the hardware.
 
   return return_type::OK;
 }
 
-return_type StepitHardware::write()
+return_type StepitHardware::write(const rclcpp::Time& time, const rclcpp::Duration& period)
 {
   std::vector<uint8_t> joint_ids(info_.joints.size(), 0);
   std::vector<int32_t> joint_commands(info_.joints.size(), 0);

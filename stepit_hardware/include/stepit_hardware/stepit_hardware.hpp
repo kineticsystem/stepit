@@ -29,6 +29,7 @@
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <rclcpp_lifecycle/state.hpp>
 #include <rclcpp/macros.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 using hardware_interface::return_type;
 
@@ -61,10 +62,10 @@ public:
   CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
   STEPIT_HARDWARE_PUBLIC
-  return_type read() override;
+  return_type read(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
   STEPIT_HARDWARE_PUBLIC
-  return_type write() override;
+  return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
 private:
   // Internal structure to store joint states or targets.

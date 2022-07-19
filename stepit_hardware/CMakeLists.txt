@@ -1,5 +1,9 @@
 # See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html
 
+# IMPORTANT: the code does not compile with C++20.
+# See https://bytemeta.vip/repo/ros2/rclcpp/issues/1936
+# A fix has been already applied on the next release of Humble.
+
 cmake_minimum_required(VERSION 3.16.3)
 project(stepit_hardware LANGUAGES CXX)
 
@@ -56,7 +60,7 @@ target_compile_options(${PROJECT_NAME}
   PRIVATE -Wall -Wextra -Wpedantic
 )
 target_compile_features(${PROJECT_NAME}
-  PRIVATE cxx_std_20
+  PRIVATE cxx_std_17
 )
 
 add_executable(exec
@@ -77,7 +81,7 @@ target_compile_options(${PROJECT_NAME}
   PRIVATE -Wall -Wextra -Wpedantic
 )
 target_compile_features(${PROJECT_NAME}
-  PRIVATE cxx_std_20
+  PRIVATE cxx_std_17
 )
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
@@ -96,8 +100,6 @@ if (BUILD_TESTING)
     add_subdirectory(test)
 endif()
 
-ament_package()
-
 install(
   DIRECTORY include/
   DESTINATION include
@@ -113,3 +115,5 @@ install(
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
 )
+
+ament_package()
