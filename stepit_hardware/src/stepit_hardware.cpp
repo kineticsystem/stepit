@@ -127,7 +127,8 @@ StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& pr
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
-hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time, const rclcpp::Duration& period)
+hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclcpp::Time& time,
+                                                     [[maybe_unused]] const rclcpp::Duration& period)
 {
   std::vector<uint8_t> ids(info_.joints.size(), 0);
   std::vector<int32_t> positions(info_.joints.size(), 0);
@@ -141,7 +142,8 @@ hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time, c
   return hardware_interface::return_type::OK;
 }
 
-hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time, const rclcpp::Duration& period)
+hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rclcpp::Time& time,
+                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
   std::vector<uint8_t> joint_ids(info_.joints.size(), 0);
   std::vector<int32_t> joint_commands(info_.joints.size(), 0);

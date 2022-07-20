@@ -6,7 +6,7 @@ DataBuffer::DataBuffer(std::size_t capacity) : buffer_{ capacity }
 {
 }
 
-int DataBuffer::size() const
+std::size_t DataBuffer::size() const
 {
   return buffer_.size();
 }

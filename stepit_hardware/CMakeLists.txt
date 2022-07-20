@@ -4,19 +4,11 @@
 # See https://bytemeta.vip/repo/ros2/rclcpp/issues/1936
 # A fix has been already applied on the next release of Humble.
 
-cmake_minimum_required(VERSION 3.16.3)
-project(stepit_hardware LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.22.1)
+project(stepit_hardware VERSION 0.1.0 LANGUAGES CXX)
+include(GNUInstallDirs)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
-
-find_package(ament_cmake REQUIRED)
-find_package(hardware_interface REQUIRED)
-find_package(pluginlib REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
-find_package(serial REQUIRED)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   hardware_interface
@@ -26,51 +18,50 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   serial
 )
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+    add_compile_options(-Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast)
+    add_compile_options($<$<CONFIG:DEBUG>:-fsanitize=address,undefined>)
+    add_link_options($<$<CONFIG:DEBUG>:-fsanitize=address,undefined>)
+endif()
+
+find_package(ament_cmake REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
+find_package(serial REQUIRED)
+
 # Build stepit_hardware library.
 
+# QCreator would need header files listed here to display them in the class view,
+# but it is not considered good practice for maintenance reasons.
 add_library(
-  ${PROJECT_NAME} # QCreator needs header files to display them.
+  stepit_hardware
   SHARED
   src/request.cpp
-  include/stepit_hardware/request.hpp
   src/response.cpp
-  include/stepit_hardware/response.hpp
   src/motor_move_to_command.cpp
-  include/stepit_hardware/motor_move_to_command.hpp
   src/motor_status.cpp
-  include/stepit_hardware/motor_status.hpp
   src/data_utils.cpp
-  include/stepit_hardware/data_utils.hpp
-  include/stepit_hardware/buffer.hpp
-  include/stepit_hardware/buffer_position.hpp
   src/data_buffer.cpp
-  include/stepit_hardware/data_buffer.hpp
   src/data_interface.cpp
-  include/stepit_hardware/data_interface.hpp
-  include/stepit_hardware/serial.hpp
   src/crc_utils.cpp
-  include/stepit_hardware/crc_utils.hpp
   src/serial_interface.cpp
-  include/stepit_hardware/serial_interface.hpp
-  include/stepit_hardware/serial_exception.hpp
   src/stepit_hardware.cpp
-  include/stepit_hardware/stepit_hardware.hpp
-  include/stepit_hardware/visibility_control.hpp
 )
 target_include_directories(
-  ${PROJECT_NAME}
+  stepit_hardware
   PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(
-  ${PROJECT_NAME}
+  stepit_hardware
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-target_compile_features(${PROJECT_NAME}
-  PRIVATE cxx_std_17
+target_compile_features(stepit_hardware
+  PUBLIC cxx_std_17
 )
-#target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
 
 #add_executable(my_exe
 #  src/main.cpp
@@ -88,8 +79,8 @@ target_compile_features(${PROJECT_NAME}
 #  serial
 #)
 
-#target_compile_features(${PROJECT_NAME}
-#  PRIVATE cxx_std_17
+#target_compile_features(stepit_hardware
+#  PUBLIC cxx_std_17
 #)
 
 ###############################################################################
@@ -101,16 +92,17 @@ pluginlib_export_plugin_description_file(hardware_interface stepit_hardware.xml)
 # INSTALL
 
 install(
-  TARGETS ${PROJECT_NAME}
-  EXPORT export_${PROJECT_NAME}
-  ARCHIVE DESTINATION lib/${PROJECT_NAME}
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
+  DIRECTORY include/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT stepit_hardware_headers
 )
 install(
-  DIRECTORY include/
-  DESTINATION include
+  TARGETS stepit_hardware
+  EXPORT stepit_hardware_targets
+  COMPONENT stepit_hardware_cmake
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 ###############################################################################
@@ -120,10 +112,10 @@ ament_export_include_directories(
   include
 )
 ament_export_libraries(
-  ${PROJECT_NAME}
+  stepit_hardware
 )
 ament_export_targets(
-  export_${PROJECT_NAME}
+  stepit_hardware_targets
 )
 
 ## Export all dependencies required by a package to use this library.
@@ -137,8 +129,9 @@ ament_export_dependencies(
 ###############################################################################
 # TESTS
 
+include(CTest)
 if (BUILD_TESTING)
-    add_subdirectory(test)
+    add_subdirectory(tests)
 endif()
 
 ament_package()

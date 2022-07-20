@@ -31,7 +31,7 @@ public:
   explicit DataBuffer(std::size_t capacity);
 
   // Returns how much data is currently stored in the buffer.
-  int size() const;
+  std::size_t size() const;
 
   // This method resets the buffer into an original state (with no data).
   void clear();
