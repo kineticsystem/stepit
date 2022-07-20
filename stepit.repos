@@ -1,4 +1,5 @@
 repositories:
   serial:
     type: git
-    url: https://github.com/RoverRobotics-forks/serial-ros2
+    url: https://github.com/tylerjw/serial.git
+    version: ros2

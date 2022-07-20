@@ -59,7 +59,7 @@ add_library(
 )
 target_include_directories(
   ${PROJECT_NAME}
-  PRIVATE
+  PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
@@ -70,6 +70,7 @@ ament_target_dependencies(
 target_compile_features(${PROJECT_NAME}
   PRIVATE cxx_std_17
 )
+#target_compile_options(${PROJECT_NAME} PRIVATE -fPIC)
 
 #add_executable(my_exe
 #  src/main.cpp
@@ -95,13 +96,6 @@ target_compile_features(${PROJECT_NAME}
 # PLUGINS
 
 pluginlib_export_plugin_description_file(hardware_interface stepit_hardware.xml)
-
-###############################################################################
-# TESTS
-
-if (BUILD_TESTING)
-    add_subdirectory(test)
-endif()
 
 ###############################################################################
 # INSTALL
@@ -139,5 +133,12 @@ ament_export_targets(
 ament_export_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
+
+###############################################################################
+# TESTS
+
+if (BUILD_TESTING)
+    add_subdirectory(test)
+endif()
 
 ament_package()

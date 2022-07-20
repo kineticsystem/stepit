@@ -63,7 +63,7 @@ TEST(TestCommandInterface, write)
 
   // Use a lambda function to populate a vector with the buffer values.
   std::vector<uint8_t> actual_frame;
-  auto write = [&actual_frame](const uint8_t* buffer, std::size_t size) -> std::size_t {
+  auto write = [&actual_frame](const uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
     actual_frame.emplace_back(buffer[0]);
     return 1;
   };
@@ -109,7 +109,7 @@ TEST(TestCommandInterface, write_escaped)
 
   // Use a lambda function to populate a vector with the buffer values.
   std::vector<uint8_t> actual_frame;
-  auto write = [&actual_frame](const uint8_t* buffer, std::size_t size) -> std::size_t {
+  auto write = [&actual_frame](const uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
     actual_frame.emplace_back(buffer[0]);
     return 1;
   };
@@ -179,7 +179,7 @@ TEST(TestCommandInterface, read)
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+  auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
     buffer[0] = *it++;
     return 1;
   };
@@ -224,7 +224,7 @@ TEST(TestCommandInterface, read_escaped)
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+  auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
     buffer[0] = *it++;
     return 1;
   };
@@ -259,7 +259,7 @@ TEST(TestCommandInterface, read_crc_error)
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+  auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
     buffer[0] = *it++;
     return 1;
   };
@@ -302,7 +302,7 @@ TEST(TestCommandInterface, read_incorrect_frame_length)
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+  auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
     buffer[0] = *it++;
     return 1;
   };
@@ -348,7 +348,7 @@ TEST(TestCommandInterface, read_start_delimiter_missing)
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
-  auto read = [&](uint8_t* buffer, std::size_t size) -> std::size_t {
+  auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
     buffer[0] = *it++;
     return 1;
   };

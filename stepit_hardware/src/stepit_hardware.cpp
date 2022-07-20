@@ -58,10 +58,10 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
 
   // Read serial port connection parameters.
 
-  auto usb_port = info_.hardware_parameters.at("usb_port");
-  auto baud_rate = std::stoi(info_.hardware_parameters.at("baud_rate"));
-
+  std::string usb_port = info_.hardware_parameters.at("usb_port");
   RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "usb_port: %s", usb_port.c_str());
+
+  uint32_t baud_rate = std::stoi(info_.hardware_parameters.at("baud_rate"));
   RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "baud_rate: %d", baud_rate);
 
   // TODO: initialize the serial connection and check the steppers.
