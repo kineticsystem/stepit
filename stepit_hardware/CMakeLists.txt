@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 3.22.1)
 project(stepit_hardware VERSION 0.1.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 
+# Enable output of compile commands during generation.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(THIS_PACKAGE_INCLUDE_DEPENDS
