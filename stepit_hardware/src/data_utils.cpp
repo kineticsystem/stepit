@@ -26,19 +26,6 @@ constexpr std::array<char, 16> vChars = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
 };
 
-std::array<uint8_t, 1> from_int8(const int8_t value)
-{
-  std::array<uint8_t, 1> bytes;
-  bytes[0] = static_cast<uint8_t>(value);
-  return bytes;
-}
-
-int8_t to_int8(const std::array<uint8_t, 1>& bytes)
-{
-  const int8_t value = static_cast<int8_t>(bytes[0]);
-  return value;
-}
-
 std::array<uint8_t, 2> from_int16(const int16_t value)
 {
   // The result of this conversion does not depend on the endianness of the system.

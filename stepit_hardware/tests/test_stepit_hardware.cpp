@@ -18,7 +18,7 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include <stepit_hardware/stepit_hardware.hpp>
 
@@ -102,7 +102,7 @@ auto activate_components = [](hardware_interface::ResourceManager& rm, const std
 TEST_F(TestStepitHardware, load_stepit_hardware)
 {
   auto urdf = ros2_control_test_assets::urdf_head + stepit_hardware_ + ros2_control_test_assets::urdf_tail;
-  ASSERT_NO_THROW(hardware_interface::ResourceManager rm(urdf));
+  hardware_interface::ResourceManager rm(urdf);
 }
 
 /**

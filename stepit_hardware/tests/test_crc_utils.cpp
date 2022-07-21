@@ -18,7 +18,7 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <stepit_hardware/crc_utils.hpp>
 
 TEST(TestCRCUtils, calculate_crc)

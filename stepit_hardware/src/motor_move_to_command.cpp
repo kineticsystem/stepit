@@ -29,14 +29,11 @@ constexpr uint8_t kCommandId = 0x71;
 MotorMoveToCommand::MotorMoveToCommand(uint8_t motor_id, int32_t position)
   : motor_id_{ motor_id }, position_{ position }
 {
-  auto encoded_motor_id = stepit_hardware::data_utils::from_int8(motor_id);
+  auto encoded_motor_id = motor_id;
   auto encoded_position = stepit_hardware::data_utils::from_int32(position);
 
   bytes_.emplace_back(kCommandId);
-  for (const uint8_t& byte : encoded_motor_id)
-  {
-    bytes_.emplace_back(byte);
-  }
+  bytes_.emplace_back(encoded_motor_id);
   for (const uint8_t& byte : encoded_position)
   {
     bytes_.emplace_back(byte);

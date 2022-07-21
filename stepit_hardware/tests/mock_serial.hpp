@@ -26,15 +26,15 @@
 class MockSerial : public stepit_hardware::Serial
 {
 public:
-  MOCK_METHOD(void, open, (), ());
-  MOCK_METHOD(bool, is_open, (), (const));
-  MOCK_METHOD(void, close, ());
-  MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size));
-  MOCK_METHOD(std::size_t, write, (const uint8_t* buffer, size_t size));
-  MOCK_METHOD(void, set_port, (const std::string& port));
-  MOCK_METHOD(std::string, get_port, (), (const));
-  MOCK_METHOD(void, set_timeout, (uint32_t timeout));
-  MOCK_METHOD(uint32_t, get_timeout, (), (const));
-  MOCK_METHOD(void, set_baudrate, (uint32_t baudrate));
-  MOCK_METHOD(uint32_t, get_baudrate, (), (const));
+  MOCK_METHOD(void, open, (), (override));
+  MOCK_METHOD(bool, is_open, (), (override, const));
+  MOCK_METHOD(void, close, (), (override));
+  MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size), (override));
+  MOCK_METHOD(std::size_t, write, (const uint8_t* buffer, size_t size), (override));
+  MOCK_METHOD(void, set_port, (const std::string& port), (override));
+  MOCK_METHOD(std::string, get_port, (), (override, const));
+  MOCK_METHOD(void, set_timeout, (uint32_t timeout), (override));
+  MOCK_METHOD(uint32_t, get_timeout, (), (override, const));
+  MOCK_METHOD(void, set_baudrate, (uint32_t baudrate), (override));
+  MOCK_METHOD(uint32_t, get_baudrate, (), (override, const));
 };

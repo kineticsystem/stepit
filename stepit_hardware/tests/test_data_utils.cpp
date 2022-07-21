@@ -18,7 +18,7 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 #include <stepit_hardware/data_utils.hpp>
 
 TEST(TestDataUtils, to_hex_test)
