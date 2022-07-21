@@ -22,8 +22,6 @@
 
 #include <stepit_hardware/request.hpp>
 
-#include <stepit_hardware/data_buffer.hpp>
-
 #include <cstdint>
 
 namespace stepit_hardware

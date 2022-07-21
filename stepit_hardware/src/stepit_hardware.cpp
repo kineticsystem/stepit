@@ -19,6 +19,7 @@
  */
 
 #include <stepit_hardware/stepit_hardware.hpp>
+#include <stepit_hardware/data_utils.hpp>
 
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
@@ -48,7 +49,7 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
 
   for (uint i = 0; i < info_.joints.size(); i++)
   {
-    joint_ids_[i] = std::stoi(info_.joints[i].parameters.at("id"));
+    joint_ids_[i] = data_utils::stoui8(info_.joints[i].parameters.at("id"));
     joints_[i].state.position = std::numeric_limits<double>::quiet_NaN();
     joints_[i].state.velocity = std::numeric_limits<double>::quiet_NaN();
     joints_[i].command.position = std::numeric_limits<double>::quiet_NaN();
@@ -61,7 +62,9 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
   std::string usb_port = info_.hardware_parameters.at("usb_port");
   RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "usb_port: %s", usb_port.c_str());
 
-  uint32_t baud_rate = std::stoi(info_.hardware_parameters.at("baud_rate"));
+  uint32_t baud_rate = data_utils::stoui32(info_.hardware_parameters.at("baud_rate"));
+
+  //  uint32_t baud_rate = std::sto(info_.hardware_parameters.at("baud_rate"));
   RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "baud_rate: %d", baud_rate);
 
   // TODO: initialize the serial connection and check the steppers.

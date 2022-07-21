@@ -4,12 +4,6 @@
 
 namespace stepit_hardware
 {
-void MotorStatus::read(DataBuffer& buffer)
-{
-  position_ = buffer.remove_int32(BufferPosition::Head);
-  distance_to_go_ = buffer.remove_int32(BufferPosition::Head);
-  speed_ = buffer.remove_float(BufferPosition::Head);
-}
 
 int32_t MotorStatus::position() const
 {

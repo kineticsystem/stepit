@@ -29,48 +29,53 @@ constexpr std::array<char, 16> vChars = {
 std::array<uint8_t, 1> from_int8(const int8_t value)
 {
   std::array<uint8_t, 1> bytes;
-  bytes[0] = value;
+  bytes[0] = static_cast<uint8_t>(value);
   return bytes;
 }
 
-int16_t to_int8(const std::array<uint8_t, 1>& bytes)
+int8_t to_int8(const std::array<uint8_t, 1>& bytes)
 {
-  const int8_t value = bytes[0];
+  const int8_t value = static_cast<int8_t>(bytes[0]);
   return value;
 }
 
 std::array<uint8_t, 2> from_int16(const int16_t value)
 {
+  // The result of this conversion does not depend on the endianness of the system.
   std::array<uint8_t, 2> bytes;
-  bytes[0] = (value >> 8) & 0xFF;
-  bytes[1] = value & 0xFF;
+  bytes[0] = static_cast<uint8_t>(value >> 8) & 0xFF;  // MSB
+  bytes[1] = static_cast<uint8_t>(value & 0xFF);       // LSB
   return bytes;
 }
 
 int16_t to_int16(const std::array<uint8_t, 2>& bytes)
 {
-  const int16_t value = (bytes[0] << 8) + bytes[1];
+  // The result of this conversion does not depend on the endianness of the system.
+  const int16_t value = static_cast<int16_t>((bytes[0] << 8) + bytes[1]);
   return value;
 }
 
 std::array<uint8_t, 4> from_int32(const int32_t value)
 {
+  // The result of this conversion does not depend on the endianness of the system.
   std::array<uint8_t, 4> bytes;
-  bytes[0] = (value >> 24) & 0xFF;
-  bytes[1] = (value >> 16) & 0xFF;
-  bytes[2] = (value >> 8) & 0xFF;
-  bytes[3] = value & 0xFF;
+  bytes[0] = static_cast<uint8_t>((value >> 24) & 0xFF);  // MSB
+  bytes[1] = static_cast<uint8_t>((value >> 16) & 0xFF);
+  bytes[2] = static_cast<uint8_t>((value >> 8) & 0xFF);
+  bytes[3] = static_cast<uint8_t>(value & 0xFF);  // LSB
   return bytes;
 }
 
 int32_t to_int32(const std::array<uint8_t, 4>& bytes)
 {
+  // The result of this conversion does not depend on the endianness of the system.
   const int32_t value = (bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3];
   return value;
 }
 
 std::array<uint8_t, 4> from_float(const float value)
 {
+  // The result of this conversion depends on the endianness of the system.
   const auto value_p = reinterpret_cast<const uint8_t*>(&value);
   std::array<uint8_t, 4> bytes;
   bytes[0] = value_p[3];
@@ -82,6 +87,7 @@ std::array<uint8_t, 4> from_float(const float value)
 
 float to_float(const std::array<uint8_t, 4>& bytes)
 {
+  // The result of this conversion depends on the endianness of the system.
   float value;
   const auto value_p = reinterpret_cast<uint8_t*>(&value);
   value_p[0] = bytes[3];

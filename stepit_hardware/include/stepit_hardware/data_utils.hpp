@@ -23,6 +23,7 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <sstream>
 
 /**
  * Utility class to convert standard types into sequence of bytes and back.
@@ -36,6 +37,45 @@
 namespace stepit_hardware::data_utils
 {
 /**
+ * Parse a string into an unsigned 8-bits value.
+ * @param s The string to parse.
+ * @return The unsigned 8-bits value.
+ */
+inline uint8_t stoui8(const std::string& s)
+{
+  std::istringstream reader(s);
+  uint8_t val = 0;
+  reader >> val;
+  return val;
+}
+
+/**
+ * Parse a string into an unsigned 16-bits value.
+ * @param s The string to parse.
+ * @return The unsigned 16-bits value.
+ */
+inline uint16_t stoui16(const std::string& s)
+{
+  std::istringstream reader(s);
+  uint16_t val = 0;
+  reader >> val;
+  return val;
+}
+
+/**
+ * Parse a string into an unsigned 32-bits value.
+ * @param s The string to parse.
+ * @return The unsigned 32-bits value.
+ */
+inline uint32_t stoui32(const std::string& s)
+{
+  std::istringstream reader(s);
+  uint32_t val = 0;
+  reader >> val;
+  return val;
+}
+
+/**
  * Convert an 8 bits integer into one bytes array.
  * @param value Then 8 bits integer to convert.
  * @return The resulting one byte array.
@@ -47,7 +87,7 @@ std::array<uint8_t, 1> from_int8(const int8_t value);
  * @param bytes The one bytes array.
  * @return The resuting 8bits integer.
  */
-int16_t to_int8(const std::array<uint8_t, 1>& bytes);
+int8_t to_int8(const std::array<uint8_t, 1>& bytes);
 
 /**
  * Convert a 16 bits integer into an 2 bytes array in Big Endian byte order.

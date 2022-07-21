@@ -130,8 +130,8 @@ void DataInterface::write(const std::vector<uint8_t>& bytes)
       write_buffer_.add(byte, BufferPosition::Tail);
     }
   }
-  const uint8_t crc_lsb = (crc & 0xff00) >> 8;
-  const uint8_t crc_msb = (crc & 0x00ff);
+  const uint8_t crc_lsb = static_cast<uint8_t>((crc & 0xff00) >> 8);
+  const uint8_t crc_msb = static_cast<uint8_t>((crc & 0x00ff));
   write_buffer_.add(crc_msb, BufferPosition::Tail);
   write_buffer_.add(crc_lsb, BufferPosition::Tail);
   write_buffer_.add(DELIMITER_FLAG, BufferPosition::Tail);
