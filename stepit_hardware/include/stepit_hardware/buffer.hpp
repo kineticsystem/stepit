@@ -21,10 +21,16 @@
 #pragma once
 
 #include <vector>
-#include <stepit_hardware/buffer_position.hpp>
 
 namespace stepit_hardware
 {
+
+enum class BufferPosition
+{
+  Head,
+  Tail
+};
+
 /**
  * This template implements a circular buffer. Items can be added and removed
  * to and from both sides of the buffer.
