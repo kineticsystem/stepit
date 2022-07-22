@@ -20,50 +20,28 @@
 
 #pragma once
 
-#include <stepit_hardware/serial_interface.hpp>
-#include <stepit_hardware/data_interface.hpp>
-#include <stepit_hardware/buffer.hpp>
-
 #include <vector>
 #include <cstdint>
-#include <string>
 
 namespace stepit_hardware
 {
-class DataHandler : public DataInterface
+class DataInterface
 {
 public:
-  explicit DataHandler(SerialInterface* serial);
-
-  /**
-   * Write a sequence of bytes to the serial port.
-   * @param bytes The bytes to read.
-   * @throw stepit_hardware::SerialException
-   */
-  void write(const std::vector<uint8_t>& bytes);
+  virtual ~DataInterface() = default;
 
   /**
    * Read a sequence of bytes from the serial port.
    * @return The bytes read.
    * @throw stepit_hardware::SerialException
    */
-  std::vector<uint8_t> read();
+  virtual std::vector<uint8_t> read() = 0;
 
-private:
-  /* States used while reading and parsiong a frame. */
-  enum class ReadState
-  {
-    StartReading,
-    ReadingMessage,
-    ReadingEscapedByte
-  } state_ = ReadState::StartReading;
-
-  /* Circular buffer to read data from the serial port. */
-  Buffer<uint8_t> read_buffer_{ 100 };
-
-  /* Circular buffer to write data to the serial port. */
-  Buffer<uint8_t> write_buffer_{ 100 };
-
-  SerialInterface* serial_ = nullptr;
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param bytes The bytes to read.
+   * @throw stepit_hardware::SerialException
+   */
+  virtual void write(const std::vector<uint8_t>& bytes) = 0;
 };
 }  // namespace stepit_hardware
