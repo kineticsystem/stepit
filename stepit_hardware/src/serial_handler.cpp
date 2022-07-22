@@ -24,7 +24,7 @@
 
 namespace stepit_hardware
 {
-SerialHandler::SerialHandler() : serial_{ new serial::Serial }
+SerialHandler::SerialHandler() : serial_{ std::make_unique<serial::Serial>() }
 {
 }
 
