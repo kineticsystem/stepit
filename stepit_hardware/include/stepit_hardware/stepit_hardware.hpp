@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <stepit_hardware/data_interface.hpp>
+#include <stepit_hardware/data_handler.hpp>
 #include <stepit_hardware/visibility_control.hpp>
 
 #include <hardware_interface/handle.hpp>
@@ -89,6 +89,6 @@ private:
   // Interface to send binary data.
   // I think we should use a CommandInterface because the DataInterface
   // is too generic: it deals with bytes sequences wrapped in data frames.
-  std::unique_ptr<DataInterface> data_interface_;
+  std::unique_ptr<DataHandler> data_interface_;
 };
 }  // namespace stepit_hardware

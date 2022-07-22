@@ -19,10 +19,10 @@
  */
 
 #include <gmock/gmock.h>
-#include <stepit_hardware/data_interface.hpp>
+#include <stepit_hardware/data_handler.hpp>
 #include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/serial_exception.hpp>
-#include <mock_serial.hpp>
+#include <mock_serial_interface.hpp>
 
 using ::testing::_;
 using ::testing::Invoke;
@@ -32,10 +32,10 @@ using ::testing::Return;
  * Write some data and expect a request frame to be created including
  * delimiters, request ID and CRC.
  */
-TEST(TestCommandInterface, write)
+TEST(TestDataHandler, write)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface data_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -69,7 +69,7 @@ TEST(TestCommandInterface, write)
   };
   EXPECT_CALL(mock, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface.write(data);
+  data_handler.write(data);
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
 }
 
@@ -77,10 +77,10 @@ TEST(TestCommandInterface, write)
  * Write some data and expect a request frame, with escaped bytes, to be
  * created including delimiters, request ID and CRC.
  */
-TEST(TestCommandInterface, write_escaped)
+TEST(TestDataHandler, write_escaped)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface data_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -115,17 +115,17 @@ TEST(TestCommandInterface, write_escaped)
   };
   EXPECT_CALL(mock, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface.write(data);
+  data_handler.write(data);
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
 }
 
 /**
  * Test that an exception is thrown is no data are written.
  */
-TEST(TestCommandInterface, write_error)
+TEST(TestDataHandler, write_error)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface cmd_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(mock, write(_, _)).WillOnce(Return(0));
@@ -134,7 +134,7 @@ TEST(TestCommandInterface, write_error)
       {
         try
         {
-          cmd_interface.write({ 0, 0 });
+          data_handler.write({ 0, 0 });
         }
         catch (const stepit_hardware::SerialException& e)
         {
@@ -148,10 +148,10 @@ TEST(TestCommandInterface, write_error)
 /**
  * Read a response frame and expect data to be returned.
  */
-TEST(TestCommandInterface, read)
+TEST(TestDataHandler, read)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface cmd_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -185,17 +185,17 @@ TEST(TestCommandInterface, read)
   };
   EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
 
-  std::vector<uint8_t> actual_data = cmd_interface.read();
+  std::vector<uint8_t> actual_data = data_handler.read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
 }
 
 /**
  * Read a response frame with escaped bytes and expect data to be returned.
  */
-TEST(TestCommandInterface, read_escaped)
+TEST(TestDataHandler, read_escaped)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface cmd_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -230,17 +230,17 @@ TEST(TestCommandInterface, read_escaped)
   };
   EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
 
-  std::vector<uint8_t> actual_data = cmd_interface.read();
+  std::vector<uint8_t> actual_data = data_handler.read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
 }
 
 /**
  * Test that an exception is thrown when a CRC error is found.
  */
-TEST(TestCommandInterface, read_crc_error)
+TEST(TestDataHandler, read_crc_error)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface cmd_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -269,7 +269,7 @@ TEST(TestCommandInterface, read_crc_error)
       {
         try
         {
-          std::vector<uint8_t> actual_data = cmd_interface.read();
+          std::vector<uint8_t> actual_data = data_handler.read();
         }
         catch (const stepit_hardware::SerialException& e)
         {
@@ -289,10 +289,10 @@ TEST(TestCommandInterface, read_crc_error)
  * 4) crc
  * 5) a delimiter.
  */
-TEST(TestCommandInterface, read_incorrect_frame_length)
+TEST(TestDataHandler, read_incorrect_frame_length)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface cmd_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -312,7 +312,7 @@ TEST(TestCommandInterface, read_incorrect_frame_length)
       {
         try
         {
-          std::vector<uint8_t> actual_data = cmd_interface.read();
+          std::vector<uint8_t> actual_data = data_handler.read();
         }
         catch (const stepit_hardware::SerialException& e)
         {
@@ -326,10 +326,10 @@ TEST(TestCommandInterface, read_incorrect_frame_length)
 /**
  * Test that an exception is thrown when there is no start delimiter.
  */
-TEST(TestCommandInterface, read_start_delimiter_missing)
+TEST(TestDataHandler, read_start_delimiter_missing)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface cmd_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   std::vector<uint8_t> frame = {
     // Missing delimiter
@@ -358,7 +358,7 @@ TEST(TestCommandInterface, read_start_delimiter_missing)
       {
         try
         {
-          std::vector<uint8_t> actual_data = cmd_interface.read();
+          std::vector<uint8_t> actual_data = data_handler.read();
         }
         catch (const stepit_hardware::SerialException& e)
         {
@@ -372,10 +372,10 @@ TEST(TestCommandInterface, read_start_delimiter_missing)
 /**
  * Test that an exception is thrown when no data is read.
  */
-TEST(TestCommandInterface, read_timeout)
+TEST(TestDataHandler, read_timeout)
 {
-  MockSerial mock;
-  stepit_hardware::DataInterface cmd_interface{ &mock };
+  MockSerialInterface mock;
+  stepit_hardware::DataHandler data_handler{ &mock };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(mock, read(_, _)).WillOnce(Return(0));
@@ -384,7 +384,7 @@ TEST(TestCommandInterface, read_timeout)
       {
         try
         {
-          std::vector<uint8_t> actual_data = cmd_interface.read();
+          std::vector<uint8_t> actual_data = data_handler.read();
         }
         catch (const stepit_hardware::SerialException& e)
         {

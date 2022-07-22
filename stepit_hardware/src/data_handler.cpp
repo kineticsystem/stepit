@@ -18,7 +18,7 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/data_interface.hpp>
+#include <stepit_hardware/data_handler.hpp>
 
 #include <stepit_hardware/crc_utils.hpp>
 #include <stepit_hardware/data_utils.hpp>
@@ -32,11 +32,11 @@ constexpr uint8_t DELIMITER_FLAG = 0x7E;  // Start and end of a packet
 constexpr uint8_t ESCAPE_FLAG = 0x7D;     // Escaping byte.
 constexpr uint8_t ESCAPED_XOR = 0x20;     // XOR value applied to escaped bytes.
 
-DataInterface::DataInterface(Serial* serial) : serial_{ serial }
+DataHandler::DataHandler(SerialInterface* serial) : serial_{ serial }
 {
 }
 
-std::vector<uint8_t> DataInterface::read()
+std::vector<uint8_t> DataHandler::read()
 {
   read_buffer_.clear();
 
@@ -111,7 +111,7 @@ std::vector<uint8_t> DataInterface::read()
   return buffer;
 }
 
-void DataInterface::write(const std::vector<uint8_t>& bytes)
+void DataHandler::write(const std::vector<uint8_t>& bytes)
 {
   write_buffer_.clear();
   uint16_t crc = 0;

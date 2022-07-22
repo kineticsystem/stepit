@@ -29,12 +29,12 @@ target_link_libraries(test_crc_utils stepit_hardware)
 ###############################################################################
 # test_data_interface
 
-ament_add_gmock(test_data_interface test_data_interface.cpp)
-target_include_directories(test_data_interface
+ament_add_gmock(test_data_handler test_data_handler.cpp)
+target_include_directories(test_data_handler
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(test_data_interface stepit_hardware)
+target_link_libraries(test_data_handler stepit_hardware)
 
 ###############################################################################
 # test_load_stepit_hardware

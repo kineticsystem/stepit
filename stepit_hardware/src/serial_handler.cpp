@@ -18,71 +18,71 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/serial_interface.hpp>
+#include <stepit_hardware/serial_handler.hpp>
 
 #include <serial/serial.h>
 
 namespace stepit_hardware
 {
-SerialInterface::SerialInterface() : serial_{ new serial::Serial }
+SerialHandler::SerialHandler() : serial_{ new serial::Serial }
 {
 }
 
-void SerialInterface::open()
+void SerialHandler::open()
 {
   serial_->open();
 }
 
-bool SerialInterface::is_open() const
+bool SerialHandler::is_open() const
 {
   return serial_->isOpen();
 }
 
-void SerialInterface::close()
+void SerialHandler::close()
 {
   serial_->close();
 }
 
-std::size_t SerialInterface::read(uint8_t* buffer, size_t size)
+std::size_t SerialHandler::read(uint8_t* buffer, size_t size)
 {
   return serial_->read(buffer, size);
 }
 
-std::size_t SerialInterface::write(const uint8_t* buffer, size_t size)
+std::size_t SerialHandler::write(const uint8_t* buffer, size_t size)
 {
   std::size_t write_size = serial_->write(buffer, size);
   serial_->flush();
   return write_size;
 }
 
-void SerialInterface::set_port(const std::string& port)
+void SerialHandler::set_port(const std::string& port)
 {
   serial_->setPort(port);
 }
 
-std::string SerialInterface::get_port() const
+std::string SerialHandler::get_port() const
 {
   return serial_->getPort();
 }
 
-void SerialInterface::set_timeout(uint32_t timeout_ms)
+void SerialHandler::set_timeout(uint32_t timeout_ms)
 {
   timeout_ms_ = timeout_ms;
   serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
   serial_->setTimeout(timeout);
 }
 
-uint32_t SerialInterface::get_timeout() const
+uint32_t SerialHandler::get_timeout() const
 {
   return timeout_ms_;
 }
 
-void SerialInterface::set_baudrate(uint32_t baudrate)
+void SerialHandler::set_baudrate(uint32_t baudrate)
 {
   serial_->setBaudrate(baudrate);
 }
 
-uint32_t SerialInterface::get_baudrate() const
+uint32_t SerialHandler::get_baudrate() const
 {
   return serial_->getBaudrate();
 }

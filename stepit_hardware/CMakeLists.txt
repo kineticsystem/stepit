@@ -44,9 +44,9 @@ add_library(
   src/motor_move_to_command.cpp
   src/motor_status.cpp
   src/data_utils.cpp
-  src/data_interface.cpp
+  src/data_handler.cpp
   src/crc_utils.cpp
-  src/serial_interface.cpp
+  src/serial_handler.cpp
   src/stepit_hardware.cpp
 )
 target_include_directories(
