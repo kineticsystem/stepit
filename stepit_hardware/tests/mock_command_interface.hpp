@@ -21,3 +21,8 @@
 #pragma once
 
 #include <gmock/gmock.h>
+
+namespace stepit_hardware::test
+{
+
+}

@@ -36,11 +36,10 @@
 #include <ros2_control_test_assets/components_urdfs.hpp>
 #include <ros2_control_test_assets/descriptions.hpp>
 
-namespace
+namespace stepit_hardware::test
 {
 const auto TIME = rclcpp::Time(0);
 const auto PERIOD = rclcpp::Duration::from_seconds(0.01);
-}  // namespace
 
 using namespace hardware_interface;
 
@@ -200,3 +199,4 @@ TEST_F(TestStepitHardware, test_read)
   hardware_interface::ResourceManager rm;
   rm.import_component(std::move(stepit_hardware), hardware_info);
 }
+}  // namespace stepit_hardware::test

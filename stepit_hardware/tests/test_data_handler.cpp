@@ -24,6 +24,9 @@
 #include <stepit_hardware/serial_exception.hpp>
 #include <mock_serial_interface.hpp>
 
+namespace stepit_hardware::test
+{
+
 using ::testing::_;
 using ::testing::Invoke;
 using ::testing::Return;
@@ -394,3 +397,4 @@ TEST(TestDataHandler, read_timeout)
       },
       stepit_hardware::SerialException);
 }
+}  // namespace stepit_hardware::test

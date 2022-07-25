@@ -22,6 +22,8 @@
 #include <stepit_hardware/command_handler.hpp>
 #include <mock_data_interface.hpp>
 
+namespace stepit_hardware::test
+{
 using ::testing::_;
 
 /**
@@ -31,3 +33,4 @@ using ::testing::_;
 TEST(TestCommandHandler, write)
 {
 }
+}  // namespace stepit_hardware::test

@@ -23,6 +23,8 @@
 #include <gmock/gmock.h>
 #include <stepit_hardware/serial_interface.hpp>
 
+namespace stepit_hardware::test
+{
 class MockSerialInterface : public stepit_hardware::SerialInterface
 {
 public:
@@ -38,3 +40,4 @@ public:
   MOCK_METHOD(void, set_baudrate, (uint32_t baudrate), (override));
   MOCK_METHOD(uint32_t, get_baudrate, (), (override, const));
 };
+}  // namespace stepit_hardware::test

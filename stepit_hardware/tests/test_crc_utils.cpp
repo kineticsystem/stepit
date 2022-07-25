@@ -21,6 +21,8 @@
 #include <gtest/gtest.h>
 #include <stepit_hardware/crc_utils.hpp>
 
+namespace stepit_hardware::test
+{
 TEST(TestCRCUtils, calculate_crc)
 {
   ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6 }), 0x3B07);
@@ -30,3 +32,4 @@ TEST(TestCRCUtils, calculate_crc)
   ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 }), 0x2189);
   ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0x80, 0x00, 0x00, 0x03 }), 0x1ff5);
 }
+}  // namespace stepit_hardware::test

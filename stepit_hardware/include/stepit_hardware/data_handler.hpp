@@ -30,6 +30,11 @@
 
 namespace stepit_hardware
 {
+/**
+ * This class is used to pack a sequence of bytes into a frame and send it to
+ * the serial port and also to parse frames coming from the serial port.
+ * A frames contains the data, a 16-bits CRC and delimiters.
+ */
 class DataHandler : public DataInterface
 {
 public:

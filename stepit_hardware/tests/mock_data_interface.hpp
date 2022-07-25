@@ -23,9 +23,12 @@
 #include <gmock/gmock.h>
 #include <stepit_hardware/data_interface.hpp>
 
+namespace stepit_hardware::test
+{
 class MockDataInterface : public stepit_hardware::DataInterface
 {
 public:
   MOCK_METHOD(std::vector<uint8_t>, read, (), (override));
   MOCK_METHOD(void, write, (const std::vector<uint8_t>& bytes), (override));
 };
+}  // namespace stepit_hardware::test
