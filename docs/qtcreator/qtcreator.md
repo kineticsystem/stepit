@@ -67,3 +67,17 @@ On the Clang Format tab, from the _Use Predefined style_ choose the option _File
 <img src="images/beautifier_file.png" width="80%">
 
 When you start QtCreator, it will read Clang Format style from the file `.clang-format` at the root of the src folder.
+
+## CPP Check
+
+CPP Check fails to correctly recognize some macros, especially the ones defined by GTest when used inside a namespace. One way to fix this problem is to tell CPP Check to define these macros.
+
+Select the menu
+
+Edit → Preferences... → Analyzer → Cppcheck
+
+and fill the custom argument field with the following string:
+
+`-D RCLCPP_SHARED_PTR_DEFINITIONS -D TEST -D TEST_F`
+
+<img src="images/cpp_check.png" width="80%">
