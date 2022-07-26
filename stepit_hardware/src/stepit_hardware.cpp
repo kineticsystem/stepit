@@ -116,11 +116,6 @@ StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& prev
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "start");
 
-  MotorStatusQuery query;
-  data_interface_->write(query.bytes());
-  auto data = data_interface_->read();
-  MotorStatusResponse response{ data };
-
   // Make goals match current joint states.
   //  read();
   //  for (auto& joint : joints_)
@@ -151,6 +146,11 @@ hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclc
 
   // TODO: call the command interface and read the stepper motor states.
   // Update the joint states with the information coming from the hardware.
+
+  MotorStatusQuery query;
+  data_interface_->write(query.bytes());
+  auto data = data_interface_->read();
+  MotorStatusResponse response{ data };
 
   return hardware_interface::return_type::OK;
 }
