@@ -20,15 +20,28 @@
 
 #pragma once
 
-#include <stepit_hardware/request.hpp>
-#include <stepit_hardware/response.hpp>
+#include <stepit_hardware/msgs/request.hpp>
+#include <stepit_hardware/msgs/response.hpp>
+#include <stepit_hardware/data_interface.hpp>
+
+#include <memory>
 
 namespace stepit_hardware
 {
 class CommandHandler
 {
 public:
-  CommandHandler();
-  Response send(const Request& request) const;
+  explicit CommandHandler(std::unique_ptr<DataInterface> data_interface);
+
+  template <class T>
+  T send([[maybe_unused]] const Request& request) const
+  {
+    data_interface_->write(request.bytes());
+    auto data = data_interface_->read();
+    return T{ data };
+  }
+
+private:
+  std::unique_ptr<DataInterface> data_interface_;
 };
 }  // namespace stepit_hardware

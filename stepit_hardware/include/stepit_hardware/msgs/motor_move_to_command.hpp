@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <stepit_hardware/request.hpp>
+#include <stepit_hardware/msgs/request.hpp>
 
 #include <cstdint>
 

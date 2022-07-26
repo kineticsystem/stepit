@@ -18,15 +18,48 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/command_handler.hpp>
-#include <stepit_hardware/msgs/request.hpp>
-#include <stepit_hardware/msgs/response.hpp>
+#pragma once
+
+#include <vector>
+#include <cstdint>
 
 namespace stepit_hardware
 {
-CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
-  : data_interface_{ std::move(data_interface) }
-{
-}
 
+class MotorStatusResponse
+{
+public:
+  // Internal structure to store joint states and targets.
+  class Joint
+  {
+  public:
+    explicit Joint(int32_t position, float velocity, int32_t distance_to_go)
+      : position_{ position }, velocity_{ velocity }, distance_to_go_{ distance_to_go }
+    {
+    }
+    double position()
+    {
+      return position_;
+    }
+    double velocity()
+    {
+      return velocity_;
+    }
+    double distance_to_go()
+    {
+      return distance_to_go_;
+    }
+
+  private:
+    int32_t position_;
+    float velocity_;
+    int32_t distance_to_go_;
+  };
+
+  explicit MotorStatusResponse(const std::vector<uint8_t>& data);
+  std::vector<Joint> joints() const;
+
+private:
+  std::vector<Joint> joints_;
+};
 }  // namespace stepit_hardware

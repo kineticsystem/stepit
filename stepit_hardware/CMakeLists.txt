@@ -42,14 +42,14 @@ find_package(serial REQUIRED)
 add_library(
     stepit_hardware
     SHARED
-    src/request.cpp
-    include/stepit_hardware/request.hpp
-    src/response.cpp
-    include/stepit_hardware/response.hpp
-    src/motor_move_to_command.cpp
-    include/stepit_hardware/motor_move_to_command.hpp
-    src/motor_status.cpp
-    include/stepit_hardware/motor_status.hpp
+    src/msgs/request.cpp
+    include/stepit_hardware/msgs/request.hpp
+    src/msgs/response.cpp
+    include/stepit_hardware/msgs/response.hpp
+    src/msgs/motor_move_to_command.cpp
+    include/stepit_hardware/msgs/motor_move_to_command.hpp
+    src/msgs/motor_status.cpp
+    include/stepit_hardware/msgs/motor_status.hpp
     src/data_utils.cpp
     include/stepit_hardware/data_utils.hpp
     src/data_handler.cpp
@@ -66,6 +66,10 @@ add_library(
     include/stepit_hardware/data_interface.hpp
     include/stepit_hardware/serial_interface.hpp
     include/stepit_hardware/serial_exception.hpp
+    src/msgs/motor_status_query.cpp
+    include/stepit_hardware/msgs/motor_status_query.hpp
+    src/msgs/motor_status_response.cpp
+    include/stepit_hardware/msgs/motor_status_response.hpp
 )
 target_include_directories(
     stepit_hardware

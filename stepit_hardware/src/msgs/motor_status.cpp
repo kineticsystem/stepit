@@ -1,4 +1,4 @@
-#include <stepit_hardware/motor_status.hpp>
+#include <stepit_hardware/msgs/motor_status.hpp>
 
 #include <stepit_hardware/data_utils.hpp>
 

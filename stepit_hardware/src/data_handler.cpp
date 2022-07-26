@@ -32,7 +32,7 @@ constexpr uint8_t DELIMITER_FLAG = 0x7E;  // Start and end of a packet
 constexpr uint8_t ESCAPE_FLAG = 0x7D;     // Escaping byte.
 constexpr uint8_t ESCAPED_XOR = 0x20;     // XOR value applied to escaped bytes.
 
-DataHandler::DataHandler(SerialInterface* serial) : serial_{ serial }
+DataHandler::DataHandler(std::unique_ptr<SerialInterface> serial) : serial_{ std::move(serial) }
 {
 }
 

@@ -37,8 +37,8 @@ using ::testing::Return;
  */
 TEST(TestDataHandler, write)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -70,7 +70,7 @@ TEST(TestDataHandler, write)
     actual_frame.emplace_back(buffer[0]);
     return 1;
   };
-  EXPECT_CALL(mock, write(_, _)).WillRepeatedly(Invoke(write));
+  EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
 
   data_handler.write(data);
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
@@ -82,8 +82,8 @@ TEST(TestDataHandler, write)
  */
 TEST(TestDataHandler, write_escaped)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -116,7 +116,7 @@ TEST(TestDataHandler, write_escaped)
     actual_frame.emplace_back(buffer[0]);
     return 1;
   };
-  EXPECT_CALL(mock, write(_, _)).WillRepeatedly(Invoke(write));
+  EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
 
   data_handler.write(data);
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
@@ -127,11 +127,11 @@ TEST(TestDataHandler, write_escaped)
  */
 TEST(TestDataHandler, write_error)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
-  EXPECT_CALL(mock, write(_, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, write(_, _)).WillOnce(Return(0));
 
   EXPECT_THROW(
       {
@@ -153,8 +153,8 @@ TEST(TestDataHandler, write_error)
  */
 TEST(TestDataHandler, read)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -186,7 +186,7 @@ TEST(TestDataHandler, read)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   std::vector<uint8_t> actual_data = data_handler.read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
@@ -197,8 +197,8 @@ TEST(TestDataHandler, read)
  */
 TEST(TestDataHandler, read_escaped)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -231,7 +231,7 @@ TEST(TestDataHandler, read_escaped)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   std::vector<uint8_t> actual_data = data_handler.read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
@@ -242,8 +242,8 @@ TEST(TestDataHandler, read_escaped)
  */
 TEST(TestDataHandler, read_crc_error)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -266,7 +266,7 @@ TEST(TestDataHandler, read_crc_error)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   EXPECT_THROW(
       {
@@ -294,8 +294,8 @@ TEST(TestDataHandler, read_crc_error)
  */
 TEST(TestDataHandler, read_incorrect_frame_length)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -309,7 +309,7 @@ TEST(TestDataHandler, read_incorrect_frame_length)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   EXPECT_THROW(
       {
@@ -331,8 +331,8 @@ TEST(TestDataHandler, read_incorrect_frame_length)
  */
 TEST(TestDataHandler, read_start_delimiter_missing)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   std::vector<uint8_t> frame = {
     // Missing delimiter
@@ -355,7 +355,7 @@ TEST(TestDataHandler, read_start_delimiter_missing)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(mock, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
   EXPECT_THROW(
       {
@@ -377,11 +377,11 @@ TEST(TestDataHandler, read_start_delimiter_missing)
  */
 TEST(TestDataHandler, read_timeout)
 {
-  MockSerialInterface mock;
-  stepit_hardware::DataHandler data_handler{ &mock };
+  auto mock = std::make_unique<MockSerialInterface>();
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
-  EXPECT_CALL(mock, read(_, _)).WillOnce(Return(0));
+  EXPECT_CALL(*mock, read(_, _)).WillOnce(Return(0));
 
   EXPECT_THROW(
       {

@@ -18,15 +18,15 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/command_handler.hpp>
+#pragma once
+
 #include <stepit_hardware/msgs/request.hpp>
-#include <stepit_hardware/msgs/response.hpp>
 
 namespace stepit_hardware
 {
-CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
-  : data_interface_{ std::move(data_interface) }
+class MotorStatusQuery : public Request
 {
-}
-
+public:
+  MotorStatusQuery();
+};
 }  // namespace stepit_hardware

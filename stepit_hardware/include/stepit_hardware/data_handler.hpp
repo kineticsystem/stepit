@@ -27,6 +27,7 @@
 #include <vector>
 #include <cstdint>
 #include <string>
+#include <memory>
 
 namespace stepit_hardware
 {
@@ -38,7 +39,7 @@ namespace stepit_hardware
 class DataHandler : public DataInterface
 {
 public:
-  explicit DataHandler(SerialInterface* serial);
+  explicit DataHandler(std::unique_ptr<SerialInterface> serial);
 
   /**
    * Write a sequence of bytes to the serial port.
@@ -69,6 +70,6 @@ private:
   /* Circular buffer to write data to the serial port. */
   Buffer<uint8_t> write_buffer_{ 100 };
 
-  SerialInterface* serial_ = nullptr;
+  std::unique_ptr<SerialInterface> serial_;
 };
 }  // namespace stepit_hardware

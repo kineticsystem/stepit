@@ -20,6 +20,11 @@
 
 #include <stepit_hardware/stepit_hardware.hpp>
 #include <stepit_hardware/data_utils.hpp>
+#include <stepit_hardware/msgs/motor_status_query.hpp>
+#include <stepit_hardware/msgs/motor_status_response.hpp>
+
+#include <stepit_hardware/data_handler.hpp>
+#include <stepit_hardware/serial_handler.hpp>
 
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
@@ -111,6 +116,11 @@ StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& prev
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "start");
 
+  MotorStatusQuery query;
+  data_interface_->write(query.bytes());
+  auto data = data_interface_->read();
+  MotorStatusResponse response{ data };
+
   // Make goals match current joint states.
   //  read();
   //  for (auto& joint : joints_)
@@ -156,6 +166,11 @@ hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rcl
   // TODO: send goals to the hardware.
 
   return hardware_interface::return_type::OK;
+}
+
+void StepitHardware::set_data_interface(std::unique_ptr<DataInterface> data_interface)
+{
+  data_interface_ = std::move(data_interface);
 }
 
 }  // namespace stepit_hardware
