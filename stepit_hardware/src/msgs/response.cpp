@@ -22,8 +22,4 @@
 
 namespace stepit_hardware
 {
-const std::vector<uint8_t>& Response::bytes() const
-{
-  return bytes_;
-}
 }  // namespace stepit_hardware

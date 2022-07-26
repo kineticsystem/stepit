@@ -28,24 +28,30 @@ MotorStatusResponse::MotorStatusResponse(const std::vector<uint8_t>& data)
   /*
    * The data array contains the following information.
    *
-   * 0:     message id               (1 byte)
+   * response ID          - 1 byte
+   * status command ID    - 1 byte
    *
-   * 1-4:   1st motor position       (4 bytes)
-   * 5-8:   1st motor speed          (4 bytes)
-   * 9-12:  1st motor distance to go (4 bytes)
+   * motorID              - 1 byte
+   * motor position       - 4 bytes
+   * motor speed          - 4 bytes
+   * motor distance to go - 4 bytes
    *
-   * 13-16: 2nd motor position       (4 bytes)
-   * 17-20: 2nd motor speed          (4 bytes)
-   * 21-24: 2nd motor distance to go (4 bytes)
+   * motorID              - 1 byte
+   * motor position       - 4 bytes
+   * motor speed          - 4 bytes
+   * motor distance to go - 4 bytes
    *
    * ...and so on.
    */
 
-  for (std::size_t i = 1; i < data.size(); i += 12)
+  std::size_t i = 0;
+  while (i < data.size())
   {
-    int32_t position = data_utils::to_int32({ data[i], data[i + 1], data[i + 2], data[i + 3] });
-    float speed = data_utils::to_float({ data[i + 4], data[i + 5], data[i + 6], data[i + 7] });
-    int32_t distance_to_go = data_utils::to_int32({ data[i + 8], data[i + 9], data[i + 10], data[i + 11] });
+    uint8_t motor_id = data[i++];
+    int32_t position = data_utils::to_int32({ data[i++], data[i++], data[i++], data[i++] });
+    float speed = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
+    int32_t distance_to_go = data_utils::to_int32({ data[i++], data[i++], data[i++], data[i++] });
+    joint_ids_.push_back(motor_id);
     joints_.push_back(Joint{ position, speed, distance_to_go });
   }
 }

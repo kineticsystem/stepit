@@ -28,10 +28,6 @@ namespace stepit_hardware
 class Response
 {
 public:
-  Response() = default;
-  [[nodiscard]] const std::vector<uint8_t>& bytes() const;
-
-protected:
-  std::vector<uint8_t> bytes_;
+  virtual ~Response() = default;
 };
 }  // namespace stepit_hardware

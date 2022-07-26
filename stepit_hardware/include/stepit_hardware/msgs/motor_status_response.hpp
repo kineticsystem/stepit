@@ -20,13 +20,15 @@
 
 #pragma once
 
+#include <stepit_hardware/msgs/response.hpp>
+
 #include <vector>
 #include <cstdint>
 
 namespace stepit_hardware
 {
 
-class MotorStatusResponse
+class MotorStatusResponse : public Response
 {
 public:
   // Internal structure to store joint states and targets.
@@ -60,6 +62,7 @@ public:
   std::vector<Joint> joints() const;
 
 private:
+  std::vector<uint8_t> joint_ids_;
   std::vector<Joint> joints_;
 };
 }  // namespace stepit_hardware

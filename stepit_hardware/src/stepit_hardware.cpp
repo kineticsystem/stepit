@@ -116,14 +116,17 @@ StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& prev
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "start");
 
-  // Make goals match current joint states.
-  //  read();
+  //  const rclcpp::Time time;
+  //  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+
+  //  // Make goals match current joint states.
+  //  read(time, period);
   //  for (auto& joint : joints_)
   //  {
   //    joint.command.position = joint.state.position;
   //    joint.command.velocity = 0.0;
   //  }
-  //  write();
+  //  write(time, period);
 
   return CallbackReturn::SUCCESS;
 }

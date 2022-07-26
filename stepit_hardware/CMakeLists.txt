@@ -60,8 +60,6 @@ add_library(
     include/stepit_hardware/serial_handler.hpp
     src/stepit_hardware.cpp
     include/stepit_hardware/stepit_hardware.hpp
-    src/command_handler.cpp
-    include/stepit_hardware/command_handler.hpp
     include/stepit_hardware/buffer.hpp
     include/stepit_hardware/data_interface.hpp
     include/stepit_hardware/serial_interface.hpp

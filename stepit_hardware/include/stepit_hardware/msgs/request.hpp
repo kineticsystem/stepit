@@ -28,7 +28,7 @@ namespace stepit_hardware
 class Request
 {
 public:
-  Request() = default;
+  virtual ~Request() = default;
   [[nodiscard]] const std::vector<uint8_t>& bytes() const;
 
 protected:

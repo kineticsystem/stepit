@@ -37,9 +37,6 @@ using ::testing::Return;
  */
 TEST(TestDataHandler, write)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
-
   std::vector<uint8_t> data{
     0x00,  // Request ID
     0x71,  // Motor Move To command ID
@@ -64,6 +61,8 @@ TEST(TestDataHandler, write)
     0x7E   // Delimiter
   };
 
+  auto mock = std::make_unique<MockSerialInterface>();
+
   // Use a lambda function to populate a vector with the buffer values.
   std::vector<uint8_t> actual_frame;
   auto write = [&actual_frame](const uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
@@ -72,6 +71,7 @@ TEST(TestDataHandler, write)
   };
   EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   data_handler.write(data);
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
 }
@@ -82,9 +82,6 @@ TEST(TestDataHandler, write)
  */
 TEST(TestDataHandler, write_escaped)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
-
   std::vector<uint8_t> data{
     0x00,  // Request ID
     0x71,  // Motor Move To command ID
@@ -110,6 +107,8 @@ TEST(TestDataHandler, write_escaped)
     0x7E   // Delimiter
   };
 
+  auto mock = std::make_unique<MockSerialInterface>();
+
   // Use a lambda function to populate a vector with the buffer values.
   std::vector<uint8_t> actual_frame;
   auto write = [&actual_frame](const uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
@@ -118,6 +117,7 @@ TEST(TestDataHandler, write_escaped)
   };
   EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   data_handler.write(data);
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
 }
@@ -128,11 +128,11 @@ TEST(TestDataHandler, write_escaped)
 TEST(TestDataHandler, write_error)
 {
   auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(*mock, write(_, _)).WillOnce(Return(0));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   EXPECT_THROW(
       {
         try
@@ -153,9 +153,6 @@ TEST(TestDataHandler, write_error)
  */
 TEST(TestDataHandler, read)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
-
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
     0x00,  // Response ID
@@ -180,6 +177,8 @@ TEST(TestDataHandler, read)
     0xB8   // Position (LSB)
   };
 
+  auto mock = std::make_unique<MockSerialInterface>();
+
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
   auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
@@ -188,6 +187,7 @@ TEST(TestDataHandler, read)
   };
   EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   std::vector<uint8_t> actual_data = data_handler.read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
 }
@@ -197,9 +197,6 @@ TEST(TestDataHandler, read)
  */
 TEST(TestDataHandler, read_escaped)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
-
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
     0x00,  // Response ID
@@ -225,6 +222,8 @@ TEST(TestDataHandler, read_escaped)
     0x00   // Position (LSB)
   };
 
+  auto mock = std::make_unique<MockSerialInterface>();
+
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
   auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
@@ -233,6 +232,7 @@ TEST(TestDataHandler, read_escaped)
   };
   EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   std::vector<uint8_t> actual_data = data_handler.read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_data), stepit_hardware::data_utils::to_hex(expected_data));
 }
@@ -242,9 +242,6 @@ TEST(TestDataHandler, read_escaped)
  */
 TEST(TestDataHandler, read_crc_error)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
-
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
     0x00,  // Response ID
@@ -260,6 +257,8 @@ TEST(TestDataHandler, read_crc_error)
     0x7E   // Delimiter
   };
 
+  auto mock = std::make_unique<MockSerialInterface>();
+
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
   auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
@@ -268,6 +267,7 @@ TEST(TestDataHandler, read_crc_error)
   };
   EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   EXPECT_THROW(
       {
         try
@@ -294,14 +294,13 @@ TEST(TestDataHandler, read_crc_error)
  */
 TEST(TestDataHandler, read_incorrect_frame_length)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
-
   std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
     0x00,  // Request ID
     0x7E   // Delimiter
   };
+
+  auto mock = std::make_unique<MockSerialInterface>();
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
@@ -311,6 +310,7 @@ TEST(TestDataHandler, read_incorrect_frame_length)
   };
   EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   EXPECT_THROW(
       {
         try
@@ -331,9 +331,6 @@ TEST(TestDataHandler, read_incorrect_frame_length)
  */
 TEST(TestDataHandler, read_start_delimiter_missing)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
-
   std::vector<uint8_t> frame = {
     // Missing delimiter
     0x00,  // Request ID
@@ -349,6 +346,8 @@ TEST(TestDataHandler, read_start_delimiter_missing)
     0x7E   // Delimiter
   };
 
+  auto mock = std::make_unique<MockSerialInterface>();
+
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
   auto read = [&](uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
@@ -357,6 +356,7 @@ TEST(TestDataHandler, read_start_delimiter_missing)
   };
   EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   EXPECT_THROW(
       {
         try
@@ -378,11 +378,11 @@ TEST(TestDataHandler, read_start_delimiter_missing)
 TEST(TestDataHandler, read_timeout)
 {
   auto mock = std::make_unique<MockSerialInterface>();
-  stepit_hardware::DataHandler data_handler{ std::move(mock) };
 
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(*mock, read(_, _)).WillOnce(Return(0));
 
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
   EXPECT_THROW(
       {
         try

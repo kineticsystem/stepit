@@ -22,6 +22,8 @@
 
 #include <stepit_hardware/stepit_hardware.hpp>
 #include <stepit_hardware/data_utils.hpp>
+#include <stepit_hardware/msgs/motor_status_query.hpp>
+#include <stepit_hardware/msgs/motor_status_response.hpp>
 #include <mock_data_interface.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
@@ -40,10 +42,8 @@
 
 namespace stepit_hardware::test
 {
-const auto TIME = rclcpp::Time(0);
-const auto PERIOD = rclcpp::Duration::from_seconds(0.01);
-
 using ::testing::_;
+using ::testing::Return;
 using ::testing::SaveArg;
 
 /**
@@ -81,21 +81,6 @@ protected:
   }
 
   std::string urdf_control_;
-};
-
-void set_components_state(hardware_interface::ResourceManager& rm, const std::vector<std::string>& components,
-                          const uint8_t state_id, const std::string& state_name)
-{
-  for (const auto& component : components)
-  {
-    rclcpp_lifecycle::State state(state_id, state_name);
-    rm.set_component_state(component, state);
-  }
-}
-
-auto activate_components = [](hardware_interface::ResourceManager& rm, const std::vector<std::string>& components) {
-  set_components_state(rm, components, lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-                       hardware_interface::lifecycle_state_names::ACTIVE);
 };
 
 /**
@@ -197,26 +182,60 @@ TEST_F(TestStepitHardware, test_read)
     };
   // clang-format on
 
-  std::vector<uint8_t> expected_query{
-    0x71,  // Motor Status Request
+  MotorStatusQuery motor_status_query;
+  std::vector<uint8_t> motor_status_response{
+    0x00,  // Motor ID
+    0x00,  // Position = 32100
+    0x00,  // Position
+    0x7D,  // Position
+    0x64,  // Position
+    0x3F,  // Speed = 0.5
+    0x00,  // Speed
+    0x00,  // Speed
+    0x00,  // Speed
+    0x00,  // Distance to go = 150
+    0x00,  // Distance to go
+    0x00,  // Distance to go
+    0x96,  // Distance to go
+    0x01,  // Motor ID
+    0x00,  // Position = -6500
+    0x00,  // Position
+    0xE6,  // Position
+    0x9C,  // Position
+    0x3F,  // Speed = 0.75
+    0x40,  // Speed
+    0x00,  // Speed
+    0x00,  // Speed
+    0x00,  // Distance to go = 150000
+    0x02,  // Distance to go
+    0x49,  // Distance to go
+    0xF0,  // Distance to go
   };
-
-  std::vector<uint8_t> response{};
 
   auto mock_data_interface = std::make_unique<MockDataInterface>();
 
   std::vector<uint8_t> query;
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&query));
+  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(motor_status_response));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
   stepit_hardware->set_data_interface(std::move(mock_data_interface));
 
+  // Load the component.
   hardware_interface::ResourceManager rm;
   rm.import_component(std::move(stepit_hardware), hardware_info);
 
   // Connect the hardware.
-  activate_components(rm, { "StepitHardware" });
+  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                 hardware_interface::lifecycle_state_names::ACTIVE };
+  rm.set_component_state("StepitHardware", state);
 
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(query), stepit_hardware::data_utils::to_hex(expected_query));
+  // Read the component state.
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  rm.read(time, period);
+
+  ASSERT_THAT(stepit_hardware::data_utils::to_hex(query),
+              stepit_hardware::data_utils::to_hex(motor_status_query.bytes()));
 }
 }  // namespace stepit_hardware::test
