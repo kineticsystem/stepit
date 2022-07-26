@@ -62,7 +62,6 @@ public:
   std::vector<Joint> joints() const;
 
 private:
-  std::vector<uint8_t> joint_ids_;
   std::vector<Joint> joints_;
 };
 }  // namespace stepit_hardware

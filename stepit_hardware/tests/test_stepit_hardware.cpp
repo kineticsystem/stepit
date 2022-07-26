@@ -23,7 +23,6 @@
 #include <stepit_hardware/stepit_hardware.hpp>
 #include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/msgs/motor_status_query.hpp>
-#include <stepit_hardware/msgs/motor_status_response.hpp>
 #include <mock_data_interface.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
@@ -184,7 +183,6 @@ TEST_F(TestStepitHardware, test_read)
 
   MotorStatusQuery motor_status_query;
   std::vector<uint8_t> motor_status_response{
-    0x00,  // Motor ID
     0x00,  // Position = 32100
     0x00,  // Position
     0x7D,  // Position
@@ -197,7 +195,6 @@ TEST_F(TestStepitHardware, test_read)
     0x00,  // Distance to go
     0x00,  // Distance to go
     0x96,  // Distance to go
-    0x01,  // Motor ID
     0x00,  // Position = -6500
     0x00,  // Position
     0xE6,  // Position
