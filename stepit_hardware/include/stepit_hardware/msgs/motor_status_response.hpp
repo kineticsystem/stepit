@@ -39,7 +39,7 @@ public:
       : position_{ position }, velocity_{ velocity }, distance_to_go_{ distance_to_go }
     {
     }
-    double position()
+    int32_t position()
     {
       return position_;
     }
@@ -47,7 +47,7 @@ public:
     {
       return velocity_;
     }
-    double distance_to_go()
+    int32_t distance_to_go()
     {
       return distance_to_go_;
     }

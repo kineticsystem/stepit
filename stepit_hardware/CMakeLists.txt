@@ -21,8 +21,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
     add_compile_options(-Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast -Wno-gnu-zero-variadic-macro-arguments)
-#    add_compile_options($<$<CONFIG:DEBUG>:-fsanitize=address,undefined>)
-#    add_link_options($<$<CONFIG:DEBUG>:-fsanitize=address,undefined>)
 endif()
 
 find_package(ament_cmake REQUIRED)

@@ -141,19 +141,23 @@ StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& pr
 hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclcpp::Time& time,
                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
-  std::vector<uint8_t> ids(info_.joints.size(), 0);
-  std::vector<int32_t> positions(info_.joints.size(), 0);
-  std::vector<int32_t> velocities(info_.joints.size(), 0);
-
-  std::copy(joint_ids_.begin(), joint_ids_.end(), ids.begin());
-
-  // TODO: call the command interface and read the stepper motor states.
-  // Update the joint states with the information coming from the hardware.
-
   MotorStatusQuery query;
   data_interface_->write(query.bytes());
   auto data = data_interface_->read();
   MotorStatusResponse response{ data };
+
+  auto joints = response.joints();
+  if (joints.size() != joints_.size())
+  {
+    RCLCPP_ERROR(rclcpp::get_logger(kStepitHardware), "incorrect number of joints");
+    return hardware_interface::return_type::ERROR;
+  }
+
+  for (std::size_t i = 0; i < joints.size(); ++i)
+  {
+    joints_[i].state.position = joints[i].position();
+    joints_[i].state.velocity = joints[i].velocity();
+  }
 
   return hardware_interface::return_type::OK;
 }

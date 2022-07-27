@@ -181,7 +181,6 @@ TEST_F(TestStepitHardware, test_read)
     };
   // clang-format on
 
-  MotorStatusQuery motor_status_query;
   std::vector<uint8_t> motor_status_response{
     0x00,  // Position = 32100
     0x00,  // Position
@@ -195,8 +194,8 @@ TEST_F(TestStepitHardware, test_read)
     0x00,  // Distance to go
     0x00,  // Distance to go
     0x96,  // Distance to go
-    0x00,  // Position = -6500
-    0x00,  // Position
+    0xFF,  // Position = -6500
+    0xFF,  // Position
     0xE6,  // Position
     0x9C,  // Position
     0x3F,  // Speed = 0.75
@@ -210,9 +209,6 @@ TEST_F(TestStepitHardware, test_read)
   };
 
   auto mock_data_interface = std::make_unique<MockDataInterface>();
-
-  std::vector<uint8_t> query;
-  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&query));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(motor_status_response));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
@@ -232,7 +228,15 @@ TEST_F(TestStepitHardware, test_read)
   const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
   rm.read(time, period);
 
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(query),
-              stepit_hardware::data_utils::to_hex(motor_status_query.bytes()));
+  //  Check the state interface values.
+  hardware_interface::LoanedStateInterface joint1_position_state = rm.claim_state_interface("joint1/position");
+  hardware_interface::LoanedStateInterface joint2_position_state = rm.claim_state_interface("joint2/position");
+  hardware_interface::LoanedStateInterface joint1_velocity_state = rm.claim_state_interface("joint1/velocity");
+  hardware_interface::LoanedStateInterface joint2_velocity_state = rm.claim_state_interface("joint2/velocity");
+
+  ASSERT_EQ(32100, joint1_position_state.get_value());
+  ASSERT_EQ(-6500, joint2_position_state.get_value());
+  ASSERT_EQ(0.5, joint1_velocity_state.get_value());
+  ASSERT_EQ(0.75, joint2_velocity_state.get_value());
 }
 }  // namespace stepit_hardware::test
