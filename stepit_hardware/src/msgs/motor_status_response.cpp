@@ -28,13 +28,15 @@ MotorStatusResponse::MotorStatusResponse(const std::vector<uint8_t>& data)
   /*
    * The data array contains the following information.
    *
-   * 1st motor position       - 4 bytes
-   * 1st motor speed          - 4 bytes
-   * 1st motor distance to go - 4 bytes
+   * motor id             - 1 byte
+   * motor position       - 4 bytes
+   * motor speed          - 4 bytes
+   * motor distance to go - 4 bytes
    *
-   * 2nd motor position       - 4 bytes
-   * 2nd motor speed          - 4 bytes
-   * 2nd motor distance to go - 4 bytes
+   * motor id             - 1 byte
+   * motor position       - 4 bytes
+   * motor speed          - 4 bytes
+   * motor distance to go - 4 bytes
    *
    * ...and so on.
    */
@@ -42,15 +44,16 @@ MotorStatusResponse::MotorStatusResponse(const std::vector<uint8_t>& data)
   std::size_t i = 0;
   while (i < data.size())
   {
+    uint8_t id = data[i++];
     int32_t position = data_utils::to_int32({ data[i++], data[i++], data[i++], data[i++] });
     float speed = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
     int32_t distance_to_go = data_utils::to_int32({ data[i++], data[i++], data[i++], data[i++] });
-    joints_.push_back(Joint{ position, speed, distance_to_go });
+    motor_states_.push_back(MotorState{ id, position, speed, distance_to_go });
   }
 }
 
-std::vector<MotorStatusResponse::Joint> MotorStatusResponse::joints() const
+std::vector<MotorStatusResponse::MotorState> MotorStatusResponse::motor_states() const
 {
-  return joints_;
+  return motor_states_;
 }
 }  // namespace stepit_hardware

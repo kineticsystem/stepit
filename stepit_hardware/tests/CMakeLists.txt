@@ -31,7 +31,7 @@ target_link_libraries(test_crc_utils stepit_hardware)
 
 ament_add_gmock(test_data_handler
     test_data_handler.cpp
-    mock_serial_interface.hpp
+    mock/mock_serial_interface.hpp
 )
 target_include_directories(test_data_handler
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -44,7 +44,8 @@ target_link_libraries(test_data_handler stepit_hardware)
 
 ament_add_gmock(test_stepit_hardware
     test_stepit_hardware.cpp
-    mock_data_interface.hpp
+    mock/mock_data_interface.hpp
+    fake/fake_hardware_info.hpp
 )
 target_include_directories(test_stepit_hardware
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include

@@ -146,17 +146,18 @@ hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclc
   auto data = data_interface_->read();
   MotorStatusResponse response{ data };
 
-  auto joints = response.joints();
-  if (joints.size() != joints_.size())
+  auto motor_states = response.motor_states();
+  if (motor_states.size() != joints_.size())
   {
     RCLCPP_ERROR(rclcpp::get_logger(kStepitHardware), "incorrect number of joints");
     return hardware_interface::return_type::ERROR;
   }
 
-  for (std::size_t i = 0; i < joints.size(); ++i)
+  for (std::size_t i = 0; i < motor_states.size(); ++i)
   {
-    joints_[i].state.position = joints[i].position();
-    joints_[i].state.velocity = joints[i].velocity();
+    uint8_t motor_id = motor_states[i].id();
+    joints_[motor_id].state.position = motor_states[i].position();
+    joints_[motor_id].state.velocity = motor_states[i].velocity();
   }
 
   return hardware_interface::return_type::OK;

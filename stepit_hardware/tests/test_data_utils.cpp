@@ -23,7 +23,7 @@
 
 namespace stepit_hardware::test
 {
-TEST(TestDataUtils, to_hex_test)
+TEST(TestDataUtils, to_hex)
 {
   std::vector<uint8_t> bytes = { 0x7E, 0x00, 0x70, 0x00, 0x00, 0x00, 0x4E, 0x20, 0x75, 0x38, 0x7E };
   std::string hex = stepit_hardware::data_utils::to_hex(bytes);

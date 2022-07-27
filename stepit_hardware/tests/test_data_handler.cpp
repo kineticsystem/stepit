@@ -22,7 +22,7 @@
 #include <stepit_hardware/data_handler.hpp>
 #include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/serial_exception.hpp>
-#include <mock_serial_interface.hpp>
+#include <mock/mock_serial_interface.hpp>
 
 namespace stepit_hardware::test
 {

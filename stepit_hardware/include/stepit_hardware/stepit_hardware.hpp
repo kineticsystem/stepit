@@ -33,6 +33,9 @@
 
 namespace stepit_hardware
 {
+/**
+ * https://control.ros.org/master/doc/ros2_control/hardware_interface/doc/writing_new_hardware_interface.html
+ */
 class StepitHardware : public hardware_interface::SystemInterface
 {
 public:

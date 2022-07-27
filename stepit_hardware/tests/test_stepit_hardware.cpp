@@ -23,7 +23,8 @@
 #include <stepit_hardware/stepit_hardware.hpp>
 #include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/msgs/motor_status_query.hpp>
-#include <mock_data_interface.hpp>
+#include <mock/mock_data_interface.hpp>
+#include <fake/fake_hardware_info.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -46,15 +47,13 @@ using ::testing::Return;
 using ::testing::SaveArg;
 
 /**
- * https://control.ros.org/master/doc/ros2_control/hardware_interface/doc/writing_new_hardware_interface.html
+ * This test generates a minimal xacro robot configuration and loads the
+ * hardware interface plugin.
  */
-class TestStepitHardware : public ::testing::Test
+TEST(TestStepitHardware, load_urdf)
 {
-protected:
-  void SetUp() override
-  {
-    urdf_control_ =
-        R"(
+  std::string urdf_control_ =
+      R"(
         <ros2_control name="StepitHardware" type="system">
           <hardware>
             <plugin>stepit_hardware/StepitHardware</plugin>
@@ -77,111 +76,36 @@ protected:
           </joint>
         </ros2_control>
       )";
-  }
 
-  std::string urdf_control_;
-};
-
-/**
- * This test generates a minimal xacro robot configuration and load plugin.
- */
-TEST_F(TestStepitHardware, load_stepit_hardware)
-{
   auto urdf = ros2_control_test_assets::urdf_head + urdf_control_ + ros2_control_test_assets::urdf_tail;
   hardware_interface::ResourceManager rm(urdf);
+
+  // Check interfaces
+  EXPECT_EQ(1u, rm.system_components_size());
+  ASSERT_EQ(4u, rm.state_interface_keys().size());
+  EXPECT_TRUE(rm.state_interface_exists("joint1/position"));
+  EXPECT_TRUE(rm.state_interface_exists("joint2/position"));
+  EXPECT_TRUE(rm.state_interface_exists("joint1/velocity"));
+  EXPECT_TRUE(rm.state_interface_exists("joint2/velocity"));
+
+  ASSERT_EQ(4u, rm.command_interface_keys().size());
+  EXPECT_TRUE(rm.command_interface_exists("joint1/position"));
+  EXPECT_TRUE(rm.command_interface_exists("joint2/position"));
+  EXPECT_TRUE(rm.command_interface_exists("joint1/velocity"));
+  EXPECT_TRUE(rm.command_interface_exists("joint2/velocity"));
 }
 
 /**
- * Activate the component, check all interfaces and their current values.
+ * Test the read method using a mocked data interface. The interface returns a
+ * hard-wired response containing information about position and velocity of
+ * two motors. The read method parses this information and use it to populate
+ * position and velocity of its state interface.
+ * The test check if the state interface contains the expected values.
  */
-// TEST_F(TestStepitHardware, activate_stepit_hardware)
-//{
-//   auto urdf = ros2_control_test_assets::urdf_head + stepit_hardware_ + ros2_control_test_assets::urdf_tail;
-//   hardware_interface::ResourceManager rm(urdf);
-
-//  // Connect the hardware.
-//  activate_components(rm, { "StepitHardware" });
-
-//  // Check interfaces
-//  EXPECT_EQ(1u, rm.system_components_size());
-//  ASSERT_EQ(4u, rm.state_interface_keys().size());
-//  EXPECT_TRUE(rm.state_interface_exists("joint1/position"));
-//  EXPECT_TRUE(rm.state_interface_exists("joint2/position"));
-//  EXPECT_TRUE(rm.state_interface_exists("joint1/velocity"));
-//  EXPECT_TRUE(rm.state_interface_exists("joint2/velocity"));
-
-//  ASSERT_EQ(4u, rm.command_interface_keys().size());
-//  EXPECT_TRUE(rm.command_interface_exists("joint1/position"));
-//  EXPECT_TRUE(rm.command_interface_exists("joint2/position"));
-//  EXPECT_TRUE(rm.command_interface_exists("joint1/velocity"));
-//  EXPECT_TRUE(rm.command_interface_exists("joint2/velocity"));
-
-//  // Check initial values
-//  hardware_interface::LoanedStateInterface joint1_position_state = rm.claim_state_interface("joint1/position");
-//  hardware_interface::LoanedStateInterface joint2_position_state = rm.claim_state_interface("joint2/position");
-//  hardware_interface::LoanedCommandInterface joint1_position_command = rm.claim_command_interface("joint1/position");
-//  hardware_interface::LoanedCommandInterface joint2_position_command = rm.claim_command_interface("joint2/position");
-
-//  ASSERT_EQ(1.57, joint1_position_state.get_value());
-//  ASSERT_EQ(0.7854, joint2_position_state.get_value());
-//  ASSERT_TRUE(std::isnan(joint1_position_command.get_value()));
-//  ASSERT_TRUE(std::isnan(joint2_position_command.get_value()));
-
-//  hardware_interface::LoanedStateInterface joint1_velocity_state = rm.claim_state_interface("joint1/velocity");
-//  hardware_interface::LoanedStateInterface joint2_velocity_state = rm.claim_state_interface("joint2/velocity");
-//  hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
-//  hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
-//}
-
-/**
- * Test the read method by providing a mocked serial interface.
- */
-TEST_F(TestStepitHardware, test_read)
+TEST(TestStepitHardware, read)
 {
-  // clang-format off
-  hardware_interface::HardwareInfo hardware_info
-    {
-      "StepitHardware",
-      "system",
-      "stepit_hardware/StepitHardware",
-      {
-        {"usb_port", "/dev/whatever"},
-        {"baud_rate", "9600"}
-      },
-      {
-        hardware_interface::ComponentInfo{"joint1",
-          "joint",
-          {
-            hardware_interface::InterfaceInfo{"position", "", "", "", "double", 1},
-            hardware_interface::InterfaceInfo{"velocity", "", "", "", "double", 1}
-          },
-          {
-            hardware_interface::InterfaceInfo{"position", "", "", "", "double", 1},
-            hardware_interface::InterfaceInfo{"velocity", "", "", "", "double", 1}
-          },
-          {{{"id","0"}}}
-        },
-        hardware_interface::ComponentInfo{"joint2",
-         "joint",
-         {
-           hardware_interface::InterfaceInfo{"position", "", "", "", "double", 1},
-           hardware_interface::InterfaceInfo{"velocity", "", "", "", "double", 1}
-         },
-         {
-           hardware_interface::InterfaceInfo{"position", "", "", "", "double", 1},
-           hardware_interface::InterfaceInfo{"velocity", "", "", "", "double", 1}
-         },
-         {{{ "id", "1" }}}
-        }
-      },
-      {},
-      {},
-      {},
-      ""
-    };
-  // clang-format on
-
   std::vector<uint8_t> motor_status_response{
+    0x00,  // Motor ID
     0x00,  // Position = 32100
     0x00,  // Position
     0x7D,  // Position
@@ -194,6 +118,7 @@ TEST_F(TestStepitHardware, test_read)
     0x00,  // Distance to go
     0x00,  // Distance to go
     0x96,  // Distance to go
+    0x01,  // Motor ID
     0xFF,  // Position = -6500
     0xFF,  // Position
     0xE6,  // Position
@@ -216,7 +141,7 @@ TEST_F(TestStepitHardware, test_read)
 
   // Load the component.
   hardware_interface::ResourceManager rm;
-  rm.import_component(std::move(stepit_hardware), hardware_info);
+  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
 
   // Connect the hardware.
   rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
