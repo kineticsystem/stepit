@@ -112,9 +112,7 @@ private:
   // Store information about current joint states and targets.
   std::vector<Joint> joints_;
 
-  // Interface to send binary data.
-  // I think we should use a CommandInterface because the DataInterface
-  // is too generic: it deals with bytes sequences wrapped in data frames.
+  // Interface to send binary data to the hardware using the serial port.
   std::unique_ptr<DataInterface> data_interface_;
 };
 }  // namespace stepit_hardware
