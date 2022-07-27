@@ -37,19 +37,6 @@
 namespace stepit_hardware::data_utils
 {
 /**
- * Parse a string into an unsigned 8-bits value.
- * @param s The string to parse.
- * @return The unsigned 8-bits value.
- */
-inline uint8_t stoui8(const std::string& s)
-{
-  std::istringstream reader(s);
-  uint8_t val = 0;
-  reader >> val;
-  return val;
-}
-
-/**
  * Parse a string into an unsigned 16-bits value.
  * @param s The string to parse.
  * @return The unsigned 16-bits value.

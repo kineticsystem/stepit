@@ -97,19 +97,17 @@ private:
   // Internal structure to store joint states or targets.
   struct JointValue
   {
-    double position{ 0.0 };
-    double velocity{ 0.0 };
+    double position;
+    double velocity;
   };
 
   // Internal structure to store joint states and targets.
   struct Joint
   {
+    uint8_t id;
     JointValue state{};
     JointValue command{};
   };
-
-  // Store joint ids.
-  std::vector<uint8_t> joint_ids_;
 
   // Store information about current joint states and targets.
   std::vector<Joint> joints_;

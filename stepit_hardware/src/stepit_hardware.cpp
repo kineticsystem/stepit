@@ -21,6 +21,7 @@
 #include <stepit_hardware/stepit_hardware.hpp>
 #include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/msgs/motor_status_query.hpp>
+#include <stepit_hardware/msgs/motor_velocity_command.hpp>
 #include <stepit_hardware/msgs/motor_status_response.hpp>
 
 #include <stepit_hardware/data_handler.hpp>
@@ -49,17 +50,16 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
 
   // Initialize as many joint states as specified in the configuration.
 
-  joint_ids_.resize(info_.joints.size(), 0);
   joints_.resize(info_.joints.size(), Joint{});
 
   for (uint i = 0; i < info_.joints.size(); i++)
   {
-    joint_ids_[i] = data_utils::stoui8(info_.joints[i].parameters.at("id"));
+    joints_[i].id = static_cast<uint8_t>(std::stoi(info_.joints[i].parameters.at("id")));
     joints_[i].state.position = std::numeric_limits<double>::quiet_NaN();
     joints_[i].state.velocity = std::numeric_limits<double>::quiet_NaN();
     joints_[i].command.position = std::numeric_limits<double>::quiet_NaN();
     joints_[i].command.velocity = std::numeric_limits<double>::quiet_NaN();
-    RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "joint_id %d: %d", i, joint_ids_[i]);
+    RCLCPP_INFO(rclcpp::get_logger(kStepitHardware), "joint_id %d: %d", i, joints_[i].id);
   }
 
   // Read serial port connection parameters.
@@ -166,12 +166,16 @@ hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclc
 hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rclcpp::Time& time,
                                                       [[maybe_unused]] const rclcpp::Duration& period)
 {
-  std::vector<uint8_t> joint_ids(info_.joints.size(), 0);
-  std::vector<int32_t> joint_commands(info_.joints.size(), 0);
-
-  std::copy(joint_ids_.begin(), joint_ids_.end(), joint_ids.begin());
-
-  // TODO: send goals to the hardware.
+  std::vector<MotorVelocityCommand::MotorVelocity> velocities;
+  for (const auto& joint : joints_)
+  {
+    MotorVelocityCommand::MotorVelocity velocity{ joint.id, joint.command.velocity };
+    velocities.push_back(velocity);
+  }
+  MotorVelocityCommand command{ velocities };
+  data_interface_->write(command.bytes());
+  auto data = data_interface_->read();
+  MotorStatusResponse response{ data };
 
   return hardware_interface::return_type::OK;
 }

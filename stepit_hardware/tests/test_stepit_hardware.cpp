@@ -148,12 +148,12 @@ TEST(TestStepitHardware, read)
                                  hardware_interface::lifecycle_state_names::ACTIVE };
   rm.set_component_state("StepitHardware", state);
 
-  // Read the component state.
+  // Invoke a read command.
   const rclcpp::Time time;
   const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
   rm.read(time, period);
 
-  //  Check the state interface values.
+  // Read state interface values.
   hardware_interface::LoanedStateInterface joint1_position_state = rm.claim_state_interface("joint1/position");
   hardware_interface::LoanedStateInterface joint2_position_state = rm.claim_state_interface("joint2/position");
   hardware_interface::LoanedStateInterface joint1_velocity_state = rm.claim_state_interface("joint1/velocity");
@@ -163,5 +163,52 @@ TEST(TestStepitHardware, read)
   ASSERT_EQ(-6500, joint2_position_state.get_value());
   ASSERT_EQ(0.5, joint1_velocity_state.get_value());
   ASSERT_EQ(0.75, joint2_velocity_state.get_value());
+}
+
+TEST(TestStepitHardware, write)
+{
+  std::vector<uint8_t> velocity_request;
+  auto mock_data_interface = std::make_unique<MockDataInterface>();
+  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&velocity_request));
+
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
+  stepit_hardware->set_data_interface(std::move(mock_data_interface));
+
+  // Load the component.
+  hardware_interface::ResourceManager rm;
+  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
+
+  // Connect the hardware.
+  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                 hardware_interface::lifecycle_state_names::ACTIVE };
+  rm.set_component_state("StepitHardware", state);
+
+  // Write state commands values.
+  hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
+  hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
+  joint1_velocity_command.set_value(0.5);
+  joint2_velocity_command.set_value(0.75);
+
+  // Invoke a write command.
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  rm.write(time, period);
+
+  std::vector<uint8_t> expected_velocity_request{
+    0x77,  // command ID
+    0x00,  // Motor ID
+    0x3F,  // Velocity = 0.5
+    0x00,  // Velocity
+    0x00,  // Velocity
+    0x00,  // Velocity
+    0x01,  // Motor ID
+    0x3F,  // Velocity = 0.75
+    0x40,  // Velocity
+    0x00,  // Velocity
+    0x00   // Velocity
+  };
+
+  ASSERT_THAT(stepit_hardware::data_utils::to_hex(velocity_request),
+              stepit_hardware::data_utils::to_hex(expected_velocity_request));
 }
 }  // namespace stepit_hardware::test

@@ -66,6 +66,8 @@ add_library(
     include/stepit_hardware/msgs/motor_status_query.hpp
     src/msgs/motor_status_response.cpp
     include/stepit_hardware/msgs/motor_status_response.hpp
+    src/msgs/motor_velocity_command.cpp
+    include/stepit_hardware/msgs/motor_velocity_command.hpp
 )
 target_include_directories(
     stepit_hardware
