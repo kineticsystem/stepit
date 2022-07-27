@@ -17,8 +17,6 @@
   <depend>hardware_interface</depend>
   <depend>pluginlib</depend>
 
-  <!-- Support for gtest-based tests in the ament buildsystem in CMake. -->
-  <test_depend>ament_cmake_gtest</test_depend>
   <!-- Check code against style conventions using clang-format. -->
   <test_depend>ament_clang_format</test_depend>
   <!-- Check code against style conventions using clang-tidy. -->
@@ -31,6 +29,9 @@
   <test_depend>ament_lint_auto</test_depend>
   <!-- The list of commonly used linters in the ament build system in CMake. -->
   <test_depend>ament_lint_common</test_depend>
+
+  <!-- Support for gtest and gmock-based tests in the ament buildsystem in CMake. -->
+  <test_depend>ament_cmake_gmock</test_depend>
   <test_depend>ros2_control_test_assets</test_depend>
 
   <export>
