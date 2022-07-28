@@ -44,8 +44,6 @@ add_library(
     include/stepit_hardware/msgs/request.hpp
     src/msgs/response.cpp
     include/stepit_hardware/msgs/response.hpp
-    src/msgs/motor_status.cpp
-    include/stepit_hardware/msgs/motor_status.hpp
     src/data_utils.cpp
     include/stepit_hardware/data_utils.hpp
     src/data_handler.cpp
