@@ -28,6 +28,9 @@ MotorStatusResponse::MotorStatusResponse(const std::vector<uint8_t>& data)
   /*
    * The data array contains the following information.
    *
+   * request id           - 1 byte
+   * status               - 1 byte
+   *
    * motor id             - 1 byte
    * motor position       - 4 bytes
    * motor speed          - 4 bytes
@@ -42,6 +45,8 @@ MotorStatusResponse::MotorStatusResponse(const std::vector<uint8_t>& data)
    */
 
   std::size_t i = 0;
+  request_id_ = data[i++];
+  status_ = data[i++];
   while (i < data.size())
   {
     uint8_t id = data[i++];

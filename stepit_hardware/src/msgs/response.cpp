@@ -22,4 +22,15 @@
 
 namespace stepit_hardware
 {
+
+uint8_t Response::request_id() const
+{
+  return request_id_;
+}
+
+uint8_t Response::status() const
+{
+  return status_;
+}
+
 }  // namespace stepit_hardware

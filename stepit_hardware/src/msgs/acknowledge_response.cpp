@@ -18,15 +18,13 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/msgs/motor_status_query.hpp>
+#include <stepit_hardware/msgs/acknowledge_response.hpp>
 
 namespace stepit_hardware
 {
-constexpr uint8_t kQueryId = 0x75;
-
-MotorStatusQuery::MotorStatusQuery(uint8_t request_id)
+AcknowledgeResponse::AcknowledgeResponse(const std::vector<uint8_t>& data)
 {
-  bytes_.emplace_back(request_id);
-  bytes_.emplace_back(kQueryId);
+  request_id_ = data[0];
+  status_ = data[1];
 }
 }  // namespace stepit_hardware

@@ -22,26 +22,34 @@
 
 #include <stepit_hardware/msgs/request.hpp>
 
-#include <cstdint>
+#include <vector>
 
 namespace stepit_hardware
 {
 /**
- * Command to move a motor to a given position.
+ * Command to set the target position a group of motors.
  */
-class MotorMoveToCommand : public Request
+class MotorPositionCommand : public Request
 {
 public:
-  /**
-   * Command to move a motor to a given position.
-   * @param motor_id The motor id.
-   * @param position The target position relative to the motor zero position,
-   * positive or negative.
-   */
-  explicit MotorMoveToCommand(uint8_t motor_id, int32_t position);
+  class Goal
+  {
+  public:
+    explicit Goal(uint8_t motor_id, double position) : motor_id_{ motor_id }, position_{ position } {};
+    uint8_t motor_id() const
+    {
+      return motor_id_;
+    }
+    double position() const
+    {
+      return position_;
+    }
 
-private:
-  uint8_t motor_id_;
-  int32_t position_;
+  private:
+    uint8_t motor_id_;
+    double position_;
+  };
+
+  explicit MotorPositionCommand(uint8_t request_id, const std::vector<Goal>& goals);
 };
 }  // namespace stepit_hardware

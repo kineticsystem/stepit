@@ -105,32 +105,34 @@ TEST(TestStepitHardware, load_urdf)
 TEST(TestStepitHardware, read)
 {
   std::vector<uint8_t> motor_status_response{
-    0x00,  // Motor ID
-    0x00,  // Position = 32100
-    0x00,  // Position
-    0x7D,  // Position
-    0x64,  // Position
-    0x3F,  // Speed = 0.5
-    0x00,  // Speed
-    0x00,  // Speed
-    0x00,  // Speed
-    0x00,  // Distance to go = 150
-    0x00,  // Distance to go
-    0x00,  // Distance to go
-    0x96,  // Distance to go
-    0x01,  // Motor ID
-    0xFF,  // Position = -6500
-    0xFF,  // Position
-    0xE6,  // Position
-    0x9C,  // Position
-    0x3F,  // Speed = 0.75
-    0x40,  // Speed
-    0x00,  // Speed
-    0x00,  // Speed
-    0x00,  // Distance to go = 150000
-    0x02,  // Distance to go
-    0x49,  // Distance to go
-    0xF0,  // Distance to go
+    0x00,  // request ID
+    0x11,  // status success
+    0x00,  // motor ID
+    0x00,  // position = 32100
+    0x00,  // position
+    0x7D,  // position
+    0x64,  // position
+    0x3F,  // speed = 0.5
+    0x00,  // speed
+    0x00,  // speed
+    0x00,  // speed
+    0x00,  // distance to go = 150
+    0x00,  // distance to go
+    0x00,  // distance to go
+    0x96,  // distance to go
+    0x01,  // motor ID
+    0xFF,  // position = -6500
+    0xFF,  // position
+    0xE6,  // position
+    0x9C,  // position
+    0x3F,  // speed = 0.75
+    0x40,  // speed
+    0x00,  // speed
+    0x00,  // speed
+    0x00,  // distance to go = 150000
+    0x02,  // distance to go
+    0x49,  // distance to go
+    0xF0,  // distance to go
   };
 
   auto mock_data_interface = std::make_unique<MockDataInterface>();
@@ -165,11 +167,23 @@ TEST(TestStepitHardware, read)
   ASSERT_EQ(0.75, joint2_velocity_state.get_value());
 }
 
+/**
+ * In this test we set velocities and positions goals on the hardware interface.
+ * We execute a write operation and expect to see two packets of data delivered
+ * to the actual hardware, one setting velocities and one setting positions.
+ */
 TEST(TestStepitHardware, write)
 {
   std::vector<uint8_t> velocity_request;
+  std::vector<uint8_t> position_request;
   auto mock_data_interface = std::make_unique<MockDataInterface>();
-  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&velocity_request));
+  EXPECT_CALL(*mock_data_interface, write(_))
+      .WillOnce(SaveArg<0>(&velocity_request))
+      .WillOnce(SaveArg<0>(&position_request));
+
+  std::vector<uint8_t> velocity_response{ 0x00, 0x11 };
+  std::vector<uint8_t> position_response{ 0x01, 0x11 };
+  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(velocity_response)).WillOnce(Return(position_response));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
   stepit_hardware->set_data_interface(std::move(mock_data_interface));
@@ -183,11 +197,17 @@ TEST(TestStepitHardware, write)
                                  hardware_interface::lifecycle_state_names::ACTIVE };
   rm.set_component_state("StepitHardware", state);
 
-  // Write state commands values.
+  // Write velocity values.
   hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
   hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
   joint1_velocity_command.set_value(0.5);
   joint2_velocity_command.set_value(0.75);
+
+  // Write position values.
+  hardware_interface::LoanedCommandInterface joint1_position_command = rm.claim_command_interface("joint1/position");
+  hardware_interface::LoanedCommandInterface joint2_position_command = rm.claim_command_interface("joint2/position");
+  joint1_position_command.set_value(0.5);
+  joint2_position_command.set_value(0.75);
 
   // Invoke a write command.
   const rclcpp::Time time;
@@ -195,20 +215,37 @@ TEST(TestStepitHardware, write)
   rm.write(time, period);
 
   std::vector<uint8_t> expected_velocity_request{
+    0x00,  // request ID
     0x77,  // command ID
-    0x00,  // Motor ID
-    0x3F,  // Velocity = 0.5
-    0x00,  // Velocity
-    0x00,  // Velocity
-    0x00,  // Velocity
-    0x01,  // Motor ID
-    0x3F,  // Velocity = 0.75
-    0x40,  // Velocity
-    0x00,  // Velocity
-    0x00   // Velocity
+    0x00,  // motor ID
+    0x3F,  // velocity = 0.5
+    0x00,  // velocity
+    0x00,  // velocity
+    0x00,  // velocity
+    0x01,  // motor ID
+    0x3F,  // velocity = 0.75
+    0x40,  // velocity
+    0x00,  // velocity
+    0x00   // velocity
   };
-
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(velocity_request),
               stepit_hardware::data_utils::to_hex(expected_velocity_request));
+
+  std::vector<uint8_t> expected_position_request{
+    0x01,  // request ID
+    0x71,  // command ID
+    0x00,  // motor ID
+    0x3F,  // position = 0.5
+    0x00,  // position
+    0x00,  // position
+    0x00,  // position
+    0x01,  // motor ID
+    0x3F,  // position = 0.75
+    0x40,  // position
+    0x00,  // position
+    0x00   // position
+  };
+  ASSERT_THAT(stepit_hardware::data_utils::to_hex(position_request),
+              stepit_hardware::data_utils::to_hex(expected_position_request));
 }
 }  // namespace stepit_hardware::test

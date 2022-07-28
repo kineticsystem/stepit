@@ -27,6 +27,6 @@ namespace stepit_hardware
 class MotorStatusQuery : public Request
 {
 public:
-  MotorStatusQuery();
+  explicit MotorStatusQuery(uint8_t request_id);
 };
 }  // namespace stepit_hardware

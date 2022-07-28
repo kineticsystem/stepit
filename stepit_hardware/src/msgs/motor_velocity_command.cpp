@@ -25,13 +25,14 @@ namespace stepit_hardware
 {
 constexpr uint8_t kCommandId = 0x77;
 
-MotorVelocityCommand::MotorVelocityCommand(const std::vector<MotorVelocity>& velocities)
+MotorVelocityCommand::MotorVelocityCommand(uint8_t request_id, const std::vector<Goal>& goals)
 {
+  bytes_.emplace_back(request_id);
   bytes_.emplace_back(kCommandId);
-  for (const auto& velocity : velocities)
+  for (const auto& goal : goals)
   {
-    bytes_.emplace_back(velocity.id());
-    auto velocity_bytes = data_utils::from_float(static_cast<float>(velocity.velocity()));
+    bytes_.emplace_back(goal.motor_id());
+    auto velocity_bytes = data_utils::from_float(static_cast<float>(goal.velocity()));
     bytes_.emplace_back(velocity_bytes[0]);
     bytes_.emplace_back(velocity_bytes[1]);
     bytes_.emplace_back(velocity_bytes[2]);

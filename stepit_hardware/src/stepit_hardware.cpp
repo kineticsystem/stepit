@@ -22,6 +22,8 @@
 #include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/msgs/motor_status_query.hpp>
 #include <stepit_hardware/msgs/motor_velocity_command.hpp>
+#include <stepit_hardware/msgs/motor_position_command.hpp>
+#include <stepit_hardware/msgs/acknowledge_response.hpp>
 #include <stepit_hardware/msgs/motor_status_response.hpp>
 
 #include <stepit_hardware/data_handler.hpp>
@@ -141,7 +143,7 @@ StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& pr
 hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclcpp::Time& time,
                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
-  MotorStatusQuery query;
+  MotorStatusQuery query{ request_id++ };
   data_interface_->write(query.bytes());
   auto data = data_interface_->read();
   MotorStatusResponse response{ data };
@@ -166,16 +168,29 @@ hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclc
 hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rclcpp::Time& time,
                                                       [[maybe_unused]] const rclcpp::Duration& period)
 {
-  std::vector<MotorVelocityCommand::MotorVelocity> velocities;
+  // Set velocities.
+
+  std::vector<MotorVelocityCommand::Goal> velocities;
   for (const auto& joint : joints_)
   {
-    MotorVelocityCommand::MotorVelocity velocity{ joint.id, joint.command.velocity };
+    MotorVelocityCommand::Goal velocity{ joint.id, joint.command.velocity };
     velocities.push_back(velocity);
   }
-  MotorVelocityCommand command{ velocities };
-  data_interface_->write(command.bytes());
-  auto data = data_interface_->read();
-  MotorStatusResponse response{ data };
+  MotorVelocityCommand velocity_command{ request_id++, velocities };
+  data_interface_->write(velocity_command.bytes());
+  AcknowledgeResponse veocity_command_response{ data_interface_->read() };
+
+  // Set positions.
+
+  std::vector<MotorPositionCommand::Goal> positions;
+  for (const auto& joint : joints_)
+  {
+    MotorPositionCommand::Goal position{ joint.id, joint.command.position };
+    positions.push_back(position);
+  }
+  MotorPositionCommand position_command{ request_id++, positions };
+  data_interface_->write(position_command.bytes());
+  AcknowledgeResponse position_command_response{ data_interface_->read() };
 
   return hardware_interface::return_type::OK;
 }

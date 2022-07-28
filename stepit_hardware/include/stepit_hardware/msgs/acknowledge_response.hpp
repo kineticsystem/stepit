@@ -18,25 +18,17 @@
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stepit_hardware/msgs/motor_move_to_command.hpp>
+#pragma once
 
-#include <stepit_hardware/data_utils.hpp>
+#include <stepit_hardware/msgs/response.hpp>
+
+#include <vector>
 
 namespace stepit_hardware
 {
-constexpr uint8_t kCommandId = 0x71;
-
-MotorMoveToCommand::MotorMoveToCommand(uint8_t motor_id, int32_t position)
-  : motor_id_{ motor_id }, position_{ position }
+class AcknowledgeResponse : public Response
 {
-  auto encoded_motor_id = motor_id;
-  auto encoded_position = stepit_hardware::data_utils::from_int32(position);
-
-  bytes_.emplace_back(kCommandId);
-  bytes_.emplace_back(encoded_motor_id);
-  for (const uint8_t& byte : encoded_position)
-  {
-    bytes_.emplace_back(byte);
-  }
-}
+public:
+  explicit AcknowledgeResponse(const std::vector<uint8_t>& data);
+};
 }  // namespace stepit_hardware

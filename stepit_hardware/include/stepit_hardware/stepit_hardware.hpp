@@ -114,5 +114,7 @@ private:
 
   // Interface to send binary data to the hardware using the serial port.
   std::unique_ptr<DataInterface> data_interface_;
+
+  uint8_t request_id;
 };
 }  // namespace stepit_hardware

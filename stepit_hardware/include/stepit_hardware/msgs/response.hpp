@@ -29,5 +29,11 @@ class Response
 {
 public:
   virtual ~Response() = default;
+  uint8_t request_id() const;
+  uint8_t status() const;
+
+protected:
+  uint8_t request_id_;
+  uint8_t status_;
 };
 }  // namespace stepit_hardware

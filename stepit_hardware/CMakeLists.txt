@@ -44,8 +44,6 @@ add_library(
     include/stepit_hardware/msgs/request.hpp
     src/msgs/response.cpp
     include/stepit_hardware/msgs/response.hpp
-    src/msgs/motor_move_to_command.cpp
-    include/stepit_hardware/msgs/motor_move_to_command.hpp
     src/msgs/motor_status.cpp
     include/stepit_hardware/msgs/motor_status.hpp
     src/data_utils.cpp
@@ -68,6 +66,10 @@ add_library(
     include/stepit_hardware/msgs/motor_status_response.hpp
     src/msgs/motor_velocity_command.cpp
     include/stepit_hardware/msgs/motor_velocity_command.hpp
+    src/msgs/motor_position_command.cpp
+    include/stepit_hardware/msgs/motor_position_command.hpp
+    src/msgs/acknowledge_response.cpp
+    include/stepit_hardware/msgs/acknowledge_response.hpp
 )
 target_include_directories(
     stepit_hardware
