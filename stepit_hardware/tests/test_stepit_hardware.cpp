@@ -168,22 +168,18 @@ TEST(TestStepitHardware, read)
 }
 
 /**
- * In this test we set velocities and positions goals on the hardware interface.
- * We execute a write operation and expect to see two packets of data delivered
- * to the actual hardware, one setting velocities and one setting positions.
+ * In this test we set velocities goals on the hardware interface.
+ * We execute a write operation and expect to see one data frame delivered
+ * to the actual hardware, setting velocities.
  */
-TEST(TestStepitHardware, write)
+TEST(TestStepitHardware, write_velocities)
 {
   std::vector<uint8_t> velocity_request;
-  std::vector<uint8_t> position_request;
   auto mock_data_interface = std::make_unique<MockDataInterface>();
-  EXPECT_CALL(*mock_data_interface, write(_))
-      .WillOnce(SaveArg<0>(&velocity_request))
-      .WillOnce(SaveArg<0>(&position_request));
+  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&velocity_request));
 
   std::vector<uint8_t> velocity_response{ 0x00, 0x11 };
-  std::vector<uint8_t> position_response{ 0x01, 0x11 };
-  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(velocity_response)).WillOnce(Return(position_response));
+  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(velocity_response));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
   stepit_hardware->set_data_interface(std::move(mock_data_interface));
@@ -202,12 +198,6 @@ TEST(TestStepitHardware, write)
   hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
   joint1_velocity_command.set_value(0.5);
   joint2_velocity_command.set_value(0.75);
-
-  // Write position values.
-  hardware_interface::LoanedCommandInterface joint1_position_command = rm.claim_command_interface("joint1/position");
-  hardware_interface::LoanedCommandInterface joint2_position_command = rm.claim_command_interface("joint2/position");
-  joint1_position_command.set_value(0.5);
-  joint2_position_command.set_value(0.75);
 
   // Invoke a write command.
   const rclcpp::Time time;
@@ -230,9 +220,47 @@ TEST(TestStepitHardware, write)
   };
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(velocity_request),
               stepit_hardware::data_utils::to_hex(expected_velocity_request));
+}
+
+/**
+ * In this test we set positions goals on the hardware interface.
+ * We execute a write operation and expect to see one data frame delivered
+ * to the actual hardware, setting positions.
+ */
+TEST(TestStepitHardware, write_positions)
+{
+  std::vector<uint8_t> position_request;
+  auto mock_data_interface = std::make_unique<MockDataInterface>();
+  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&position_request));
+
+  std::vector<uint8_t> position_response{ 0x01, 0x11 };
+  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(position_response));
+
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
+  stepit_hardware->set_data_interface(std::move(mock_data_interface));
+
+  // Load the component.
+  hardware_interface::ResourceManager rm;
+  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
+
+  // Connect the hardware.
+  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                 hardware_interface::lifecycle_state_names::ACTIVE };
+  rm.set_component_state("StepitHardware", state);
+
+  // Write position values.
+  hardware_interface::LoanedCommandInterface joint1_position_command = rm.claim_command_interface("joint1/position");
+  hardware_interface::LoanedCommandInterface joint2_position_command = rm.claim_command_interface("joint2/position");
+  joint1_position_command.set_value(0.5);
+  joint2_position_command.set_value(0.75);
+
+  // Invoke a write command.
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  rm.write(time, period);
 
   std::vector<uint8_t> expected_position_request{
-    0x01,  // request ID
+    0x00,  // request ID
     0x71,  // command ID
     0x00,  // motor ID
     0x3F,  // position = 0.5
