@@ -23,4 +23,7 @@ robot_description = os.path.join(
 robot_description_config = xacro.process_file(robot_description)
 ```
 
-For more information read [here](https://docs.ros.org/en/foxy/Tutorials/Intermediate/URDF/URDF-Main.html).
+For more information read:
+
+- [URDF description](https://docs.ros.org/en/humble/Tutorials/Intermediate/URDF/URDF-Main.html)
+- [Create your own URDF file](http://wiki.ros.org/urdf/Tutorials/Create%20your%20own%20urdf%20file)
