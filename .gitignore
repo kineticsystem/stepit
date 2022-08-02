@@ -1,10 +1,15 @@
-# VSCode config.
-.vscode/*
+# VSCode
+.vscode
 
-# ROS build folders.
+# ROS
 build
 install
 log
 
-# QtCreator files.
+# QtCreator
 *.user
+
+# PyCharm
+venv
+.idea
+*.egg-info

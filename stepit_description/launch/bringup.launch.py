@@ -38,7 +38,7 @@ import xacro
 
 
 def generate_launch_description():
-    robot_name = "stepit_robot"
+    robot_name = "stepit"
     package_name = robot_name + "_description"
     robot_description = os.path.join(
         get_package_share_directory(package_name), "urdf", robot_name + ".urdf.xacro"

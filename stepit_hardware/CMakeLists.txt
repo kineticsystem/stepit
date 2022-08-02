@@ -83,26 +83,6 @@ target_compile_features(stepit_hardware
     PUBLIC cxx_std_17
 )
 
-#add_executable(my_exe
-#    src/main.cpp
-#    src/data_utils.cpp
-#    include/stepit_hardware/data_utils.hpp
-#    src/serial_interface.cpp
-#    include/stepit_hardware/serial_interface.hpp
-#)
-#target_include_directories(
-#    my_exe
-#    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-#    PUBLIC $<INSTALL_INTERFACE:include>)
-#ament_target_dependencies(my_exe
-#    rclcpp
-#    serial
-#)
-
-#target_compile_features(stepit_hardware
-#    PUBLIC cxx_std_17
-#)
-
 ###############################################################################
 # PLUGINS
 
