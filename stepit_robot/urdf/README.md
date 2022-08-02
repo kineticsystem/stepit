@@ -1,0 +1,26 @@
+# URDF and XACRO
+
+## Definitions
+
+**URDF**, or Unified Robotics Description Format, is an XML specification used in academia and industry to model multibody systems such as robotic manipulator arms for manufacturing assembly lines and animatronic robots for amusement parks. URDF is especially popular with users of ROS, or Robotics Operating System—a framework that offers standard support for URDF models. You can import URDF models into [Gazebo](https://gazebosim.org/home) , for example, for simulation, analysis, and control design tasks.
+
+**Xacro** (XML Macros) is an XML macro language. With xacro, you can construct shorter and more readable XML files by using macros that expand to larger XML expressions.
+
+## Usage
+
+After designing the xacro file, we can use a command to convert it to a URDF file:
+
+`xacro model.xacro > model.urdf`
+
+We can also automatically generate the urdf in a launch file.
+
+```
+robot_name = "stepit_robot"
+package_name = robot_name + "_description"
+robot_description = os.path.join(
+    get_package_share_directory(package_name), "urdf", robot_name + ".urdf.xacro"
+)
+robot_description_config = xacro.process_file(robot_description)
+```
+
+For more information read [here](https://docs.ros.org/en/foxy/Tutorials/Intermediate/URDF/URDF-Main.html).
