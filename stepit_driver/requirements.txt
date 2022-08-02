@@ -1,0 +1,2 @@
+launch~=1.0.2
+setuptools~=63.1.0
