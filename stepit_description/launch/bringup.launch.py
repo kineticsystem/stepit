@@ -40,6 +40,9 @@ import xacro
 def generate_launch_description():
     robot_name = "stepit"
     package_name = robot_name + "_description"
+    rviz_config = os.path.join(
+        get_package_share_directory(package_name), "launch", robot_name + ".rviz"
+    )
     robot_description = os.path.join(
         get_package_share_directory(package_name), "urdf", robot_name + ".urdf.xacro"
     )
@@ -58,14 +61,14 @@ def generate_launch_description():
                     {"robot_description": robot_description_config.toxml()},
                     controller_config,
                 ],
-                output={
-                    "stdout": "screen",
-                    "stderr": "screen",
-                },
+                # output={
+                #    "stdout": "screen",
+                #    "stderr": "screen",
+                # },
             ),
             Node(
                 package="controller_manager",
-                executable="spawner.py",
+                executable="spawner",
                 arguments=[
                     "joint_state_broadcaster",
                     "--controller-manager",
@@ -74,8 +77,25 @@ def generate_launch_description():
             ),
             Node(
                 package="controller_manager",
-                executable="spawner.py",
+                executable="spawner",
                 arguments=["velocity_controller", "-c", "/controller_manager"],
+            ),
+            Node(
+                package="robot_state_publisher",
+                executable="robot_state_publisher",
+                name="robot_state_publisher",
+                parameters=[{"robot_description": robot_description_config.toxml()}],
+                output="screen",
+            ),
+            Node(
+                package="rviz2",
+                executable="rviz2",
+                name="rviz2",
+                arguments=["-d", rviz_config],
+                # output={
+                #    "stdout": "screen",
+                #    "stderr": "log",
+                # },
             ),
         ]
     )

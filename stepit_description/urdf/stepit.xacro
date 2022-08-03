@@ -3,12 +3,44 @@
 
   <xacro:macro name="stepit">
 
+    <link name="base_link">
+      <visual>
+        <geometry>
+          <box size="1 1 1" />
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="link1">
+      <visual>
+        <origin xyz="0 0 0.5" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="1" radius="0.4" />
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="link2">
+      <visual>
+        <origin xyz="0 0 -0.5" rpy="0 0 0" />
+        <geometry>
+          <cylinder length="1" radius="0.4" />
+        </geometry>
+      </visual>
+    </link>
+
     <joint name="joint1" type="revolute">
+      <parent link="base_link" />
+      <child link="link1" />
       <axis xyz="0 0 1" />
+      <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0" />
     </joint>
 
     <joint name="joint2" type="revolute">
+      <parent link="base_link" />
+      <child link="link2" />
       <axis xyz="0 0 1" />
+      <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0" />
     </joint>
 
   </xacro:macro>
