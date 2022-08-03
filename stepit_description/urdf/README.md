@@ -4,7 +4,7 @@
 
 **URDF**, or Unified Robotics Description Format, is an XML specification used in academia and industry to model multibody systems such as robotic manipulator arms for manufacturing assembly lines and animatronic robots for amusement parks. URDF is especially popular with users of ROS, or Robotics Operating System—a framework that offers standard support for URDF models. You can import URDF models into [Gazebo](https://gazebosim.org/home) , for example, for simulation, analysis, and control design tasks.
 
-**Xacro** (XML Macros) is an XML macro language. With xacro, you can construct shorter and more readable XML files by using macros that expand to larger XML expressions. We can declare variables or expressions to use them later in the document.
+**Xacro** (XML Macros) is an XML macro language. With xacro, you can construct shorter and more readable XML files by using macros that expand to larger XML expressions. We can declare properties, use mathematical operator or create templates to use them later in the document.
 
 ## Usage
 
