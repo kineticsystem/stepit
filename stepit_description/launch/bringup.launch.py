@@ -41,7 +41,7 @@ def generate_launch_description():
     robot_name = "stepit"
     package_name = robot_name + "_description"
     rviz_config = os.path.join(
-        get_package_share_directory(package_name), "launch", robot_name + ".rviz"
+        get_package_share_directory(package_name), "rviz", robot_name + ".rviz"
     )
     robot_description = os.path.join(
         get_package_share_directory(package_name), "urdf", robot_name + ".urdf.xacro"
@@ -54,32 +54,36 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            Node(
-                package="controller_manager",
-                executable="ros2_control_node",
-                parameters=[
-                    {"robot_description": robot_description_config.toxml()},
-                    controller_config,
-                ],
-                # output={
-                #    "stdout": "screen",
-                #    "stderr": "screen",
-                # },
-            ),
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=[
-                    "joint_state_broadcaster",
-                    "--controller-manager",
-                    "/controller_manager",
-                ],
-            ),
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=["velocity_controller", "-c", "/controller_manager"],
-            ),
+            # Node(
+            #     package="controller_manager",
+            #     executable="ros2_control_node",
+            #     parameters=[
+            #         {"robot_description": robot_description_config.toxml()},
+            #         controller_config,
+            #     ],
+            #     # output={
+            #     #    "stdout": "screen",
+            #     #    "stderr": "screen",
+            #     # },
+            # ),
+            # Node(
+            #     package="controller_manager",
+            #     executable="spawner",
+            #     arguments=[
+            #         "joint_state_broadcaster",
+            #         "--controller-manager",
+            #         "/controller_manager",
+            #     ],
+            # ),
+            # Node(
+            #     package="controller_manager",
+            #     executable="spawner",
+            #     arguments=["velocity_controller", "-c", "/controller_manager"],
+            # ),
+            # robot_state_publisher uses the URDF specified by the parameter
+            # robot_description and the joint positions from the topic
+            # /joint_states to calculate the forward kinematics of the robot
+            # and publish the results via tf.
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
@@ -87,6 +91,18 @@ def generate_launch_description():
                 parameters=[{"robot_description": robot_description_config.toxml()}],
                 output="screen",
             ),
+            # joint_state_publisher publishes sensor_msgs/JointState messages
+            # for a robot. The package reads the robot_description parameter,
+            # finds all of the non-fixed joints and publishes a JointState
+            # message with all those joints defined.
+            # Can be used in conjunction with the robot_state_publisher node to
+            # also publish transforms for all joint states.
+            Node(
+                package="joint_state_publisher",
+                executable="joint_state_publisher",
+                name="joint_state_publisher",
+            ),
+            # rviz2 starts up the rviz2 application.
             Node(
                 package="rviz2",
                 executable="rviz2",

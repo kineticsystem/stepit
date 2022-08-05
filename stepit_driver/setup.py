@@ -29,8 +29,13 @@
 
 import os
 from glob import glob
+
 from setuptools import setup
 
+# The setup.py installation script is deprecated but there is not a valid alternative
+# yet. If you want to switch off the deprecation warning just set the following
+# environment variable.
+# export PYTHONWARNINGS="ignore:::setuptools.command.install,ignore:::setuptools.command.easy_install,ignore:::pkg_resources"
 
 package_name = "stepit_driver"
 

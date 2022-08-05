@@ -3,31 +3,45 @@
 
   <xacro:macro name="stepit">
 
+    <material name="base_link_material">
+      <color rgba="0 0 1 1" />
+    </material>
+
+    <link name="world" />
+
     <link name="base_link">
-      <visual>
+      <visual name="base_link_visual">
+        <origin xyz="0.0 0 0.05" rpy="0 0 0" />
         <geometry>
-          <box size="1 1 1" />
+          <box size="2 1 0.1" />
         </geometry>
+        <material name="base_link_material" />
       </visual>
     </link>
 
     <link name="link1">
-      <visual>
-        <origin xyz="0 0 0.5" rpy="0 0 0" />
+      <visual name="link1_visual">
+        <origin xyz="0.5 0 0.15" rpy="0 0 0" />
         <geometry>
-          <cylinder length="1" radius="0.4" />
+          <mesh filename="file://$(find stepit_description)/meshes/cylinder.dae" scale="1 1 1" />
         </geometry>
       </visual>
     </link>
 
     <link name="link2">
-      <visual>
-        <origin xyz="0 0 -0.5" rpy="0 0 0" />
+      <visual name="link2_visual">
+        <origin xyz="-0.5 0 0.15" rpy="0 0 0" />
         <geometry>
-          <cylinder length="1" radius="0.4" />
+          <mesh filename="file://$(find stepit_description)/meshes/cylinder.dae" scale="1 1 1" />
         </geometry>
       </visual>
     </link>
+
+    <joint name="base_link_to_world" type="fixed">
+      <parent link="world" />
+      <child link="base_link" />
+      <axis xyz="0 0 1" />
+    </joint>
 
     <joint name="joint1" type="revolute">
       <parent link="base_link" />
