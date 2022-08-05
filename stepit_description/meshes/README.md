@@ -11,7 +11,7 @@ For the material we must use four nodes:
 1. a Texture Coordinate node;
 2. a Texture node;
 3. a principled BSDF node;
-4. an Material Output node.
+4. a Material Output node.
 
 The Texture Coordinate node "UV" output must be connected to the Texture node "Vector" input.
 
@@ -21,4 +21,4 @@ The Principled BSDF node "BSDF" output must be connected to the Material Output 
 
 For all this to work, the object must provide UV coordinates.
 
-The texture will be exported in the same location of the DAE file. For RVIZ to find it, it must remain in the same position, together with the DAE file and not in the texture folder as commonly used by Gazebo.
+The texture will be exported in the same location of the DAE file. For RVIZ to find it, it must remain in the same position, together with the DAE file and not in the texture as required by Gazebo.
