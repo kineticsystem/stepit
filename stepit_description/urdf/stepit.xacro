@@ -21,7 +21,7 @@
 
     <link name="link1">
       <visual name="link1_visual">
-        <origin xyz="0.5 0 0.15" rpy="0 0 0" />
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
         <geometry>
           <mesh filename="file://$(find stepit_description)/meshes/cylinder.dae" scale="1 1 1" />
         </geometry>
@@ -30,7 +30,7 @@
 
     <link name="link2">
       <visual name="link2_visual">
-        <origin xyz="-0.5 0 0.15" rpy="0 0 0" />
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
         <geometry>
           <mesh filename="file://$(find stepit_description)/meshes/cylinder.dae" scale="1 1 1" />
         </geometry>
@@ -46,6 +46,7 @@
     <joint name="joint1" type="revolute">
       <parent link="base_link" />
       <child link="link1" />
+      <origin xyz="0.5 0.0 0.15" rpy="0 0 0" />
       <axis xyz="0 0 1" />
       <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0" />
     </joint>
@@ -53,6 +54,7 @@
     <joint name="joint2" type="revolute">
       <parent link="base_link" />
       <child link="link2" />
+      <origin xyz="-0.5 0.0 0.15" rpy="0 0 0" />
       <axis xyz="0 0 1" />
       <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0" />
     </joint>
