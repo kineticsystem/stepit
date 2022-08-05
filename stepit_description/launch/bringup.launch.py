@@ -91,27 +91,26 @@ def generate_launch_description():
                 parameters=[{"robot_description": robot_description_config.toxml()}],
                 output="screen",
             ),
-            # joint_state_publisher publishes sensor_msgs/JointState messages
-            # for a robot. The package reads the robot_description parameter,
-            # finds all of the non-fixed joints and publishes a JointState
-            # message with all those joints defined.
-            # Can be used in conjunction with the robot_state_publisher node to
-            # also publish transforms for all joint states.
+            # joint_state_publisher_gui reads the robot description from the
+            # topic /robot/description and create a GUI displaying a slider
+            # for each moving joint.
+            # Remember to set non-zero lower and upper limits on each joint,
+            # otherwise the slider will not be displayed.
+            # By moving the slider we publish joint states to the topic
+            # /joint_states which are used by the robot_state_publisher node.
+            # A non-graphical tool to do the same is the joint_state_publisher
+            # node.
             Node(
-                package="joint_state_publisher",
-                executable="joint_state_publisher",
-                name="joint_state_publisher",
+                package="joint_state_publisher_gui",
+                executable="joint_state_publisher_gui",
+                name="joint_state_publisher_gui",
             ),
-            # rviz2 starts up the rviz2 application.
+            # RViz2 starts up the RViz2 application.
             Node(
                 package="rviz2",
                 executable="rviz2",
                 name="rviz2",
                 arguments=["-d", rviz_config],
-                # output={
-                #    "stdout": "screen",
-                #    "stderr": "log",
-                # },
             ),
         ]
     )
