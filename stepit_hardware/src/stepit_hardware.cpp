@@ -53,6 +53,15 @@ namespace stepit_hardware
 constexpr auto kStepitHardware = "StepitHardware";
 constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
+StepitHardware::StepitHardware() : data_interface_{ std::make_unique<DataHandler>(std::make_unique<SerialHandler>()) }
+{
+}
+
+StepitHardware::StepitHardware(std::unique_ptr<DataInterface> data_interface)
+  : data_interface_{ std::move(data_interface) }
+{
+}
+
 hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "on_init");
@@ -214,11 +223,6 @@ hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rcl
     AcknowledgeResponse position_command_response{ data_interface_->read() };
   }
   return hardware_interface::return_type::OK;
-}
-
-void StepitHardware::set_data_interface(std::unique_ptr<DataInterface> data_interface)
-{
-  data_interface_ = std::move(data_interface);
 }
 
 }  // namespace stepit_hardware

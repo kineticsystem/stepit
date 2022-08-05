@@ -54,32 +54,28 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            # Node(
-            #     package="controller_manager",
-            #     executable="ros2_control_node",
-            #     parameters=[
-            #         {"robot_description": robot_description_config.toxml()},
-            #         controller_config,
-            #     ],
-            #     # output={
-            #     #    "stdout": "screen",
-            #     #    "stderr": "screen",
-            #     # },
-            # ),
-            # Node(
-            #     package="controller_manager",
-            #     executable="spawner",
-            #     arguments=[
-            #         "joint_state_broadcaster",
-            #         "--controller-manager",
-            #         "/controller_manager",
-            #     ],
-            # ),
-            # Node(
-            #     package="controller_manager",
-            #     executable="spawner",
-            #     arguments=["velocity_controller", "-c", "/controller_manager"],
-            # ),
+            Node(
+                package="controller_manager",
+                executable="ros2_control_node",
+                parameters=[
+                    {"robot_description": robot_description_config.toxml()},
+                    controller_config,
+                ],
+            ),
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=[
+                    "joint_state_broadcaster",
+                    "--controller-manager",
+                    "/controller_manager",
+                ],
+            ),
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["velocity_controller", "-c", "/controller_manager"],
+            ),
             # robot_state_publisher uses the URDF specified by the parameter
             # robot_description and the joint positions from the topic
             # /joint_states to calculate the forward kinematics of the robot

@@ -48,6 +48,23 @@ namespace stepit_hardware
 class StepitHardware : public hardware_interface::SystemInterface
 {
 public:
+  /**
+   * Default constructor initializing all required components.
+   */
+  StepitHardware();
+
+  /**
+   * Constructor with given data interface.
+   * @param data_interface The data interface to send and receive data packets
+   * to and from the serial port.
+   */
+  explicit StepitHardware(std::unique_ptr<DataInterface> data_interface);
+
+  /**
+   * Defines aliases and static functions for using the Class with shared_ptrs.
+   * With such definitions, the control manager can instantiate the class with
+   * auto hardware_interface = StepitHardware::make_shared();
+   */
   RCLCPP_SHARED_PTR_DEFINITIONS(StepitHardware)
 
   /**
@@ -100,20 +117,18 @@ public:
   STEPIT_HARDWARE_PUBLIC
   hardware_interface::return_type write(const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
-  void set_data_interface(std::unique_ptr<DataInterface> data_interface);
-
 private:
   // Internal structure to store joint states or targets.
   struct JointValue
   {
-    double position;
-    double velocity;
+    double position = 0.0;
+    double velocity = 0.0;
   };
 
   // Internal structure to store joint states and targets.
   struct Joint
   {
-    uint8_t id;
+    uint8_t id = 0;
     JointValue state{};
     JointValue command{};
   };
@@ -124,6 +139,6 @@ private:
   // Interface to send binary data to the hardware using the serial port.
   std::unique_ptr<DataInterface> data_interface_;
 
-  uint8_t request_id;
+  uint8_t request_id = 0;
 };
 }  // namespace stepit_hardware

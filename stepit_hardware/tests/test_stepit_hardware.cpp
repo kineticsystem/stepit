@@ -148,8 +148,7 @@ TEST(TestStepitHardware, read)
   auto mock_data_interface = std::make_unique<MockDataInterface>();
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(motor_status_response));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
-  stepit_hardware->set_data_interface(std::move(mock_data_interface));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_data_interface));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -191,8 +190,7 @@ TEST(TestStepitHardware, write_velocities)
   std::vector<uint8_t> velocity_response{ 0x00, 0x11 };
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(velocity_response));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
-  stepit_hardware->set_data_interface(std::move(mock_data_interface));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_data_interface));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -246,8 +244,7 @@ TEST(TestStepitHardware, write_positions)
   std::vector<uint8_t> position_response{ 0x01, 0x11 };
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(position_response));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
-  stepit_hardware->set_data_interface(std::move(mock_data_interface));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_data_interface));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
