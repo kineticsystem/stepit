@@ -36,9 +36,8 @@ import math
 # Trajectory profiles are then plotted to validate the result.
 
 
-def time_to_go(v_max: float, a: float, x0: float, x1: float):
+def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
     dx = x1 - x0
-    total_time = 0
     if dx >= pow(v_max, 2) / a:
         t1 = v_max / a
         t2 = t1 + max(0, (dx - pow(v_max, 2) / a)) / v_max
@@ -48,58 +47,60 @@ def time_to_go(v_max: float, a: float, x0: float, x1: float):
         t1 = math.sqrt(dx / a)
         t2 = 2 * t1
         total_time = t2
-    return total_time
+    return total_time - v0 / a
 
 
-def velocity(v_max: float, a: float, x0: float, x1: float, t: float):
+def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     dx = x1 - x0
     v = 0
+    tt = t + v0 / a
     if dx >= pow(v_max, 2) / a:
         t1 = v_max / a
         t2 = t1 + max(0, (dx - pow(v_max, 2) / a)) / v_max
         t3 = t1 + t2
-        if t <= t1:
-            v = a * t
-        elif t <= t2:
+        if tt <= t1:
+            v = a * tt
+        elif tt <= t2:
             v = a * t1
-        elif t <= t3:
-            v = a * t1 - a * (t - t2)
+        elif tt <= t3:
+            v = a * t1 - a * (tt - t2)
         else:
             v = 0
     elif dx >= 0:
         t1 = math.sqrt(dx / a)
         t2 = 2 * t1
-        if t <= t1:
-            v = a * t
-        elif t <= t2:
-            v = a * t1 - a * (t - t1)
+        if tt <= t1:
+            v = a * tt
+        elif tt <= t2:
+            v = a * t1 - a * (tt - t1)
         else:
             v = 0
     return v
 
 
-def distance(v_max: float, a: float, x0: float, x1: float, t: float):
+def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     dx = x1 - x0
     d = 0
+    tt = t + v0 / a
     if dx >= pow(v_max, 2) / a:
         t1 = v_max / a
         t2 = t1 + max(0, (dx - pow(v_max, 2) / a)) / v_max
         t3 = t1 + t2
-        if t <= t1:
-            d = 0.5 * a * pow(t, 2)
-        elif t <= t2:
-            d = 0.5 * pow(v_max, 2) / a + v_max * (t - t1)
-        elif t <= t3:
-            d = 0.5 * pow(v_max, 2) / a + v_max * (t - t1) - 0.5 * a * pow(t - t2, 2)
+        if tt <= t1:
+            d = 0.5 * a * pow(tt, 2)
+        elif tt <= t2:
+            d = 0.5 * pow(v_max, 2) / a + v_max * (tt - t1)
+        elif tt <= t3:
+            d = 0.5 * pow(v_max, 2) / a + v_max * (tt - t1) - 0.5 * a * pow(tt - t2, 2)
         else:
             d = pow(v_max, 2) / a + v_max * (t2 - t1)
     elif dx >= 0:
         t1 = math.sqrt(dx / a)
         t2 = 2 * t1
-        if t <= t1:
-            d = 0.5 * a * pow(t, 2)
-        elif t <= t2:
-            d = 0.5 * dx + a * t1 * (t - t1) - 0.5 * a * pow(t - t1, 2)
+        if tt <= t1:
+            d = 0.5 * a * pow(tt, 2)
+        elif tt <= t2:
+            d = 0.5 * dx + a * t1 * (tt - t1) - 0.5 * a * pow(tt - t1, 2)
         else:
             d = 0.5 * dx + 0.5 * a * pow(t1, 2)
     return d
@@ -112,14 +113,19 @@ def plot():
     d_v = [0.0] * n
     v_v = [0.0] * n
 
+    v0 = 0.5
+    a = 0.7
+    v_max = 1.1
+    x0 = 0
+
     plt.figure(figsize=(16, 6), dpi=200)
 
     plt.subplot(1, 2, 1)
     for x1 in [4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1, 0.5]:
-        total_time = time_to_go(v_max=1.1, a=0.7, x0=0, x1=x1)
+        total_time = time_to_go(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1)
         for i in range(n):
             t = i * total_time / (n - 1)
-            d = distance(v_max=1.1, a=0.7, x0=0, x1=x1, t=t)
+            d = position(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t)
             t_v[i] = t
             d_v[i] = d
         # plt.plot(x, y, "red")
@@ -131,13 +137,14 @@ def plot():
     plt.ylim(-1)
     plt.axhline(y=0, color="black", linestyle="--", linewidth=0.5)
     plt.axvline(x=0, color="black", linestyle="--", linewidth=0.5)
+    plt.plot(0, position(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=0), "k.")
     plt.subplot(1, 2, 2)
 
     for x1 in [4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1, 0.5]:
-        total_time = time_to_go(v_max=1.1, a=0.7, x0=0, x1=x1)
+        total_time = time_to_go(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1)
         for i in range(n):
             t = i * total_time / (n - 1)
-            v = velocity(v_max=1.1, a=0.7, x0=0, x1=x1, t=t)
+            v = velocity(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t)
             t_v[i] = t
             v_v[i] = v
         # plt.plot(x, y, "red")
@@ -149,6 +156,8 @@ def plot():
     plt.ylim(-1)
     plt.axhline(y=0, color="black", linestyle="--", linewidth=0.5)
     plt.axvline(x=0, color="black", linestyle="--", linewidth=0.5)
+    plt.plot(0, velocity(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=0), "k.")
+    # plt.text(xmax, ymax + 2, 'local max:' + str(ymax))
 
     plt.show()
 
