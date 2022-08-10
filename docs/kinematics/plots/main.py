@@ -38,21 +38,36 @@ import math
 
 def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
     dx = x1 - x0
+    dt = v0 / a
+    total_time = 0
     if dx >= pow(v_max, 2) / a:
         t1 = v_max / a
         t2 = t1 + max(0, (dx - pow(v_max, 2) / a)) / v_max
         t3 = t1 + t2
-        total_time = t3
+        total_time = t3 - dt
     elif dx >= 0:
         t1 = math.sqrt(dx / a)
         t2 = 2 * t1
-        total_time = t2
-    return total_time - v0 / a
+        total_time = t2 - dt
+    return total_time
+
+
+def time_to_stop(a: float, v0: float):
+    return v0 / a
+
+
+def distance_to_stop(a: float, v0: float):
+    return 0.5 * pow(v0, 2) / a
 
 
 def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
+
     dx = x1 - x0
     v = 0
+
+    # if dx < distance_to_stop(a=a, v0=v0) it means I must reverse velocity
+    # to go to position x1.
+
     tt = t + v0 / a
     if dx >= pow(v_max, 2) / a:
         t1 = v_max / a
