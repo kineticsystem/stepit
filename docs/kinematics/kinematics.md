@@ -6,20 +6,20 @@ In the following picture, we show a diagram representing the velocity of a motor
 
 The area $\Delta x$ under this curve represents the distance between $x_0$ and $x_1$.
 
-<img src="images/forward_1.svg">
+<img src="svg/forward_1.svg">
 
 If $x_1$ is not too far from $x_0$, the velocity trajectory may degenerate into the following curve. The area of the triangle is
 
 $$\Delta x = \frac{v_{max}^2}{a}$$
 
-<img src="images/forward_2.svg">
+<img src="svg/forward_2.svg">
 
 If the distance between $x_0$ and $x_1$ is shorter than this quantity, the trajectory degenerates even more into the following curve.
 
-<img src="images/forward_3.svg">
+<img src="svg/forward_3.svg">
 
-If $x_1 < x_0$, the above diagrams become
+If $x_1< x_0$, the above diagrams become
 
-<img src="images/reverse_1.svg">
-<img src="images/reverse_2.svg">
-<img src="images/reverse_3.svg">
+<img src="svg/reverse_1.svg">
+<img src="svg/reverse_2.svg">
+<img src="svg/reverse_3.svg">

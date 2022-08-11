@@ -29,8 +29,8 @@
      fit-margin-bottom="1"
      lock-margins="true"
      inkscape:zoom="1.2810466"
-     inkscape:cx="205.69119"
-     inkscape:cy="256.82126"
+     inkscape:cx="119.04329"
+     inkscape:cy="152.9999"
      inkscape:window-width="1728"
      inkscape:window-height="1011"
      inkscape:window-x="0"
@@ -92,16 +92,14 @@
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="17.638403"
+       x="17.212572"
        y="13.563983"
        id="text8466"><tspan
          sodipodi:role="line"
          id="tspan8464"
          style="font-size:4.23333px;text-align:end;text-anchor:end;fill:#000000;fill-opacity:1;stroke-width:0.264583"
-         x="17.638403"
-         y="13.563983">V<tspan
-   style="font-size:65%;baseline-shift:sub"
-   id="tspan35215">max</tspan></tspan></text>
+         x="17.212574"
+         y="13.563983">$v_{max}$</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:4.23333px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
