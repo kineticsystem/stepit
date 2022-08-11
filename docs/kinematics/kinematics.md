@@ -20,6 +20,4 @@ If the distance between $x_0$ and $x_1$ is shorter than this quantity, the traje
 
 If $x_1< x_0$, the above diagrams become
 
-<img src="svg/reverse_1.svg">
-<img src="svg/reverse_2.svg">
-<img src="svg/reverse_3.svg">
+<img src="svg/reverse_1.svg"><img src="svg/reverse_2.svg"><img src="svg/reverse_3.svg">
