@@ -18,7 +18,7 @@ If the distance between $x_0$ and $x_1$ is shorter than this quantity, the traje
 
 <img src="images/forward_3.svg">
 
-If $x_1<x_0$, the above diagrams become
+If $x_1 < x_0$, the above diagrams become
 
 <img src="images/reverse_1.svg">
 <img src="images/reverse_2.svg">
