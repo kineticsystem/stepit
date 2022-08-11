@@ -53,6 +53,6 @@ $$
 v''(t) =
 \begin{cases}
 v_0 - at & t < t_{stop}\\
-v(t - t_{stop}) & t >= t_{stop}
+v(t - t_{stop}) & t \ge t_{stop}
 \end{cases}
 $$
