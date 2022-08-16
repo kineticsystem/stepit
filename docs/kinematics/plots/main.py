@@ -61,19 +61,36 @@ def distance_to_stop(a: float, v0: float):
     return 0.5 * pow(v0, 2) / a
 
 
-def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
-    dx = abs(x1 - x0)
-    dt = v0 / a
+def time_to_go_0(v_max: float, a: float, x0: float, x1: float):
+    """
+    Return the time for a motor with acceleration a and zero initial velocity to move from position x0 to position x1.
+    :param v_max: The maximum velocity.
+    :param a:     The acceleration.
+    :param x0:    The initial position.
+    :param x1:    The final position.
+    :return:      The motor velocity.
+    """
+    dx = x1 - x0
     total_time = 0
-    if dx >= pow(v_max, 2) / a:
+    if abs(dx) >= pow(v_max, 2) / a:
         t1 = v_max / a
-        t2 = t1 + max(0, (dx - pow(v_max, 2) / a)) / v_max
-        t3 = t1 + t2
-        total_time = t3 - dt
-    elif dx >= 0:
-        t1 = math.sqrt(dx / a)
-        t2 = 2 * t1
-        total_time = t2 - dt
+        t2 = t1 + max(0, (abs(dx) - pow(v_max, 2) / a)) / v_max
+        total_time = t1 + t2
+    elif abs(dx) >= 0:
+        t1 = math.sqrt(abs(dx) / a)
+        total_time = 2 * t1
+    return total_time
+
+
+def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
+    dx = x1 - x0
+    d_stop = distance_to_stop(a, v0)
+    t_stop = time_to_stop(a, v0)
+    total_time = 0
+    if (v0 >= 0 and dx >= d_stop) or (v0 <= 0 and dx <= -d_stop):  # Keep accelerating.
+        total_time = time_to_go_0(v_max, a, x0, x1 + sgn(v0) * d_stop) - t_stop
+    elif abs(dx) >= 0:  # Decelerate and reverse.
+        total_time = time_to_go_0(v_max, a, x0, x1 - sgn(v0) * d_stop) + t_stop
     return total_time
 
 
@@ -144,7 +161,7 @@ def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     else:
         if t <= t_stop:  # Decelerate.
             x = v0 * (t - t_stop) + sgn(v0) * (
-                -0.5 * a * pow(t, 2) + 0.5 * a * pow(t_stop, 2) + d_stop
+                0.5 * a * (pow(t_stop, 2) - pow(t, 2)) + d_stop
             )
         else:  # Reverse.
             x = (
@@ -223,49 +240,16 @@ def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     return v
 
 
-# def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
-#
-#     dx = abs(x1 - x0)
-#     sign_dx = sgn(x1 - x0)
-#     d = 0
-#
-#     if v0 >= 0:
-#         distance_to_stop = 0.5 * pow(v0, 2) / a
-#     else:
-#
-#     tt = t + time_to_stop(a, v0)
-#     if dx >= pow(v_max, 2) / a:
-#         t1 = v_max / a
-#         t2 = t1 + max(0, (dx - pow(v_max, 2) / a)) / v_max
-#         t3 = t1 + t2
-#         if tt <= t1:
-#             d = 0.5 * a * pow(tt, 2)
-#         elif tt <= t2:
-#             d = 0.5 * pow(v_max, 2) / a + v_max * (tt - t1)
-#         elif tt <= t3:
-#             d = 0.5 * pow(v_max, 2) / a + v_max * (tt - t1) - 0.5 * a * pow(tt - t2, 2)
-#         else:
-#             d = pow(v_max, 2) / a + v_max * (t2 - t1)
-#     elif dx >= 0:
-#         t1 = math.sqrt(dx / a)
-#         t2 = 2 * t1
-#         if tt <= t1:
-#             d = 0.5 * a * pow(tt, 2)
-#         elif tt <= t2:
-#             d = 0.5 * dx + a * t1 * (tt - t1) - 0.5 * a * pow(tt - t1, 2)
-#         else:
-#             d = 0.5 * dx + 0.5 * a * pow(t1, 2)
-#     return sign_dx * (d - 0.5 * pow(v0, 2) / a)
-
-
 def plot():
+
+    x_max = 5
 
     v0 = 0
     a = 1
     v_max = 1
     x0 = 0
     x1 = 0
-    t_max = 5
+    t_max = time_to_go(v_max, a, -v_max, x0, x0 + x_max)
 
     t = np.linspace(0, t_max, 200)
     fig, ax = plt.subplots(figsize=(12, 6), dpi=200)
@@ -278,6 +262,8 @@ def plot():
     plt.ylabel("velocity [rad/s]")
     plt.ylim(-v_max * 1.01, v_max * 1.01)
     plt.xlim(0.0, t_max)
+
+    line1 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
 
     # adjust the main plot to make room for the sliders
     plt.subplots_adjust(left=0.18, bottom=0.25)
@@ -292,8 +278,10 @@ def plot():
     plt.subplot(1, 2, 2)
     plt.xlabel("time [s]")
     plt.ylabel("position [rad]")
-    plt.ylim(-5, 5)
+    plt.ylim(-x_max * 1.01, x_max * 1.01)
     plt.xlim(0.0, t_max)
+
+    line2 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
 
     (position_line,) = plt.plot(
         t, position_v(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t), lw=2, color="blue"
@@ -307,8 +295,8 @@ def plot():
     x1_slider = plt.Slider(
         ax=ax_x1,
         label="$x_1$",
-        valmin=-5,
-        valmax=5,
+        valmin=-x_max,
+        valmax=x_max,
         valinit=0,
     )
 
@@ -337,6 +325,10 @@ def plot():
 
     # The function to be called anytime a slider's value changes.
     def update(val):
+        nonlocal line1
+        nonlocal line2
+        nonlocal t_max
+
         velocity_line.set_ydata(
             velocity_v(
                 v_max=v_max,
@@ -357,6 +349,19 @@ def plot():
                 t=t,
             )
         )
+
+        t_max = time_to_go(
+            v_max=v_max, a=a_slider.val, v0=v0_slider.val, x0=x0, x1=x1_slider.val
+        )
+
+        plt.subplot(1, 2, 1)
+        line1.remove()
+        line1 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
+
+        plt.subplot(1, 2, 2)
+        line2.remove()
+        line2 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
+
         fig.canvas.draw_idle()
 
     # The function to be called to reset the sliders.
