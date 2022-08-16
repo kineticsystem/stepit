@@ -80,7 +80,7 @@ def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
 def position_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
     x = [0.0] * len(t)
     for i in range(0, len(t)):
-        x[i] = position_0(v_max, a, x0, x1, t[i])
+        x[i] = position(v_max, a, v0, x0, x1, t[i])
     return x
 
 
@@ -92,7 +92,7 @@ def position_0(v_max: float, a: float, x0: float, x1: float, t: float):
     :param x0:    The initial position.
     :param x1:    The final position.
     :param t:     The time.
-    :return:      The motor velocity.
+    :return:      The motor position.
     """
     dx = x1 - x0
     x = 0
@@ -118,6 +118,40 @@ def position_0(v_max: float, a: float, x0: float, x1: float, t: float):
         else:
             x = abs(dx)
     return x * sgn(dx)
+
+
+def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
+    """
+    Velocity at time t of a motor with acceleration a and initial velocity v0, moving from position x0 to position x1.
+    :param v_max: The maximum velocity.
+    :param a:     The acceleration.
+    :param v0:    The initial velocity.
+    :param x0:    The initial position.
+    :param x1:    The final position.
+    :param t:     The time.
+    :return:      The motor position.
+    """
+
+    dx = x1 - x0
+    d_stop = distance_to_stop(a, v0)
+    t_stop = time_to_stop(a, v0)
+    x = 0
+    if (v0 >= 0 and dx >= d_stop) or (v0 <= 0 and dx <= -d_stop):  # Keep accelerating.
+        x = (
+            position_0(v_max, a, x0, x1 + sgn(v0) * d_stop, t + t_stop)
+            - sgn(v0) * d_stop
+        )
+    else:
+        if t <= t_stop:  # Decelerate.
+            x = v0 * (t - t_stop) + sgn(v0) * (
+                -0.5 * a * pow(t, 2) + 0.5 * a * pow(t_stop, 2) + d_stop
+            )
+        else:  # Reverse.
+            x = (
+                position_0(v_max, a, x0, x1 - sgn(v0) * d_stop, t - t_stop)
+                + sgn(v0) * d_stop
+            )
+    return x
 
 
 def velocity_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
