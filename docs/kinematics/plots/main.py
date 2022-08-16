@@ -77,6 +77,49 @@ def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
     return total_time
 
 
+def position_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
+    x = [0.0] * len(t)
+    for i in range(0, len(t)):
+        x[i] = position_0(v_max, a, x0, x1, t[i])
+    return x
+
+
+def position_0(v_max: float, a: float, x0: float, x1: float, t: float):
+    """
+    Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to position x1.
+    :param v_max: The maximum velocity.
+    :param a:     The acceleration.
+    :param x0:    The initial position.
+    :param x1:    The final position.
+    :param t:     The time.
+    :return:      The motor velocity.
+    """
+    dx = x1 - x0
+    x = 0
+    if abs(dx) >= pow(v_max, 2) / a:
+        t1 = v_max / a
+        t2 = t1 + max(0, (abs(dx) - pow(v_max, 2) / a)) / v_max
+        t3 = t1 + t2
+        if t <= t1:  # v = a * t
+            x = 0.5 * a * pow(t, 2)
+        elif t <= t2:  # v = a * t1
+            x = 0.5 * pow(v_max, 2) / a + v_max * (t - t1)
+        elif t <= t3:  # v = a * t1 - a * (t - t2)
+            x = 0.5 * pow(v_max, 2) / a + v_max * (t - t1) - 0.5 * a * pow(t - t2, 2)
+        else:
+            x = pow(v_max, 2) / a + v_max * (t2 - t1)
+    elif abs(dx) >= 0:
+        t1 = math.sqrt(abs(dx) / a)
+        t2 = 2 * t1
+        if t <= t1:
+            x = 0.5 * a * pow(t, 2)
+        elif t <= t2:
+            x = 0.5 * abs(dx) + a * t1 * (t - t1) - 0.5 * a * pow(t - t1, 2)
+        else:
+            x = abs(dx)
+    return x * sgn(dx)
+
+
 def velocity_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
     v = [0.0] * len(t)
     for i in range(0, len(t)):
@@ -152,27 +195,6 @@ def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
 #     sign_dx = sgn(x1 - x0)
 #     d = 0
 #
-#
-#     a = 1
-#     # time_to_stop = 0.5 * pow(v0, 2) / a
-#
-#     v0 = 1 # distance_to_stop = 0.5
-#     x0 = 1
-#     x1 = 2 # dx = 1 -> I must accelerate in the positive direction.
-#
-#     v0 = -1 # distance_to_stop = 0.5
-#     x0 = 1
-#     x1 = 2 # dx = 1
-#
-#     v0 = -1 # distance_to_stop = 0.5
-#     x0 = -1
-#     x1 = -2 # dx = 1
-#
-#     v0 = 1 # distance_to_stop = 0.5
-#     x0 = -1
-#     x1 = -2 # dx = -1
-#
-#
 #     if v0 >= 0:
 #         distance_to_stop = 0.5 * pow(v0, 2) / a
 #     else:
@@ -236,11 +258,11 @@ def plot():
     plt.subplot(1, 2, 2)
     plt.xlabel("time [s]")
     plt.ylabel("position [rad]")
-    plt.ylim(-v_max * 1.01, v_max * 1.01)
+    plt.ylim(-5, 5)
     plt.xlim(0.0, t_max)
 
     (position_line,) = plt.plot(
-        t, velocity_v(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t), lw=2, color="blue"
+        t, position_v(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t), lw=2, color="blue"
     )
 
     ####################################################################################################################
@@ -292,7 +314,7 @@ def plot():
             )
         )
         position_line.set_ydata(
-            velocity_v(
+            position_v(
                 v_max=v_max,
                 a=a_slider.val,
                 v0=v0_slider.val,
