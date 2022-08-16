@@ -77,6 +77,13 @@ def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
     return total_time
 
 
+def velocity_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
+    v = [0.0] * len(t)
+    for i in range(0, len(t)):
+        v[i] = velocity(v_max, a, v0, x0, x1, t[i])
+    return v
+
+
 def velocity_0(v_max: float, a: float, x0: float, x1: float, t: float):
     """
     Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to position x1.
@@ -88,7 +95,6 @@ def velocity_0(v_max: float, a: float, x0: float, x1: float, t: float):
     :return:      The motor velocity.
     """
     dx = x1 - x0
-
     v = 0
     if abs(dx) >= pow(v_max, 2) / a:
         t1 = v_max / a
@@ -111,14 +117,7 @@ def velocity_0(v_max: float, a: float, x0: float, x1: float, t: float):
             v = a * t1 - a * (t - t1)
         else:
             v = 0
-    return sgn(dx) * v
-
-
-def velocity_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
-    v = [0.0] * len(t)
-    for i in range(0, len(t)):
-        v[i] = velocity(v_max, a, v0, x0, x1, t[i])
-    return v
+    return v * sgn(dx)
 
 
 def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
@@ -136,17 +135,14 @@ def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     dx = x1 - x0
     d_stop = distance_to_stop(a, v0)
     t_stop = time_to_stop(a, v0)
-
     v = 0
-    if v0 > 0 and dx > d_stop:  # Accelerate or keep accelerating.
-        v = velocity_0(v_max, a, x0, x1 + d_stop, t + t_stop)
-    elif v0 < 0 and dx < -d_stop:  # Accelerate or keep accelerating.
-        v = velocity_0(v_max, a, x0, x1 - d_stop, t + t_stop)
-    else:  # Must decelerate.
-        if t >= t_stop:
-            v = velocity_0(v_max, a, x0, x1 - d_stop, t - t_stop)
-        else:
+    if (v0 >= 0 and dx >= d_stop) or (v0 <= 0 and dx <= -d_stop):  # Keep accelerating.
+        v = velocity_0(v_max, a, x0, x1 + sgn(v0) * d_stop, t + t_stop)
+    else:
+        if t <= t_stop:  # Decelerate.
             v = v0 - sgn(v0) * a * t
+        else:  # Reverse.
+            v = velocity_0(v_max, a, x0, x1 - sgn(v0) * d_stop, t - t_stop)
     return v
 
 
