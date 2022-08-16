@@ -209,63 +209,45 @@ def plot():
     v_max = 1
     x0 = 0
     x1 = 0
+    t_max = 5
 
-    # plt.subplot(1, 2, 1)
-    # for x1 in [
-    #     4.5,
-    #     4,
-    #     3.5,
-    #     3,
-    #     2.5,
-    #     2,
-    #     1.5,
-    #     1,
-    #     0.5,
-    #     -4.5,
-    #     -4,
-    #     -3.5,
-    #     -3,
-    #     -2.5,
-    #     -2,
-    #     -1.5,
-    #     -1,
-    #     -0.5,
-    # ]:
-    #     total_time = time_to_go(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1)
-    #     for i in range(n):
-    #         t = i * total_time / (n - 1)
-    #         d = position(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t)
-    #         t_v[i] = t
-    #         d_v[i] = d
-    #     # plt.plot(x, y, "red")
-    #     plt.plot(t_v, d_v)
-    # plt.title("Position")
-    # plt.xlabel("t")
-    # plt.ylabel("x")
-    # # plt.xlim(-1)
-    # # plt.ylim(-1)
-    # plt.axhline(y=0, color="black", linestyle="--", linewidth=0.5)
-    # plt.axvline(x=0, color="black", linestyle="--", linewidth=0.5)
-    # plt.plot(0, position(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=0), "k.")
+    t = np.linspace(0, t_max, 200)
+    fig, ax = plt.subplots(figsize=(12, 6), dpi=200)
 
-    t = np.linspace(0, 5, 200)
+    ####################################################################################################################
+    # PLOT 1
 
-    fig, ax = plt.subplots(figsize=(6, 6), dpi=200)
-
-    (line,) = plt.plot(
-        t, velocity_v(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t), lw=2, color="red"
-    )
-    ax.set_xlabel("time [s]")
-    ax.set_ylabel("velocity [rad/s]")
-
+    plt.subplot(1, 2, 1)
+    plt.xlabel("time [s]")
+    plt.ylabel("velocity [rad/s]")
     plt.ylim(-v_max * 1.01, v_max * 1.01)
-    plt.xlim(0.0)
+    plt.xlim(0.0, t_max)
 
     # adjust the main plot to make room for the sliders
-    plt.subplots_adjust(left=0.25, bottom=0.25)
+    plt.subplots_adjust(left=0.18, bottom=0.25)
+
+    (velocity_line,) = plt.plot(
+        t, velocity_v(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t), lw=2, color="red"
+    )
+
+    ####################################################################################################################
+    # PLOT 2
+
+    plt.subplot(1, 2, 2)
+    plt.xlabel("time [s]")
+    plt.ylabel("position [rad]")
+    plt.ylim(-v_max * 1.01, v_max * 1.01)
+    plt.xlim(0.0, t_max)
+
+    (position_line,) = plt.plot(
+        t, velocity_v(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t), lw=2, color="blue"
+    )
+
+    ####################################################################################################################
+    # SLIDERS AND BUTTONS
 
     # Make a horizontal slider to control the final coordinate.
-    ax_x1 = plt.axes([0.25, 0.1, 0.63, 0.03])
+    ax_x1 = plt.axes([0.18, 0.1, 0.33, 0.03])
     x1_slider = plt.Slider(
         ax=ax_x1,
         label="$x_1$",
@@ -275,9 +257,8 @@ def plot():
     )
 
     # Make a vertically oriented slider to control the initial velocity
-    ax_v0 = plt.axes([0.07, 0.25, 0.03, 0.63])
     v0_slider = plt.Slider(
-        ax=ax_v0,
+        ax=plt.axes([0.07, 0.25, 0.015, 0.63]),
         label="$v_0$",
         valmin=-v_max,
         valmax=v_max,
@@ -286,9 +267,8 @@ def plot():
     )
 
     # Make a vertically oriented slider to control the initial velocity
-    ax_a = plt.axes([0.018, 0.25, 0.03, 0.63])
     a_slider = plt.Slider(
-        ax=ax_a,
+        ax=plt.axes([0.018, 0.25, 0.015, 0.63]),
         label="$a$",
         valmin=0.1,
         valmax=1,
@@ -296,9 +276,22 @@ def plot():
         orientation="vertical",
     )
 
-    # The function to be called anytime a slider's value changes
+    # Make a reset button.
+    button = plt.Button(plt.axes([0.8, 0.025, 0.1, 0.04]), "Reset", hovercolor="0.975")
+
+    # The function to be called anytime a slider's value changes.
     def update(val):
-        line.set_ydata(
+        velocity_line.set_ydata(
+            velocity_v(
+                v_max=v_max,
+                a=a_slider.val,
+                v0=v0_slider.val,
+                x0=x0,
+                x1=x1_slider.val,
+                t=t,
+            )
+        )
+        position_line.set_ydata(
             velocity_v(
                 v_max=v_max,
                 a=a_slider.val,
@@ -310,71 +303,16 @@ def plot():
         )
         fig.canvas.draw_idle()
 
-    # register the update function with each slider
-    a_slider.on_changed(update)
-    v0_slider.on_changed(update)
-    x1_slider.on_changed(update)
-
-    # Create a `matplotlib.widgets.Button` to reset the sliders to initial values.
-    resetax = plt.axes([0.8, 0.025, 0.1, 0.04])
-    button = plt.Button(resetax, "Reset", hovercolor="0.975")
-
+    # The function to be called to reset the sliders.
     def reset(event):
         v0_slider.reset()
         x1_slider.reset()
 
+    # Events.
+    a_slider.on_changed(update)
+    v0_slider.on_changed(update)
+    x1_slider.on_changed(update)
     button.on_clicked(reset)
-
-    # for x1 in [
-    #     4.5,
-    #     4,
-    #     3.5,
-    #     3,
-    #     2.5,
-    #     2,
-    #     1.5,
-    #     1,
-    #     0.5,
-    #     0,
-    #     -0.5,
-    #     -1,
-    #     -1.5,
-    #     -2,
-    #     -2.5,
-    #     -3,
-    #     -3.5,
-    #     -4,
-    #     -4.5,
-    # ]:
-    #     total_time = 6  # time_to_go(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1)
-    #     for i in range(n):
-    #         t = i * total_time / (n - 1)
-    #         v = velocity(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t)
-    #         t_v[i] = t
-    #         v_v[i] = v
-    #     # plt.plot(x, y, "red")
-    #     plt.plot(t_v, v_v)
-    # plt.title("Velocity")
-    # plt.xlabel("t")
-    # plt.ylabel("v")
-    # # plt.xlim(-1)
-    # # plt.ylim(-1)
-    # plt.axhline(y=0, color="black", linestyle="--", linewidth=0.5)
-    # plt.axvline(x=0, color="black", linestyle="--", linewidth=0.5)
-    # plt.plot(0, velocity(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=0), "k.")
-    # # plt.text(xmax, ymax + 2, 'local max:' + str(ymax))
-    #
-    # def update():
-    #     fig.canvas.draw_idle()
-    #
-    # x_slider = plt.Slider(
-    #     ax=plt.axes([0.5, 0, 0.45, 0.05]),
-    #     label="x1",
-    #     valmin=-4.5,
-    #     valmax=4.5,
-    #     valinit=0,
-    # )
-    # x_slider.on_changed(update)
 
     plt.show()
 
