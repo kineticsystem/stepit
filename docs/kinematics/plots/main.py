@@ -106,7 +106,6 @@ def position_0(v_max: float, a: float, x0: float, x1: float, t: float):
     Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to position x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
-    :param x0:    The initial position.
     :param x1:    The final position.
     :param t:     The time.
     :return:      The motor position.
@@ -168,7 +167,7 @@ def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
                 position_0(v_max, a, x0, x1 - sgn(v0) * d_stop, t - t_stop)
                 + sgn(v0) * d_stop
             )
-    return x
+    return x + x0
 
 
 def velocity_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
@@ -290,8 +289,18 @@ def plot():
     ####################################################################################################################
     # SLIDERS AND BUTTONS
 
-    # Make a horizontal slider to control the final coordinate.
-    ax_x1 = plt.axes([0.18, 0.1, 0.33, 0.03])
+    # Make a horizontal slider to control x0 coordinate.
+    ax_x0 = plt.axes([0.18, 0.1, 0.33, 0.03])
+    x0_slider = plt.Slider(
+        ax=ax_x0,
+        label="$x_0$",
+        valmin=-x_max,
+        valmax=x_max,
+        valinit=0,
+    )
+
+    # Make a horizontal slider to control x1 coordinate.
+    ax_x1 = plt.axes([0.18, 0.05, 0.33, 0.03])
     x1_slider = plt.Slider(
         ax=ax_x1,
         label="$x_1$",
@@ -302,7 +311,7 @@ def plot():
 
     # Make a vertically oriented slider to control the initial velocity
     v0_slider = plt.Slider(
-        ax=plt.axes([0.07, 0.25, 0.015, 0.63]),
+        ax=plt.axes([0.055, 0.25, 0.015, 0.63]),
         label="$v_0$",
         valmin=-v_max,
         valmax=v_max,
@@ -312,7 +321,7 @@ def plot():
 
     # Make a vertically oriented slider to control the initial velocity
     a_slider = plt.Slider(
-        ax=plt.axes([0.018, 0.25, 0.015, 0.63]),
+        ax=plt.axes([0.028, 0.25, 0.015, 0.63]),
         label="$a$",
         valmin=0.1,
         valmax=1,
@@ -334,7 +343,7 @@ def plot():
                 v_max=v_max,
                 a=a_slider.val,
                 v0=v0_slider.val,
-                x0=x0,
+                x0=x0_slider.val,
                 x1=x1_slider.val,
                 t=t,
             )
@@ -344,14 +353,18 @@ def plot():
                 v_max=v_max,
                 a=a_slider.val,
                 v0=v0_slider.val,
-                x0=x0,
+                x0=x0_slider.val,
                 x1=x1_slider.val,
                 t=t,
             )
         )
 
         t_max = time_to_go(
-            v_max=v_max, a=a_slider.val, v0=v0_slider.val, x0=x0, x1=x1_slider.val
+            v_max=v_max,
+            a=a_slider.val,
+            v0=v0_slider.val,
+            x0=x0_slider.val,
+            x1=x1_slider.val,
         )
 
         plt.subplot(1, 2, 1)
@@ -367,11 +380,13 @@ def plot():
     # The function to be called to reset the sliders.
     def reset(event):
         v0_slider.reset()
+        x0_slider.reset()
         x1_slider.reset()
 
     # Events.
     a_slider.on_changed(update)
     v0_slider.on_changed(update)
+    x0_slider.on_changed(update)
     x1_slider.on_changed(update)
     button.on_clicked(reset)
 
