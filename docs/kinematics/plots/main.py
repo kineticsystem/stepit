@@ -94,7 +94,7 @@ def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
     return total_time
 
 
-def position_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
+def position_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: np.ndarray):
     x = [0.0] * len(t)
     for i in range(0, len(t)):
         x[i] = position(v_max, a, v0, x0, x1, t[i])
@@ -106,6 +106,7 @@ def position_0(v_max: float, a: float, x0: float, x1: float, t: float):
     Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to position x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
+    :param x0:    The initial position.
     :param x1:    The final position.
     :param t:     The time.
     :return:      The motor position.
@@ -151,7 +152,6 @@ def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     dx = x1 - x0
     d_stop = distance_to_stop(a, v0)
     t_stop = time_to_stop(a, v0)
-    x = 0
     if (v0 >= 0 and dx >= d_stop) or (v0 <= 0 and dx <= -d_stop):  # Keep accelerating.
         x = (
             position_0(v_max, a, x0, x1 + sgn(v0) * d_stop, t + t_stop)
@@ -170,7 +170,7 @@ def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     return x + x0
 
 
-def velocity_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: list[float]):
+def velocity_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: np.ndarray):
     v = [0.0] * len(t)
     for i in range(0, len(t)):
         v[i] = velocity(v_max, a, v0, x0, x1, t[i])
@@ -228,7 +228,6 @@ def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     dx = x1 - x0
     d_stop = distance_to_stop(a, v0)
     t_stop = time_to_stop(a, v0)
-    v = 0
     if (v0 >= 0 and dx >= d_stop) or (v0 <= 0 and dx <= -d_stop):  # Keep accelerating.
         v = velocity_0(v_max, a, x0, x1 + sgn(v0) * d_stop, t + t_stop)
     else:
@@ -333,7 +332,7 @@ def plot():
     button = plt.Button(plt.axes([0.8, 0.025, 0.1, 0.04]), "Reset", hovercolor="0.975")
 
     # The function to be called anytime a slider's value changes.
-    def update(val):
+    def update(_):
         nonlocal line1
         nonlocal line2
         nonlocal t_max
@@ -378,7 +377,7 @@ def plot():
         fig.canvas.draw_idle()
 
     # The function to be called to reset the sliders.
-    def reset(event):
+    def reset(_):
         v0_slider.reset()
         x0_slider.reset()
         x1_slider.reset()
