@@ -30,7 +30,9 @@
 import kinematics
 
 import matplotlib.pyplot as plt
+import matplotlib.widgets as widgets
 import numpy as np
+from enum import Enum
 
 # This is a library that has been used to figure out trajectory profiles of
 # motors given initial position x0, initial velocity v0, acceleration a and
@@ -38,29 +40,62 @@ import numpy as np
 # Trajectory profiles are then plotted to validate the result.
 
 
-def position_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: np.ndarray):
+class Control(Enum):
+    VELOCITY = 0
+    POSITION = 1
+
+
+def position_v(
+    control: Control,
+    v_max: float,
+    a: float,
+    v0: float,
+    x0: float,
+    x1: float,
+    t: np.ndarray,
+):
     x = [0.0] * len(t)
-    for i in range(0, len(t)):
-        x[i] = kinematics.position(v_max, a, v0, x0, x1, t[i])
+    if control == Control.POSITION:
+        for i in range(0, len(t)):
+            x[i] = kinematics.position(v_max, a, v0, x0, x1, t[i])
+    else:
+        for i in range(0, len(t)):
+            x[i] = 0.5
     return x
 
 
-def velocity_v(v_max: float, a: float, v0: float, x0: float, x1: float, t: np.ndarray):
+def velocity_v(
+    control: Control,
+    v_max: float,
+    a: float,
+    v0: float,
+    x0: float,
+    x1: float,
+    t: np.ndarray,
+):
     v = [0.0] * len(t)
-    for i in range(0, len(t)):
-        v[i] = kinematics.velocity(v_max, a, v0, x0, x1, t[i])
+    if control == Control.POSITION:
+        for i in range(0, len(t)):
+            v[i] = kinematics.velocity(v_max, a, v0, x0, x1, t[i])
+    else:
+        for i in range(0, len(t)):
+            v[i] = 0.5
     return v
 
 
 def plot():
 
     x_max = 5
-
-    v0 = 0
-    a = 1
     v_max = 1
+
+    a = 1
+    v0 = 0
+    v1 = 0
     x0 = 0
     x1 = 0
+
+    control = Control.POSITION
+
     t_max = kinematics.time_to_go(v_max, a, -v_max, x0, x0 + x_max)
 
     t = np.linspace(0, t_max, 200)
@@ -81,7 +116,10 @@ def plot():
     plt.subplots_adjust(left=0.18, bottom=0.25)
 
     (velocity_line,) = plt.plot(
-        t, velocity_v(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t), lw=2, color="red"
+        t,
+        velocity_v(control, v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t),
+        lw=2,
+        color="red",
     )
 
     ####################################################################################################################
@@ -96,41 +134,14 @@ def plot():
     line2 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
 
     (position_line,) = plt.plot(
-        t, position_v(v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t), lw=2, color="blue"
+        t,
+        position_v(control, v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t),
+        lw=2,
+        color="blue",
     )
 
     ####################################################################################################################
     # SLIDERS AND BUTTONS
-
-    # Make a horizontal slider to control x0 coordinate.
-    ax_x0 = plt.axes([0.18, 0.1, 0.33, 0.03])
-    x0_slider = plt.Slider(
-        ax=ax_x0,
-        label="$x_0$",
-        valmin=-x_max,
-        valmax=x_max,
-        valinit=0,
-    )
-
-    # Make a horizontal slider to control x1 coordinate.
-    ax_x1 = plt.axes([0.18, 0.05, 0.33, 0.03])
-    x1_slider = plt.Slider(
-        ax=ax_x1,
-        label="$x_1$",
-        valmin=-x_max,
-        valmax=x_max,
-        valinit=0,
-    )
-
-    # Make a vertically oriented slider to control the initial velocity
-    v0_slider = plt.Slider(
-        ax=plt.axes([0.055, 0.25, 0.015, 0.63]),
-        label="$v_0$",
-        valmin=-v_max,
-        valmax=v_max,
-        valinit=v0,
-        orientation="vertical",
-    )
 
     # Make a vertically oriented slider to control the initial velocity
     a_slider = plt.Slider(
@@ -141,18 +152,66 @@ def plot():
         valinit=a,
         orientation="vertical",
     )
+    a_slider.valtext.set_visible(False)
+
+    # Make a vertically oriented slider to control the initial velocity
+    v0_slider = plt.Slider(
+        ax=plt.axes([0.055, 0.25, 0.015, 0.63]),
+        label="$v_0$",
+        valmin=-v_max,
+        valmax=v_max,
+        valinit=v0,
+        orientation="vertical",
+    )
+    v0_slider.valtext.set_visible(False)
+
+    # Make a vertically oriented slider to control the initial velocity
+    v1_slider = plt.Slider(
+        ax=plt.axes([0.082, 0.25, 0.015, 0.63]),
+        label="$v_1$",
+        valmin=-v_max,
+        valmax=v_max,
+        valinit=v1,
+        orientation="vertical",
+    )
+    v1_slider.valtext.set_visible(False)
+
+    # Make a horizontal slider to control x0 coordinate.
+    x0_slider = plt.Slider(
+        ax=plt.axes([0.18, 0.1, 0.33, 0.03]),
+        label="$x_0$",
+        valmin=-x_max,
+        valmax=x_max,
+        valinit=0,
+    )
+    x0_slider.valtext.set_visible(False)
+
+    # Make a horizontal slider to control x1 coordinate.
+    x1_slider = plt.Slider(
+        ax=plt.axes([0.18, 0.05, 0.33, 0.03]),
+        label="$x_1$",
+        valmin=-x_max,
+        valmax=x_max,
+        valinit=0,
+    )
+    x1_slider.valtext.set_visible(False)
+
+    radio = widgets.RadioButtons(
+        plt.axes([0.5726, 0.025, 0.08, 0.15]), ("velocity", "position"), active=1
+    )
 
     # Make a reset button.
     button = plt.Button(plt.axes([0.8, 0.025, 0.1, 0.04]), "Reset", hovercolor="0.975")
 
     # The function to be called anytime a slider's value changes.
-    def update(_):
+    def update_plot(_):
         nonlocal line1
         nonlocal line2
         nonlocal t_max
 
         velocity_line.set_ydata(
             velocity_v(
+                control,
                 v_max=v_max,
                 a=a_slider.val,
                 v0=v0_slider.val,
@@ -163,6 +222,7 @@ def plot():
         )
         position_line.set_ydata(
             position_v(
+                control,
                 v_max=v_max,
                 a=a_slider.val,
                 v0=v0_slider.val,
@@ -190,18 +250,28 @@ def plot():
 
         fig.canvas.draw_idle()
 
+    # Function to be called by the radio buttons.
+    def change_control(label):
+        nonlocal control
+        if label == "velocity":
+            control = Control.VELOCITY
+        else:
+            control = Control.POSITION
+        update_plot(None)
+
     # The function to be called to reset the sliders.
-    def reset(_):
+    def reset_plot(_):
         v0_slider.reset()
         x0_slider.reset()
         x1_slider.reset()
 
     # Events.
-    a_slider.on_changed(update)
-    v0_slider.on_changed(update)
-    x0_slider.on_changed(update)
-    x1_slider.on_changed(update)
-    button.on_clicked(reset)
+    a_slider.on_changed(update_plot)
+    v0_slider.on_changed(update_plot)
+    x0_slider.on_changed(update_plot)
+    x1_slider.on_changed(update_plot)
+    button.on_clicked(reset_plot)
+    radio.on_clicked(change_control)
 
     plt.show()
 
