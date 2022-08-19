@@ -1,3 +1,2 @@
-from .kinematics import *
-
-__all__ = kinematics.__all__
+from .position_control import position_control
+from .velocity_control import velocity_control

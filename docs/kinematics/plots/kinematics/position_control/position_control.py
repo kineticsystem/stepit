@@ -107,7 +107,7 @@ def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
 
 def _position(v_max: float, a: float, x0: float, x1: float, t: float):
     """
-    Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to position x1.
+    Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param x0:    The initial position.
@@ -143,7 +143,7 @@ def _position(v_max: float, a: float, x0: float, x1: float, t: float):
 
 def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     """
-    Velocity at time t of a motor with acceleration a and initial velocity v0, moving from position x0 to position x1.
+    Velocity at time t of a motor with acceleration a and initial velocity v0, moving from position x0 to x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param v0:    The initial velocity.
@@ -176,7 +176,7 @@ def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
 
 def _velocity(v_max: float, a: float, x0: float, x1: float, t: float):
     """
-    Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to position x1.
+    Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param x0:    The initial position.
@@ -212,7 +212,7 @@ def _velocity(v_max: float, a: float, x0: float, x1: float, t: float):
 
 def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     """
-    Velocity at time t of a motor with acceleration a and initial velocity v0, moving from position x0 to position x1.
+    Velocity at time t of a motor with acceleration a and initial velocity v0, moving from position x0 to x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param v0:    The initial velocity.

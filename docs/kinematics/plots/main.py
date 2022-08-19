@@ -50,6 +50,7 @@ def position_v(
     v_max: float,
     a: float,
     v0: float,
+    v1: float,
     x0: float,
     x1: float,
     t: np.ndarray,
@@ -57,10 +58,11 @@ def position_v(
     x = [0.0] * len(t)
     if control == Control.POSITION:
         for i in range(0, len(t)):
-            x[i] = kinematics.position(v_max, a, v0, x0, x1, t[i])
+            x[i] = kinematics.position_control.position(v_max, a, v0, x0, x1, t[i])
     else:
-        for i in range(0, len(t)):
-            x[i] = 0.5
+        pass
+        # for i in range(0, len(t)):
+        #     x[i] = kinematics.velocity_control.position(v_max, a, v0, v1, t[i])
     return x
 
 
@@ -69,6 +71,7 @@ def velocity_v(
     v_max: float,
     a: float,
     v0: float,
+    v1: float,
     x0: float,
     x1: float,
     t: np.ndarray,
@@ -76,10 +79,10 @@ def velocity_v(
     v = [0.0] * len(t)
     if control == Control.POSITION:
         for i in range(0, len(t)):
-            v[i] = kinematics.velocity(v_max, a, v0, x0, x1, t[i])
+            v[i] = kinematics.position_control.velocity(v_max, a, v0, x0, x1, t[i])
     else:
         for i in range(0, len(t)):
-            v[i] = 0.5
+            v[i] = kinematics.velocity_control.velocity(v_max, a, v0, v1, t[i])
     return v
 
 
@@ -96,7 +99,7 @@ def plot():
 
     control = Control.POSITION
 
-    t_max = kinematics.time_to_go(v_max, a, -v_max, x0, x0 + x_max)
+    t_max = kinematics.position_control.time_to_go(v_max, a, -v_max, x0, x0 + x_max)
 
     t = np.linspace(0, t_max, 200)
     fig, ax = plt.subplots(figsize=(12, 6), dpi=200)
@@ -117,7 +120,7 @@ def plot():
 
     (velocity_line,) = plt.plot(
         t,
-        velocity_v(control, v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t),
+        velocity_v(control, v_max=v_max, a=a, v0=v0, v1=v1, x0=x0, x1=x1, t=t),
         lw=2,
         color="red",
     )
@@ -135,7 +138,7 @@ def plot():
 
     (position_line,) = plt.plot(
         t,
-        position_v(control, v_max=v_max, a=a, v0=v0, x0=x0, x1=x1, t=t),
+        position_v(control, v_max=v_max, a=a, v0=v0, v1=v1, x0=x0, x1=x1, t=t),
         lw=2,
         color="blue",
     )
@@ -215,6 +218,7 @@ def plot():
                 v_max=v_max,
                 a=a_slider.val,
                 v0=v0_slider.val,
+                v1=v1_slider.val,
                 x0=x0_slider.val,
                 x1=x1_slider.val,
                 t=t,
@@ -226,13 +230,14 @@ def plot():
                 v_max=v_max,
                 a=a_slider.val,
                 v0=v0_slider.val,
+                v1=v1_slider.val,
                 x0=x0_slider.val,
                 x1=x1_slider.val,
                 t=t,
             )
         )
 
-        t_max = kinematics.time_to_go(
+        t_max = kinematics.position_control.time_to_go(
             v_max=v_max,
             a=a_slider.val,
             v0=v0_slider.val,
@@ -268,6 +273,7 @@ def plot():
     # Events.
     a_slider.on_changed(update_plot)
     v0_slider.on_changed(update_plot)
+    v1_slider.on_changed(update_plot)
     x0_slider.on_changed(update_plot)
     x1_slider.on_changed(update_plot)
     button.on_clicked(reset_plot)
