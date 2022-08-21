@@ -73,12 +73,11 @@ def _time_to_go(v_max: float, a: float, x0: float, x1: float):
     :return:      The motor velocity.
     """
     dx = x1 - x0
-    total_time = 0
     if abs(dx) >= pow(v_max, 2) / a:
         t1 = v_max / a
         t2 = t1 + max(0, (abs(dx) - pow(v_max, 2) / a)) / v_max
         total_time = t1 + t2
-    elif abs(dx) >= 0:
+    else:
         t1 = math.sqrt(abs(dx) / a)
         total_time = 2 * t1
     return total_time
@@ -94,13 +93,14 @@ def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
     :param x1:    The final position.
     :return:      The motor velocity.
     """
+    v0 = max(-v_max, min(v0, v_max))
     dx = x1 - x0
     d_stop = distance_to_stop(a, v0)
     t_stop = time_to_stop(a, v0)
     total_time = 0
     if (v0 >= 0 and dx >= d_stop) or (v0 <= 0 and dx <= -d_stop):  # Keep accelerating.
         total_time = _time_to_go(v_max, a, x0, x1 + sgn(v0) * d_stop) - t_stop
-    elif abs(dx) >= 0:  # Decelerate and reverse.
+    else:  # Decelerate and reverse.
         total_time = _time_to_go(v_max, a, x0, x1 - sgn(v0) * d_stop) + t_stop
     return total_time
 
@@ -121,15 +121,15 @@ def _position(v_max: float, a: float, x0: float, x1: float, t: float):
         t1 = v_max / a
         t2 = t1 + max(0, (abs(dx) - pow(v_max, 2) / a)) / v_max
         t3 = t1 + t2
-        if t <= t1:  # v = a * t
+        if t <= t1:
             x = 0.5 * a * pow(t, 2)
-        elif t <= t2:  # v = a * t1
+        elif t <= t2:
             x = 0.5 * pow(v_max, 2) / a + v_max * (t - t1)
-        elif t <= t3:  # v = a * t1 - a * (t - t2)
+        elif t <= t3:
             x = 0.5 * pow(v_max, 2) / a + v_max * (t - t1) - 0.5 * a * pow(t - t2, 2)
         else:
             x = pow(v_max, 2) / a + v_max * (t2 - t1)
-    elif abs(dx) >= 0:
+    else:
         t1 = math.sqrt(abs(dx) / a)
         t2 = 2 * t1
         if t <= t1:
@@ -152,7 +152,7 @@ def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     :param t:     The time.
     :return:      The motor position.
     """
-
+    v0 = max(-v_max, min(v0, v_max))
     dx = x1 - x0
     d_stop = distance_to_stop(a, v0)
     t_stop = time_to_stop(a, v0)
@@ -198,7 +198,7 @@ def _velocity(v_max: float, a: float, x0: float, x1: float, t: float):
             v = a * t1 - a * (t - t2)
         else:
             v = 0
-    elif abs(dx) >= 0:
+    else:
         t1 = math.sqrt(abs(dx) / a)
         t2 = 2 * t1
         if t <= t1:
@@ -221,6 +221,7 @@ def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     :param t:     The time.
     :return:      The motor velocity.
     """
+    v0 = max(-v_max, min(v0, v_max))
     dx = x1 - x0
     d_stop = distance_to_stop(a, v0)
     t_stop = time_to_stop(a, v0)

@@ -60,9 +60,8 @@ def position_v(
         for i in range(0, len(t)):
             x[i] = kinematics.position_control.position(v_max, a, v0, x0, x1, t[i])
     else:
-        pass
-        # for i in range(0, len(t)):
-        #     x[i] = kinematics.velocity_control.position(v_max, a, v0, v1, t[i])
+        for i in range(0, len(t)):
+            x[i] = kinematics.velocity_control.position(v_max, a, x0, v0, v1, t[i])
     return x
 
 
@@ -110,7 +109,7 @@ def plot():
     plt.subplot(1, 2, 1)
     plt.xlabel("time [s]")
     plt.ylabel("velocity [rad/s]")
-    plt.ylim(-v_max * 1.01, v_max * 1.01)
+    plt.ylim(-v_max * 1.2, v_max * 1.2)
     plt.xlim(0.0, t_max)
 
     line1 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
@@ -131,7 +130,7 @@ def plot():
     plt.subplot(1, 2, 2)
     plt.xlabel("time [s]")
     plt.ylabel("position [rad]")
-    plt.ylim(-x_max * 1.01, x_max * 1.01)
+    plt.ylim(-x_max * 1.2, x_max * 1.2)
     plt.xlim(0.0, t_max)
 
     line2 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
@@ -161,8 +160,8 @@ def plot():
     v0_slider = plt.Slider(
         ax=plt.axes([0.055, 0.25, 0.015, 0.63]),
         label="$v_0$",
-        valmin=-v_max,
-        valmax=v_max,
+        valmin=-v_max * 1.2,
+        valmax=v_max * 1.2,
         valinit=v0,
         orientation="vertical",
     )
@@ -172,8 +171,8 @@ def plot():
     v1_slider = plt.Slider(
         ax=plt.axes([0.082, 0.25, 0.015, 0.63]),
         label="$v_1$",
-        valmin=-v_max,
-        valmax=v_max,
+        valmin=-v_max * 1.2,
+        valmax=v_max * 1.2,
         valinit=v1,
         orientation="vertical",
     )
@@ -211,6 +210,7 @@ def plot():
         nonlocal line1
         nonlocal line2
         nonlocal t_max
+        nonlocal control
 
         velocity_line.set_ydata(
             velocity_v(
@@ -246,12 +246,16 @@ def plot():
         )
 
         plt.subplot(1, 2, 1)
-        line1.remove()
-        line1 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
+        if line1.axes is not None:
+            line1.remove()
+        if control == Control.POSITION:
+            line1 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
 
         plt.subplot(1, 2, 2)
-        line2.remove()
-        line2 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
+        if line2.axes is not None:
+            line2.remove()
+        if control == Control.POSITION:
+            line2 = plt.axvline(x=t_max, lw=0.5, color="black", linestyle="dashed")
 
         fig.canvas.draw_idle()
 
