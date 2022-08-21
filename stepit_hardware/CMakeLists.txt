@@ -68,6 +68,8 @@ add_library(
     include/stepit_hardware/msgs/motor_position_command.hpp
     src/msgs/acknowledge_response.cpp
     include/stepit_hardware/msgs/acknowledge_response.hpp
+    src/position_control.cpp
+    include/stepit_hardware/position_control.hpp
 )
 target_include_directories(
     stepit_hardware
