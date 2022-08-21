@@ -30,8 +30,9 @@
 #include <stepit_hardware/position_control.hpp>
 
 #include <algorithm>
+#include <cmath>
 
-namespace stepit_hardware::kinematics
+namespace stepit_hardware::position_control
 {
 
 /**
@@ -276,4 +277,4 @@ float velocity(float v_max, float a, float v0, float x0, float x1, float t)
   return v;
 }
 
-}  // namespace stepit_hardware::kinematics
+}  // namespace stepit_hardware::position_control

@@ -29,54 +29,31 @@
 
 #pragma once
 
-namespace stepit_hardware::position_control
+namespace stepit_hardware::velocity_control
 {
-
 /**
- * @brief Conpute the absolute distance to stop for a motor with acceleration a
- * and rotating speed v0.
- * @param a  The motor acceleration.
- * @param v0 The current speed.
- * @return   The absolute distance for the motor to stop.
- */
-float distance_to_stop(float a, float v0);
-
-/**
- * @brief Conpute the time for a motor, with acceleration a and initial velocity
- * v0, to move from position x0 to position x1.
+ * @brief Compute the position of a motor with acceleration a while changing
+ * velocity from v0 to v1.
  * @param v_max The maximum velocity.
  * @param a     The acceleration.
  * @param v0    The initial velocity.
+ * @param v1    The initial velocity.
  * @param x0    The initial position.
- * @param x1    The final position.
- * @return      The motor velocity.
- */
-float time_to_go(float v_max, float a, float v0, float x0, float x1);
-
-/**
- * @brief Compute the position of a motor with acceleration a and initial
- * velocity v0, moving from position x0 to x1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param v0    The initial velocity.
- * @param x0    The initial position.
- * @param x1    The final position.
  * @param t     The time.
- * @return      The motor position.
+ * @return:      The motor position.
  */
-float position(float v_max, float a, float v0, float x0, float x1, float t);
+float position(float v_max, float a, float x0, float v0, float v1, float t);
 
 /**
- * @brief Compute the velocity of a motor with acceleration a and initial
- * velocity v0, moving from position x0 to x1.
+ * @brief Compute the velocity of a motor with acceleration a while changing
+ * velocity from v0 to v1.
  * @param v_max The maximum velocity.
  * @param a     The acceleration.
  * @param v0    The initial velocity.
- * @param x0    The initial position.
- * @param x1    The final position.
+ * @param v1    The final velocity.
  * @param t     The time.
  * @return      The motor velocity.
  */
-float velocity(float v_max, float a, float v0, float x0, float x1, float t);
+float velocity(float v_max, float a, float v0, float v1, float t);
 
-}  // namespace stepit_hardware::position_control
+}  // namespace stepit_hardware::velocity_control

@@ -70,6 +70,8 @@ add_library(
     include/stepit_hardware/msgs/acknowledge_response.hpp
     src/position_control.cpp
     include/stepit_hardware/position_control.hpp
+    src/velocity_control.cpp
+    include/stepit_hardware/velocity_control.hpp
 )
 target_include_directories(
     stepit_hardware
