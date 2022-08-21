@@ -36,7 +36,7 @@ __all__ = ["time_to_go", "position", "velocity"]
 
 def sgn(number: float):
     """
-    Return the sign of the given number.
+    Compute the sign of the given number.
     :param number: The number to calculate the sign of.
     :return: The sign of the given number.
     """
@@ -45,7 +45,7 @@ def sgn(number: float):
 
 def time_to_stop(a: float, v0: float):
     """
-    Return the time to stop for a motor with acceleration a and rotating speed v0.
+    Compute the time to stop for a motor with acceleration a and rotating speed v0.
     :param a:  The motor acceleration.
     :param v0: The current speed.
     :return:   The time for the motor to stop.
@@ -55,7 +55,7 @@ def time_to_stop(a: float, v0: float):
 
 def distance_to_stop(a: float, v0: float):
     """
-    Return the absolute distance to stop for a motor with acceleration a and rotating speed v0.
+    Compute the absolute distance to stop for a motor with acceleration a and rotating speed v0.
     :param a:  The motor acceleration.
     :param v0: The current speed.
     :return:   The absolute distance for the motor to stop.
@@ -65,7 +65,8 @@ def distance_to_stop(a: float, v0: float):
 
 def _time_to_go(v_max: float, a: float, x0: float, x1: float):
     """
-    Return the time for a motor, with acceleration a and zero initial velocity, to move from position x0 to position x1.
+    Compute the time for a motor, with acceleration a and zero initial velocity, to move from position x0 to position
+    x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param x0:    The initial position.
@@ -85,7 +86,7 @@ def _time_to_go(v_max: float, a: float, x0: float, x1: float):
 
 def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
     """
-    Return the time for a motor, with acceleration a and initial velocity v0, to move from position x0 to position x1.
+    Compute the time for a motor, with acceleration a and initial velocity v0, to move from position x0 to position x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param v0:    The initial velocity.
@@ -97,7 +98,6 @@ def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
     dx = x1 - x0
     d_stop = distance_to_stop(a, v0)
     t_stop = time_to_stop(a, v0)
-    total_time = 0
     if (v0 >= 0 and dx >= d_stop) or (v0 <= 0 and dx <= -d_stop):  # Keep accelerating.
         total_time = _time_to_go(v_max, a, x0, x1 + sgn(v0) * d_stop) - t_stop
     else:  # Decelerate and reverse.
@@ -107,7 +107,7 @@ def time_to_go(v_max: float, a: float, v0: float, x0: float, x1: float):
 
 def _position(v_max: float, a: float, x0: float, x1: float, t: float):
     """
-    Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to x1.
+    Compute the Velocity of a motor with acceleration a and zero initial velocity, moving from position x0 to x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param x0:    The initial position.
@@ -116,7 +116,6 @@ def _position(v_max: float, a: float, x0: float, x1: float, t: float):
     :return:      The motor position.
     """
     dx = x1 - x0
-    x = 0
     if abs(dx) >= pow(v_max, 2) / a:
         t1 = v_max / a
         t2 = t1 + max(0, (abs(dx) - pow(v_max, 2) / a)) / v_max
@@ -143,7 +142,7 @@ def _position(v_max: float, a: float, x0: float, x1: float, t: float):
 
 def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     """
-    Velocity at time t of a motor with acceleration a and initial velocity v0, moving from position x0 to x1.
+    Compute the position of a motor with acceleration a and initial velocity v0, moving from position x0 to x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param v0:    The initial velocity.
@@ -176,7 +175,7 @@ def position(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
 
 def _velocity(v_max: float, a: float, x0: float, x1: float, t: float):
     """
-    Velocity at time t of a motor with acceleration a and zero initial velocity, moving from position x0 to x1.
+    Compute the velocity of a motor with acceleration a and zero initial velocity, moving from position x0 to x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param x0:    The initial position.
@@ -185,7 +184,6 @@ def _velocity(v_max: float, a: float, x0: float, x1: float, t: float):
     :return:      The motor velocity.
     """
     dx = x1 - x0
-    v = 0
     if abs(dx) >= pow(v_max, 2) / a:
         t1 = v_max / a
         t2 = t1 + max(0, (abs(dx) - pow(v_max, 2) / a)) / v_max
@@ -212,7 +210,7 @@ def _velocity(v_max: float, a: float, x0: float, x1: float, t: float):
 
 def velocity(v_max: float, a: float, v0: float, x0: float, x1: float, t: float):
     """
-    Velocity at time t of a motor with acceleration a and initial velocity v0, moving from position x0 to x1.
+    Compute the velocity of a motor with acceleration a and initial velocity v0, moving from position x0 to x1.
     :param v_max: The maximum velocity.
     :param a:     The acceleration.
     :param v0:    The initial velocity.
