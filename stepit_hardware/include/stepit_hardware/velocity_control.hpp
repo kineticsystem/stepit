@@ -40,7 +40,7 @@ namespace stepit_hardware::velocity_control
  * @param v1    The initial velocity.
  * @param x0    The initial position.
  * @param t     The time.
- * @return:      The motor position.
+ * @return      The motor position.
  */
 float position(float v_max, float a, float x0, float v0, float v1, float t);
 
