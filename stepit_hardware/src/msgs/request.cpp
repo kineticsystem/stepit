@@ -31,8 +31,14 @@
 
 namespace stepit_hardware
 {
-const std::vector<uint8_t>& Request::bytes() const
+
+Request::Request(uint8_t request_id) : request_id_{ request_id }
 {
-  return bytes_;
 }
+
+uint8_t Request::request_id() const
+{
+  return request_id_;
+}
+
 }  // namespace stepit_hardware

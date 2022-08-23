@@ -31,9 +31,7 @@
 
 namespace stepit_hardware
 {
-AcknowledgeResponse::AcknowledgeResponse(const std::vector<uint8_t>& data)
+AcknowledgeResponse::AcknowledgeResponse(uint8_t request_id, uint8_t status) : Response{ request_id, status }
 {
-  request_id_ = data[0];
-  status_ = data[1];
 }
 }  // namespace stepit_hardware

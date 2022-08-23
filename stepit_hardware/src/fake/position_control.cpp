@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/position_control.hpp>
+#include <stepit_hardware/fake/position_control.hpp>
 
 #include <algorithm>
 #include <cmath>

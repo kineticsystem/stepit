@@ -37,5 +37,6 @@ class MotorStatusQuery : public Request
 {
 public:
   explicit MotorStatusQuery(uint8_t request_id);
+  uint8_t query_id() const;
 };
 }  // namespace stepit_hardware

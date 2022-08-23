@@ -37,11 +37,12 @@ namespace stepit_hardware
 class Response
 {
 public:
+  explicit Response(uint8_t request_id, uint8_t status);
   virtual ~Response() = default;
   uint8_t request_id() const;
   uint8_t status() const;
 
-protected:
+private:
   uint8_t request_id_;
   uint8_t status_;
 };

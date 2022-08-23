@@ -33,9 +33,12 @@ namespace stepit_hardware
 {
 constexpr uint8_t kQueryId = 0x75;
 
-MotorStatusQuery::MotorStatusQuery(uint8_t request_id)
+MotorStatusQuery::MotorStatusQuery(uint8_t request_id) : Request{ request_id }
 {
-  bytes_.emplace_back(request_id);
-  bytes_.emplace_back(kQueryId);
+}
+
+uint8_t MotorStatusQuery::query_id() const
+{
+  return kQueryId;
 }
 }  // namespace stepit_hardware

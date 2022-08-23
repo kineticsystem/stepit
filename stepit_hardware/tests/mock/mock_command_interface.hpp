@@ -27,25 +27,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/msgs/motor_velocity_command.hpp>
-#include <stepit_hardware/data_utils.hpp>
+#pragma once
 
-namespace stepit_hardware
-{
-constexpr uint8_t kCommandId = 0x77;
+#include <gmock/gmock.h>
+#include <stepit_hardware/command_interface.hpp>
 
-MotorVelocityCommand::MotorVelocityCommand(uint8_t request_id, const std::vector<Goal>& goals)
-  : Request{ request_id }, goals_{ goals }
+namespace stepit_hardware::test
 {
-}
-
-uint8_t MotorVelocityCommand::command_id() const
+class MockCommandInterface : public stepit_hardware::CommandInterface
 {
-  return kCommandId;
-}
-
-std::vector<MotorVelocityCommand::Goal> MotorVelocityCommand::goals() const
-{
-  return goals_;
-}
-}  // namespace stepit_hardware
+public:
+  MOCK_METHOD(AcknowledgeResponse, send, (const MotorConfigCommand& command), (const, override));
+  MOCK_METHOD(AcknowledgeResponse, send, (const MotorPositionCommand& command), (const, override));
+  MOCK_METHOD(AcknowledgeResponse, send, (const MotorVelocityCommand& command), (const, override));
+  MOCK_METHOD(MotorStatusResponse, send, (const MotorStatusQuery& query), (const, override));
+};
+}  // namespace stepit_hardware::test

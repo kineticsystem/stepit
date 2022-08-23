@@ -37,10 +37,11 @@ namespace stepit_hardware
 class Request
 {
 public:
+  explicit Request(uint8_t request_id);
   virtual ~Request() = default;
-  [[nodiscard]] const std::vector<uint8_t>& bytes() const;
+  uint8_t request_id() const;
 
-protected:
-  std::vector<uint8_t> bytes_;
+private:
+  uint8_t request_id_;
 };
 }  // namespace stepit_hardware

@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include <stepit_hardware/data_interface.hpp>
+#include <stepit_hardware/command_interface.hpp>
 #include <stepit_hardware/visibility_control.hpp>
 
 #include <hardware_interface/handle.hpp>
@@ -58,7 +58,7 @@ public:
    * @param data_interface The data interface to send and receive data packets
    * to and from the serial port.
    */
-  explicit StepitHardware(std::unique_ptr<DataInterface> data_interface);
+  explicit StepitHardware(std::unique_ptr<CommandInterface> command_interface);
 
   /**
    * Defines aliases and static functions for using the Class with shared_ptrs.
@@ -66,6 +66,9 @@ public:
    * auto hardware_interface = StepitHardware::make_shared();
    */
   RCLCPP_SHARED_PTR_DEFINITIONS(StepitHardware)
+
+  STEPIT_HARDWARE_PUBLIC
+  CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
    * Initialization of the hardware interface from data parsed from the
@@ -137,7 +140,7 @@ private:
   std::vector<Joint> joints_;
 
   // Interface to send binary data to the hardware using the serial port.
-  std::unique_ptr<DataInterface> data_interface_;
+  std::unique_ptr<CommandInterface> command_interface_;
 
   uint8_t request_id = 0;
 };

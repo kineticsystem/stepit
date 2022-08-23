@@ -38,6 +38,6 @@ namespace stepit_hardware
 class AcknowledgeResponse : public Response
 {
 public:
-  explicit AcknowledgeResponse(const std::vector<uint8_t>& data);
+  explicit AcknowledgeResponse(uint8_t request_id, uint8_t status);
 };
 }  // namespace stepit_hardware

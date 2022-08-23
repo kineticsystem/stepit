@@ -35,17 +35,17 @@ namespace stepit_hardware
 constexpr uint8_t kCommandId = 0x71;
 
 MotorPositionCommand::MotorPositionCommand(uint8_t request_id, const std::vector<Goal>& goals)
+  : Request{ request_id }, goals_{ goals }
 {
-  bytes_.emplace_back(request_id);
-  bytes_.emplace_back(kCommandId);
-  for (const auto& goal : goals)
-  {
-    bytes_.emplace_back(goal.motor_id());
-    auto position_bytes = data_utils::from_float(static_cast<float>(goal.position()));
-    bytes_.emplace_back(position_bytes[0]);
-    bytes_.emplace_back(position_bytes[1]);
-    bytes_.emplace_back(position_bytes[2]);
-    bytes_.emplace_back(position_bytes[3]);
-  }
+}
+
+uint8_t MotorPositionCommand::command_id() const
+{
+  return kCommandId;
+}
+
+std::vector<MotorPositionCommand::Goal> MotorPositionCommand::goals() const
+{
+  return goals_;
 }
 }  // namespace stepit_hardware

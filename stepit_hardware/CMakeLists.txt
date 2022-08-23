@@ -68,10 +68,20 @@ add_library(
     include/stepit_hardware/msgs/motor_position_command.hpp
     src/msgs/acknowledge_response.cpp
     include/stepit_hardware/msgs/acknowledge_response.hpp
-    src/position_control.cpp
-    include/stepit_hardware/position_control.hpp
-    src/velocity_control.cpp
-    include/stepit_hardware/velocity_control.hpp
+    src/fake/position_control.cpp
+    include/stepit_hardware/fake/position_control.hpp
+    src/fake/velocity_control.cpp
+    include/stepit_hardware/fake/velocity_control.hpp
+    include/stepit_hardware/command_interface.hpp
+    src/command_handler.cpp
+    include/stepit_hardware/command_handler.hpp
+    src/fake/fake_command_handler.cpp
+    include/stepit_hardware/fake/fake_command_handler.hpp
+    src/fake/fake_motor.cpp
+    include/stepit_hardware/fake/fake_motor.hpp
+    src/msgs/motor_config_command.cpp
+    include/stepit_hardware/msgs/motor_config_command.hpp
+    include/stepit_hardware/msgs/msgs.hpp
 )
 target_include_directories(
     stepit_hardware

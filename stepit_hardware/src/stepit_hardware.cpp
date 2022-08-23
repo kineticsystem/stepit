@@ -35,6 +35,7 @@
 #include <stepit_hardware/msgs/acknowledge_response.hpp>
 #include <stepit_hardware/msgs/motor_status_response.hpp>
 
+#include <stepit_hardware/command_handler.hpp>
 #include <stepit_hardware/data_handler.hpp>
 #include <stepit_hardware/serial_handler.hpp>
 
@@ -53,13 +54,26 @@ namespace stepit_hardware
 constexpr auto kStepitHardware = "StepitHardware";
 constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
-StepitHardware::StepitHardware() : data_interface_{ std::make_unique<DataHandler>(std::make_unique<SerialHandler>()) }
+StepitHardware::StepitHardware()
+  : command_interface_{ std::make_unique<CommandHandler>(
+        std::make_unique<DataHandler>(std::make_unique<SerialHandler>())) }
 {
 }
 
-StepitHardware::StepitHardware(std::unique_ptr<DataInterface> data_interface)
-  : data_interface_{ std::move(data_interface) }
+StepitHardware::StepitHardware(std::unique_ptr<CommandInterface> command_interface)
+  : command_interface_{ std::move(command_interface) }
 {
+}
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
+{
+  RCLCPP_DEBUG(rclcpp::get_logger(kStepitHardware), "on_configure");
+  if (hardware_interface::SystemInterface::on_configure(previous_state) != CallbackReturn::SUCCESS)
+  {
+    return CallbackReturn::ERROR;
+  }
+  return CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
@@ -164,9 +178,7 @@ hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclc
                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
   MotorStatusQuery query{ request_id++ };
-  data_interface_->write(query.bytes());
-  auto data = data_interface_->read();
-  MotorStatusResponse response{ data };
+  MotorStatusResponse response = command_interface_->send(query);
 
   auto motor_states = response.motor_states();
   if (motor_states.size() != joints_.size())
@@ -201,9 +213,8 @@ hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rcl
         velocities.push_back(velocity);
       }
     }
-    MotorVelocityCommand velocity_command{ request_id++, velocities };
-    data_interface_->write(velocity_command.bytes());
-    AcknowledgeResponse veocity_command_response{ data_interface_->read() };
+    MotorVelocityCommand command{ request_id++, velocities };
+    AcknowledgeResponse response = command_interface_->send(command);
   }
   else
   {
@@ -218,9 +229,8 @@ hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rcl
         positions.push_back(position);
       }
     }
-    MotorPositionCommand position_command{ request_id++, positions };
-    data_interface_->write(position_command.bytes());
-    AcknowledgeResponse position_command_response{ data_interface_->read() };
+    MotorPositionCommand command{ request_id++, positions };
+    AcknowledgeResponse response = command_interface_->send(command);
   }
   return hardware_interface::return_type::OK;
 }
