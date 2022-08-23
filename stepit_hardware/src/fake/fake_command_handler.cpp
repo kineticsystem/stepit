@@ -31,6 +31,11 @@
 
 namespace stepit_hardware::fake
 {
+/**
+ * @brief The FakeCommandHandler class receives commands and queries from the
+ * hardware interface, sends them to a fake hardware and returns a
+ * corresponding response.
+ */
 FakeCommandHandler::FakeCommandHandler()
 {
 }

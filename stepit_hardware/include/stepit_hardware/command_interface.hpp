@@ -33,6 +33,11 @@
 
 namespace stepit_hardware
 {
+/**
+ * @brief The CommandInterface class receives commands and queries from the
+ * hardware interface, sends them to a fake or a real hardware and returns
+ * a corresponding response.
+ */
 class CommandInterface
 {
 public:

@@ -38,6 +38,11 @@
 
 namespace stepit_hardware
 {
+/**
+ * @brief The CommandHandler class receives commands and queries from the
+ * hardware interface, sends them to the real hardware and returns a
+ * corresponding response.
+ */
 class CommandHandler : public CommandInterface
 {
 public:
