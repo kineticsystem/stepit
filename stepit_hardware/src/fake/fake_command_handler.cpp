@@ -44,7 +44,9 @@ AcknowledgeResponse FakeCommandHandler::send(const MotorConfigCommand& command) 
 {
   for (const auto& param : command.params())
   {
-    const FakeMotor motor{ param.acceleration(), param.max_velocity() };
+    FakeMotor motor;
+    motor.set_acceleration(param.acceleration());
+    motor.set_max_velocity(param.max_velocity());
     motors_.emplace_back(motor);
   }
 

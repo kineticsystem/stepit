@@ -36,7 +36,10 @@ namespace stepit_hardware
 class FakeMotor
 {
 public:
-  explicit FakeMotor(double acceleration, double max_velocity);
+  FakeMotor();
+
+  void set_acceleration(double acceleration);
+  void set_max_velocity(double acceleration);
 
   double get_position(const rclcpp::Time& time) const;
   void set_target_position(const rclcpp::Time& time, double position);
