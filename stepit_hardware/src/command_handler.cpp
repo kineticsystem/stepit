@@ -60,7 +60,7 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
   uint8_t request_id = out[0];
-  uint8_t status = out[1];
+  Response::Status status{ out[1] };
   AcknowledgeResponse response{ request_id, status };
   return response;
 }
@@ -83,7 +83,7 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
   uint8_t request_id = out[0];
-  uint8_t status = out[1];
+  Response::Status status{ out[1] };
   AcknowledgeResponse response{ request_id, status };
   return response;
 }
@@ -106,7 +106,7 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
   uint8_t request_id = out[0];
-  uint8_t status = out[1];
+  Response::Status status{ out[1] };
   AcknowledgeResponse response{ request_id, status };
   return response;
 }
@@ -138,7 +138,7 @@ MotorStatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
 
   std::size_t i = 0;
   uint8_t request_id = data[i++];
-  uint8_t status = data[i++];
+  Response::Status status{ data[i++] };
   std::vector<MotorStatusResponse::MotorState> motor_states;
   while (i < data.size())
   {

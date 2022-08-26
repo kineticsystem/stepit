@@ -120,7 +120,7 @@ TEST(TestStepitHardware, read_status)
   // clang-format off
   const MotorStatusResponse mocked_response{
       0,     // request ID
-      0x11,  // success status
+      Response::Status::Success,
       {
           MotorStatusResponse::MotorState{ 0, 32100, 0.5, 150 },     // Motor 0 status
           MotorStatusResponse::MotorState{ 1, -6500, 0.75, 150000 }  // Motor 1 status
@@ -176,7 +176,7 @@ TEST(TestStepitHardware, write_velocities)
   };
   // clang-format on
 
-  const AcknowledgeResponse mocked_response{ 0x00, 0x11 };
+  const AcknowledgeResponse mocked_response{ 0x00, Response::Status::Success };
   MotorVelocityCommand actual_request{ 0, {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
@@ -230,7 +230,7 @@ TEST(TestStepitHardware, write_positions)
   };
   // clang-format on
 
-  const AcknowledgeResponse mocked_response{ 0x00, 0x11 };
+  const AcknowledgeResponse mocked_response{ 0x00, Response::Status::Success };
   MotorPositionCommand actual_request{ 0, {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();

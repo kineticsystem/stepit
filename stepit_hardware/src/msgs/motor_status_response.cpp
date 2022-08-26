@@ -32,7 +32,7 @@
 
 namespace stepit_hardware
 {
-MotorStatusResponse::MotorStatusResponse(uint8_t request_id, uint8_t status, std::vector<MotorState> motor_states)
+MotorStatusResponse::MotorStatusResponse(uint8_t request_id, Status status, std::vector<MotorState> motor_states)
   : Response{ request_id, status }, motor_states_{ motor_states }
 {
 }

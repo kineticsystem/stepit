@@ -56,7 +56,7 @@ AcknowledgeResponse FakeCommandHandler::send([[maybe_unused]] const rclcpp::Time
     motors_.emplace_back(motor);
   }
 
-  return AcknowledgeResponse{ command.request_id(), 0u };
+  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
 }
 
 AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorPositionCommand& command) const
@@ -73,7 +73,7 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Mot
       motors_[motor_id].set_target_position(time, goal.position());
     }
   }
-  return AcknowledgeResponse{ command.request_id(), 0 };
+  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
 }
 
 AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorVelocityCommand& command) const
@@ -90,7 +90,7 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Mot
       motors_[motor_id].set_target_velocity(time, goal.velocity());
     }
   }
-  return AcknowledgeResponse{ command.request_id(), 0 };
+  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
 }
 
 MotorStatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorStatusQuery& query) const
@@ -105,7 +105,6 @@ MotorStatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const Mot
     MotorStatusResponse::MotorState state{ id++, position, velocity, distance_to_go };
     states.emplace_back(state);
   }
-
-  return MotorStatusResponse(query.request_id(), 0, states);
+  return MotorStatusResponse(query.request_id(), Response::Status::Success, states);
 }
 }  // namespace stepit_hardware

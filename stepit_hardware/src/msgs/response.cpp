@@ -32,7 +32,7 @@
 namespace stepit_hardware
 {
 
-Response::Response(uint8_t request_id, uint8_t status) : request_id_{ request_id }, status_{ status }
+Response::Response(uint8_t request_id, Status status) : request_id_{ request_id }, status_{ status }
 {
 }
 
@@ -41,7 +41,7 @@ uint8_t Response::request_id() const
   return request_id_;
 }
 
-uint8_t Response::status() const
+Response::Status Response::status() const
 {
   return status_;
 }

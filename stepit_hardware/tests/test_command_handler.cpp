@@ -140,7 +140,7 @@ TEST(CommandHandler, send_velocity_command)
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
               stepit_hardware::data_utils::to_hex(expected_request));
   ASSERT_EQ(0, response.request_id());
-  ASSERT_EQ(0x11, response.status());
+  ASSERT_EQ(Response::Status::Success, response.status());
 }
 
 /**
@@ -181,7 +181,7 @@ TEST(CommandHandler, send_position_command)
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
               stepit_hardware::data_utils::to_hex(expected_request));
   ASSERT_EQ(0, response.request_id());
-  ASSERT_EQ(0x11, response.status());
+  ASSERT_EQ(Response::Status::Success, response.status());
 }
 
 /**
@@ -231,7 +231,7 @@ TEST(CommandHandler, send_configure_command)
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
               stepit_hardware::data_utils::to_hex(expected_request));
   ASSERT_EQ(0, response.request_id());
-  ASSERT_EQ(0x11, response.status());
+  ASSERT_EQ(Response::Status::Success, response.status());
 }
 
 }  // namespace stepit_hardware::test

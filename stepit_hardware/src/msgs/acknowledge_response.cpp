@@ -31,7 +31,7 @@
 
 namespace stepit_hardware
 {
-AcknowledgeResponse::AcknowledgeResponse(uint8_t request_id, uint8_t status) : Response{ request_id, status }
+AcknowledgeResponse::AcknowledgeResponse(uint8_t request_id, Status status) : Response{ request_id, status }
 {
 }
 }  // namespace stepit_hardware

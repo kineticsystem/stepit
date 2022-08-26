@@ -37,13 +37,19 @@ namespace stepit_hardware
 class Response
 {
 public:
-  explicit Response(uint8_t request_id, uint8_t status);
+  enum class Status : uint8_t
+  {
+    Success = 0x11,
+    Failure = 0x12,
+  };
+
+  explicit Response(uint8_t request_id, Status status);
   virtual ~Response() = default;
   uint8_t request_id() const;
-  uint8_t status() const;
+  Status status() const;
 
 private:
   uint8_t request_id_;
-  uint8_t status_;
+  Status status_;
 };
 }  // namespace stepit_hardware
