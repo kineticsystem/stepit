@@ -31,6 +31,8 @@
 
 #include <stepit_hardware/msgs/msgs.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+
 namespace stepit_hardware
 {
 /**
@@ -42,9 +44,36 @@ class CommandInterface
 public:
   virtual ~CommandInterface() = default;
 
-  virtual AcknowledgeResponse send(const MotorConfigCommand& command) const = 0;
-  virtual AcknowledgeResponse send(const MotorPositionCommand& command) const = 0;
-  virtual AcknowledgeResponse send(const MotorVelocityCommand& command) const = 0;
-  virtual MotorStatusResponse send(const MotorStatusQuery& query) const = 0;
+  /**
+   * @brief Configure the hardware.
+   * @param time The time the command is sent.
+   * @param command A command with all required configuration.
+   * @return An aknowledgment response, success or failure.
+   */
+  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorConfigCommand& command) const = 0;
+
+  /**
+   * @brief Send motor target positions (rad) to the hardware.
+   * @param time The time the command is sent.
+   * @param command A command with all positions (rad).
+   * @return An aknowledgment response, success or failure.
+   */
+  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const = 0;
+
+  /**
+   * @brief Send motor target velocities (rad/s) to the hardware.
+   * @param time The time the command is sent.
+   * @param command A command with all motor velocities (rad/s).
+   * @return An aknowledgment response, success or failure.
+   */
+  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const = 0;
+
+  /**
+   * @brief Request the status of each motor connected to the hardware.
+   * @param time The time the command is sent.
+   * @param command A query for the status of each motor.
+   * @return Each motor status and a request status, success or failure.
+   */
+  virtual MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const = 0;
 };
 }  // namespace stepit_hardware

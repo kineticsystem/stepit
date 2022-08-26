@@ -37,7 +37,8 @@ CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
 {
 }
 
-AcknowledgeResponse CommandHandler::send([[maybe_unused]] const MotorConfigCommand& command) const
+AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
+                                         const MotorConfigCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.request_id());
@@ -64,7 +65,8 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const MotorConfigComma
   return response;
 }
 
-AcknowledgeResponse CommandHandler::send(const MotorPositionCommand& command) const
+AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
+                                         const MotorPositionCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.request_id());
@@ -86,7 +88,8 @@ AcknowledgeResponse CommandHandler::send(const MotorPositionCommand& command) co
   return response;
 }
 
-AcknowledgeResponse CommandHandler::send(const MotorVelocityCommand& command) const
+AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
+                                         const MotorVelocityCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.request_id());
@@ -108,7 +111,7 @@ AcknowledgeResponse CommandHandler::send(const MotorVelocityCommand& command) co
   return response;
 }
 
-MotorStatusResponse CommandHandler::send(const MotorStatusQuery& query) const
+MotorStatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const MotorStatusQuery& query) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.request_id());
@@ -140,9 +143,9 @@ MotorStatusResponse CommandHandler::send(const MotorStatusQuery& query) const
   while (i < data.size())
   {
     uint8_t id = data[i++];
-    int32_t position = data_utils::to_int32({ data[i++], data[i++], data[i++], data[i++] });
+    float position = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
     float speed = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
-    int32_t distance_to_go = data_utils::to_int32({ data[i++], data[i++], data[i++], data[i++] });
+    float distance_to_go = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
     motor_states.push_back(MotorStatusResponse::MotorState{ id, position, speed, distance_to_go });
   }
 

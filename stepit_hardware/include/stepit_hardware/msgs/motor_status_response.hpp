@@ -44,7 +44,7 @@ public:
   class MotorState
   {
   public:
-    explicit MotorState(uint8_t id, int32_t position, float velocity, int32_t distance_to_go)
+    explicit MotorState(uint8_t id, double position, double velocity, double distance_to_go)
       : id_{ id }, position_{ position }, velocity_{ velocity }, distance_to_go_{ distance_to_go }
     {
     }
@@ -52,7 +52,7 @@ public:
     {
       return id_;
     }
-    int32_t position()
+    double position()
     {
       return position_;
     }
@@ -60,16 +60,16 @@ public:
     {
       return velocity_;
     }
-    int32_t distance_to_go()
+    double distance_to_go()
     {
       return distance_to_go_;
     }
 
   private:
     uint8_t id_;
-    int32_t position_;
-    float velocity_;
-    int32_t distance_to_go_;
+    double position_;
+    double velocity_;
+    double distance_to_go_;
   };
 
   explicit MotorStatusResponse(uint8_t request_id, uint8_t status, std::vector<MotorState> motor_states);

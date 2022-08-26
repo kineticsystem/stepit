@@ -178,7 +178,7 @@ hardware_interface::return_type StepitHardware::read([[maybe_unused]] const rclc
                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
   MotorStatusQuery query{ request_id++ };
-  MotorStatusResponse response = command_interface_->send(query);
+  MotorStatusResponse response = command_interface_->send(time, query);
 
   auto motor_states = response.motor_states();
   if (motor_states.size() != joints_.size())
@@ -214,7 +214,7 @@ hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rcl
       }
     }
     MotorVelocityCommand command{ request_id++, velocities };
-    AcknowledgeResponse response = command_interface_->send(command);
+    AcknowledgeResponse response = command_interface_->send(time, command);
   }
   else
   {
@@ -230,7 +230,7 @@ hardware_interface::return_type StepitHardware::write([[maybe_unused]] const rcl
       }
     }
     MotorPositionCommand command{ request_id++, positions };
-    AcknowledgeResponse response = command_interface_->send(command);
+    AcknowledgeResponse response = command_interface_->send(time, command);
   }
   return hardware_interface::return_type::OK;
 }

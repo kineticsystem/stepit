@@ -129,7 +129,7 @@ TEST(TestStepitHardware, read_status)
   // clang-format on
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  EXPECT_CALL(*mock_command_interface, send(An<const MotorStatusQuery&>())).WillOnce(Return(mocked_response));
+  EXPECT_CALL(*mock_command_interface, send(_, An<const MotorStatusQuery&>())).WillOnce(Return(mocked_response));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
 
@@ -180,8 +180,8 @@ TEST(TestStepitHardware, write_velocities)
   MotorVelocityCommand actual_request{ 0, {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  EXPECT_CALL(*mock_command_interface, send(Matcher<const MotorVelocityCommand&>(_)))
-      .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
+  EXPECT_CALL(*mock_command_interface, send(_, Matcher<const MotorVelocityCommand&>(_)))
+      .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(mocked_response)));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
 
@@ -234,8 +234,8 @@ TEST(TestStepitHardware, write_positions)
   MotorPositionCommand actual_request{ 0, {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  EXPECT_CALL(*mock_command_interface, send(Matcher<const MotorPositionCommand&>(_)))
-      .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
+  EXPECT_CALL(*mock_command_interface, send(_, Matcher<const MotorPositionCommand&>(_)))
+      .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(mocked_response)));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
 

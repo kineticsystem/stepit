@@ -33,6 +33,8 @@
 #include <stepit_hardware/fake/fake_motor.hpp>
 #include <stepit_hardware/msgs/msgs.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+
 #include <vector>
 
 namespace stepit_hardware
@@ -45,10 +47,10 @@ class FakeCommandHandler : public CommandInterface
 {
 public:
   FakeCommandHandler();
-  AcknowledgeResponse send(const MotorConfigCommand& command) const override;
-  AcknowledgeResponse send(const MotorPositionCommand& command) const override;
-  AcknowledgeResponse send(const MotorVelocityCommand& command) const override;
-  MotorStatusResponse send(const MotorStatusQuery& query) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const MotorConfigCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const override;
+  MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const override;
 
 private:
   mutable std::vector<FakeMotor> motors_;

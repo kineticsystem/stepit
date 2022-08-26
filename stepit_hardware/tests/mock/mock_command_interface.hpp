@@ -29,17 +29,23 @@
 
 #pragma once
 
-#include <gmock/gmock.h>
 #include <stepit_hardware/command_interface.hpp>
+
+#include <gmock/gmock.h>
+
+#include <rclcpp/rclcpp.hpp>
 
 namespace stepit_hardware::test
 {
 class MockCommandInterface : public stepit_hardware::CommandInterface
 {
 public:
-  MOCK_METHOD(AcknowledgeResponse, send, (const MotorConfigCommand& command), (override, const));
-  MOCK_METHOD(AcknowledgeResponse, send, (const MotorPositionCommand& command), (override, const));
-  MOCK_METHOD(AcknowledgeResponse, send, (const MotorVelocityCommand& command), (override, const));
-  MOCK_METHOD(MotorStatusResponse, send, (const MotorStatusQuery& query), (override, const));
+  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorConfigCommand& command),
+              (override, const));
+  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorPositionCommand& command),
+              (override, const));
+  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorVelocityCommand& command),
+              (override, const));
+  MOCK_METHOD(MotorStatusResponse, send, (const rclcpp::Time& time, const MotorStatusQuery& query), (override, const));
 };
 }  // namespace stepit_hardware::test

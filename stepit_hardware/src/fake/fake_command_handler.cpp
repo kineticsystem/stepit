@@ -29,8 +29,12 @@
 
 #include <stepit_hardware/fake/fake_command_handler.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+
 namespace stepit_hardware
 {
+constexpr auto kLoggerName = "FakeCommandHandler";
+
 /**
  * @brief The FakeCommandHandler class receives commands and queries from the
  * hardware interface, sends them to a fake hardware and returns a
@@ -40,8 +44,10 @@ FakeCommandHandler::FakeCommandHandler()
 {
 }
 
-AcknowledgeResponse FakeCommandHandler::send(const MotorConfigCommand& command) const
+AcknowledgeResponse FakeCommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
+                                             const MotorConfigCommand& command) const
 {
+  motors_.clear();
   for (const auto& param : command.params())
   {
     FakeMotor motor;
@@ -53,18 +59,53 @@ AcknowledgeResponse FakeCommandHandler::send(const MotorConfigCommand& command) 
   return AcknowledgeResponse{ command.request_id(), 0u };
 }
 
-AcknowledgeResponse FakeCommandHandler::send([[maybe_unused]] const MotorPositionCommand& command) const
+AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorPositionCommand& command) const
 {
-  return AcknowledgeResponse{ 0u, 0u };
+  for (const auto& goal : command.goals())
+  {
+    const auto motor_id = goal.motor_id();
+    if (motor_id >= motors_.size())
+    {
+      RCLCPP_ERROR(rclcpp::get_logger(kLoggerName), "Motor id does not exist.");
+    }
+    else
+    {
+      motors_[motor_id].set_target_position(time, goal.position());
+    }
+  }
+  return AcknowledgeResponse{ command.request_id(), 0 };
 }
 
-AcknowledgeResponse FakeCommandHandler::send([[maybe_unused]] const MotorVelocityCommand& command) const
+AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorVelocityCommand& command) const
 {
-  return AcknowledgeResponse{ 0u, 0u };
+  for (const auto& goal : command.goals())
+  {
+    const auto motor_id = goal.motor_id();
+    if (motor_id >= motors_.size())
+    {
+      RCLCPP_ERROR(rclcpp::get_logger(kLoggerName), "Motor id does not exist.");
+    }
+    else
+    {
+      motors_[motor_id].set_target_velocity(time, goal.velocity());
+    }
+  }
+  return AcknowledgeResponse{ command.request_id(), 0 };
 }
 
-MotorStatusResponse FakeCommandHandler::send([[maybe_unused]] const MotorStatusQuery& query) const
+MotorStatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorStatusQuery& query) const
 {
-  return MotorStatusResponse(0u, 0u, std::vector<MotorStatusResponse::MotorState>{});
+  uint8_t id = 0;
+  std::vector<MotorStatusResponse::MotorState> states;
+  for (const auto& motor : motors_)
+  {
+    auto position = motor.get_position(time);
+    auto velocity = motor.get_velocity(time);
+    auto distance_to_go = 0.0;
+    MotorStatusResponse::MotorState state{ id++, position, velocity, distance_to_go };
+    states.emplace_back(state);
+  }
+
+  return MotorStatusResponse(query.request_id(), 0, states);
 }
 }  // namespace stepit_hardware
