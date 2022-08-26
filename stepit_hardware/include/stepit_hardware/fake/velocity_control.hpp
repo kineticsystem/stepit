@@ -34,26 +34,26 @@ namespace stepit_hardware::velocity_control
 /**
  * @brief Compute the position of a motor with acceleration a while changing
  * velocity from v0 to v1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param v0    The initial velocity.
- * @param v1    The initial velocity.
- * @param x0    The initial position.
- * @param t     The time.
- * @return      The motor position.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param v0    The initial velocity (rad/s).
+ * @param v1    The target velocity  (rad/s).
+ * @param x0    The initial position (rad).
+ * @param t     The time             (s).
+ * @return      The motor position   (rad).
  */
-float position(float v_max, float a, float x0, float v0, float v1, float t);
+double position(double v_max, double a, double x0, double v0, double v1, double t);
 
 /**
  * @brief Compute the velocity of a motor with acceleration a while changing
  * velocity from v0 to v1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param v0    The initial velocity.
- * @param v1    The final velocity.
- * @param t     The time.
- * @return      The motor velocity.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param v0    The initial velocity (rad/s).
+ * @param v1    The target velocity  (rad/s).
+ * @param t     The time             (s).
+ * @return      The motor velocity   (rad).
  */
-float velocity(float v_max, float a, float v0, float v1, float t);
+double velocity(double v_max, double a, double v0, double v1, double t);
 
 }  // namespace stepit_hardware::velocity_control

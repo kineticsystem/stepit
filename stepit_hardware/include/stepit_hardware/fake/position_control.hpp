@@ -35,48 +35,48 @@ namespace stepit_hardware::position_control
 /**
  * @brief Conpute the absolute distance to stop for a motor with acceleration a
  * and rotating speed v0.
- * @param a  The motor acceleration.
- * @param v0 The current speed.
- * @return   The absolute distance for the motor to stop.
+ * @param a  The motor acceleration (rad/s^2).
+ * @param v0 The current speed      (rad/s).
+ * @return   The distance to stop   (rad).
  */
-float distance_to_stop(float a, float v0);
+double distance_to_stop(double a, double v0);
 
 /**
  * @brief Conpute the time for a motor, with acceleration a and initial velocity
  * v0, to move from position x0 to position x1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param v0    The initial velocity.
- * @param x0    The initial position.
- * @param x1    The final position.
- * @return      The motor velocity.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param v0    The initial velocity (rad/s).
+ * @param x0    The initial position (rad/s).
+ * @param x1    The target position  (rad).
+ * @return      The time to go       (s).
  */
-float time_to_go(float v_max, float a, float v0, float x0, float x1);
+double time_to_go(double v_max, double a, double v0, double x0, double x1);
 
 /**
  * @brief Compute the position of a motor with acceleration a and initial
  * velocity v0, moving from position x0 to x1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param v0    The initial velocity.
- * @param x0    The initial position.
- * @param x1    The final position.
- * @param t     The time.
- * @return      The motor position.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param v0    The initial velocity (rad/s).
+ * @param x0    The initial position (rad).
+ * @param x1    The target position  (rad).
+ * @param t     The time             (s).
+ * @return      The motor position   (rad).
  */
-float position(float v_max, float a, float v0, float x0, float x1, float t);
+double position(double v_max, double a, double v0, double x0, double x1, double t);
 
 /**
  * @brief Compute the velocity of a motor with acceleration a and initial
  * velocity v0, moving from position x0 to x1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param v0    The initial velocity.
- * @param x0    The initial position.
- * @param x1    The final position.
- * @param t     The time.
- * @return      The motor velocity.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param v0    The initial velocity (rad/s).
+ * @param x0    The initial position (rad).
+ * @param x1    The target position  (rad).
+ * @param t     The time             (s).
+ * @return      The motor velocity   (rad/s).
  */
-float velocity(float v_max, float a, float v0, float x0, float x1, float t);
+double velocity(double v_max, double a, double v0, double x0, double x1, double t);
 
 }  // namespace stepit_hardware::position_control

@@ -46,7 +46,7 @@ using ::testing::Return;
  */
 TEST(TestDataHandler, write)
 {
-  std::vector<uint8_t> data{
+  const std::vector<uint8_t> data{
     0x00,  // Request ID
     0x71,  // Motor Move To command ID
     0x01,  // Motor ID
@@ -56,7 +56,7 @@ TEST(TestDataHandler, write)
     0xB8   // Position (LSB)
   };
 
-  std::vector<uint8_t> expected_frame{
+  const std::vector<uint8_t> expected_frame{
     0x7E,  // Delimiter
     0x00,  // Request ID
     0x71,  // Motor Move To command ID
@@ -91,7 +91,7 @@ TEST(TestDataHandler, write)
  */
 TEST(TestDataHandler, write_escaped)
 {
-  std::vector<uint8_t> data{
+  const std::vector<uint8_t> data{
     0x00,  // Request ID
     0x71,  // Motor Move To command ID
     0x01,  // Motor ID
@@ -101,7 +101,7 @@ TEST(TestDataHandler, write_escaped)
     0x00   // Position (LSB)
   };
 
-  std::vector<uint8_t> expected_frame = {
+  const std::vector<uint8_t> expected_frame = {
     0x7E,  // Delimiter
     0x00,  // Request ID
     0x71,  // Motor Move To command ID
@@ -162,7 +162,7 @@ TEST(TestDataHandler, write_error)
  */
 TEST(TestDataHandler, read)
 {
-  std::vector<uint8_t> frame = {
+  const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
     0x00,  // Response ID
     0x71,  // Status command ID
@@ -176,7 +176,7 @@ TEST(TestDataHandler, read)
     0x7E   // Delimiter
   };
 
-  std::vector<uint8_t> expected_data{
+  const std::vector<uint8_t> expected_data{
     0x00,  // Response ID
     0x71,  // Status command ID
     0x01,  // Motor ID
@@ -206,7 +206,7 @@ TEST(TestDataHandler, read)
  */
 TEST(TestDataHandler, read_escaped)
 {
-  std::vector<uint8_t> frame = {
+  const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
     0x00,  // Response ID
     0x71,  // Motor Move To command ID
@@ -221,7 +221,7 @@ TEST(TestDataHandler, read_escaped)
     0x7E   // Delimiter
   };
 
-  std::vector<uint8_t> expected_data{
+  const std::vector<uint8_t> expected_data{
     0x00,  // Response ID
     0x71,  // Status command ID
     0x01,  // Motor ID
@@ -251,7 +251,7 @@ TEST(TestDataHandler, read_escaped)
  */
 TEST(TestDataHandler, read_crc_error)
 {
-  std::vector<uint8_t> frame = {
+  const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
     0x00,  // Response ID
     0x71,  // Motor Move To command ID
@@ -303,7 +303,7 @@ TEST(TestDataHandler, read_crc_error)
  */
 TEST(TestDataHandler, read_incorrect_frame_length)
 {
-  std::vector<uint8_t> frame = {
+  const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
     0x00,  // Request ID
     0x7E   // Delimiter
@@ -340,7 +340,7 @@ TEST(TestDataHandler, read_incorrect_frame_length)
  */
 TEST(TestDataHandler, read_start_delimiter_missing)
 {
-  std::vector<uint8_t> frame = {
+  const std::vector<uint8_t> frame = {
     // Missing delimiter
     0x00,  // Request ID
     0x71,  // Motor Move To command ID

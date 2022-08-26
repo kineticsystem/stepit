@@ -28,10 +28,56 @@
  */
 
 #include <stepit_hardware/fake/fake_motor.hpp>
+#include <stepit_hardware/fake/position_control.hpp>
+#include <stepit_hardware/fake/velocity_control.hpp>
 
-namespace stepit_hardware::fake
+namespace stepit_hardware
 {
-FakeMotor::FakeMotor([[maybe_unused]] double acceleration, [[maybe_unused]] double max_velocity)
+FakeMotor::FakeMotor(double acceleration, double max_velocity)
+  : acceleration_{ acceleration }, max_velocity_{ max_velocity }, initial_position_{ 0.0 }, initial_velocity_{ 0.0 }
 {
 }
-}  // namespace stepit_hardware::fake
+
+double FakeMotor::get_position([[maybe_unused]] const rclcpp::Time& time) const
+{
+  double t = time.seconds() - time_.seconds();
+  if (control_type == ControlType::Position)
+  {
+    return position_control::position(max_velocity_, acceleration_, initial_velocity_, initial_position_,
+                                      target_position_, t);
+  }
+  else
+  {
+    return velocity_control::position(max_velocity_, acceleration_, initial_position_, initial_velocity_,
+                                      target_velocity_, t);
+  }
+}
+
+void FakeMotor::set_target_position([[maybe_unused]] const rclcpp::Time& time, double position)
+{
+  time_ = time;
+  target_position_ = position;
+  control_type = ControlType::Position;
+}
+
+double FakeMotor::get_velocity([[maybe_unused]] const rclcpp::Time& time) const
+{
+  double t = time.seconds() - time_.seconds();
+  if (control_type == ControlType::Position)
+  {
+    return position_control::velocity(max_velocity_, acceleration_, initial_velocity_, initial_position_,
+                                      target_position_, t);
+  }
+  else
+  {
+    return velocity_control::velocity(max_velocity_, acceleration_, initial_velocity_, target_velocity_, t);
+  }
+}
+
+void FakeMotor::set_target_velocity([[maybe_unused]] const rclcpp::Time& time, double velocity)
+{
+  time_ = time;
+  target_velocity_ = velocity;
+  control_type = ControlType::Velocity;
+}
+}  // namespace stepit_hardware

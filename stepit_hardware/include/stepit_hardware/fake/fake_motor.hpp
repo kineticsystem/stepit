@@ -29,11 +29,36 @@
 
 #pragma once
 
-namespace stepit_hardware::fake
+#include <rclcpp/rclcpp.hpp>
+
+namespace stepit_hardware
 {
 class FakeMotor
 {
 public:
-  FakeMotor(double acceleration, double max_velocity);
+  explicit FakeMotor(double acceleration, double max_velocity);
+
+  double get_position(const rclcpp::Time& time) const;
+  void set_target_position(const rclcpp::Time& time, double position);
+
+  double get_velocity(const rclcpp::Time& time) const;
+  void set_target_velocity(const rclcpp::Time& time, double velocity);
+
+private:
+  double acceleration_;
+  double max_velocity_;
+  double initial_position_;
+  double initial_velocity_;
+  double target_position_;
+  double target_velocity_;
+
+  rclcpp::Time time_;
+
+  enum ControlType
+  {
+    Velocity,
+    Position
+  };
+  ControlType control_type = ControlType::Position;
 };
-}  // namespace stepit_hardware::fake
+}  // namespace stepit_hardware

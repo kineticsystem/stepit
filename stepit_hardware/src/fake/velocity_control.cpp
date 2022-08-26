@@ -40,42 +40,42 @@ namespace stepit_hardware::velocity_control
  * @param val The number to calculate the sign of.
  * @return The sign of the given number.
  */
-float sgn(float val)
+float sgn(double val)
 {
   if (val > 0)
   {
-    return 1.0f;
+    return 1.0;
   }
   if (val < 0)
   {
-    return -1.0f;
+    return -1.0;
   }
-  return 0.0f;
+  return 0.0;
 }
 
-float position(float v_max, float a, float x0, float v0, float v1, float t)
+double position(double v_max, double a, double x0, double v0, double v1, double t)
 {
-  float x;
+  double x;
   v0 = std::clamp(v0, -v_max, v_max);
   v1 = std::clamp(v1, -v_max, v_max);
-  float t1 = std::abs(v1 - v0) / a;
+  double t1 = std::abs(v1 - v0) / a;
   if (t <= t1)
   {
-    x = x0 + v0 * t + 0.5f * a * powf(t, 2) * sgn(v1 - v0);
+    x = x0 + v0 * t + 0.5 * a * pow(t, 2) * sgn(v1 - v0);
   }
   else
   {
-    x = x0 + (v0 - v1) * t1 + 0.5f * a * powf(t1, 2) * sgn(v1 - v0) + v1 * t;
+    x = x0 + (v0 - v1) * t1 + 0.5 * a * pow(t1, 2) * sgn(v1 - v0) + v1 * t;
   }
   return x;
 }
 
-float velocity(float v_max, float a, float v0, float v1, float t)
+double velocity(double v_max, double a, double v0, double v1, double t)
 {
-  float v;
+  double v;
   v0 = std::clamp(v0, -v_max, v_max);
   v1 = std::clamp(v1, -v_max, v_max);
-  float t1 = std::abs(v1 - v0) / a;
+  double t1 = std::abs(v1 - v0) / a;
   if (t <= t1)
   {
     v = v0 + a * t * sgn(v1 - v0);

@@ -29,11 +29,12 @@
 
 #include <gtest/gtest.h>
 
-#include <stepit_hardware/stepit_hardware.hpp>
 #include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/msgs/motor_status_query.hpp>
-#include <mock/mock_data_interface.hpp>
+#include <stepit_hardware/msgs/msgs.hpp>
+#include <stepit_hardware/stepit_hardware.hpp>
+
 #include <fake/fake_hardware_info.hpp>
+#include <mock/mock_command_interface.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -52,6 +53,8 @@
 namespace stepit_hardware::test
 {
 using ::testing::_;
+using ::testing::An;
+using ::testing::Matcher;
 using ::testing::Return;
 using ::testing::SaveArg;
 
@@ -105,182 +108,162 @@ TEST(TestStepitHardware, load_urdf)
   EXPECT_TRUE(rm.command_interface_exists("joint2/velocity"));
 }
 
-///**
-// * Test the read method using a mocked data interface. The interface returns a
-// * hard-wired response containing information about position and velocity of
-// * two motors. The read method parses this information and use it to populate
-// * position and velocity of its state interface.
-// * The test check if the state interface contains the expected values.
-// */
-// TEST(TestStepitHardware, read)
-//{
-//  std::vector<uint8_t> motor_status_response{
-//    0x00,  // request ID
-//    0x11,  // status success
-//    0x00,  // motor ID
-//    0x00,  // position = 32100
-//    0x00,  // position
-//    0x7D,  // position
-//    0x64,  // position
-//    0x3F,  // speed = 0.5
-//    0x00,  // speed
-//    0x00,  // speed
-//    0x00,  // speed
-//    0x00,  // distance to go = 150
-//    0x00,  // distance to go
-//    0x00,  // distance to go
-//    0x96,  // distance to go
-//    0x01,  // motor ID
-//    0xFF,  // position = -6500
-//    0xFF,  // position
-//    0xE6,  // position
-//    0x9C,  // position
-//    0x3F,  // speed = 0.75
-//    0x40,  // speed
-//    0x00,  // speed
-//    0x00,  // speed
-//    0x00,  // distance to go = 150000
-//    0x02,  // distance to go
-//    0x49,  // distance to go
-//    0xF0,  // distance to go
-//  };
+/**
+ * Test the read method using a mocked data interface. The interface returns a
+ * hard-wired response containing information about position and velocity of
+ * two motors. The read method parses this information and use it to populate
+ * position and velocity of its state interface.
+ * The test check if the state interface contains the expected values.
+ */
+TEST(TestStepitHardware, read_status)
+{
+  // clang-format off
+  const MotorStatusResponse mocked_response{
+      0,     // request ID
+      0x11,  // success status
+      {
+          MotorStatusResponse::MotorState{ 0, 32100, 0.5, 150 },     // Motor 0 status
+          MotorStatusResponse::MotorState{ 1, -6500, 0.75, 150000 }  // Motor 1 status
+      }
+  };
+  // clang-format on
 
-//  auto mock_data_interface = std::make_unique<MockDataInterface>();
-//  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(motor_status_response));
+  auto mock_command_interface = std::make_unique<MockCommandInterface>();
+  EXPECT_CALL(*mock_command_interface, send(An<const MotorStatusQuery&>())).WillOnce(Return(mocked_response));
 
-//  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_data_interface));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
 
-//  // Load the component.
-//  hardware_interface::ResourceManager rm;
-//  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
+  // Load the component.
+  hardware_interface::ResourceManager rm;
+  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
 
-//  // Connect the hardware.
-//  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-//                                 hardware_interface::lifecycle_state_names::ACTIVE };
-//  rm.set_component_state("StepitHardware", state);
+  // Connect the hardware.
+  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                 hardware_interface::lifecycle_state_names::ACTIVE };
+  rm.set_component_state("StepitHardware", state);
 
-//  // Invoke a read command.
-//  const rclcpp::Time time;
-//  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
-//  rm.read(time, period);
+  // Invoke a read command.
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  rm.read(time, period);
 
-//  // Read state interface values.
-//  hardware_interface::LoanedStateInterface joint1_position_state = rm.claim_state_interface("joint1/position");
-//  hardware_interface::LoanedStateInterface joint2_position_state = rm.claim_state_interface("joint2/position");
-//  hardware_interface::LoanedStateInterface joint1_velocity_state = rm.claim_state_interface("joint1/velocity");
-//  hardware_interface::LoanedStateInterface joint2_velocity_state = rm.claim_state_interface("joint2/velocity");
+  // Read state interface values.
+  hardware_interface::LoanedStateInterface joint1_position_state = rm.claim_state_interface("joint1/position");
+  hardware_interface::LoanedStateInterface joint2_position_state = rm.claim_state_interface("joint2/position");
+  hardware_interface::LoanedStateInterface joint1_velocity_state = rm.claim_state_interface("joint1/velocity");
+  hardware_interface::LoanedStateInterface joint2_velocity_state = rm.claim_state_interface("joint2/velocity");
 
-//  ASSERT_EQ(32100, joint1_position_state.get_value());
-//  ASSERT_EQ(-6500, joint2_position_state.get_value());
-//  ASSERT_EQ(0.5, joint1_velocity_state.get_value());
-//  ASSERT_EQ(0.75, joint2_velocity_state.get_value());
-//}
+  ASSERT_EQ(32100, joint1_position_state.get_value());
+  ASSERT_EQ(-6500, joint2_position_state.get_value());
+  ASSERT_EQ(0.5, joint1_velocity_state.get_value());
+  ASSERT_EQ(0.75, joint2_velocity_state.get_value());
+}
 
-///**
-// * In this test we set velocities goals on the hardware interface.
-// * We execute a write operation and expect to see one data frame delivered
-// * to the actual hardware, setting velocities.
-// */
-// TEST(TestStepitHardware, write_velocities)
-//{
-//  std::vector<uint8_t> velocity_request;
-//  auto mock_data_interface = std::make_unique<MockDataInterface>();
-//  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&velocity_request));
+/**
+ * In this test we set velocities goals on the hardware interface.
+ * We execute a write operation and expect to see one data frame delivered
+ * to the actual hardware, setting velocities.
+ */
+TEST(TestStepitHardware, write_velocities)
+{
+  // clang-format off
+  const MotorVelocityCommand expected_request{
+    0,  // request ID
+    {
+        MotorVelocityCommand::Goal{ 0, 0.5 },  // Motor 0 goal
+        MotorVelocityCommand::Goal{ 1, 0.75 }  // Motor 1 goal
+    }
+  };
+  // clang-format on
 
-//  std::vector<uint8_t> velocity_response{ 0x00, 0x11 };
-//  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(velocity_response));
+  const AcknowledgeResponse mocked_response{ 0x00, 0x11 };
+  MotorVelocityCommand actual_request{ 0, {} };
 
-//  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_data_interface));
+  auto mock_command_interface = std::make_unique<MockCommandInterface>();
+  EXPECT_CALL(*mock_command_interface, send(Matcher<const MotorVelocityCommand&>(_)))
+      .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
 
-//  // Load the component.
-//  hardware_interface::ResourceManager rm;
-//  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
 
-//  // Connect the hardware.
-//  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-//                                 hardware_interface::lifecycle_state_names::ACTIVE };
-//  rm.set_component_state("StepitHardware", state);
+  // Load the component.
+  hardware_interface::ResourceManager rm;
+  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
 
-//  // Write velocity values.
-//  hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
-//  hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
-//  joint1_velocity_command.set_value(0.5);
-//  joint2_velocity_command.set_value(0.75);
+  // Connect the hardware.
+  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                 hardware_interface::lifecycle_state_names::ACTIVE };
+  rm.set_component_state("StepitHardware", state);
 
-//  // Invoke a write command.
-//  const rclcpp::Time time;
-//  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
-//  rm.write(time, period);
+  // Write velocity values.
+  hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
+  hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
+  joint1_velocity_command.set_value(0.5);
+  joint2_velocity_command.set_value(0.75);
 
-//  std::vector<uint8_t> expected_velocity_request{
-//    0x00,  // request ID
-//    0x77,  // command ID
-//    0x00,  // motor ID
-//    0x3F,  // velocity = 0.5
-//    0x00,  // velocity
-//    0x00,  // velocity
-//    0x00,  // velocity
-//    0x01,  // motor ID
-//    0x3F,  // velocity = 0.75
-//    0x40,  // velocity
-//    0x00,  // velocity
-//    0x00   // velocity
-//  };
-//  ASSERT_THAT(stepit_hardware::data_utils::to_hex(velocity_request),
-//              stepit_hardware::data_utils::to_hex(expected_velocity_request));
-//}
+  // Invoke a write command.
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  rm.write(time, period);
 
-///**
-// * In this test we set positions goals on the hardware interface.
-// * We execute a write operation and expect to see one data frame delivered
-// * to the actual hardware, setting positions.
-// */
-// TEST(TestStepitHardware, write_positions)
-//{
-//  std::vector<uint8_t> position_request;
-//  auto mock_data_interface = std::make_unique<MockDataInterface>();
-//  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&position_request));
+  ASSERT_EQ(actual_request.request_id(), expected_request.request_id());
+  ASSERT_EQ(actual_request.goals().size(), actual_request.goals().size());
+  ASSERT_EQ(actual_request.goals()[0].motor_id(), actual_request.goals()[0].motor_id());
+  ASSERT_EQ(actual_request.goals()[0].velocity(), actual_request.goals()[0].velocity());
+  ASSERT_EQ(actual_request.goals()[1].motor_id(), actual_request.goals()[1].motor_id());
+  ASSERT_EQ(actual_request.goals()[1].velocity(), actual_request.goals()[1].velocity());
+}
 
-//  std::vector<uint8_t> position_response{ 0x01, 0x11 };
-//  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(position_response));
+/**
+ * In this test we set positions goals on the hardware interface.
+ * We execute a write operation and expect to see one data frame delivered
+ * to the actual hardware, setting positions.
+ */
+TEST(TestStepitHardware, write_positions)
+{
+  // clang-format off
+  const MotorPositionCommand expected_request{
+    0,  // request ID
+    {
+        MotorPositionCommand::Goal{ 0, 0.5 },  // Motor 0 goal
+        MotorPositionCommand::Goal{ 1, 0.75 }  // Motor 1 goal
+    }
+  };
+  // clang-format on
 
-//  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_data_interface));
+  const AcknowledgeResponse mocked_response{ 0x00, 0x11 };
+  MotorPositionCommand actual_request{ 0, {} };
 
-//  // Load the component.
-//  hardware_interface::ResourceManager rm;
-//  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
+  auto mock_command_interface = std::make_unique<MockCommandInterface>();
+  EXPECT_CALL(*mock_command_interface, send(Matcher<const MotorPositionCommand&>(_)))
+      .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
 
-//  // Connect the hardware.
-//  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-//                                 hardware_interface::lifecycle_state_names::ACTIVE };
-//  rm.set_component_state("StepitHardware", state);
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
 
-//  // Write position values.
-//  hardware_interface::LoanedCommandInterface joint1_position_command = rm.claim_command_interface("joint1/position");
-//  hardware_interface::LoanedCommandInterface joint2_position_command = rm.claim_command_interface("joint2/position");
-//  joint1_position_command.set_value(0.5);
-//  joint2_position_command.set_value(0.75);
+  // Load the component.
+  hardware_interface::ResourceManager rm;
+  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
 
-//  // Invoke a write command.
-//  const rclcpp::Time time;
-//  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
-//  rm.write(time, period);
+  // Connect the hardware.
+  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                 hardware_interface::lifecycle_state_names::ACTIVE };
+  rm.set_component_state("StepitHardware", state);
 
-//  std::vector<uint8_t> expected_position_request{
-//    0x00,  // request ID
-//    0x71,  // command ID
-//    0x00,  // motor ID
-//    0x3F,  // position = 0.5
-//    0x00,  // position
-//    0x00,  // position
-//    0x00,  // position
-//    0x01,  // motor ID
-//    0x3F,  // position = 0.75
-//    0x40,  // position
-//    0x00,  // position
-//    0x00   // position
-//  };
-//  ASSERT_THAT(stepit_hardware::data_utils::to_hex(position_request),
-//              stepit_hardware::data_utils::to_hex(expected_position_request));
-//}
+  // Write position values.
+  hardware_interface::LoanedCommandInterface joint1_position_command = rm.claim_command_interface("joint1/position");
+  hardware_interface::LoanedCommandInterface joint2_position_command = rm.claim_command_interface("joint2/position");
+  joint1_position_command.set_value(0.5);
+  joint2_position_command.set_value(0.75);
+
+  // Invoke a write command.
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  rm.write(time, period);
+
+  ASSERT_EQ(actual_request.request_id(), expected_request.request_id());
+  ASSERT_EQ(actual_request.goals().size(), actual_request.goals().size());
+  ASSERT_EQ(actual_request.goals()[0].motor_id(), actual_request.goals()[0].motor_id());
+  ASSERT_EQ(actual_request.goals()[0].position(), actual_request.goals()[0].position());
+  ASSERT_EQ(actual_request.goals()[1].motor_id(), actual_request.goals()[1].motor_id());
+  ASSERT_EQ(actual_request.goals()[1].position(), actual_request.goals()[1].position());
+}
 }  // namespace stepit_hardware::test

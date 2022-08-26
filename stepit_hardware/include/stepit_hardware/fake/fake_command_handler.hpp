@@ -29,11 +29,28 @@
 
 #pragma once
 
-namespace stepit_hardware::fake
+#include <stepit_hardware/command_interface.hpp>
+#include <stepit_hardware/fake/fake_motor.hpp>
+#include <stepit_hardware/msgs/msgs.hpp>
+
+#include <vector>
+
+namespace stepit_hardware
 {
-class FakeCommandHandler
+/**
+ * @brief The FakeCommandHandler class receives commands and queries from the
+ * hardware interface and sends them to a fake hardware.
+ */
+class FakeCommandHandler : public CommandInterface
 {
 public:
   FakeCommandHandler();
+  AcknowledgeResponse send(const MotorConfigCommand& command) const override;
+  AcknowledgeResponse send(const MotorPositionCommand& command) const override;
+  AcknowledgeResponse send(const MotorVelocityCommand& command) const override;
+  MotorStatusResponse send(const MotorStatusQuery& query) const override;
+
+private:
+  mutable std::vector<FakeMotor> motors_;
 };
-}  // namespace stepit_hardware::fake
+}  // namespace stepit_hardware

@@ -40,27 +40,27 @@ namespace stepit_hardware::position_control
  * @param val The number to calculate the sign of.
  * @return The sign of the given number.
  */
-float sgn(float val)
+double sgn(double val)
 {
   if (val > 0)
   {
-    return 1.0f;
+    return 1.0;
   }
   if (val < 0)
   {
-    return -1.0f;
+    return -1.0;
   }
-  return 0.0f;
+  return 0.0;
 }
 
 /**
  * @brief Compute the time to stop for a motor with acceleration a and rotating
  * speed v0.
- * @param a The motor acceleration.
- * @param v0 The current speed.
- * @return The time for the motor to stop.
+ * @param a The motor acceleration (rad/s^2).
+ * @param v0 The current speed     (rad/s).
+ * @return The time to stop        (s).
  */
-float time_to_stop(float a, float v0)
+double time_to_stop(double a, double v0)
 {
   return std::abs(v0 / a);
 }
@@ -68,25 +68,25 @@ float time_to_stop(float a, float v0)
 /**
  * @brief Compute the time for a motor, with acceleration a and zero initial
  * velocity, to move from position x0 to position x1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param x0    The initial position.
- * @param x1    The final position.
- * @return      The motor velocity.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param x0    The initial position (rad).
+ * @param x1    The target position  (rad).
+ * @return      The motor velocity   (rad/s).
  */
-float time_to_go(float v_max, float a, float x0, float x1)
+double time_to_go(double v_max, double a, double x0, double x1)
 {
-  float dx = x1 - x0;
-  float total_time = 0;
-  if (std::abs(dx) >= powf(v_max, 2) / a)
+  double dx = x1 - x0;
+  double total_time = 0;
+  if (std::abs(dx) >= pow(v_max, 2) / a)
   {
-    float t1 = v_max / a;
-    float t2 = t1 + std::max(0.0f, (std::abs(dx) - powf(v_max, 2) / a)) / v_max;
+    double t1 = v_max / a;
+    double t2 = t1 + std::max(0.0, (std::abs(dx) - pow(v_max, 2) / a)) / v_max;
     total_time = t1 + t2;
   }
   else
   {
-    float t1 = std::sqrt(std::abs(dx) / a);
+    double t1 = std::sqrt(std::abs(dx) / a);
     total_time = 2 * t1;
   }
   return total_time;
@@ -95,50 +95,50 @@ float time_to_go(float v_max, float a, float x0, float x1)
 /**
  * @brief Compute the position of a motor with acceleration a and zero initial
  * velocity, moving from position x0 to x1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param x0    The initial position.
- * @param x1    The final position.
- * @param t     The time.
- * @return      The motor position.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param x0    The initial position (rad).
+ * @param x1    The target position  (rad).
+ * @param t     The time             (s).
+ * @return      The motor position   (rad).
  */
-float position(float v_max, float a, float x0, float x1, float t)
+double position(double v_max, double a, double x0, double x1, double t)
 {
-  float dx = x1 - x0;
-  float x = 0;
+  double dx = x1 - x0;
+  double x = 0;
   if (std::abs(dx) >= pow(v_max, 2) / a)
   {
-    float t1 = v_max / a;
-    float t2 = t1 + std::fmax(0.0f, (std::abs(dx) - powf(v_max, 2) / a)) / v_max;
-    float t3 = t1 + t2;
+    double t1 = v_max / a;
+    double t2 = t1 + std::max(0.0, (std::abs(dx) - pow(v_max, 2) / a)) / v_max;
+    double t3 = t1 + t2;
     if (t <= t1)
     {
-      x = 0.5f * a * powf(t, 2);
+      x = 0.5 * a * pow(t, 2);
     }
     else if (t <= t2)
     {
-      x = 0.5f * powf(v_max, 2) / a + v_max * (t - t1);
+      x = 0.5 * pow(v_max, 2) / a + v_max * (t - t1);
     }
     else if (t <= t3)
     {
-      x = 0.5f * powf(v_max, 2) / a + v_max * (t - t1) - 0.5f * a * powf(t - t2, 2);
+      x = 0.5 * pow(v_max, 2) / a + v_max * (t - t1) - 0.5 * a * pow(t - t2, 2);
     }
     else
     {
-      x = powf(v_max, 2) / a + v_max * (t2 - t1);
+      x = pow(v_max, 2) / a + v_max * (t2 - t1);
     }
   }
   else
   {
-    float t1 = std::sqrt(std::abs(dx) / a);
-    float t2 = 2 * t1;
+    double t1 = std::sqrt(std::abs(dx) / a);
+    double t2 = 2.0 * t1;
     if (t <= t1)
     {
-      x = 0.5f * a * powf(t, 2);
+      x = 0.5 * a * pow(t, 2);
     }
     else if (t <= t2)
     {
-      x = 0.5f * std::abs(dx) + a * t1 * (t - t1) - 0.5f * a * powf(t - t1, 2);
+      x = 0.5 * std::abs(dx) + a * t1 * (t - t1) - 0.5 * a * pow(t - t1, 2);
     }
     else
     {
@@ -151,22 +151,22 @@ float position(float v_max, float a, float x0, float x1, float t)
 /**
  * @brief Compute the velocity of a motor with acceleration a and zero initial
  * velocity, moving from position x0 to x1.
- * @param v_max The maximum velocity.
- * @param a     The acceleration.
- * @param x0    The initial position.
- * @param x1    The final position.
- * @param t     The time.
- * @return      The motor velocity.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param x0    The initial position (rad).
+ * @param x1    The target position  (rad).
+ * @param t     The time             (s).
+ * @return      The motor velocity   (rad/s).
  */
-float velocity(float v_max, float a, float x0, float x1, float t)
+double velocity(double v_max, double a, double x0, double x1, double t)
 {
-  float v = 0;
-  float dx = x1 - x0;
-  if (std::abs(dx) >= powf(v_max, 2) / a)
+  double v = 0.0;
+  double dx = x1 - x0;
+  if (std::abs(dx) >= pow(v_max, 2) / a)
   {
-    float t1 = v_max / a;
-    float t2 = t1 + std::max(0.0f, (std::abs(dx) - powf(v_max, 2) / a)) / v_max;
-    float t3 = t1 + t2;
+    double t1 = v_max / a;
+    double t2 = t1 + std::max(0.0, (std::abs(dx) - pow(v_max, 2) / a)) / v_max;
+    double t3 = t1 + t2;
     if (t <= t1)
     {
       v = a * t;
@@ -179,15 +179,11 @@ float velocity(float v_max, float a, float x0, float x1, float t)
     {
       v = a * t1 - a * (t - t2);
     }
-    else
-    {
-      v = 0;
-    }
   }
   else
   {
-    float t1 = std::sqrt(std::abs(dx) / a);
-    float t2 = 2 * t1;
+    double t1 = std::sqrt(std::abs(dx) / a);
+    double t2 = 2.0 * t1;
     if (t <= t1)
     {
       v = a * t;
@@ -196,26 +192,22 @@ float velocity(float v_max, float a, float x0, float x1, float t)
     {
       v = a * t1 - a * (t - t1);
     }
-    else
-    {
-      v = 0;
-    }
   }
   return v * sgn(dx);
 }
 
-float distance_to_stop(float a, float v0)
+double distance_to_stop(double a, double v0)
 {
-  return 0.5f * powf(v0, 2) / a;
+  return 0.5 * pow(v0, 2) / a;
 }
 
-float time_to_go(float v_max, float a, float v0, float x0, float x1)
+double time_to_go(double v_max, double a, double v0, double x0, double x1)
 {
   v0 = std::clamp(v0, -v_max, v_max);
-  float dx = x1 - x0;
-  float d_stop = distance_to_stop(a, v0);
-  float t_stop = time_to_stop(a, v0);
-  float total_time = 0;
+  double dx = x1 - x0;
+  double d_stop = distance_to_stop(a, v0);
+  double t_stop = time_to_stop(a, v0);
+  double total_time = 0;
   if ((v0 >= 0 && dx >= d_stop) || (v0 <= 0 && dx <= -d_stop))  // Keep accelerating.
   {
     total_time = time_to_go(v_max, a, x0, x1 + sgn(v0) * d_stop) - t_stop;
@@ -227,13 +219,13 @@ float time_to_go(float v_max, float a, float v0, float x0, float x1)
   return total_time;
 }
 
-float position(float v_max, float a, float v0, float x0, float x1, float t)
+double position(double v_max, double a, double v0, double x0, double x1, double t)
 {
-  float x = 0;
+  double x = 0.0;
   v0 = std::clamp(v0, -v_max, v_max);
-  float dx = x1 - x0;
-  float d_stop = distance_to_stop(a, v0);
-  float t_stop = time_to_stop(a, v0);
+  double dx = x1 - x0;
+  double d_stop = distance_to_stop(a, v0);
+  double t_stop = time_to_stop(a, v0);
   if ((v0 >= 0 && dx >= d_stop) || (v0 <= 0 && dx <= -d_stop))  // Keep accelerating.
   {
     x = position(v_max, a, x0, x1 + sgn(v0) * d_stop, t + t_stop) - sgn(v0) * d_stop;
@@ -242,7 +234,7 @@ float position(float v_max, float a, float v0, float x0, float x1, float t)
   {
     if (t <= t_stop)  // Decelerate.
     {
-      x = v0 * (t - t_stop) + sgn(v0) * (0.5f * a * (powf(t_stop, 2) - powf(t, 2)) + d_stop);
+      x = v0 * (t - t_stop) + sgn(v0) * (0.5 * a * (pow(t_stop, 2) - pow(t, 2)) + d_stop);
     }
     else  // Reverse.
     {
@@ -252,13 +244,13 @@ float position(float v_max, float a, float v0, float x0, float x1, float t)
   return x + x0;
 }
 
-float velocity(float v_max, float a, float v0, float x0, float x1, float t)
+double velocity(double v_max, double a, double v0, double x0, double x1, double t)
 {
-  float v;
+  double v = 0.0;
   v0 = std::clamp(v0, -v_max, v_max);
-  float dx = x1 - x0;
-  float d_stop = distance_to_stop(a, v0);
-  float t_stop = time_to_stop(a, v0);
+  double dx = x1 - x0;
+  double d_stop = distance_to_stop(a, v0);
+  double t_stop = time_to_stop(a, v0);
   if ((v0 >= 0 && dx >= d_stop) || (v0 <= 0 && dx <= -d_stop))  // Keep accelerating.
   {
     v = velocity(v_max, a, x0, x1 + sgn(v0) * d_stop, t + t_stop);

@@ -46,12 +46,12 @@ using ::testing::SaveArg;
  */
 TEST(CommandHandler, send_status_query)
 {
-  std::vector<uint8_t> expected_request{
+  const std::vector<uint8_t> expected_request{
     0x00,  // request ID
     0x75,  // query ID
   };
 
-  std::vector<uint8_t> mocked_response{
+  const std::vector<uint8_t> mocked_response{
     0x00,  // request ID
     0x11,  // status success
     0x00,  // motor ID
@@ -107,7 +107,7 @@ TEST(CommandHandler, send_status_query)
  */
 TEST(CommandHandler, send_velocity_command)
 {
-  std::vector<uint8_t> expected_request{
+  const std::vector<uint8_t> expected_request{
     0x00,  // request ID
     0x77,  // command ID
     0x00,  // motor ID
@@ -122,7 +122,7 @@ TEST(CommandHandler, send_velocity_command)
     0x00   // velocity
   };
 
-  std::vector<uint8_t> mocked_response{
+  const std::vector<uint8_t> mocked_response{
     0x00,  // Request Id
     0x11   // Status
   };
@@ -148,7 +148,7 @@ TEST(CommandHandler, send_velocity_command)
  */
 TEST(CommandHandler, send_position_command)
 {
-  std::vector<uint8_t> expected_request{
+  const std::vector<uint8_t> expected_request{
     0x00,  // request ID
     0x71,  // command ID
     0x00,  // motor ID
@@ -163,7 +163,7 @@ TEST(CommandHandler, send_position_command)
     0x00   // position
   };
 
-  std::vector<uint8_t> mocked_response{
+  const std::vector<uint8_t> mocked_response{
     0x00,  // Request Id
     0x11   // Status
   };
@@ -175,6 +175,56 @@ TEST(CommandHandler, send_position_command)
 
   auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
   MotorPositionCommand request{ 0, { MotorPositionCommand::Goal{ 0, 0.5 }, MotorPositionCommand::Goal{ 1, 0.75 } } };
+  AcknowledgeResponse response = command_handler->send(request);
+
+  ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
+              stepit_hardware::data_utils::to_hex(expected_request));
+  ASSERT_EQ(0, response.request_id());
+  ASSERT_EQ(0x11, response.status());
+}
+
+/**
+ * In this test we we configure a set of motors and
+ * check the expected binary request and response.
+ */
+TEST(CommandHandler, send_configure_command)
+{
+  const std::vector<uint8_t> expected_request{
+    0x00,  // request ID
+    0x78,  // command ID
+    0x00,  // motor ID
+    0x3F,  // acceleration = 0.5
+    0x00,  // acceleration
+    0x00,  // acceleration
+    0x00,  // acceleration
+    0x3F,  // max_velocity = 0.75
+    0x40,  // max_velocity
+    0x00,  // max_velocity
+    0x00,  // max_velocity
+    0x01,  // motor ID
+    0x3F,  // acceleration = 0.5
+    0x00,  // acceleration
+    0x00,  // acceleration
+    0x00,  // acceleration
+    0x3F,  // max_velocity = 0.75
+    0x40,  // max_velocity
+    0x00,  // max_velocity
+    0x00,  // max_velocity
+  };
+
+  const std::vector<uint8_t> mocked_response{
+    0x00,  // Request Id
+    0x11   // Status
+  };
+
+  std::vector<uint8_t> actual_request;
+  auto mock_data_interface = std::make_unique<MockDataInterface>();
+  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
+  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
+
+  auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
+  MotorConfigCommand request{ 0,
+                              { MotorConfigCommand::Param{ 0, 0.5, 0.75 }, MotorConfigCommand::Param{ 1, 0.5, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(request);
 
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),

@@ -31,7 +31,20 @@
 
 namespace stepit_hardware
 {
-MotorConfigCommand::MotorConfigCommand()
+constexpr uint8_t kCommandId = 0x78;
+
+MotorConfigCommand::MotorConfigCommand(uint8_t request_id, const std::vector<Param>& params)
+  : Request{ request_id }, params_{ params }
 {
+}
+
+uint8_t MotorConfigCommand::command_id() const
+{
+  return kCommandId;
+}
+
+std::vector<MotorConfigCommand::Param> MotorConfigCommand::params() const
+{
+  return params_;
 }
 }  // namespace stepit_hardware

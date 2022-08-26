@@ -36,7 +36,7 @@
 namespace stepit_hardware
 {
 /**
- * Command to set the target position a group of motors.
+ * @brief Command to set the target position a group of motors.
  */
 class MotorPositionCommand : public Request
 {

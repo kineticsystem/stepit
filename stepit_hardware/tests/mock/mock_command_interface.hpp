@@ -37,9 +37,9 @@ namespace stepit_hardware::test
 class MockCommandInterface : public stepit_hardware::CommandInterface
 {
 public:
-  MOCK_METHOD(AcknowledgeResponse, send, (const MotorConfigCommand& command), (const, override));
-  MOCK_METHOD(AcknowledgeResponse, send, (const MotorPositionCommand& command), (const, override));
-  MOCK_METHOD(AcknowledgeResponse, send, (const MotorVelocityCommand& command), (const, override));
-  MOCK_METHOD(MotorStatusResponse, send, (const MotorStatusQuery& query), (const, override));
+  MOCK_METHOD(AcknowledgeResponse, send, (const MotorConfigCommand& command), (override, const));
+  MOCK_METHOD(AcknowledgeResponse, send, (const MotorPositionCommand& command), (override, const));
+  MOCK_METHOD(AcknowledgeResponse, send, (const MotorVelocityCommand& command), (override, const));
+  MOCK_METHOD(MotorStatusResponse, send, (const MotorStatusQuery& query), (override, const));
 };
 }  // namespace stepit_hardware::test

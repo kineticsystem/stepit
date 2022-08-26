@@ -35,12 +35,13 @@ namespace stepit_hardware
 {
 /**
  * @brief The CommandInterface class receives commands and queries from the
- * hardware interface, sends them to a fake or a real hardware and returns
- * a corresponding response.
+ * hardware interface and sends them to a fake or a real hardware.
  */
 class CommandInterface
 {
 public:
+  virtual ~CommandInterface() = default;
+
   virtual AcknowledgeResponse send(const MotorConfigCommand& command) const = 0;
   virtual AcknowledgeResponse send(const MotorPositionCommand& command) const = 0;
   virtual AcknowledgeResponse send(const MotorVelocityCommand& command) const = 0;

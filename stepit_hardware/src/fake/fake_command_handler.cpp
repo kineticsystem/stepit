@@ -29,7 +29,7 @@
 
 #include <stepit_hardware/fake/fake_command_handler.hpp>
 
-namespace stepit_hardware::fake
+namespace stepit_hardware
 {
 /**
  * @brief The FakeCommandHandler class receives commands and queries from the
@@ -39,4 +39,30 @@ namespace stepit_hardware::fake
 FakeCommandHandler::FakeCommandHandler()
 {
 }
-}  // namespace stepit_hardware::fake
+
+AcknowledgeResponse FakeCommandHandler::send(const MotorConfigCommand& command) const
+{
+  for (const auto& param : command.params())
+  {
+    const FakeMotor motor{ param.acceleration(), param.max_velocity() };
+    motors_.emplace_back(motor);
+  }
+
+  return AcknowledgeResponse{ command.request_id(), 0u };
+}
+
+AcknowledgeResponse FakeCommandHandler::send([[maybe_unused]] const MotorPositionCommand& command) const
+{
+  return AcknowledgeResponse{ 0u, 0u };
+}
+
+AcknowledgeResponse FakeCommandHandler::send([[maybe_unused]] const MotorVelocityCommand& command) const
+{
+  return AcknowledgeResponse{ 0u, 0u };
+}
+
+MotorStatusResponse FakeCommandHandler::send([[maybe_unused]] const MotorStatusQuery& query) const
+{
+  return MotorStatusResponse(0u, 0u, std::vector<MotorStatusResponse::MotorState>{});
+}
+}  // namespace stepit_hardware
