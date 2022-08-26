@@ -55,31 +55,31 @@ TEST(CommandHandler, send_status_query)
     0x00,  // request ID
     0x11,  // status success
     0x00,  // motor ID
-    0x00,  // position = 32100
+    0x46,  // position = 32100.0 (rad)
+    0xFA,  // position
+    0xC8,  // position
     0x00,  // position
-    0x7D,  // position
-    0x64,  // position
-    0x3F,  // speed = 0.5
+    0x3F,  // speed = 0.5 (rad/s)
     0x00,  // speed
     0x00,  // speed
     0x00,  // speed
-    0x00,  // distance to go = 150
+    0x43,  // distance to go = 150.0 (rad)
+    0x16,  // distance to go
     0x00,  // distance to go
     0x00,  // distance to go
-    0x96,  // distance to go
     0x01,  // motor ID
-    0xFF,  // position = -6500
-    0xFF,  // position
-    0xE6,  // position
-    0x9C,  // position
-    0x3F,  // speed = 0.75
+    0xC5,  // position = -6500
+    0xCB,  // position
+    0x20,  // position
+    0x00,  // position
+    0x3F,  // speed = 0.75 (rad/s)
     0x40,  // speed
     0x00,  // speed
     0x00,  // speed
-    0x00,  // distance to go = 150000
-    0x02,  // distance to go
-    0x49,  // distance to go
-    0xF0,  // distance to go
+    0x48,  // distance to go = 150000.0 (rad)
+    0x12,  // distance to go
+    0x7C,  // distance to go
+    0x00,  // distance to go
   };
 
   std::vector<uint8_t> actual_request;
@@ -112,12 +112,12 @@ TEST(CommandHandler, send_velocity_command)
     0x00,  // request ID
     0x77,  // command ID
     0x00,  // motor ID
-    0x3F,  // velocity = 0.5
+    0x3F,  // velocity = 0.5 (rad/s)
     0x00,  // velocity
     0x00,  // velocity
     0x00,  // velocity
     0x01,  // motor ID
-    0x3F,  // velocity = 0.75
+    0x3F,  // velocity = 0.75 (rad/s)
     0x40,  // velocity
     0x00,  // velocity
     0x00   // velocity
@@ -153,12 +153,12 @@ TEST(CommandHandler, send_position_command)
     0x00,  // request ID
     0x71,  // command ID
     0x00,  // motor ID
-    0x3F,  // position = 0.5
+    0x3F,  // position = 0.5 (rad)
     0x00,  // position
     0x00,  // position
     0x00,  // position
     0x01,  // motor ID
-    0x3F,  // position = 0.75
+    0x3F,  // position = 0.75 (rad)
     0x40,  // position
     0x00,  // position
     0x00   // position
@@ -194,20 +194,20 @@ TEST(CommandHandler, send_configure_command)
     0x00,  // request ID
     0x78,  // command ID
     0x00,  // motor ID
-    0x3F,  // acceleration = 0.5
+    0x3F,  // acceleration = 0.5 (rad/s^2)
     0x00,  // acceleration
     0x00,  // acceleration
     0x00,  // acceleration
-    0x3F,  // max_velocity = 0.75
+    0x3F,  // max_velocity = 0.75 (rad/s)
     0x40,  // max_velocity
     0x00,  // max_velocity
     0x00,  // max_velocity
     0x01,  // motor ID
-    0x3F,  // acceleration = 0.5
+    0x3F,  // acceleration = 0.5 (rad/s^2)
     0x00,  // acceleration
     0x00,  // acceleration
     0x00,  // acceleration
-    0x3F,  // max_velocity = 0.75
+    0x3F,  // max_velocity = 0.75 (rad/s)
     0x40,  // max_velocity
     0x00,  // max_velocity
     0x00,  // max_velocity
