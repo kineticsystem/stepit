@@ -226,7 +226,7 @@ TEST(CommandHandler, send_configure_command)
   auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
   MotorConfigCommand request{ 0,
                               { MotorConfigCommand::Param{ 0, 0.5, 0.75 }, MotorConfigCommand::Param{ 1, 0.5, 0.75 } } };
-  AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
+  AcknowledgeResponse response = command_handler->send(request);
 
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
               stepit_hardware::data_utils::to_hex(expected_request));

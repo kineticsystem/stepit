@@ -35,17 +35,11 @@ namespace stepit_hardware
 {
 constexpr auto kLoggerName = "FakeCommandHandler";
 
-/**
- * @brief The FakeCommandHandler class receives commands and queries from the
- * hardware interface, sends them to a fake hardware and returns a
- * corresponding response.
- */
-FakeCommandHandler::FakeCommandHandler()
+void FakeCommandHandler::init()
 {
 }
 
-AcknowledgeResponse FakeCommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
-                                             const MotorConfigCommand& command) const
+AcknowledgeResponse FakeCommandHandler::send(const MotorConfigCommand& command) const
 {
   motors_.clear();
   for (const auto& param : command.params())

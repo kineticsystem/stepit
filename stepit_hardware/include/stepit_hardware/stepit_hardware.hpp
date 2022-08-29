@@ -67,9 +67,6 @@ public:
    */
   RCLCPP_SHARED_PTR_DEFINITIONS(StepitHardware)
 
-  STEPIT_HARDWARE_PUBLIC
-  CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
-
   /**
    * Initialization of the hardware interface from data parsed from the
    * robot's URDF.
@@ -132,6 +129,8 @@ private:
   struct Joint
   {
     uint8_t id = 0;
+    double acceleration = 0;
+    double max_velocity = 0;
     JointValue state{};
     JointValue command{};
   };

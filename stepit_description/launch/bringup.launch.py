@@ -54,6 +54,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            # This node loads and manage all ROS controls.
             Node(
                 package="controller_manager",
                 executable="ros2_control_node",

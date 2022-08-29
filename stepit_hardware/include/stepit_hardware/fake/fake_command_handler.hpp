@@ -46,8 +46,9 @@ namespace stepit_hardware
 class FakeCommandHandler : public CommandInterface
 {
 public:
-  FakeCommandHandler();
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorConfigCommand& command) const override;
+  FakeCommandHandler() = default;
+  void init() override;
+  AcknowledgeResponse send(const MotorConfigCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const override;
   MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const override;

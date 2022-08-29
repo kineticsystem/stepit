@@ -37,8 +37,11 @@ CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
 {
 }
 
-AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
-                                         const MotorConfigCommand& command) const
+void CommandHandler::init()
+{
+}
+
+AcknowledgeResponse CommandHandler::send(const MotorConfigCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.request_id());

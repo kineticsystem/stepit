@@ -1,9 +1,14 @@
+# Configuration file required by the Controller Manager to load the specified controls.
+
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz
+    update_rate: 100 # Hz
 
     velocity_controller:
       type: velocity_controllers/JointGroupVelocityController
+
+    joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
@@ -13,3 +18,15 @@ velocity_controller:
     joints:
       - joint1
       - joint2
+
+joint_trajectory_controller:
+  ros__parameters:
+    joints:
+      - joint1
+      - joint2
+
+    command_interfaces:
+      - position
+
+    state_interfaces:
+      - position

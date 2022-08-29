@@ -47,7 +47,8 @@ public:
       "stepit_hardware/StepitHardware",
       {
           {"usb_port", "/dev/whatever"},
-          {"baud_rate", "9600"}
+          {"baud_rate", "9600"},
+          {"use_dummy", "true"}
       },
       {
           hardware_interface::ComponentInfo{"joint1",
@@ -60,7 +61,7 @@ public:
                   hardware_interface::InterfaceInfo{"position", "", "", "", "double", 1},
                   hardware_interface::InterfaceInfo{"velocity", "", "", "", "double", 1}
               },
-              {{{"id","0"}}}
+              {{{"id","0"}, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
           },
           hardware_interface::ComponentInfo{"joint2",
               "joint",
@@ -72,7 +73,7 @@ public:
                   hardware_interface::InterfaceInfo{"position", "", "", "", "double", 1},
                   hardware_interface::InterfaceInfo{"velocity", "", "", "", "double", 1}
               },
-              {{{ "id", "1" }}}
+              {{{ "id", "1" }, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
           }
       },
       {},

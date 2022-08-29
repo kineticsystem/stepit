@@ -40,8 +40,8 @@ namespace stepit_hardware::test
 class MockCommandInterface : public stepit_hardware::CommandInterface
 {
 public:
-  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorConfigCommand& command),
-              (override, const));
+  MOCK_METHOD(void, init, (), (override));
+  MOCK_METHOD(AcknowledgeResponse, send, (const MotorConfigCommand& command), (override, const));
   MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorPositionCommand& command),
               (override, const));
   MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorVelocityCommand& command),

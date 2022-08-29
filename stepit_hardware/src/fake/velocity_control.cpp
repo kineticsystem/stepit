@@ -29,11 +29,16 @@
 
 #include <stepit_hardware/fake/velocity_control.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace stepit_hardware::velocity_control
 {
+
+constexpr auto kLogger = "velocity_control";
 
 /**
  * @brief Compute the sign of the given number.
@@ -84,6 +89,7 @@ double velocity(double v_max, double a, double v0, double v1, double t)
   {
     v = v1;
   }
+  RCLCPP_INFO(rclcpp::get_logger(kLogger), "v_max: %f, a: %f, v0: %f, v1: %f, t %f", v_max, a, v0, v1, t);
   return v;
 }
 

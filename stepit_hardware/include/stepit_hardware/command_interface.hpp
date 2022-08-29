@@ -45,12 +45,16 @@ public:
   virtual ~CommandInterface() = default;
 
   /**
+   * @brief Initialize the command interface.
+   */
+  virtual void init() = 0;
+
+  /**
    * @brief Configure the hardware.
-   * @param time The time the command is sent.
    * @param command A command with all required configuration.
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorConfigCommand& command) const = 0;
+  virtual AcknowledgeResponse send(const MotorConfigCommand& command) const = 0;
 
   /**
    * @brief Send motor target positions (rad) to the hardware.

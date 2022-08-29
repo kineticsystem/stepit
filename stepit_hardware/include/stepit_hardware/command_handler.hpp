@@ -46,7 +46,8 @@ class CommandHandler : public CommandInterface
 {
 public:
   explicit CommandHandler(std::unique_ptr<DataInterface> data_interface);
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorConfigCommand& command) const override;
+  void init() override;
+  AcknowledgeResponse send(const MotorConfigCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const override;
   MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const override;
