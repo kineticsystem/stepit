@@ -67,11 +67,11 @@ double FakeMotor::get_position(const rclcpp::Time& time) const
 
 void FakeMotor::set_target_position(const rclcpp::Time& time, double position)
 {
-  time_ = time;
   initial_position_ = get_position(time);
   initial_velocity_ = get_velocity(time);
   target_position_ = position;
   control_type = ControlType::Position;
+  time_ = time;
 }
 
 double FakeMotor::get_velocity(const rclcpp::Time& time) const
@@ -90,10 +90,10 @@ double FakeMotor::get_velocity(const rclcpp::Time& time) const
 
 void FakeMotor::set_target_velocity(const rclcpp::Time& time, double velocity)
 {
-  time_ = time;
   initial_position_ = get_position(time);
   initial_velocity_ = get_velocity(time);
   target_velocity_ = velocity;
   control_type = ControlType::Velocity;
+  time_ = time;
 }
 }  // namespace stepit_hardware

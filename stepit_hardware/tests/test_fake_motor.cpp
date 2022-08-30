@@ -99,19 +99,19 @@ TEST(TestFakeMotor, test_sequence_of_velocity_commands)
   motor.set_target_velocity(dtot(t[1]), 3.14159);
 
   ASSERT_NEAR(motor.get_velocity(dtot(t[2])), v[2], EPSILON);
-  // motor.set_target_velocity(dtot(t[2]), 3.14159);
+  motor.set_target_velocity(dtot(t[2]), 3.14159);
 
   ASSERT_NEAR(motor.get_velocity(dtot(t[3])), v[3], EPSILON);
-  // motor.set_target_velocity(dtot(t[3]), 3.14159);
+  motor.set_target_velocity(dtot(t[3]), 3.14159);
 
   ASSERT_NEAR(motor.get_velocity(dtot(t[4])), v[4], EPSILON);
-  // motor.set_target_velocity(dtot(t[4]), 3.14159);
+  motor.set_target_velocity(dtot(t[4]), 3.14159);
 
   ASSERT_NEAR(motor.get_velocity(dtot(t[5])), v[5], EPSILON);
-  // motor.set_target_velocity(dtot(t[5]), 3.14159);
+  motor.set_target_velocity(dtot(t[5]), 3.14159);
 
   ASSERT_NEAR(motor.get_velocity(dtot(t[6])), v[6], EPSILON);
-  // motor.set_target_velocity(dtot(t[6]), 3.14159);
+  motor.set_target_velocity(dtot(t[6]), 3.14159);
 
   ASSERT_NEAR(motor.get_velocity(dtot(t[7])), v[7], EPSILON);
 }

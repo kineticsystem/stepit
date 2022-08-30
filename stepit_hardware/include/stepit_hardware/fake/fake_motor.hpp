@@ -55,7 +55,7 @@ private:
   double target_position_;
   double target_velocity_;
 
-  rclcpp::Time time_;
+  rclcpp::Time time_{ 0 };
 
   enum ControlType
   {

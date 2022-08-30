@@ -107,11 +107,11 @@ def generate_launch_description():
             # otherwise the slider will not be displayed. By moving the slider we publish joint states to the topic
             # /joint_states which are used by the robot_state_publisher node. A non-graphical tool to do the same is the
             # joint_state_publisher node.
-            Node(
-                package="joint_state_publisher_gui",
-                executable="joint_state_publisher_gui",
-                name="joint_state_publisher_gui",
-            ),
+            # Node(
+            #    package="joint_state_publisher_gui",
+            #    executable="joint_state_publisher_gui",
+            #    name="joint_state_publisher_gui",
+            # ),
             # RViz2 starts up the RViz2 application.
             Node(
                 package="rviz2",
