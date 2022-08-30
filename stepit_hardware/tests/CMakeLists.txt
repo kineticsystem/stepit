@@ -56,6 +56,18 @@ target_include_directories(test_command_handler
 target_link_libraries(test_command_handler stepit_hardware)
 
 ###############################################################################
+# test_fake_motor
+
+ament_add_gmock(test_fake_motor
+    test_fake_motor.cpp
+)
+target_include_directories(test_fake_motor
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(test_fake_motor stepit_hardware)
+
+###############################################################################
 # test_stepit_hardware
 
 ament_add_gmock(test_stepit_hardware

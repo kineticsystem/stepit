@@ -27,65 +27,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/fake/velocity_control.hpp>
+#include <gtest/gtest.h>
+#include <stepit_hardware/fake/fake_motor.hpp>
 
-#include <algorithm>
-#include <cmath>
-#include <iostream>
+#include <rclcpp/rclcpp.hpp>
 
-namespace stepit_hardware::velocity_control
+namespace stepit_hardware::test
 {
-
-/**
- * @brief Compute the sign of the given number.
- * @param val The number to calculate the sign of.
- * @return The sign of the given number.
- */
-float sgn(double val)
+TEST(TestFakeMotor, test)
 {
-  if (val > 0)
-  {
-    return 1.0;
-  }
-  if (val < 0)
-  {
-    return -1.0;
-  }
-  return 0.0;
+  static constexpr double EPSILON = 1E-5;
+
+  double acceleration = 3.14159;  // Rad/s^2
+  double max_velocity = 6.28319;  // Rad/s
+  double target_velocity = 0.5 * max_velocity;
+
+  FakeMotor motor;
+  motor.set_acceleration(acceleration);
+  motor.set_max_velocity(max_velocity);
+  motor.set_target_velocity(rclcpp::Time{ 0, 0 }, target_velocity);
+
+  ASSERT_NEAR(motor.get_velocity(rclcpp::Time{ 0, 500000000 }), 0.5 * target_velocity, EPSILON);
+  ASSERT_NEAR(motor.get_velocity(rclcpp::Time{ 1, 0 }), target_velocity, EPSILON);
+  ASSERT_NEAR(motor.get_velocity(rclcpp::Time{ 2, 0 }), target_velocity, EPSILON);
+  ASSERT_NEAR(motor.get_velocity(rclcpp::Time{ 3, 0 }), target_velocity, EPSILON);
 }
-
-double position(double v_max, double a, double x0, double v0, double v1, double t)
-{
-  double x;
-  v0 = std::clamp(v0, -v_max, v_max);
-  v1 = std::clamp(v1, -v_max, v_max);
-  double t1 = std::abs(v1 - v0) / a;
-  if (t <= t1)
-  {
-    x = x0 + v0 * t + 0.5 * a * pow(t, 2) * sgn(v1 - v0);
-  }
-  else
-  {
-    x = x0 + (v0 - v1) * t1 + 0.5 * a * pow(t1, 2) * sgn(v1 - v0) + v1 * t;
-  }
-  return x;
-}
-
-double velocity(double v_max, double a, double v0, double v1, double t)
-{
-  double v;
-  v0 = std::clamp(v0, -v_max, v_max);
-  v1 = std::clamp(v1, -v_max, v_max);
-  double t1 = std::abs(v1 - v0) / a;
-  if (t <= t1)
-  {
-    v = v0 + a * t * sgn(v1 - v0);
-  }
-  else
-  {
-    v = v1;
-  }
-  return v;
-}
-
-}  // namespace stepit_hardware::velocity_control
+}  // namespace stepit_hardware::test

@@ -54,7 +54,9 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            # This node loads and manage all ROS controls.
+            # The Controller Manager (CM) connects the controllers’ and hardware-abstraction sides of the ros2_control
+            # framework. It also serves as the entry-point for users through ROS services.
+            # https://control.ros.org/master/doc/getting_started/getting_started.html#architecture
             Node(
                 package="controller_manager",
                 executable="ros2_control_node",
@@ -63,6 +65,8 @@ def generate_launch_description():
                     controller_config,
                 ],
             ),
+            # The broadcaster reads all state interfaces and reports them on /joint_states and /dynamic_joint_states.
+            # https://control.ros.org/master/doc/ros2_controllers/joint_state_broadcaster/doc/userdoc.html
             Node(
                 package="controller_manager",
                 executable="spawner",
@@ -72,15 +76,25 @@ def generate_launch_description():
                     "/controller_manager",
                 ],
             ),
+            # This is a controller that work using the “velocity” joint command interface.
+            # https://control.ros.org/master/doc/ros2_controllers/velocity_controllers/doc/userdoc.html
             Node(
                 package="controller_manager",
                 executable="spawner",
                 arguments=["velocity_controller", "-c", "/controller_manager"],
             ),
-            # robot_state_publisher uses the URDF specified by the parameter
-            # robot_description and the joint positions from the topic
-            # /joint_states to calculate the forward kinematics of the robot
-            # and publish the results via tf.
+            # Controller for executing joint-space trajectories on a group of joints. Trajectories are specified as a
+            # set of waypoints to be reached at specific time instants, which the controller attempts to execute as well
+            # as the mechanism allows. Waypoints consist of positions, and optionally velocities and accelerations.
+            # https://control.ros.org/master/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
+            ),
+            # robot_state_publisher uses the URDF specified by the parameter robot_description and the joint positions
+            # from the topic /joint_states to calculate the forward kinematics of the robot and publish the results via
+            # tf.
             Node(
                 package="robot_state_publisher",
                 executable="robot_state_publisher",
@@ -88,15 +102,11 @@ def generate_launch_description():
                 parameters=[{"robot_description": robot_description_config.toxml()}],
                 output="screen",
             ),
-            # joint_state_publisher_gui reads the robot description from the
-            # topic /robot/description and create a GUI displaying a slider
-            # for each moving joint.
-            # Remember to set non-zero lower and upper limits on each joint,
-            # otherwise the slider will not be displayed.
-            # By moving the slider we publish joint states to the topic
-            # /joint_states which are used by the robot_state_publisher node.
-            # A non-graphical tool to do the same is the joint_state_publisher
-            # node.
+            # joint_state_publisher_gui reads the robot description from the topic /robot/description and create a GUI
+            # displaying a slider for each moving joint. Remember to set non-zero lower and upper limits on each joint,
+            # otherwise the slider will not be displayed. By moving the slider we publish joint states to the topic
+            # /joint_states which are used by the robot_state_publisher node. A non-graphical tool to do the same is the
+            # joint_state_publisher node.
             Node(
                 package="joint_state_publisher_gui",
                 executable="joint_state_publisher_gui",

@@ -31,8 +31,11 @@
 #include <stepit_hardware/fake/position_control.hpp>
 #include <stepit_hardware/fake/velocity_control.hpp>
 
+#include <rclcpp/rclcpp.hpp>
+
 namespace stepit_hardware
 {
+
 FakeMotor::FakeMotor() : acceleration_{ 0.0 }, max_velocity_{ 0.0 }, initial_position_{ 0.0 }, initial_velocity_{ 0.0 }
 {
 }
