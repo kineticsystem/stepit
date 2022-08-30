@@ -34,22 +34,85 @@
 
 namespace stepit_hardware::test
 {
-TEST(TestFakeMotor, test)
-{
-  static constexpr double EPSILON = 1E-5;
 
-  double acceleration = 3.14159;  // Rad/s^2
-  double max_velocity = 6.28319;  // Rad/s
-  double target_velocity = 0.5 * max_velocity;
+rclcpp::Time dtot(double seconds)
+{
+  return rclcpp::Time{ static_cast<int64_t>(seconds * 1000000000) };
+}
+
+TEST(TestFakeMotor, test_position_zero_initial_velocity)
+{
+  static constexpr double EPSILON = 1E-12;
 
   FakeMotor motor;
-  motor.set_acceleration(acceleration);
-  motor.set_max_velocity(max_velocity);
-  motor.set_target_velocity(rclcpp::Time{ 0, 0 }, target_velocity);
+  motor.set_acceleration(3.14159);
+  motor.set_max_velocity(6.28319);
+  motor.set_target_velocity(rclcpp::Time{ 0, 0 }, 3.14159);
 
-  ASSERT_NEAR(motor.get_velocity(rclcpp::Time{ 0, 500000000 }), 0.5 * target_velocity, EPSILON);
-  ASSERT_NEAR(motor.get_velocity(rclcpp::Time{ 1, 0 }), target_velocity, EPSILON);
-  ASSERT_NEAR(motor.get_velocity(rclcpp::Time{ 2, 0 }), target_velocity, EPSILON);
-  ASSERT_NEAR(motor.get_velocity(rclcpp::Time{ 3, 0 }), target_velocity, EPSILON);
+  double t[] = { 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2 };
+  double x[] = { 0.01570795, 0.0628318, 0.14137155, 0.2513272, 0.39269875, 1.570795, 4.712385 };
+
+  ASSERT_NEAR(motor.get_position(dtot(t[0])), x[0], EPSILON);
+  ASSERT_NEAR(motor.get_position(dtot(t[1])), x[1], EPSILON);
+  ASSERT_NEAR(motor.get_position(dtot(t[2])), x[2], EPSILON);
+  ASSERT_NEAR(motor.get_position(dtot(t[3])), x[3], EPSILON);
+  ASSERT_NEAR(motor.get_position(dtot(t[4])), x[4], EPSILON);
+  ASSERT_NEAR(motor.get_position(dtot(t[5])), x[5], EPSILON);
+  ASSERT_NEAR(motor.get_position(dtot(t[6])), x[6], EPSILON);
+}
+
+TEST(TestFakeMotor, test_velocity_zero_initial_velocity)
+{
+  static constexpr double EPSILON = 1E-12;
+
+  FakeMotor motor;
+  motor.set_acceleration(3.14159);
+  motor.set_max_velocity(6.28319);
+  motor.set_target_velocity(rclcpp::Time{ 0, 0 }, 3.14159);
+
+  double t[] = { 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2 };
+  double v[] = { 0.314159, 0.628318, 0.942477, 1.256636, 1.570795, 3.14159, 3.14159 };
+
+  ASSERT_NEAR(motor.get_velocity(dtot(t[0])), v[0], EPSILON);
+  ASSERT_NEAR(motor.get_velocity(dtot(t[1])), v[1], EPSILON);
+  ASSERT_NEAR(motor.get_velocity(dtot(t[2])), v[2], EPSILON);
+  ASSERT_NEAR(motor.get_velocity(dtot(t[3])), v[3], EPSILON);
+  ASSERT_NEAR(motor.get_velocity(dtot(t[4])), v[4], EPSILON);
+  ASSERT_NEAR(motor.get_velocity(dtot(t[5])), v[5], EPSILON);
+  ASSERT_NEAR(motor.get_velocity(dtot(t[6])), v[6], EPSILON);
+}
+
+TEST(TestFakeMotor, test_sequence_of_velocity_commands)
+{
+  static constexpr double EPSILON = 1E-12;
+
+  FakeMotor motor;
+  motor.set_acceleration(3.14159);
+  motor.set_max_velocity(6.28319);
+
+  double t[] = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 1, 2 };
+  double v[] = { 0.0, 0.314159, 0.628318, 0.942477, 1.256636, 1.570795, 3.14159, 3.14159 };
+
+  motor.set_target_velocity(dtot(t[0]), 3.14159);
+
+  ASSERT_NEAR(motor.get_velocity(dtot(t[1])), v[1], EPSILON);
+  motor.set_target_velocity(dtot(t[1]), 3.14159);
+
+  ASSERT_NEAR(motor.get_velocity(dtot(t[2])), v[2], EPSILON);
+  // motor.set_target_velocity(dtot(t[2]), 3.14159);
+
+  ASSERT_NEAR(motor.get_velocity(dtot(t[3])), v[3], EPSILON);
+  // motor.set_target_velocity(dtot(t[3]), 3.14159);
+
+  ASSERT_NEAR(motor.get_velocity(dtot(t[4])), v[4], EPSILON);
+  // motor.set_target_velocity(dtot(t[4]), 3.14159);
+
+  ASSERT_NEAR(motor.get_velocity(dtot(t[5])), v[5], EPSILON);
+  // motor.set_target_velocity(dtot(t[5]), 3.14159);
+
+  ASSERT_NEAR(motor.get_velocity(dtot(t[6])), v[6], EPSILON);
+  // motor.set_target_velocity(dtot(t[6]), 3.14159);
+
+  ASSERT_NEAR(motor.get_velocity(dtot(t[7])), v[7], EPSILON);
 }
 }  // namespace stepit_hardware::test
