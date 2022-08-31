@@ -32,8 +32,9 @@ import os
 import launch
 from ament_index_python.packages import get_package_share_directory
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, TextSubstitution
+from launch import LaunchDescription
 from launch_ros.actions import Node
+from launch.substitutions import LaunchConfiguration, TextSubstitution
 
 
 def generate_launch_description():
@@ -41,7 +42,7 @@ def generate_launch_description():
     joy_dev = LaunchConfiguration("joy_dev")
     config_filepath = LaunchConfiguration("config_filepath")
 
-    return launch.LaunchDescription(
+    return LaunchDescription(
         [
             DeclareLaunchArgument("joy_vel", default_value="stepit/cmd_vel"),
             DeclareLaunchArgument("joy_config", default_value="logitech"),
@@ -76,6 +77,11 @@ def generate_launch_description():
                 name="teleop_twist_joy_node",
                 parameters=[config_filepath],
                 remappings={("/cmd_vel", LaunchConfiguration("joy_vel"))},
+            ),
+            Node(
+                package="stepit_driver",
+                executable="stepit_driver_node",
+                name="stepit_driver_node",
             ),
         ]
     )

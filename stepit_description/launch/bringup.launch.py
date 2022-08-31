@@ -29,6 +29,7 @@
 
 import os
 
+import launch
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
@@ -83,15 +84,22 @@ def generate_launch_description():
                 executable="spawner",
                 arguments=["velocity_controller", "-c", "/controller_manager"],
             ),
+            # This is a controller that work using the “position” joint command interface.
+            # https://control.ros.org/master/doc/ros2_controllers/position_controllers/doc/userdoc.html
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=["position_controller", "-c", "/controller_manager"],
+            ),
             # Controller for executing joint-space trajectories on a group of joints. Trajectories are specified as a
             # set of waypoints to be reached at specific time instants, which the controller attempts to execute as well
             # as the mechanism allows. Waypoints consist of positions, and optionally velocities and accelerations.
             # https://control.ros.org/master/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html
-            Node(
-                package="controller_manager",
-                executable="spawner",
-                arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
-            ),
+            # Node(
+            #     package="controller_manager",
+            #     executable="spawner",
+            #     arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
+            # ),
             # robot_state_publisher uses the URDF specified by the parameter robot_description and the joint positions
             # from the topic /joint_states to calculate the forward kinematics of the robot and publish the results via
             # tf.

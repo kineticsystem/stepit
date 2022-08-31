@@ -49,14 +49,14 @@ class StepitHardware : public hardware_interface::SystemInterface
 {
 public:
   /**
-   * Default constructor initializing all required components.
+   * Default constructor.
    */
   StepitHardware();
 
   /**
-   * Constructor with given data interface.
-   * @param data_interface The data interface to send and receive data packets
-   * to and from the serial port.
+   * Constructor with given command interface. This method is used for testing.
+   * @param command_interface The interface to send commands and queries to
+   * the hardware.
    */
   explicit StepitHardware(std::unique_ptr<CommandInterface> command_interface);
 
