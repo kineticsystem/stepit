@@ -36,23 +36,23 @@ find_package(geometry_msgs REQUIRED)
 # for easily navigating between class and header files (F4) and for automatic
 # code formatting.
 add_executable(
-    stepit_driver_node
+    velocity_driver_node
     src/velocity_driver_main.cpp
     src/velocity_driver_node.cpp
     include/stepit_driver/velocity_driver_node.hpp
 )
 target_include_directories(
-    stepit_driver_node
+    velocity_driver_node
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 # This is used by the linked to find all includes required by the target.
 ament_target_dependencies(
-    stepit_driver_node
+    velocity_driver_node
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-target_compile_features(stepit_driver_node
+target_compile_features(velocity_driver_node
     PUBLIC cxx_std_17
 )
 
@@ -62,7 +62,7 @@ target_compile_features(stepit_driver_node
 
 install(
   TARGETS
-    stepit_driver_node
+    velocity_driver_node
   DESTINATION lib/stepit_driver)
 
 # Install directories

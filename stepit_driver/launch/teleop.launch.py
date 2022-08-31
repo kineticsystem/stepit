@@ -80,8 +80,8 @@ def generate_launch_description():
             ),
             Node(
                 package="stepit_driver",
-                executable="stepit_driver_node",
-                name="stepit_driver_node",
+                executable="velocity_driver_node",
+                name="velocity_driver_node",
             ),
         ]
     )
