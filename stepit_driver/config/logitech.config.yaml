@@ -1,16 +1,19 @@
-# Logitech gamepad
+# teleop_twist_joy configuration.
+# https://index.ros.org/p/teleop_twist_joy
+
+# Configuration for Logitech gamepad.
 teleop_twist_joy_node:
   ros__parameters:
-    axis_linear:  # Forward/Back
+    axis_linear: # Joystick axis used to update the linear x value.
       x: 1
     scale_linear:
-      x: 1.0
-    scale_linear_turbo:
-      x: 1.5
+      x: 5.0
 
-    axis_angular:  # Twist
-      yaw: 2
+    axis_angular: # Joystick axis used to update the twist roll value.
+      roll: 3
     scale_angular:
-      yaw: 0.5
+      roll: 5.0
 
-    enable_button: 5  # Trigger
+    # configure the dead man's switch.
+    require_enable_button: false
+    enable_button: 5 # Trigger

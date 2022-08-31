@@ -31,6 +31,8 @@
 
 namespace stepit_driver
 {
+constexpr auto kLogger = "VelocityDriverNode";
+
 VelocityDriverNode::VelocityDriverNode() : Node("velocity_driver_node")
 {
   pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/velocity_controller/commands", 10);
@@ -40,8 +42,10 @@ VelocityDriverNode::VelocityDriverNode() : Node("velocity_driver_node")
 
 void VelocityDriverNode::callback([[maybe_unused]] const geometry_msgs::msg::Twist::SharedPtr msg)
 {
+  RCLCPP_INFO(rclcpp::get_logger(kLogger), "angular: (%f, %f, %f), linear: (%f, %f, %f)", msg->angular.x,
+              msg->angular.y, msg->angular.z, msg->linear.x, msg->linear.y, msg->linear.z);
   auto new_msg = std_msgs::msg::Float64MultiArray();
-  // new_msg.data = msg->data * 2.0;
+  new_msg.data = { msg->angular.x, msg->linear.x };
   pub_->publish(new_msg);
 }
 }  // namespace stepit_driver
