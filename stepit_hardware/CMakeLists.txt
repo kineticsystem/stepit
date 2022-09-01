@@ -58,6 +58,7 @@ add_library(
     include/stepit_hardware/data_interface.hpp
     include/stepit_hardware/serial_interface.hpp
     include/stepit_hardware/serial_exception.hpp
+    include/stepit_hardware/msgs/msgs_ids.hpp
     src/msgs/motor_status_query.cpp
     include/stepit_hardware/msgs/motor_status_query.hpp
     src/msgs/motor_status_response.cpp
@@ -106,10 +107,15 @@ pluginlib_export_plugin_description_file(hardware_interface stepit_hardware.xml)
 # INSTALL
 
 install(
-    DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    COMPONENT stepit_hardware_headers
+    DIRECTORY
+      include/
+    DESTINATION
+      ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT
+      stepit_hardware_headers
 )
+
+# Install our library.
 install(
     TARGETS stepit_hardware
     EXPORT stepit_hardware_targets
@@ -122,20 +128,24 @@ install(
 ###############################################################################
 # EXPORTS
 
+# Tell downstream packages where to find our headers
 ament_export_include_directories(
     include
 )
+# Tell downstream packages our libraries to link against
 ament_export_libraries(
     stepit_hardware
 )
+
 ament_export_targets(
     stepit_hardware_targets
 )
 
-## Export all dependencies required by a package to use this library.
-## When a package calls find_package(stepit_hardware), CMake looks for a file
-## called stepit_hardwareConfig.cmake which sets up everything another project
-## would need to depend on this one.
+# Help downstream packages to find transitive dependencies i.e. export all
+# dependencies required by a package to use this library.
+# When a package calls find_package(stepit_hardware), CMake looks for a file
+# called stepit_hardwareConfig.cmake which sets up everything another project
+# would need to depend on this one.
 ament_export_dependencies(
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )

@@ -28,12 +28,11 @@
  */
 
 #include <stepit_hardware/msgs/motor_position_command.hpp>
+#include <stepit_hardware/msgs/msgs_ids.hpp>
 #include <stepit_hardware/data_utils.hpp>
 
 namespace stepit_hardware
 {
-constexpr uint8_t kCommandId = 0x71;
-
 MotorPositionCommand::MotorPositionCommand(uint8_t request_id, const std::vector<Goal>& goals)
   : Request{ request_id }, goals_{ goals }
 {
@@ -41,7 +40,7 @@ MotorPositionCommand::MotorPositionCommand(uint8_t request_id, const std::vector
 
 uint8_t MotorPositionCommand::command_id() const
 {
-  return kCommandId;
+  return constants::kMotorPositionCommandId;
 }
 
 std::vector<MotorPositionCommand::Goal> MotorPositionCommand::goals() const

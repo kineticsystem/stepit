@@ -27,25 +27,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_driver/velocity_driver_node.hpp>
+#pragma once
 
-namespace stepit_driver
-{
-constexpr auto kLogger = "VelocityDriverNode";
+#include <stdint.h>
 
-VelocityDriverNode::VelocityDriverNode() : Node("velocity_driver_node")
+namespace stepit_hardware::constants
 {
-  pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/velocity_controller/commands", 10);
-  sub_ = this->create_subscription<geometry_msgs::msg::Twist>(
-      "/stepit/cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg) { callback(msg); });
-}
-
-void VelocityDriverNode::callback([[maybe_unused]] const geometry_msgs::msg::Twist::SharedPtr msg)
-{
-  RCLCPP_INFO(rclcpp::get_logger(kLogger), "angular: (%f, %f, %f), linear: (%f, %f, %f)", msg->angular.x,
-              msg->angular.y, msg->angular.z, msg->linear.x, msg->linear.y, msg->linear.z);
-  auto new_msg = std_msgs::msg::Float64MultiArray();
-  new_msg.data = { msg->angular.x, msg->linear.x };
-  pub_->publish(new_msg);
-}
-}  // namespace stepit_driver
+constexpr uint8_t kMotorConfigCommandId = 0x78;
+constexpr uint8_t kMotorPositionCommandId = 0x71;
+constexpr uint8_t kMotorVelocityCommandId = 0x77;
+constexpr uint8_t kMotorStatusQueryId = 0x75;
+}  // namespace stepit_hardware::constants

@@ -37,7 +37,7 @@ namespace stepit_hardware::test
 
 rclcpp::Time dtot(double seconds)
 {
-  return rclcpp::Time{ static_cast<int64_t>(seconds * 1000000000) };
+  return rclcpp::Time{ static_cast<int64_t>(seconds * 1e9) };
 }
 
 TEST(TestFakeMotor, test_position_zero_initial_velocity)

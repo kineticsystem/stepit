@@ -54,6 +54,9 @@ public:
   MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const override;
 
 private:
+  /* Virtual motors behaving like real stepper motors with given acceletation
+   * and absolute maximum velocity.
+   */
   mutable std::vector<FakeMotor> motors_;
 };
 }  // namespace stepit_hardware

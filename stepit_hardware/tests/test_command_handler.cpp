@@ -44,7 +44,7 @@ using ::testing::SaveArg;
  * In this test we send a status query to the command handler,
  * we check the expected binary request and response.
  */
-TEST(CommandHandler, send_status_query)
+TEST(TestCommandHandler, send_status_query)
 {
   const std::vector<uint8_t> expected_request{
     0x00,  // request ID
@@ -106,7 +106,7 @@ TEST(CommandHandler, send_status_query)
  * In this test we send velocity goals to the command handler,
  * we check the expected binary request and response.
  */
-TEST(CommandHandler, send_velocity_command)
+TEST(TestCommandHandler, send_velocity_command)
 {
   const std::vector<uint8_t> expected_request{
     0x00,  // request ID
@@ -147,7 +147,7 @@ TEST(CommandHandler, send_velocity_command)
  * In this test we send positions goals to the command handler,
  * we check the expected binary request and response.
  */
-TEST(CommandHandler, send_position_command)
+TEST(TestCommandHandler, send_position_command)
 {
   const std::vector<uint8_t> expected_request{
     0x00,  // request ID
@@ -188,7 +188,7 @@ TEST(CommandHandler, send_position_command)
  * In this test we we configure a set of motors and
  * check the expected binary request and response.
  */
-TEST(CommandHandler, send_configure_command)
+TEST(TestCommandHandler, send_configure_command)
 {
   const std::vector<uint8_t> expected_request{
     0x00,  // request ID

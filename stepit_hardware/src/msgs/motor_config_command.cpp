@@ -28,11 +28,10 @@
  */
 
 #include <stepit_hardware/msgs/motor_config_command.hpp>
+#include <stepit_hardware/msgs/msgs_ids.hpp>
 
 namespace stepit_hardware
 {
-constexpr uint8_t kCommandId = 0x78;
-
 MotorConfigCommand::MotorConfigCommand(uint8_t request_id, const std::vector<Param>& params)
   : Request{ request_id }, params_{ params }
 {
@@ -40,7 +39,7 @@ MotorConfigCommand::MotorConfigCommand(uint8_t request_id, const std::vector<Par
 
 uint8_t MotorConfigCommand::command_id() const
 {
-  return kCommandId;
+  return constants::kMotorConfigCommandId;
 }
 
 std::vector<MotorConfigCommand::Param> MotorConfigCommand::params() const

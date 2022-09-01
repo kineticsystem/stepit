@@ -45,9 +45,9 @@ void FakeMotor::set_acceleration(double acceleration)
   acceleration_ = acceleration;
 }
 
-void FakeMotor::set_max_velocity(double max_velocity)
+void FakeMotor::set_max_velocity(double velocity)
 {
-  max_velocity_ = max_velocity;
+  max_velocity_ = velocity;
 }
 
 double FakeMotor::get_position(const rclcpp::Time& time) const

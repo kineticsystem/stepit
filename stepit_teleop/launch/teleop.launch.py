@@ -49,10 +49,10 @@ def generate_launch_description():
             DeclareLaunchArgument("joy_dev", default_value="/dev/input/js0"),
             DeclareLaunchArgument(
                 "config_filepath",
-                default_value=[  # ../stepit_driver/config/logitech.config.yaml
+                default_value=[  # ../stepit_teleop/config/teleop.config.yaml
                     TextSubstitution(
                         text=os.path.join(
-                            get_package_share_directory("stepit_driver"), "config", ""
+                            get_package_share_directory("stepit_teleop"), "config", ""
                         )
                     ),
                     joy_config,
@@ -79,9 +79,9 @@ def generate_launch_description():
                 remappings={("/cmd_vel", LaunchConfiguration("joy_vel"))},
             ),
             Node(
-                package="stepit_driver",
-                executable="velocity_driver_node",
-                name="velocity_driver_node",
+                package="stepit_teleop",
+                executable="velocity_teleop_node",
+                name="velocity_teleop_node",
             ),
         ]
     )

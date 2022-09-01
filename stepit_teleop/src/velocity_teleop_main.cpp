@@ -27,18 +27,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
-#include <stepit_hardware/crc_utils.hpp>
+#include <stepit_teleop/velocity_teleop_node.hpp>
 
-namespace stepit_hardware::test
+#include <rclcpp/rclcpp.hpp>
+
+int main(int argc, char* argv[])
 {
-TEST(TestCrcUtils, calculate_crc)
-{
-  ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6 }), 0x3B07);
-  ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0xE2, 0x12, 0xF1, 0xFF, 0x00, 0xD2 }), 0x7071);
-  ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }), 0xFBE9);
-  ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }), 0x0000);
-  ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 }), 0x2189);
-  ASSERT_EQ(stepit_hardware::crc_utils::crc_ccitt({ 0x80, 0x00, 0x00, 0x03 }), 0x1ff5);
+  rclcpp::init(argc, argv);
+  auto node = std::make_shared<stepit_teleop::VelocityTeleopNode>();
+  rclcpp::executors::MultiThreadedExecutor exec;
+  exec.add_node(node);
+  exec.spin();
+  exec.remove_node(node);
+  rclcpp::shutdown();
 }
-}  // namespace stepit_hardware::test

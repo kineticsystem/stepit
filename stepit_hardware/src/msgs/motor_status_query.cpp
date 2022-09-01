@@ -28,10 +28,10 @@
  */
 
 #include <stepit_hardware/msgs/motor_status_query.hpp>
+#include <stepit_hardware/msgs/msgs_ids.hpp>
 
 namespace stepit_hardware
 {
-constexpr uint8_t kQueryId = 0x75;
 
 MotorStatusQuery::MotorStatusQuery(uint8_t request_id) : Request{ request_id }
 {
@@ -39,6 +39,6 @@ MotorStatusQuery::MotorStatusQuery(uint8_t request_id) : Request{ request_id }
 
 uint8_t MotorStatusQuery::query_id() const
 {
-  return kQueryId;
+  return constants::kMotorStatusQueryId;
 }
 }  // namespace stepit_hardware

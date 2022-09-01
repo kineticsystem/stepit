@@ -1,13 +1,16 @@
 # See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html
 
-cmake_minimum_required(VERSION 3.16.3)
-project(stepit LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.22.1)
+project(stepit VERSION 0.1.0 LANGUAGES CXX)
+include(GNUInstallDirs)
+
 find_package(ament_cmake REQUIRED)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  set(ament_cmake_flake8_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+# Install directories
+install(
+  DIRECTORY
+    launch
+  DESTINATION share/stepit
+)
 
 ament_package()

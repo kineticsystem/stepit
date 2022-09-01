@@ -33,16 +33,16 @@
 #include <std_msgs/msg/float64_multi_array.hpp>
 #include <geometry_msgs/msg/twist.hpp>
 
-namespace stepit_driver
+namespace stepit_teleop
 {
 /**
  * @brief The VelocityDriverNode class convert messages received by a joystick
  * into velocity commands for the Stepit controller.
  */
-class VelocityDriverNode : public rclcpp::Node
+class VelocityTeleopNode : public rclcpp::Node
 {
 public:
-  VelocityDriverNode();
+  VelocityTeleopNode();
 
 private:
   void callback(const geometry_msgs::msg::Twist::SharedPtr msg);
@@ -50,4 +50,4 @@ private:
   rclcpp::Publisher<std_msgs::msg::Float64MultiArray>::SharedPtr pub_;
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_;
 };
-}  // namespace stepit_driver
+}  // namespace stepit_teleop

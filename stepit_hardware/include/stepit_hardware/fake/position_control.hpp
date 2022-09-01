@@ -33,7 +33,7 @@ namespace stepit_hardware::position_control
 {
 
 /**
- * @brief Conpute the absolute distance to stop for a motor with acceleration a
+ * @brief Compute the absolute distance to stop for a motor with acceleration a
  * and rotating speed v0.
  * @param a  The motor acceleration (rad/s^2).
  * @param v0 The current speed      (rad/s).
@@ -42,7 +42,7 @@ namespace stepit_hardware::position_control
 double distance_to_stop(double a, double v0);
 
 /**
- * @brief Conpute the time for a motor, with acceleration a and initial velocity
+ * @brief Compute the time for a motor, with acceleration a and initial velocity
  * v0, to move from position x0 to position x1.
  * @param v_max The maximum velocity (rad/s).
  * @param a     The acceleration     (rad/s^2).

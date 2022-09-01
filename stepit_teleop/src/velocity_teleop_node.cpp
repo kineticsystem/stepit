@@ -27,17 +27,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_driver/velocity_driver_node.hpp>
+#include <stepit_teleop/velocity_teleop_node.hpp>
 
-#include <rclcpp/rclcpp.hpp>
-
-int main(int argc, char* argv[])
+namespace stepit_teleop
 {
-  rclcpp::init(argc, argv);
-  auto node = std::make_shared<stepit_driver::VelocityDriverNode>();
-  rclcpp::executors::MultiThreadedExecutor exec;
-  exec.add_node(node);
-  exec.spin();
-  exec.remove_node(node);
-  rclcpp::shutdown();
+constexpr auto kLogger = "VelocityDriverNode";
+
+VelocityTeleopNode::VelocityTeleopNode() : Node("velocity_teleop_node")
+{
+  pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/velocity_controller/commands", 10);
+  sub_ = this->create_subscription<geometry_msgs::msg::Twist>(
+      "/stepit/cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg) { callback(msg); });
 }
+
+void VelocityTeleopNode::callback([[maybe_unused]] const geometry_msgs::msg::Twist::SharedPtr msg)
+{
+  auto new_msg = std_msgs::msg::Float64MultiArray();
+  new_msg.data = { msg->angular.x, msg->linear.x };
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "velocity command: {%f, %f}", msg->angular.x, msg->linear.x);
+  pub_->publish(new_msg);
+}
+}  // namespace stepit_teleop

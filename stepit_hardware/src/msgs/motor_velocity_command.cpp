@@ -28,12 +28,11 @@
  */
 
 #include <stepit_hardware/msgs/motor_velocity_command.hpp>
+#include <stepit_hardware/msgs/msgs_ids.hpp>
 #include <stepit_hardware/data_utils.hpp>
 
 namespace stepit_hardware
 {
-constexpr uint8_t kCommandId = 0x77;
-
 MotorVelocityCommand::MotorVelocityCommand(uint8_t request_id, const std::vector<Goal>& goals)
   : Request{ request_id }, goals_{ goals }
 {
@@ -41,7 +40,7 @@ MotorVelocityCommand::MotorVelocityCommand(uint8_t request_id, const std::vector
 
 uint8_t MotorVelocityCommand::command_id() const
 {
-  return kCommandId;
+  return constants::kMotorVelocityCommandId;
 }
 
 std::vector<MotorVelocityCommand::Goal> MotorVelocityCommand::goals() const

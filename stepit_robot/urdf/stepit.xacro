@@ -23,7 +23,7 @@
       <visual name="link1_visual">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="file://$(find stepit_description)/meshes/cylinder.dae" scale="1 1 1" />
+          <mesh filename="file://$(find stepit_robot)/meshes/cylinder.dae" scale="1 1 1" />
         </geometry>
       </visual>
     </link>
@@ -32,7 +32,7 @@
       <visual name="link2_visual">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="file://$(find stepit_description)/meshes/cylinder.dae" scale="1 1 1" />
+          <mesh filename="file://$(find stepit_robot)/meshes/cylinder.dae" scale="1 1 1" />
         </geometry>
       </visual>
     </link>

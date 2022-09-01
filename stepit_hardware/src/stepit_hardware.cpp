@@ -105,10 +105,6 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
     command_interface_ = std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
   }
 
-  // Initialize the hardware.
-
-  command_interface_->init();
-
   // Send configuration parameters to the hardware.
 
   std::vector<MotorConfigCommand::Param> params;
@@ -157,6 +153,10 @@ hardware_interface::CallbackReturn
 StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "start");
+
+  // Initialize the hardware.
+  command_interface_->init();
+
   return CallbackReturn::SUCCESS;
 }
 
