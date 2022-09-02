@@ -51,7 +51,7 @@ public:
   /**
    * Default constructor.
    */
-  StepitHardware();
+  StepitHardware() = default;
 
   /**
    * Constructor with given command interface. This method is used for testing.

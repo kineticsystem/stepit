@@ -54,10 +54,6 @@ namespace stepit_hardware
 constexpr auto kLogger = "StepitHardware";
 constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
-StepitHardware::StepitHardware() : command_interface_{ std::make_unique<FakeCommandHandler>() }
-{
-}
-
 StepitHardware::StepitHardware(std::unique_ptr<CommandInterface> command_interface)
   : command_interface_{ std::move(command_interface) }
 {
@@ -87,23 +83,34 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
     RCLCPP_INFO(rclcpp::get_logger(kLogger), "joint_id %d: %d", i, joints_[i].id);
   }
 
-  // Return a real hardware unless use_dummy is set to true.
+  // If "use_dummy" is true return a fake hardware otherwise return a real one.
 
-  if (info.hardware_parameters.find("use_dummy") == info.hardware_parameters.end() ||
-      info.hardware_parameters.at("use_dummy") != "true")
+  if (!command_interface_)
   {
-    std::string usb_port = info.hardware_parameters.at("usb_port");
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "usb_port: %s", usb_port.c_str());
+    if (info_.hardware_parameters.find("use_dummy") != info_.hardware_parameters.end() &&
+        info_.hardware_parameters.at("use_dummy") == "true")
+    {
+      command_interface_ = std::make_unique<FakeCommandHandler>();
+    }
+    else
+    {
+      std::string usb_port = info.hardware_parameters.at("usb_port");
+      RCLCPP_INFO(rclcpp::get_logger(kLogger), "usb_port: %s", usb_port.c_str());
 
-    uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "baud_rate: %d", baud_rate);
+      uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
+      RCLCPP_INFO(rclcpp::get_logger(kLogger), "baud_rate: %d", baud_rate);
 
-    auto serial_handler = std::make_unique<SerialHandler>();
-    serial_handler->set_port(usb_port);
-    serial_handler->set_baudrate(baud_rate);
+      auto serial_handler = std::make_unique<SerialHandler>();
+      serial_handler->set_port(usb_port);
+      serial_handler->set_baudrate(baud_rate);
+      // serial_handler->set_timeout(500);
 
-    command_interface_ = std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
+      command_interface_ = std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
+    }
   }
+
+  // Initialize the hardware.
+  command_interface_->init();
 
   // Send configuration parameters to the hardware.
 
@@ -153,10 +160,6 @@ hardware_interface::CallbackReturn
 StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "start");
-
-  // Initialize the hardware.
-  command_interface_->init();
-
   return CallbackReturn::SUCCESS;
 }
 
