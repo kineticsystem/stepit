@@ -10,15 +10,6 @@ find_package(ros2_control REQUIRED)
 find_package(ros2_controllers REQUIRED)
 
 ###############################################################################
-# INSTALL
-
-# Install all files in the launch folder into share/stepit_hardware_test
-install(
-  DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
-)
-
-###############################################################################
 # TESTS
 
 include(CTest)
