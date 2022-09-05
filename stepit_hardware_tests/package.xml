@@ -1,29 +1,21 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>stepit_robot</name>
+  <name>stepit_hardware_tests</name>
   <version>0.0.0</version>
   <description>
-    The robot URDF files.
+    Tests to be executed against the real hardware.
   </description>
   <maintainer email="g.remigi@kineticsystem.org">Giovanni Remigi</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>joint_state_publisher</depend>
-  <depend>joint_state_publisher_gui</depend>
-  <depend>robot_state_publisher</depend>
-  <depend>xacro</depend>
-  <depend>rviz2</depend>
-  <depend>urdf</depend>
   <depend>launch</depend>
   <depend>launch_ros</depend>
   <depend>ros2_control</depend>
   <depend>ros2_controllers</depend>
   <depend>stepit_control</depend>
-  <depend>gazebo_ros</depend>
-  <depend>gazebo_ros2_control</depend>
 
   <!-- Check code against style conventions using clang-format. -->
   <test_depend>ament_clang_format</test_depend>
