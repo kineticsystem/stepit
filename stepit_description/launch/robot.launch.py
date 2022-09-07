@@ -160,14 +160,7 @@ def launch_setup(context, *args, **kwargs):
         package="ros_ign_gazebo",
         executable="create",
         output="screen",
-        arguments=[
-            "-string",
-            robot_description_content,
-            "-name",
-            "ur",
-            "-allow_renaming",
-            "true",
-        ],
+        arguments=["-string", robot_description_content],
     )
 
     ignition_launch_description = IncludeLaunchDescription(
