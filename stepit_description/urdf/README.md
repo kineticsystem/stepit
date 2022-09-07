@@ -15,7 +15,7 @@ After designing the xacro file, we can use a command to convert it to a URDF fil
 We can also automatically generate the urdf in a launch file.
 
 ```
-robot_name = "stepit_robot"
+robot_name = "stepit_description"
 package_name = robot_name + "_description"
 robot_description = os.path.join(
     get_package_share_directory(package_name), "urdf", robot_name + ".urdf.xacro"

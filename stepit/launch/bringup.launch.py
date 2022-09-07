@@ -44,10 +44,12 @@ def generate_launch_description():
 
     launch_description = LaunchDescription()
 
-    stepit_robot = IncludeLaunchDescription(
+    stepit_description = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [
-                os.path.join(get_package_share_directory("stepit_robot"), "launch"),
+                os.path.join(
+                    get_package_share_directory("stepit_description"), "launch"
+                ),
                 "/robot.launch.py",
             ]
         )
@@ -62,13 +64,15 @@ def generate_launch_description():
         )
     )
 
-    stepit_robot = IncludeLaunchDescription(
+    stepit_description = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             [
-                os.path.join(get_package_share_directory("stepit_robot"), "launch"),
+                os.path.join(
+                    get_package_share_directory("stepit_description"), "launch"
+                ),
                 "/robot.launch.py",
             ]
         )
     )
 
-    return LaunchDescription([stepit_robot, stepit_teleop])
+    return LaunchDescription([stepit_description, stepit_teleop])

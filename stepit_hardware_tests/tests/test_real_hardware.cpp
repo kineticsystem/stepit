@@ -50,7 +50,7 @@ namespace stepit_control::test
 /**
  * This test requires connection to a real hardware.
  */
-TEST(DISABLED_TestStepitHardware, real_hardware)
+TEST(TestStepitHardware, real_hardware)
 {
   auto stepit_control = std::make_unique<stepit_control::StepitControl>();
 
@@ -64,6 +64,6 @@ TEST(DISABLED_TestStepitHardware, real_hardware)
   // Connect the hardware.
   rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
                                  hardware_interface::lifecycle_state_names::ACTIVE };
-  rm.set_component_state("TestStepitControl", state);
+  rm.set_component_state("StepitControl", state);
 }
 }  // namespace stepit_control::test
