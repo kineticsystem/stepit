@@ -28,11 +28,13 @@
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
+    IncludeLaunchDescription,
     OpaqueFunction,
     RegisterEventHandler,
 )
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     LaunchConfiguration,
     PathJoinSubstitution,
@@ -153,6 +155,28 @@ def launch_setup(context, *args, **kwargs):
         )
     )
 
+    # Ignition nodes
+    ignition_spawn_entity = Node(
+        package="ros_ign_gazebo",
+        executable="create",
+        output="screen",
+        arguments=[
+            "-string",
+            robot_description_content,
+            "-name",
+            "ur",
+            "-allow_renaming",
+            "true",
+        ],
+    )
+
+    ignition_launch_description = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            [FindPackageShare("ros_ign_gazebo"), "/launch/ign_gazebo.launch.py"]
+        ),
+        launch_arguments={"ign_args": " -r -v 3 empty.sdf"}.items(),
+    )
+
     nodes_to_start = [
         ros2_control_node,
         joint_state_broadcaster_spawner,
@@ -160,6 +184,8 @@ def launch_setup(context, *args, **kwargs):
         velocity_controller_spawner,
         position_controller_spawner,
         robot_state_publisher_node,
+        ignition_spawn_entity,
+        ignition_launch_description,
     ]
     return nodes_to_start
 

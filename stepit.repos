@@ -3,3 +3,8 @@ repositories:
     type: git
     url: https://github.com/tylerjw/serial.git
     version: ros2
+
+  ign_ros2_control:
+    type: git
+    url: git@github.com:ros-controls/gz_ros2_control.git
+    version: humble
