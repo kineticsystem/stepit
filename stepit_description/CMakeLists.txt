@@ -24,11 +24,11 @@ find_package(gazebo_ros2_control REQUIRED)
 # INSTALL
 
 install(DIRECTORY
+  config
   meshes
-  urdf
   launch
-  controllers
   rviz
+  urdf
   DESTINATION share/${PROJECT_NAME}
 )
 
