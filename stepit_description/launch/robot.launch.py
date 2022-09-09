@@ -167,7 +167,7 @@ def launch_setup(context, *args, **kwargs):
         PythonLaunchDescriptionSource(
             [FindPackageShare("ros_ign_gazebo"), "/launch/ign_gazebo.launch.py"]
         ),
-        launch_arguments={"ign_args": " -r -v 3 empty.sdf"}.items(),
+        launch_arguments={"ign_args": " -r -v 4 empty.sdf"}.items(),
     )
 
     nodes_to_start = [
