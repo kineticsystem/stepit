@@ -9,6 +9,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <depend>stepit_control</depend>
   <depend>joint_state_publisher</depend>
   <depend>joint_state_publisher_gui</depend>
   <depend>robot_state_publisher</depend>
@@ -19,7 +20,6 @@
   <depend>launch_ros</depend>
   <depend>ros2_control</depend>
   <depend>ros2_controllers</depend>
-  <depend>stepit_control</depend>
 
   <exec_depend>ign_ros2_control</exec_depend>
 

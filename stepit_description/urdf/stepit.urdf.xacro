@@ -4,6 +4,14 @@
   <xacro:include filename="$(find stepit_description)/urdf/stepit.ros2_control.xacro" />
 
   <xacro:stepit />
-  <xacro:stepit_ros2_control name="stepit_ros2_control" />
+  <xacro:stepit_ros2_control name="IgnitionSystem" />
+
+  <xacro:arg name="simulation_controllers" default="$(find stepit_description)/config/controllers.yaml" />
+  <gazebo>
+    <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+      <parameters>$(arg simulation_controllers)</parameters>
+      <controller_manager_node_name>controller_manager</controller_manager_node_name>
+    </plugin>
+  </gazebo>
 
 </robot>
