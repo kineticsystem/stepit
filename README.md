@@ -81,8 +81,47 @@ must install Nektos `act` command in the user folder `~/bin` as explained in Nek
 
 ## Configuration
 
-For Arduino IDE (or Visual Studio Code) to find the included libraries, modify the variable the `sketchbook.path` in the following configuration file:
-`<USER_HOME>/snap/arduino/61/.arduino15/preferences.txt`
+We want to develop code for Arduino using Visual Studio Code because it provides better tools to format and validate the code. VSC requires Arduino IDE to be installed first and the best option is to install it manually.
+
+At the moment we are developing for Arduino Nano with ATMega 328 old version. Download the file
+
+`arduino-1.8.19-linux64.tar.xz`
+
+and install it under
+
+`/opt/arduino-1.8.19/`
+
+Run Arduino IDE, open the preferences dialog and change the Sketchbook location to
+
+`<USER_HOME>/src/stepit/arduino/StepIt`
+
+We must install Arduino extension in Visual Studio Code. Additionally, we need three files inside
+
+`<USER_HOME>/src/stepit/arduino/StepIt/.vscode`
+
+1. `arduino.json`
+
+```
+{
+    "board": "arduino:avr:nano",
+    "programmer": "arduino:avrisp",
+    "sketch": "StepIt.ino",
+    "port": "/dev/ttyUSB0",
+    "configuration": "cpu=atmega328old"
+}
+```
+
+2. `settings.json`
+
+```
+{
+  "makefile.extensionOutputFolder": "./.vscode",
+  "arduino.path": "/opt/arduino-1.8.19",
+  "arduino.commandPath": "arduino"
+}
+```
+
+3. The third file `c_cpp_properties.json` is generated automatically once the previous two are properly configured without errors.
 
 ## Running the application
 
