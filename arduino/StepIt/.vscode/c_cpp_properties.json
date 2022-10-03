@@ -3,8 +3,9 @@
     "configurations": [
         {
             "name": "Arduino",
-            "compilerPath": "/home/giovanni/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/bin/avr-g++",
+            "compilerPath": "/opt/arduino-1.8.19/hardware/tools/avr/bin/avr-g++",
             "compilerArgs": [
+                "-w",
                 "-std=gnu++11",
                 "-fpermissive",
                 "-fno-exceptions",
@@ -15,17 +16,17 @@
             ],
             "intelliSenseMode": "gcc-x64",
             "includePath": [
-                "/home/giovanni/.arduino15/packages/arduino/hardware/avr/1.8.5/cores/arduino",
-                "/home/giovanni/.arduino15/packages/arduino/hardware/avr/1.8.5/variants/eightanaloginputs",
-                "/home/giovanni/repo/stepit/arduino/StepIt/libraries/AccelStepper",
-                "/home/giovanni/repo/stepit/arduino/StepIt/libraries/TimerInterrupt",
-                "/home/giovanni/repo/stepit/arduino/StepIt/libraries/BufferedSerial",
-                "/home/giovanni/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/lib/gcc/avr/7.3.0/include",
-                "/home/giovanni/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/lib/gcc/avr/7.3.0/include-fixed",
-                "/home/giovanni/.arduino15/packages/arduino/tools/avr-gcc/7.3.0-atmel3.6.1-arduino7/avr/include"
+                "/opt/arduino-1.8.19/hardware/arduino/avr/cores/arduino",
+                "/opt/arduino-1.8.19/hardware/arduino/avr/variants/eightanaloginputs",
+                "/home/giovanni/repo/stepit_ws/src/stepit/arduino/StepIt/libraries/AccelStepper",
+                "/home/giovanni/repo/stepit_ws/src/stepit/arduino/StepIt/libraries/TimerInterrupt",
+                "/home/giovanni/repo/stepit_ws/src/stepit/arduino/StepIt/libraries/BufferedSerial",
+                "/opt/arduino-1.8.19/hardware/tools/avr/lib/gcc/avr/7.3.0/include",
+                "/opt/arduino-1.8.19/hardware/tools/avr/lib/gcc/avr/7.3.0/include-fixed",
+                "/opt/arduino-1.8.19/hardware/tools/avr/avr/include"
             ],
             "forcedInclude": [
-                "/home/giovanni/.arduino15/packages/arduino/hardware/avr/1.8.5/cores/arduino/Arduino.h"
+                "/opt/arduino-1.8.19/hardware/arduino/avr/cores/arduino/Arduino.h"
             ],
             "cStandard": "c11",
             "cppStandard": "c++11",
