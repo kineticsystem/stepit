@@ -107,7 +107,8 @@ We must install Arduino extension in Visual Studio Code. Additionally, we need t
     "programmer": "arduino:avrisp",
     "sketch": "StepIt.ino",
     "port": "/dev/ttyUSB0",
-    "configuration": "cpu=atmega328old"
+    "configuration": "cpu=atmega328old",
+    "output": "../ArduinoOutput"
 }
 ```
 
