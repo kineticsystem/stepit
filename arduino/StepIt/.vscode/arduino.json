@@ -3,5 +3,6 @@
     "programmer": "arduino:avrisp",
     "sketch": "StepIt.ino",
     "port": "/dev/ttyUSB0",
-    "configuration": "cpu=atmega328old"
+    "configuration": "cpu=atmega328old",
+    "output": "../ArduinoOutput"
 }
