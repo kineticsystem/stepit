@@ -53,7 +53,7 @@ AcknowledgeResponse FakeCommandHandler::send(const MotorConfigCommand& command) 
   return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
 }
 
-AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorPositionCommand& command) const
+AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorCommand& command) const
 {
   for (const auto& goal : command.goals())
   {
@@ -65,23 +65,6 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Mot
     else
     {
       motors_[motor_id].set_target_position(time, goal.position());
-    }
-  }
-  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
-}
-
-AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorVelocityCommand& command) const
-{
-  for (const auto& goal : command.goals())
-  {
-    const auto motor_id = goal.motor_id();
-    if (motor_id >= motors_.size())
-    {
-      RCLCPP_ERROR(rclcpp::get_logger(kLoggerName), "Motor id does not exist.");
-    }
-    else
-    {
-      motors_[motor_id].set_target_velocity(time, goal.velocity());
     }
   }
   return AcknowledgeResponse{ command.request_id(), Response::Status::Success };

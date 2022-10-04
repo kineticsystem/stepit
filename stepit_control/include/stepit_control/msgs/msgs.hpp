@@ -31,9 +31,8 @@
 
 #include <stepit_control/msgs/acknowledge_response.hpp>
 #include <stepit_control/msgs/motor_config_command.hpp>
-#include <stepit_control/msgs/motor_position_command.hpp>
+#include <stepit_control/msgs/motor_command.hpp>
 #include <stepit_control/msgs/motor_status_query.hpp>
 #include <stepit_control/msgs/motor_status_response.hpp>
-#include <stepit_control/msgs/motor_velocity_command.hpp>
 #include <stepit_control/msgs/request.hpp>
 #include <stepit_control/msgs/response.hpp>

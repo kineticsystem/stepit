@@ -42,10 +42,7 @@ class MockCommandInterface : public stepit_control::CommandInterface
 public:
   MOCK_METHOD(void, init, (), (override));
   MOCK_METHOD(AcknowledgeResponse, send, (const MotorConfigCommand& command), (override, const));
-  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorPositionCommand& command),
-              (override, const));
-  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorVelocityCommand& command),
-              (override, const));
+  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const MotorCommand& command), (override, const));
   MOCK_METHOD(MotorStatusResponse, send, (const rclcpp::Time& time, const MotorStatusQuery& query), (override, const));
 };
 }  // namespace stepit_control::test

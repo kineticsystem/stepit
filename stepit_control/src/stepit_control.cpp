@@ -30,8 +30,7 @@
 #include <stepit_control/stepit_control.hpp>
 #include <stepit_control/fake/fake_command_handler.hpp>
 #include <stepit_control/msgs/motor_status_query.hpp>
-#include <stepit_control/msgs/motor_velocity_command.hpp>
-#include <stepit_control/msgs/motor_position_command.hpp>
+#include <stepit_control/msgs/motor_command.hpp>
 #include <stepit_control/msgs/acknowledge_response.hpp>
 #include <stepit_control/msgs/motor_status_response.hpp>
 
@@ -204,38 +203,20 @@ hardware_interface::return_type StepitControl::read(const rclcpp::Time& time,
 hardware_interface::return_type StepitControl::write(const rclcpp::Time& time,
                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
-  if (std::any_of(joints_.cbegin(), joints_.cend(), [](auto joint) { return !std::isnan(joint.command.velocity); }))
-  {
-    // Set velocities.
+  // Set motor targets.
 
-    std::vector<MotorVelocityCommand::Goal> velocities;
-    for (const auto& joint : joints_)
-    {
-      if (!std::isnan(joint.command.velocity))
-      {
-        MotorVelocityCommand::Goal velocity{ joint.id, joint.command.velocity };
-        velocities.push_back(velocity);
-      }
-    }
-    MotorVelocityCommand command{ request_id++, velocities };
-    AcknowledgeResponse response = command_interface_->send(time, command);
-  }
-  else
+  std::vector<MotorCommand::Goal> goals;
+  for (const auto& joint : joints_)
   {
-    // Set positions.
-
-    std::vector<MotorPositionCommand::Goal> positions;
-    for (const auto& joint : joints_)
+    if (!std::isnan(joint.command.position) && !std::isnan(joint.command.velocity))
     {
-      if (!std::isnan(joint.command.position))
-      {
-        MotorPositionCommand::Goal position{ joint.id, joint.command.position };
-        positions.push_back(position);
-      }
+      MotorCommand::Goal goal{ joint.id, joint.command.position, joint.command.velocity };
+      goals.push_back(goal);
     }
-    MotorPositionCommand command{ request_id++, positions };
-    AcknowledgeResponse response = command_interface_->send(time, command);
   }
+  MotorCommand command{ request_id++, goals };
+  AcknowledgeResponse response = command_interface_->send(time, command);
+
   return hardware_interface::return_type::OK;
 }
 

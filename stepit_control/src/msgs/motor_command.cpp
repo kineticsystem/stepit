@@ -27,43 +27,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <stepit_control/msgs/request.hpp>
-
-#include <vector>
+#include <stepit_control/msgs/motor_command.hpp>
+#include <stepit_control/msgs/msgs_ids.hpp>
+#include <stepit_control/data_utils.hpp>
 
 namespace stepit_control
 {
-/**
- * @brief Command to set the target position a group of motors.
- */
-class MotorPositionCommand : public Request
+MotorCommand::MotorCommand(uint8_t request_id, const std::vector<Goal>& goals) : Request{ request_id }, goals_{ goals }
 {
-public:
-  class Goal
-  {
-  public:
-    explicit Goal(uint8_t motor_id, double position) : motor_id_{ motor_id }, position_{ position } {};
-    uint8_t motor_id() const
-    {
-      return motor_id_;
-    }
-    double position() const
-    {
-      return position_;
-    }
+}
 
-  private:
-    uint8_t motor_id_;
-    double position_;
-  };
+uint8_t MotorCommand::command_id() const
+{
+  return constants::kMotorPositionCommandId;
+}
 
-  explicit MotorPositionCommand(uint8_t request_id, const std::vector<Goal>& goals);
-  uint8_t command_id() const;
-  std::vector<Goal> goals() const;
-
-private:
-  std::vector<Goal> goals_;
-};
+std::vector<MotorCommand::Goal> MotorCommand::goals() const
+{
+  return goals_;
+}
 }  // namespace stepit_control

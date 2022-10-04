@@ -27,24 +27,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_control/msgs/motor_velocity_command.hpp>
-#include <stepit_control/msgs/msgs_ids.hpp>
-#include <stepit_control/data_utils.hpp>
+#pragma once
+
+#include <stepit_control/msgs/request.hpp>
+
+#include <vector>
 
 namespace stepit_control
 {
-MotorVelocityCommand::MotorVelocityCommand(uint8_t request_id, const std::vector<Goal>& goals)
-  : Request{ request_id }, goals_{ goals }
+/**
+ * @brief Command to set the target position a group of motors.
+ */
+class MotorCommand : public Request
 {
-}
+public:
+  class Goal
+  {
+  public:
+    explicit Goal(uint8_t motor_id, double position, double velocity)
+      : motor_id_{ motor_id }, position_{ position }, velocity_{ velocity } {};
+    uint8_t motor_id() const
+    {
+      return motor_id_;
+    }
+    double position() const
+    {
+      return position_;
+    }
+    double velocity() const
+    {
+      return velocity_;
+    }
 
-uint8_t MotorVelocityCommand::command_id() const
-{
-  return constants::kMotorVelocityCommandId;
-}
+  private:
+    uint8_t motor_id_;
+    double position_;
+    double velocity_;
+  };
 
-std::vector<MotorVelocityCommand::Goal> MotorVelocityCommand::goals() const
-{
-  return goals_;
-}
+  explicit MotorCommand(uint8_t request_id, const std::vector<Goal>& goals);
+  uint8_t command_id() const;
+  std::vector<Goal> goals() const;
+
+private:
+  std::vector<Goal> goals_;
+};
 }  // namespace stepit_control
