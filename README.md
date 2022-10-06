@@ -131,7 +131,7 @@ By default, the application runs with fake motors. Run the following commands on
 ```
 cd <STEPIT_WS>
 source install/setup.bash
-ros2 launch stepit_description bringup.launch.py
+ros2 launch stepit_description robot.launch.py
 ```
 
 We can control the motors with a velocity controller or a position controller. Open a different terminal and run any of the following commands to spin up the fake motors.
@@ -152,3 +152,39 @@ To control the velocity run
 ```
 ros2 topic pub -1 /velocity_controller/commands std_msgs/msg/Float64MultiArray "data: [6,-6]"
 ```
+
+To control a trajectory with a sequence of positions and velocities run
+
+```
+ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "{
+  joint_names: ["joint1", "joint2"],
+  points: [
+    {
+      positions: [0, 0],
+      velocities: [0, 0],
+      time_from_start: {
+        sec: 0,
+        nanosec: 0
+      }
+    },
+    {
+      positions: [6.28, -6.28],
+      velocities: [2, 0],
+      time_from_start: {
+        sec: 5,
+        nanosec: 0
+      }
+    },
+    {
+      positions: [0, 0],
+      velocities: [0, 0],
+      time_from_start: {
+        sec: 10,
+        nanosec: 0
+      }
+    },
+  ]
+}"
+```
+
+The trajectory is a list of waypoints, each of them containing the desired position and velocity of each joint at a given time.

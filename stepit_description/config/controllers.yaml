@@ -39,3 +39,4 @@ joint_trajectory_controller:
 
     state_interfaces:
       - position
+      - velocity

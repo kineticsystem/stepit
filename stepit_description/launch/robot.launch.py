@@ -110,11 +110,11 @@ def launch_setup(context, *args, **kwargs):
     # set of waypoints to be reached at specific time instants, which the controller attempts to execute as well
     # as the mechanism allows. Waypoints consist of positions, and optionally velocities and accelerations.
     # https://control.ros.org/master/doc/ros2_controllers/joint_trajectory_controller/doc/userdoc.html
-    # joint_trajectory_controller_spawner = Node(
-    #     package="controller_manager",
-    #     executable="spawner",
-    #     arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
-    # )
+    joint_trajectory_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
+    )
 
     # robot_state_publisher uses the URDF specified by the parameter robot_description and the joint positions
     # from the topic /joint_states to calculate the forward kinematics of the robot and publish the results via
@@ -174,11 +174,12 @@ def launch_setup(context, *args, **kwargs):
         ros2_control_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
-        velocity_controller_spawner,
-        position_controller_spawner,
+        # velocity_controller_spawner,
+        # position_controller_spawner,
+        joint_trajectory_controller_spawner,
         robot_state_publisher_node,
         ignition_spawn_entity,
-        ignition_launch_description,
+        # ignition_launch_description,
     ]
     return nodes_to_start
 
