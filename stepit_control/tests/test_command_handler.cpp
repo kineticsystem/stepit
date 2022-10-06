@@ -102,28 +102,20 @@ TEST(TestCommandHandler, send_status_query)
 }
 
 /**
- * In this test we send positions goals to the command handler,
+ * In this test we send velocity goals to the command handler,
  * we check the expected binary request and response.
  */
-TEST(TestCommandHandler, send_motor_command)
+TEST(TestCommandHandler, send_velocity_command)
 {
   const std::vector<uint8_t> expected_request{
     0x00,  // request ID
-    0x71,  // command ID
+    0x77,  // command ID
     0x00,  // motor ID
-    0x3F,  // position = 0.5 (rad)
-    0x00,  // position
-    0x00,  // position
-    0x00,  // position
     0x3F,  // velocity = 0.5 (rad/s)
     0x00,  // velocity
     0x00,  // velocity
     0x00,  // velocity
     0x01,  // motor ID
-    0x3F,  // position = 0.75 (rad)
-    0x40,  // position
-    0x00,  // position
-    0x00,  // position
     0x3F,  // velocity = 0.75 (rad/s)
     0x40,  // velocity
     0x00,  // velocity
@@ -141,7 +133,47 @@ TEST(TestCommandHandler, send_motor_command)
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
   auto command_handler = std::make_unique<stepit_control::CommandHandler>(std::move(mock_data_interface));
-  MotorCommand request{ 0, { MotorCommand::Goal{ 0, 0.5, 0.5 }, MotorCommand::Goal{ 1, 0.75, 0.75 } } };
+  MotorVelocityCommand request{ 0, { MotorVelocityCommand::Goal{ 0, 0.5 }, MotorVelocityCommand::Goal{ 1, 0.75 } } };
+  AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
+
+  ASSERT_THAT(stepit_control::data_utils::to_hex(actual_request), stepit_control::data_utils::to_hex(expected_request));
+  ASSERT_EQ(0, response.request_id());
+  ASSERT_EQ(Response::Status::Success, response.status());
+}
+
+/**
+ * In this test we send positions goals to the command handler,
+ * we check the expected binary request and response.
+ */
+TEST(TestCommandHandler, send_position_command)
+{
+  const std::vector<uint8_t> expected_request{
+    0x00,  // request ID
+    0x71,  // command ID
+    0x00,  // motor ID
+    0x3F,  // position = 0.5 (rad)
+    0x00,  // position
+    0x00,  // position
+    0x00,  // position
+    0x01,  // motor ID
+    0x3F,  // position = 0.75 (rad)
+    0x40,  // position
+    0x00,  // position
+    0x00   // position
+  };
+
+  const std::vector<uint8_t> mocked_response{
+    0x00,  // Request Id
+    0x11   // Status
+  };
+
+  std::vector<uint8_t> actual_request;
+  auto mock_data_interface = std::make_unique<MockDataInterface>();
+  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
+  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
+
+  auto command_handler = std::make_unique<stepit_control::CommandHandler>(std::move(mock_data_interface));
+  MotorPositionCommand request{ 0, { MotorPositionCommand::Goal{ 0, 0.5 }, MotorPositionCommand::Goal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
   ASSERT_THAT(stepit_control::data_utils::to_hex(actual_request), stepit_control::data_utils::to_hex(expected_request));

@@ -68,7 +68,8 @@ AcknowledgeResponse CommandHandler::send(const MotorConfigCommand& command) cons
   return response;
 }
 
-AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const MotorCommand& command) const
+AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
+                                         const MotorPositionCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.request_id());
@@ -81,6 +82,24 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
     in.emplace_back(position_bytes[1]);
     in.emplace_back(position_bytes[2]);
     in.emplace_back(position_bytes[3]);
+  }
+  data_interface_->write(in);
+  std::vector<uint8_t> out = data_interface_->read();
+  uint8_t request_id = out[0];
+  Response::Status status{ out[1] };
+  AcknowledgeResponse response{ request_id, status };
+  return response;
+}
+
+AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
+                                         const MotorVelocityCommand& command) const
+{
+  std::vector<uint8_t> in;
+  in.emplace_back(command.request_id());
+  in.emplace_back(command.command_id());
+  for (const auto& goal : command.goals())
+  {
+    in.emplace_back(goal.motor_id());
     auto velocity_bytes = data_utils::from_float(static_cast<float>(goal.velocity()));
     in.emplace_back(velocity_bytes[0]);
     in.emplace_back(velocity_bytes[1]);

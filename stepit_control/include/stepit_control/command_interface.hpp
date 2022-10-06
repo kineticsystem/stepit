@@ -57,12 +57,20 @@ public:
   virtual AcknowledgeResponse send(const MotorConfigCommand& command) const = 0;
 
   /**
-   * @brief Send motor positions (rad) and velocities (rad/s) to the hardware.
+   * @brief Send motor target positions (rad) to the hardware.
    * @param time The time the command is sent.
-   * @param command A command with all positions (rad) and velocities (rad/s).
+   * @param command A command with all positions (rad).
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorCommand& command) const = 0;
+  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const = 0;
+
+  /**
+   * @brief Send motor target velocities (rad/s) to the hardware.
+   * @param time The time the command is sent.
+   * @param command A command with all motor velocities (rad/s).
+   * @return An aknowledgment response, success or failure.
+   */
+  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const = 0;
 
   /**
    * @brief Request the status of each motor connected to the hardware.

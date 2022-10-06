@@ -29,30 +29,41 @@
 
 #pragma once
 
-#include <stepit_control/command_interface.hpp>
-#include <stepit_control/data_interface.hpp>
-#include <stepit_control/msgs/msgs.hpp>
+#include <stepit_control/msgs/request.hpp>
 
-#include <functional>
-#include <memory>
+#include <vector>
 
 namespace stepit_control
 {
 /**
- * @brief The CommandHandler class receives commands and queries from the
- * hardware interface and sends them to the real hardware.
+ * Command to set the target velocity a group of motors.
  */
-class CommandHandler : public CommandInterface
+class MotorVelocityCommand : public Request
 {
 public:
-  explicit CommandHandler(std::unique_ptr<DataInterface> data_interface);
-  void init() override;
-  AcknowledgeResponse send(const MotorConfigCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const override;
-  MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const override;
+  class Goal
+  {
+  public:
+    explicit Goal(uint8_t motor_id, double velocity) : motor_id_{ motor_id }, velocity_{ velocity } {};
+    uint8_t motor_id() const
+    {
+      return motor_id_;
+    }
+    double velocity() const
+    {
+      return velocity_;
+    }
+
+  private:
+    uint8_t motor_id_;
+    double velocity_;
+  };
+
+  explicit MotorVelocityCommand(uint8_t request_id, const std::vector<Goal>& goals);
+  uint8_t command_id() const;
+  std::vector<Goal> goals() const;
 
 private:
-  std::unique_ptr<DataInterface> data_interface_;
+  std::vector<Goal> goals_;
 };
 }  // namespace stepit_control

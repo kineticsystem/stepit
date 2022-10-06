@@ -167,29 +167,85 @@ TEST(TestStepitControl, read_status)
 }
 
 /**
- * In this test we set positions goals on the hardware interface.
+ * In this test we set velocities goals on the hardware interface.
  * We execute a write operation and expect to see one data frame delivered
- * to the actual hardware, setting positions.
+ * to the actual hardware, setting velocities.
  */
-TEST(TestStepitControl, write_targets)
+TEST(TestStepitControl, write_velocities)
 {
   // clang-format off
-  const MotorCommand expected_request{
+  const MotorVelocityCommand expected_request{
     1,  // request ID
     {
-        MotorCommand::Goal{ 0, 0.5, 0.5 },  // Motor 0 goal
-        MotorCommand::Goal{ 1, 0.75, 0.75 }  // Motor 1 goal
+        MotorVelocityCommand::Goal{ 0, 0.5 },  // Motor 0 goal
+        MotorVelocityCommand::Goal{ 1, 0.75 }  // Motor 1 goal
     }
   };
   // clang-format on
 
-  MotorCommand actual_request{ 0, {} };
+  MotorVelocityCommand actual_request{ 0, {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
   ON_CALL(*mock_command_interface, init()).WillByDefault(Return());
   ON_CALL(*mock_command_interface, send(Matcher<const MotorConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
-  EXPECT_CALL(*mock_command_interface, send(_, Matcher<const MotorCommand&>(_)))
+  EXPECT_CALL(*mock_command_interface, send(_, Matcher<const MotorVelocityCommand&>(_)))
+      .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ 0x01, Response::Status::Success })));
+
+  auto stepit_control = std::make_unique<stepit_control::StepitControl>(std::move(mock_command_interface));
+
+  // Load the component.
+  hardware_interface::ResourceManager rm;
+  rm.import_component(std::move(stepit_control), FakeHardwareInfo{});
+
+  // Connect the hardware.
+  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                 hardware_interface::lifecycle_state_names::ACTIVE };
+  rm.set_component_state("StepitControl", state);
+
+  // Write velocity values.
+  hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
+  hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
+  joint1_velocity_command.set_value(0.5);
+  joint2_velocity_command.set_value(0.75);
+
+  // Invoke a write command.
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  rm.write(time, period);
+
+  ASSERT_EQ(actual_request.request_id(), expected_request.request_id());
+  ASSERT_EQ(actual_request.goals().size(), actual_request.goals().size());
+  ASSERT_EQ(actual_request.goals()[0].motor_id(), actual_request.goals()[0].motor_id());
+  ASSERT_EQ(actual_request.goals()[0].velocity(), actual_request.goals()[0].velocity());
+  ASSERT_EQ(actual_request.goals()[1].motor_id(), actual_request.goals()[1].motor_id());
+  ASSERT_EQ(actual_request.goals()[1].velocity(), actual_request.goals()[1].velocity());
+}
+
+/**
+ * In this test we set positions goals on the hardware interface.
+ * We execute a write operation and expect to see one data frame delivered
+ * to the actual hardware, setting positions.
+ */
+TEST(TestStepitControl, write_positions)
+{
+  // clang-format off
+  const MotorPositionCommand expected_request{
+    1,  // request ID
+    {
+        MotorPositionCommand::Goal{ 0, 0.5 },  // Motor 0 goal
+        MotorPositionCommand::Goal{ 1, 0.75 }  // Motor 1 goal
+    }
+  };
+  // clang-format on
+
+  MotorPositionCommand actual_request{ 0, {} };
+
+  auto mock_command_interface = std::make_unique<MockCommandInterface>();
+  ON_CALL(*mock_command_interface, init()).WillByDefault(Return());
+  ON_CALL(*mock_command_interface, send(Matcher<const MotorConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
+  EXPECT_CALL(*mock_command_interface, send(_, Matcher<const MotorPositionCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ 0x01, Response::Status::Success })));
 
   auto stepit_control = std::make_unique<stepit_control::StepitControl>(std::move(mock_command_interface));
@@ -209,12 +265,6 @@ TEST(TestStepitControl, write_targets)
   joint1_position_command.set_value(0.5);
   joint2_position_command.set_value(0.75);
 
-  // Write velocity values.
-  hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
-  hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
-  joint1_velocity_command.set_value(0.5);
-  joint2_velocity_command.set_value(0.75);
-
   // Invoke a write command.
   const rclcpp::Time time;
   const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
@@ -224,10 +274,8 @@ TEST(TestStepitControl, write_targets)
   ASSERT_EQ(actual_request.goals().size(), actual_request.goals().size());
   ASSERT_EQ(actual_request.goals()[0].motor_id(), actual_request.goals()[0].motor_id());
   ASSERT_EQ(actual_request.goals()[0].position(), actual_request.goals()[0].position());
-  ASSERT_EQ(actual_request.goals()[0].velocity(), actual_request.goals()[0].velocity());
   ASSERT_EQ(actual_request.goals()[1].motor_id(), actual_request.goals()[1].motor_id());
   ASSERT_EQ(actual_request.goals()[1].position(), actual_request.goals()[1].position());
-  ASSERT_EQ(actual_request.goals()[1].velocity(), actual_request.goals()[1].velocity());
 }
 
 /**

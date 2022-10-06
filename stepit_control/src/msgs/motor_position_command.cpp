@@ -27,32 +27,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <stepit_control/command_interface.hpp>
-#include <stepit_control/data_interface.hpp>
-#include <stepit_control/msgs/msgs.hpp>
-
-#include <functional>
-#include <memory>
+#include <stepit_control/msgs/motor_position_command.hpp>
+#include <stepit_control/msgs/msgs_ids.hpp>
+#include <stepit_control/data_utils.hpp>
 
 namespace stepit_control
 {
-/**
- * @brief The CommandHandler class receives commands and queries from the
- * hardware interface and sends them to the real hardware.
- */
-class CommandHandler : public CommandInterface
+MotorPositionCommand::MotorPositionCommand(uint8_t request_id, const std::vector<Goal>& goals)
+  : Request{ request_id }, goals_{ goals }
 {
-public:
-  explicit CommandHandler(std::unique_ptr<DataInterface> data_interface);
-  void init() override;
-  AcknowledgeResponse send(const MotorConfigCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const override;
-  MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const override;
+}
 
-private:
-  std::unique_ptr<DataInterface> data_interface_;
-};
+uint8_t MotorPositionCommand::command_id() const
+{
+  return constants::kMotorPositionCommandId;
+}
+
+std::vector<MotorPositionCommand::Goal> MotorPositionCommand::goals() const
+{
+  return goals_;
+}
 }  // namespace stepit_control

@@ -49,12 +49,13 @@ public:
   FakeCommandHandler() = default;
   void init() override;
   AcknowledgeResponse send(const MotorConfigCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const override;
   MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const override;
 
 private:
-  /* Virtual motors behaving like real stepper motors with given acceleration (rad/s^2)
-   * and absolute maximum velocity (rad/s).
+  /* Virtual motors behaving like real stepper motors with given acceletation
+   * and absolute maximum velocity.
    */
   mutable std::vector<FakeMotor> motors_;
 };

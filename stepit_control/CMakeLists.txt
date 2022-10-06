@@ -66,8 +66,10 @@ add_library(
     include/stepit_control/msgs/motor_status_query.hpp
     src/msgs/motor_status_response.cpp
     include/stepit_control/msgs/motor_status_response.hpp
-    src/msgs/motor_command.cpp
-    include/stepit_control/msgs/motor_command.hpp
+    src/msgs/motor_velocity_command.cpp
+    include/stepit_control/msgs/motor_velocity_command.hpp
+    src/msgs/motor_position_command.cpp
+    include/stepit_control/msgs/motor_position_command.hpp
     src/msgs/acknowledge_response.cpp
     include/stepit_control/msgs/acknowledge_response.hpp
     src/fake/position_control.cpp
