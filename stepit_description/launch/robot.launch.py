@@ -174,7 +174,7 @@ def launch_setup(context, *args, **kwargs):
         ros2_control_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
-        # velocity_controller_spawner,
+        velocity_controller_spawner,
         # position_controller_spawner,
         joint_trajectory_controller_spawner,
         robot_state_publisher_node,
