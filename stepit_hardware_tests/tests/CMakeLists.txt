@@ -3,7 +3,7 @@ find_package(ament_cmake_gtest REQUIRED)
 find_package(ament_cmake_gmock REQUIRED)
 find_package(ament_lint_auto REQUIRED)
 find_package(ros2_control_test_assets REQUIRED)
-find_package(stepit_control REQUIRED)
+find_package(stepit_hardware REQUIRED)
 
 ament_lint_auto_find_test_dependencies()
 
@@ -22,9 +22,9 @@ ament_add_gmock(test_real_hardware
 target_include_directories(test_real_hardware
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(test_real_hardware stepit_control::stepit_control)
+target_link_libraries(test_real_hardware stepit_hardware::stepit_hardware)
 ament_target_dependencies(test_real_hardware
-    stepit_control
+    stepit_hardware
     pluginlib
     ros2_control_test_assets
 )

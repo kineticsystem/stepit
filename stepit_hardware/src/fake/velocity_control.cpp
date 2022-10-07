@@ -27,43 +27,65 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#include <stepit_hardware/fake/velocity_control.hpp>
 
-#include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-#include <stepit_hardware/stepit_hardware.hpp>
+#include <algorithm>
+#include <cmath>
+#include <iostream>
 
-#include <fake/fake_hardware_info.hpp>
-
-#include <hardware_interface/loaned_command_interface.hpp>
-#include <hardware_interface/loaned_state_interface.hpp>
-#include <hardware_interface/resource_manager.hpp>
-#include <hardware_interface/types/lifecycle_state_names.hpp>
-#include <lifecycle_msgs/msg/state.hpp>
-#include <rclcpp_lifecycle/state.hpp>
-#include <ros2_control_test_assets/components_urdfs.hpp>
-#include <ros2_control_test_assets/descriptions.hpp>
-
-namespace stepit_hardware::test
+namespace stepit_hardware::velocity_control
 {
 
 /**
- * This test requires connection to a real hardware.
+ * @brief Compute the sign of the given number.
+ * @param val The number to calculate the sign of.
+ * @return The sign of the given number.
  */
-TEST(TestStepitHardware, real_hardware)
+float sgn(double val)
 {
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
-
-  FakeHardwareInfo info;
-  info.hardware_parameters["use_dummy"] = false;
-
-  // Load the component.
-  hardware_interface::ResourceManager rm;
-  rm.import_component(std::move(stepit_hardware), info);
-
-  // Connect the hardware.
-  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-                                 hardware_interface::lifecycle_state_names::ACTIVE };
-  rm.set_component_state("StepitHardware", state);
+  if (val > 0)
+  {
+    return 1.0;
+  }
+  if (val < 0)
+  {
+    return -1.0;
+  }
+  return 0.0;
 }
-}  // namespace stepit_hardware::test
+
+double position(double v_max, double a, double x0, double v0, double v1, double t)
+{
+  double x;
+  v0 = std::clamp(v0, -v_max, v_max);
+  v1 = std::clamp(v1, -v_max, v_max);
+  double t1 = std::abs(v1 - v0) / a;
+  if (t <= t1)
+  {
+    x = x0 + v0 * t + 0.5 * a * pow(t, 2) * sgn(v1 - v0);
+  }
+  else
+  {
+    x = x0 + (v0 - v1) * t1 + 0.5 * a * pow(t1, 2) * sgn(v1 - v0) + v1 * t;
+  }
+  return x;
+}
+
+double velocity(double v_max, double a, double v0, double v1, double t)
+{
+  double v;
+  v0 = std::clamp(v0, -v_max, v_max);
+  v1 = std::clamp(v1, -v_max, v_max);
+  double t1 = std::abs(v1 - v0) / a;
+  if (t <= t1)
+  {
+    v = v0 + a * t * sgn(v1 - v0);
+  }
+  else
+  {
+    v = v1;
+  }
+  return v;
+}
+
+}  // namespace stepit_hardware::velocity_control

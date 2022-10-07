@@ -27,43 +27,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#pragma once
 
-#include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-#include <stepit_hardware/stepit_hardware.hpp>
+#include <stepit_hardware/serial_interface.hpp>
 
-#include <fake/fake_hardware_info.hpp>
+#include <memory>
+#include "serial/serial.h"
 
-#include <hardware_interface/loaned_command_interface.hpp>
-#include <hardware_interface/loaned_state_interface.hpp>
-#include <hardware_interface/resource_manager.hpp>
-#include <hardware_interface/types/lifecycle_state_names.hpp>
-#include <lifecycle_msgs/msg/state.hpp>
-#include <rclcpp_lifecycle/state.hpp>
-#include <ros2_control_test_assets/components_urdfs.hpp>
-#include <ros2_control_test_assets/descriptions.hpp>
-
-namespace stepit_hardware::test
+namespace serial
 {
-
-/**
- * This test requires connection to a real hardware.
- */
-TEST(TestStepitHardware, real_hardware)
-{
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
-
-  FakeHardwareInfo info;
-  info.hardware_parameters["use_dummy"] = false;
-
-  // Load the component.
-  hardware_interface::ResourceManager rm;
-  rm.import_component(std::move(stepit_hardware), info);
-
-  // Connect the hardware.
-  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-                                 hardware_interface::lifecycle_state_names::ACTIVE };
-  rm.set_component_state("StepitHardware", state);
+class Serial;
 }
-}  // namespace stepit_hardware::test
+
+namespace stepit_hardware
+{
+class SerialHandler : public SerialInterface
+{
+public:
+  /**
+   * Creates a Serial object to send and receive bytes to and from the serial
+   * port.
+   */
+  SerialHandler();
+
+  void open() override;
+
+  [[nodiscard]] bool is_open() const override;
+
+  void close() override;
+
+  [[nodiscard]] std::size_t read(uint8_t* buffer, size_t size = 1) override;
+  [[nodiscard]] std::size_t write(const uint8_t* buffer, size_t size) override;
+
+  void set_port(const std::string& port) override;
+  [[nodiscard]] std::string get_port() const override;
+
+  void set_timeout(uint32_t timeout_ms) override;
+  [[nodiscard]] uint32_t get_timeout() const override;
+
+  void set_baudrate(uint32_t baudrate) override;
+  [[nodiscard]] uint32_t get_baudrate() const override;
+
+private:
+  std::unique_ptr<serial::Serial> serial_ = nullptr;
+  uint32_t timeout_ms_ = 0;
+};
+}  // namespace stepit_hardware

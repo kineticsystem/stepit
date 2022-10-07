@@ -1,27 +1,21 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>stepit_description</name>
+  <name>stepit_hardware</name>
   <version>0.0.0</version>
-  <description>The robot URDF files.</description>
+  <description>
+    StepIt Hardware Interface
+  </description>
   <maintainer email="g.remigi@kineticsystem.org">Giovanni Remigi</maintainer>
   <license>BSD-3-Clause</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>joint_state_publisher</depend>
-  <depend>joint_state_publisher_gui</depend>
-  <depend>robot_state_publisher</depend>
-  <depend>xacro</depend>
-  <depend>rviz2</depend>
-  <depend>urdf</depend>
-  <depend>launch</depend>
-  <depend>launch_ros</depend>
-  <depend>ros2_control</depend>
-  <depend>ros2_controllers</depend>
-  <depend>stepit_hardware</depend>
-
-  <exec_depend>ign_ros2_control</exec_depend>
+  <depend>serial</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>lifecycle_msgs</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
 
   <!-- Check code against style conventions using clang-format. -->
   <test_depend>ament_clang_format</test_depend>
@@ -35,6 +29,10 @@
   <test_depend>ament_lint_auto</test_depend>
   <!-- The list of commonly used linters in the ament build system in CMake. -->
   <test_depend>ament_lint_common</test_depend>
+
+  <!-- Support for gtest and gmock-based tests in the ament buildsystem in CMake. -->
+  <test_depend>ament_cmake_gmock</test_depend>
+  <test_depend>ros2_control_test_assets</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

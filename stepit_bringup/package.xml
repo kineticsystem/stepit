@@ -1,28 +1,18 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>stepit_description</name>
+  <name>stepit_bringup</name>
   <version>0.0.0</version>
-  <description>The robot URDF files.</description>
+  <description>
+    TODO: Package description
+  </description>
   <maintainer email="g.remigi@kineticsystem.org">Giovanni Remigi</maintainer>
-  <license>BSD-3-Clause</license>
+  <license>LGPL</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>joint_state_publisher</depend>
-  <depend>joint_state_publisher_gui</depend>
-  <depend>robot_state_publisher</depend>
-  <depend>xacro</depend>
-  <depend>rviz2</depend>
-  <depend>urdf</depend>
-  <depend>launch</depend>
-  <depend>launch_ros</depend>
-  <depend>ros2_control</depend>
-  <depend>ros2_controllers</depend>
-  <depend>stepit_hardware</depend>
-
-  <exec_depend>ign_ros2_control</exec_depend>
-
+  <!-- Support for gtest-based tests in the ament buildsystem in CMake. -->
+  <test_depend>ament_cmake_gtest</test_depend>
   <!-- Check code against style conventions using clang-format. -->
   <test_depend>ament_clang_format</test_depend>
   <!-- Check code against style conventions using clang-tidy. -->
@@ -31,6 +21,7 @@
   <test_depend>ament_cmake_copyright</test_depend>
   <!-- Lint CMake code using cmakelint. -->
   <test_depend>ament_cmake_lint_cmake</test_depend>
+
   <!-- The auto-magic functions for ease to use of the ament linters in CMake. -->
   <test_depend>ament_lint_auto</test_depend>
   <!-- The list of commonly used linters in the ament build system in CMake. -->

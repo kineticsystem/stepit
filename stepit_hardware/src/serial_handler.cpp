@@ -27,43 +27,72 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#include <stepit_hardware/serial_handler.hpp>
 
-#include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-#include <stepit_hardware/stepit_hardware.hpp>
+#include <serial/serial.h>
 
-#include <fake/fake_hardware_info.hpp>
-
-#include <hardware_interface/loaned_command_interface.hpp>
-#include <hardware_interface/loaned_state_interface.hpp>
-#include <hardware_interface/resource_manager.hpp>
-#include <hardware_interface/types/lifecycle_state_names.hpp>
-#include <lifecycle_msgs/msg/state.hpp>
-#include <rclcpp_lifecycle/state.hpp>
-#include <ros2_control_test_assets/components_urdfs.hpp>
-#include <ros2_control_test_assets/descriptions.hpp>
-
-namespace stepit_hardware::test
+namespace stepit_hardware
 {
-
-/**
- * This test requires connection to a real hardware.
- */
-TEST(TestStepitHardware, real_hardware)
+SerialHandler::SerialHandler() : serial_{ std::make_unique<serial::Serial>() }
 {
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
-
-  FakeHardwareInfo info;
-  info.hardware_parameters["use_dummy"] = false;
-
-  // Load the component.
-  hardware_interface::ResourceManager rm;
-  rm.import_component(std::move(stepit_hardware), info);
-
-  // Connect the hardware.
-  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-                                 hardware_interface::lifecycle_state_names::ACTIVE };
-  rm.set_component_state("StepitHardware", state);
 }
-}  // namespace stepit_hardware::test
+
+void SerialHandler::open()
+{
+  serial_->open();
+}
+
+bool SerialHandler::is_open() const
+{
+  return serial_->isOpen();
+}
+
+void SerialHandler::close()
+{
+  serial_->close();
+}
+
+std::size_t SerialHandler::read(uint8_t* buffer, size_t size)
+{
+  return serial_->read(buffer, size);
+}
+
+std::size_t SerialHandler::write(const uint8_t* buffer, size_t size)
+{
+  std::size_t write_size = serial_->write(buffer, size);
+  serial_->flush();
+  return write_size;
+}
+
+void SerialHandler::set_port(const std::string& port)
+{
+  serial_->setPort(port);
+}
+
+std::string SerialHandler::get_port() const
+{
+  return serial_->getPort();
+}
+
+void SerialHandler::set_timeout(uint32_t timeout_ms)
+{
+  timeout_ms_ = timeout_ms;
+  serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
+  serial_->setTimeout(timeout);
+}
+
+uint32_t SerialHandler::get_timeout() const
+{
+  return timeout_ms_;
+}
+
+void SerialHandler::set_baudrate(uint32_t baudrate)
+{
+  serial_->setBaudrate(baudrate);
+}
+
+uint32_t SerialHandler::get_baudrate() const
+{
+  return serial_->getBaudrate();
+}
+}  // namespace stepit_hardware

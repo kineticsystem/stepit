@@ -27,43 +27,58 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#pragma once
 
-#include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-#include <stepit_hardware/stepit_hardware.hpp>
+#include <stepit_hardware/serial_interface.hpp>
+#include <stepit_hardware/data_interface.hpp>
+#include <stepit_hardware/buffer.hpp>
 
-#include <fake/fake_hardware_info.hpp>
+#include <vector>
+#include <cstdint>
+#include <string>
+#include <memory>
 
-#include <hardware_interface/loaned_command_interface.hpp>
-#include <hardware_interface/loaned_state_interface.hpp>
-#include <hardware_interface/resource_manager.hpp>
-#include <hardware_interface/types/lifecycle_state_names.hpp>
-#include <lifecycle_msgs/msg/state.hpp>
-#include <rclcpp_lifecycle/state.hpp>
-#include <ros2_control_test_assets/components_urdfs.hpp>
-#include <ros2_control_test_assets/descriptions.hpp>
-
-namespace stepit_hardware::test
+namespace stepit_hardware
 {
-
 /**
- * This test requires connection to a real hardware.
+ * This class is used to pack a sequence of bytes into a frame and send it to
+ * the serial port and also to parse frames coming from the serial port.
+ * A frames contains the data, a 16-bits CRC and delimiters.
  */
-TEST(TestStepitHardware, real_hardware)
+class DataHandler : public DataInterface
 {
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
+public:
+  explicit DataHandler(std::unique_ptr<SerialInterface> serial);
 
-  FakeHardwareInfo info;
-  info.hardware_parameters["use_dummy"] = false;
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param bytes The bytes to read.
+   * @throw stepit_hardware::SerialException
+   */
+  void write(const std::vector<uint8_t>& bytes);
 
-  // Load the component.
-  hardware_interface::ResourceManager rm;
-  rm.import_component(std::move(stepit_hardware), info);
+  /**
+   * Read a sequence of bytes from the serial port.
+   * @return The bytes read.
+   * @throw stepit_hardware::SerialException
+   */
+  std::vector<uint8_t> read();
 
-  // Connect the hardware.
-  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-                                 hardware_interface::lifecycle_state_names::ACTIVE };
-  rm.set_component_state("StepitHardware", state);
-}
-}  // namespace stepit_hardware::test
+private:
+  /* States used while reading and parsiong a frame. */
+  enum class ReadState
+  {
+    StartReading,
+    ReadingMessage,
+    ReadingEscapedByte
+  } state_ = ReadState::StartReading;
+
+  /* Circular buffer to read data from the serial port. */
+  Buffer<uint8_t> read_buffer_{ 100 };
+
+  /* Circular buffer to write data to the serial port. */
+  Buffer<uint8_t> write_buffer_{ 100 };
+
+  std::unique_ptr<SerialInterface> serial_;
+};
+}  // namespace stepit_hardware

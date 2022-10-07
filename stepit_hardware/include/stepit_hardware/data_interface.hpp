@@ -27,43 +27,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#pragma once
 
-#include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-#include <stepit_hardware/stepit_hardware.hpp>
+#include <vector>
+#include <cstdint>
 
-#include <fake/fake_hardware_info.hpp>
-
-#include <hardware_interface/loaned_command_interface.hpp>
-#include <hardware_interface/loaned_state_interface.hpp>
-#include <hardware_interface/resource_manager.hpp>
-#include <hardware_interface/types/lifecycle_state_names.hpp>
-#include <lifecycle_msgs/msg/state.hpp>
-#include <rclcpp_lifecycle/state.hpp>
-#include <ros2_control_test_assets/components_urdfs.hpp>
-#include <ros2_control_test_assets/descriptions.hpp>
-
-namespace stepit_hardware::test
+namespace stepit_hardware
 {
-
-/**
- * This test requires connection to a real hardware.
- */
-TEST(TestStepitHardware, real_hardware)
+class DataInterface
 {
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
+public:
+  virtual ~DataInterface() = default;
 
-  FakeHardwareInfo info;
-  info.hardware_parameters["use_dummy"] = false;
+  /**
+   * Read a sequence of bytes from the serial port.
+   * @return The bytes read.
+   * @throw stepit_hardware::SerialException
+   */
+  virtual std::vector<uint8_t> read() = 0;
 
-  // Load the component.
-  hardware_interface::ResourceManager rm;
-  rm.import_component(std::move(stepit_hardware), info);
-
-  // Connect the hardware.
-  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-                                 hardware_interface::lifecycle_state_names::ACTIVE };
-  rm.set_component_state("StepitHardware", state);
-}
-}  // namespace stepit_hardware::test
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param bytes The bytes to read.
+   * @throw stepit_hardware::SerialException
+   */
+  virtual void write(const std::vector<uint8_t>& bytes) = 0;
+};
+}  // namespace stepit_hardware
