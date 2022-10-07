@@ -230,10 +230,11 @@ void speedCommand(byte requestId, DataBuffer* cmd)
     {
       absSpeed = motorConfig[motorId].getMaxSpeed();
     }
+    long position = motorState[motorId].getPosition() + sgnSpeed * TOTAL_STEPS;
 
     Guard goalGuard{ writingMotorGoals };
-    // Full rotation of a stepper in the direction given by the speed sign.
-    motorGoal[motorId].setPosition(sgnSpeed * TOTAL_STEPS);
+    // Move a full rotation of a stepper in the direction given by the speed sign.
+    motorGoal[motorId].setPosition(position);
     motorGoal[motorId].setSpeed(absSpeed);
   }
   returnCommandSuccess(requestId);
