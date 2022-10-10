@@ -56,6 +56,7 @@ TEST(TestStepitHardware, real_hardware)
 
   FakeHardwareInfo info;
   info.hardware_parameters["use_dummy"] = false;
+  info.hardware_parameters["timeout"] = "2.0";  // Seconds.
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -65,5 +66,10 @@ TEST(TestStepitHardware, real_hardware)
   rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
                                  hardware_interface::lifecycle_state_names::ACTIVE };
   rm.set_component_state("StepitHardware", state);
+
+  // Invoke a read command.
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  rm.read(time, period);
 }
 }  // namespace stepit_hardware::test

@@ -39,6 +39,8 @@ class DataInterface
 public:
   virtual ~DataInterface() = default;
 
+  virtual void open() = 0;
+
   /**
    * Read a sequence of bytes from the serial port.
    * @return The bytes read.

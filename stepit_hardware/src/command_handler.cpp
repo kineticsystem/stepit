@@ -39,6 +39,11 @@ CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
 
 void CommandHandler::init()
 {
+  data_interface_->open();
+  std::vector<uint8_t> out = data_interface_->read();
+  [[maybe_unused]] uint8_t request_id = out[0];
+  [[maybe_unused]] Response::Status status{ out[1] };
+  std::cout << "out";
 }
 
 AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,

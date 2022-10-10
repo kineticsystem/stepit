@@ -57,6 +57,7 @@ constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 StepitHardware::StepitHardware(std::unique_ptr<CommandInterface> command_interface)
   : command_interface_{ std::move(command_interface) }
 {
+  // This constructor is use for testing only.
 }
 
 hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
@@ -107,13 +108,11 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
       serial_handler->set_baudrate(baud_rate);
       serial_handler->set_timeout(timeout_ms);
 
-      serial_handler->open();
-      [[maybe_unused]] bool is_open = serial_handler->is_open();
       command_interface_ = std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
     }
   }
 
-  // Initialize the hardware.
+  // Open the serial port and initialize the hardware.
   command_interface_->init();
 
   return CallbackReturn::SUCCESS;

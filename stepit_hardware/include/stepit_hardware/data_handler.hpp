@@ -51,18 +51,23 @@ public:
   explicit DataHandler(std::unique_ptr<SerialInterface> serial);
 
   /**
+   * Open the serial connection.
+   */
+  void open() override;
+
+  /**
    * Write a sequence of bytes to the serial port.
    * @param bytes The bytes to read.
    * @throw stepit_hardware::SerialException
    */
-  void write(const std::vector<uint8_t>& bytes);
+  void write(const std::vector<uint8_t>& bytes) override;
 
   /**
    * Read a sequence of bytes from the serial port.
    * @return The bytes read.
    * @throw stepit_hardware::SerialException
    */
-  std::vector<uint8_t> read();
+  std::vector<uint8_t> read() override;
 
 private:
   /* States used while reading and parsiong a frame. */

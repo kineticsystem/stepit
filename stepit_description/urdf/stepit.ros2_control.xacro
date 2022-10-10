@@ -8,7 +8,7 @@
         <param name="use_dummy">false</param>
         <param name="usb_port">/dev/ttyUSB0</param>
         <param name="baud_rate">9600</param>
-        <param name="timeout">0.5</param>
+        <param name="timeout">2.0</param>
       </hardware>
       <joint name="joint1">
         <param name="id">0</param>
