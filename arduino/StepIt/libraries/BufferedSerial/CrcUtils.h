@@ -40,43 +40,28 @@
  */
 class CrcUtils
 {
-
 public:
-    /**
-     * Initialize the precomputed table that is used in the CRC calculation.
-     * Initialization is done when any of the class methods are invoked
-     * but, should it be required, this method permits initialization beforehand.
-     */
-    static void init();
+  /**
+   * This method updates the given CRC adding a new byte to the original
+   * sequence of bytes where the given CRC was computed.
+   * The CCITT CRC-16 (Kermit) requires to pass an initial CRC equal to 0x0000
+   * the first time the method is invoked.
+   * Please note that the calculated CRC is given in Little Endian Form.
+   * @param crc The CRC value to update.
+   * @param byte The byte to be added to the original sequence of bytes where
+   *     the given CRC was computed.
+   * @return The new CRC computed on the full sequence of bytes.
+   */
+  static unsigned short crc_ccitt_byte(unsigned short crc, unsigned char byte);
 
-    /**
-     * This method updates the given CRC adding a new byte to the original
-     * sequence of bytes where the given CRC was computed.
-     * The CCITT CRC-16 (Kermit) requires to pass an initial CRC equal to 0x0000
-     * the first time the method is invoked.
-     * Please note that the calculated CRC is given in Little Endian Form.
-     * @param crc The CRC value to update.
-     * @param byte The byte to be added to the original sequence of bytes where
-     *     the given CRC was computed.
-     * @return The new CRC computed on the full sequence of bytes.
-     */
-    static unsigned short updateCRC(unsigned short crc, char byte);
-
-    /**
-     * This method calculates the CRC on the given sequence bytes and length.
-     * Please note that the calculated CRC is given in Little Endian Form.
-     * @param bytes The sequence of bytes to calculate the CRC.
-     * @param length The sequence length in a number of bytes.
-     * @return The CRC calculated on the given sequence of bytes.
-     */
-    static unsigned short calculateCRC(const char *bytes, int length);
-
-private:
-    // Variable to check if all required data structures are initialized.
-    static bool initialized;
-
-    // The algorithm uses a precomputed table for performance reasons.
-    static unsigned short crcTable[256];
+  /**
+   * This method calculates the CRC on the given sequence bytes and length.
+   * Please note that the calculated CRC is given in Little Endian Form.
+   * @param bytes The sequence of bytes to calculate the CRC.
+   * @param length The sequence length in a number of bytes.
+   * @return The CRC calculated on the given sequence of bytes.
+   */
+  static unsigned short crc_ccitt(const unsigned char* bytes, int length);
 };
 
-#endif // CRC_UTILS_H
+#endif  // CRC_UTILS_H

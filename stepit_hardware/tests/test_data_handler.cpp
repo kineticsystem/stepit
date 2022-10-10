@@ -49,7 +49,7 @@ TEST(TestDataHandler, write)
   const std::vector<uint8_t> data{
     0x00,  // Request ID
     0x71,  // Motor Move To command ID
-    0x01,  // Motor ID
+    0x01,
     0x00,  // Position (MSB) = 3000
     0x00,  // Position
     0x0B,  // Position

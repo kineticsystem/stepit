@@ -89,7 +89,7 @@ void SerialPort::write(DataBuffer* buffer)
   while (buffer->getSize() > 0)
   {
     byte out = buffer->removeByte(Location::FRONT);
-    outCRC = CrcUtils::updateCRC(outCRC, out);
+    outCRC = CrcUtils::crc_ccitt_byte(outCRC, out);
     addEscapedByte(m_writeBuffer, out);
   }
 
@@ -128,7 +128,7 @@ void SerialPort::update()
       case WAITING_STATE:
         if (in == DELIMITER_FLAG)
         {
-          inCRC = 0;
+          crc = 0;
           m_readBuffer->clear();
           m_state = READING_MESSAGE_STATE;
         }
@@ -150,7 +150,7 @@ void SerialPort::update()
 
             // CRC calculated on frame data is zero when the frame data
             // is correct.
-            if (inCRC == 0)
+            if (crc == 0)
             {
               // Remove the CRC from the buffer.
               m_readBuffer->removeInt(Location::END);
@@ -160,18 +160,18 @@ void SerialPort::update()
             }
             m_state = WAITING_STATE;
           }
-          inCRC = 0;
+          crc = 0;
           m_readBuffer->clear();
         }
         else
         {
-          inCRC = CrcUtils::updateCRC(inCRC, in);
+          crc = CrcUtils::crc_ccitt_byte(crc, in);
           m_readBuffer->addByte(in, Location::END);
         }
         break;
 
       case ESCAPING_BYTE_STATE:
-        inCRC = CrcUtils::updateCRC(inCRC, in ^ ESCAPED_XOR);
+        crc = CrcUtils::crc_ccitt_byte(crc, in ^ ESCAPED_XOR);
         m_readBuffer->addByte(in ^ ESCAPED_XOR, Location::END);
         m_state = READING_MESSAGE_STATE;
         break;

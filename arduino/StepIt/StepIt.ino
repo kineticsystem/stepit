@@ -35,8 +35,8 @@ constexpr byte STEPPER0_DIR_PIN = 10;
 constexpr byte STEPPER1_STEP_PIN = 11;
 constexpr byte STEPPER1_DIR_PIN = 12;
 
-// Number of full steps to achieve a rotation: 200 * 8 µ-steps
-constexpr long TOTAL_STEPS = 1600;
+// Number of full steps to achieve a rotation: 200 * 16 µ-steps
+constexpr long TOTAL_STEPS = 3200;
 
 // This is the information sent by Arduino during the connection handshake.
 constexpr char NAME[] = "STEPPIT\0";
@@ -106,10 +106,10 @@ MotorState motorState[] = { MotorState{}, MotorState{} };
 volatile bool readingMotorStates = false;
 
 // Class to read and write over a serial port.
-SerialPort serialPort{ 255, 255 };
+SerialPort serialPort{ 50, 50 };
 
 // Message to be written to the serial port, usually a response.
-DataBuffer responseBuffer{ 255 };
+DataBuffer responseBuffer{ 50 };
 
 /**
  * Convert a rotation angle in radians to a number of steps.
@@ -231,15 +231,15 @@ void setMotorsEnabled(byte requestId, DataBuffer* cmd)
  */
 void speedCommand(byte requestId, DataBuffer* cmd)
 {
-  while (cmd->getSize() > 0)
+  for (int i = 0; i < 2; ++i)
   {
     byte motorId = cmd->removeByte(Location::FRONT);
-    float speed = radiansToSteps(cmd->removeFloat(Location::FRONT));
+    float speed = radiansToSteps(cmd->removeFloat(Location::FRONT));  // steps/s
 
     float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
     float sgnSpeed = sgn(speed);
 
-    long position = motorState[motorId].getPosition() + sgnSpeed * TOTAL_STEPS;
+    long position = motorState[motorId].getPosition() + sgnSpeed * TOTAL_STEPS;  // <-- ATTENTION, reading position.
 
     Guard goalGuard{ writingMotorGoals };
 
@@ -247,6 +247,7 @@ void speedCommand(byte requestId, DataBuffer* cmd)
     motorGoal[motorId].setPosition(position);
     motorGoal[motorId].setSpeed(absSpeed);
   }
+
   returnCommandSuccess(requestId);
 }
 
@@ -257,7 +258,7 @@ void speedCommand(byte requestId, DataBuffer* cmd)
  */
 void moveCommand(byte requestId, DataBuffer* cmd)
 {
-  while (cmd->getSize() > 0)
+  for (int i = 0; i < 2; ++i)
   {
     byte motorId = cmd->removeByte(Location::FRONT);
     long position = radiansToSteps(cmd->removeFloat(Location::FRONT));

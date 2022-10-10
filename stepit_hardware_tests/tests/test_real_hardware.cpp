@@ -44,6 +44,9 @@
 #include <ros2_control_test_assets/components_urdfs.hpp>
 #include <ros2_control_test_assets/descriptions.hpp>
 
+#include <stepit_hardware/serial_handler.hpp>
+#include <stepit_hardware/data_handler.hpp>
+
 namespace stepit_hardware::test
 {
 
@@ -82,12 +85,54 @@ TEST(TestStepitHardware, test_connection)
   ASSERT_EQ(0, joint2_velocity_state.get_value());
 
   // Write velocity values.
+  // Arduino uses its max internal speed if a too high velocity value is given.
   hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
   hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
-  joint1_velocity_command.set_value(5.9);
-  joint2_velocity_command.set_value(5.9);
+  joint1_velocity_command.set_value(2);
+  joint2_velocity_command.set_value(2);
 
-  // Invoke a write command.
-  rm.write(rclcpp::Time{}, rclcpp::Duration::from_seconds(0));
+  for (int i = 0; i < 100000; ++i)
+  {
+    // Invoke a write command.
+    rm.write(rclcpp::Time{}, rclcpp::Duration::from_seconds(0));
+    rm.read(rclcpp::Time{}, rclcpp::Duration::from_seconds(0));
+    RCLCPP_INFO(rclcpp::get_logger("TestStepitHardware"), "%d, p1:%f, v1:%f, p2:%f, v2:%f", i,
+                joint1_position_state.get_value(), joint1_velocity_state.get_value(), joint2_position_state.get_value(),
+                joint2_velocity_state.get_value());
+    rclcpp::sleep_for(std::chrono::milliseconds(30));
+  }
 }
+
+TEST(TestStepitHardware, test_serial)
+{
+  auto serial_handler = std::make_unique<SerialHandler>();
+  serial_handler->set_port("/dev/ttyUSB0");
+  serial_handler->set_baudrate(9600);
+  serial_handler->set_timeout(2000);
+
+  auto data_handler = std::make_unique<DataHandler>(std::move(serial_handler));
+  data_handler->open();
+  std::vector<uint8_t> out = data_handler->read();
+
+  const std::vector<uint8_t> data{
+    0x01,  // Request ID
+    0x77,  // Motor velocity command ID
+    0x00,  // Motor ID
+    0x40,  // Velocity = 4
+    0x80,  // Velocity
+    0x00,  // Velocity
+    0x00,  // Velocity
+    0x01,  // Motor ID
+    0x40,  // Velocity = 3
+    0x40,  // Velocity <- Change this value to 41 to make it work.
+    0x00,  // Velocity
+    0x00   // Velocity
+  };
+  data_handler->write(data);
+
+  const std::vector<uint8_t> in = data_handler->read();
+
+  std::cout << "out";
+}
+
 }  // namespace stepit_hardware::test

@@ -63,7 +63,7 @@ public:
 
 private:
   // This is the CRC-16 calculated on incoming data.
-  unsigned short inCRC;
+  unsigned short crc;
 
   // Protocol flags.
   static const byte DELIMITER_FLAG = 0x7E;
