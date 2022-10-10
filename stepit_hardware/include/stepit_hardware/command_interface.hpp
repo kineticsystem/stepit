@@ -50,13 +50,6 @@ public:
   virtual void init() = 0;
 
   /**
-   * @brief Configure the hardware.
-   * @param command A command with all required configuration.
-   * @return An aknowledgment response, success or failure.
-   */
-  virtual AcknowledgeResponse send(const MotorConfigCommand& command) const = 0;
-
-  /**
    * @brief Send motor target positions (rad) to the hardware.
    * @param time The time the command is sent.
    * @param command A command with all positions (rad).

@@ -26,13 +26,13 @@
  */
 class MotorConfig
 {
-    float m_acceleration;
-    float m_maxSpeed;
+  float m_acceleration;
+  float m_maxSpeed;
 
 public:
-    explicit MotorConfig(float acceleration, float maxSpeed);
-    float getAcceleration() const;
-    float getMaxSpeed() const;
+  explicit MotorConfig(float acceleration, float maxSpeed);
+  float getAcceleration() const;
+  float getMaxSpeed() const;
 };
 
-#endif // MOTOR_CONFIG_H
+#endif  // MOTOR_CONFIG_H

@@ -41,33 +41,6 @@ void CommandHandler::init()
 {
 }
 
-AcknowledgeResponse CommandHandler::send(const MotorConfigCommand& command) const
-{
-  std::vector<uint8_t> in;
-  in.emplace_back(command.request_id());
-  in.emplace_back(command.command_id());
-  for (const auto& param : command.params())
-  {
-    in.emplace_back(param.motor_id());
-    auto acceleration_bytes = data_utils::from_float(static_cast<float>(param.acceleration()));
-    in.emplace_back(acceleration_bytes[0]);
-    in.emplace_back(acceleration_bytes[1]);
-    in.emplace_back(acceleration_bytes[2]);
-    in.emplace_back(acceleration_bytes[3]);
-    auto max_velocity_bytes = data_utils::from_float(static_cast<float>(param.max_velocity()));
-    in.emplace_back(max_velocity_bytes[0]);
-    in.emplace_back(max_velocity_bytes[1]);
-    in.emplace_back(max_velocity_bytes[2]);
-    in.emplace_back(max_velocity_bytes[3]);
-  }
-  data_interface_->write(in);
-  std::vector<uint8_t> out = data_interface_->read();
-  uint8_t request_id = out[0];
-  Response::Status status{ out[1] };
-  AcknowledgeResponse response{ request_id, status };
-  return response;
-}
-
 AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
                                          const MotorPositionCommand& command) const
 {

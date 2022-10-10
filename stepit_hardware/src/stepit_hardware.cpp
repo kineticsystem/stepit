@@ -74,8 +74,6 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
   for (uint i = 0; i < info_.joints.size(); i++)
   {
     joints_[i].id = static_cast<uint8_t>(std::stoi(info_.joints[i].parameters.at("id")));
-    joints_[i].acceleration = std::stod(info_.joints[i].parameters.at("acceleration"));
-    joints_[i].max_velocity = std::stod(info_.joints[i].parameters.at("max_velocity"));
     joints_[i].state.position = kNaN;
     joints_[i].state.velocity = kNaN;
     joints_[i].command.position = kNaN;
@@ -117,19 +115,6 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
 
   // Initialize the hardware.
   command_interface_->init();
-
-  // Send configuration parameters to the hardware.
-
-  std::vector<MotorConfigCommand::Param> params;
-  for (const auto joint : joints_)
-  {
-    params.emplace_back(MotorConfigCommand::Param{ joint.id, joint.acceleration, joint.max_velocity });
-  }
-  const AcknowledgeResponse response = command_interface_->send(MotorConfigCommand{ request_id++, params });
-  if (response.status() == Response::Status::Failure)
-  {
-    return CallbackReturn::FAILURE;
-  }
 
   return CallbackReturn::SUCCESS;
 }

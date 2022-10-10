@@ -83,8 +83,6 @@ add_library(
     include/stepit_hardware/fake/fake_command_handler.hpp
     src/fake/fake_motor.cpp
     include/stepit_hardware/fake/fake_motor.hpp
-    src/msgs/motor_config_command.cpp
-    include/stepit_hardware/msgs/motor_config_command.hpp
     include/stepit_hardware/msgs/msgs.hpp
 )
 target_include_directories(

@@ -30,7 +30,6 @@
 #pragma once
 
 #include <stepit_hardware/msgs/acknowledge_response.hpp>
-#include <stepit_hardware/msgs/motor_config_command.hpp>
 #include <stepit_hardware/msgs/motor_position_command.hpp>
 #include <stepit_hardware/msgs/motor_status_query.hpp>
 #include <stepit_hardware/msgs/motor_status_response.hpp>

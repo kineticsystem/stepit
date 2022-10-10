@@ -48,7 +48,7 @@ public:
       {"usb_port", "/dev/ttyUSB0"},
       {"baud_rate", "9600"},
       {"timeout", "0.5"},
-      {"use_dummy", "true"}
+      {"use_dummy", "false"}
     },
     {
       {
@@ -62,7 +62,7 @@ public:
           {"position", "", "", "", "double", 1},
           {"velocity", "", "", "", "double", 1}
         },
-        {{{"id","0"}, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
+        {{{"id","0"}}}
       },
       {
         "joint2",
@@ -75,7 +75,7 @@ public:
           {"position", "", "", "", "double", 1},
           {"velocity", "", "", "", "double", 1}
         },
-        {{{ "id", "1" }, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
+        {{{ "id", "1" }}}
       }
     },
     {},

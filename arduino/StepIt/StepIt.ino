@@ -51,10 +51,10 @@ constexpr int TIMEOUT_MS = 1000;
 // For each command received, Arduino returns a response with success or error
 // code and possibly some data.
 
-constexpr byte MOVE_CMD = 0x71;                // Move motors at maximum speed to a given position.
-constexpr byte SPEED_CMD = 0x77;               // MOve motors at the given speed.
-constexpr byte STATUS_CMD = 0x75;              // Request motors status, position and speed.
+constexpr byte MOVE_CMD = 0x71;                // Move motors to a given position (rad) at maximum speed (rad/s).
+constexpr byte STATUS_CMD = 0x75;              // Request motors position (rad) and velocity (rad/s).
 constexpr byte INFO_CMD = 0x76;                // Request controller info for connection handshaking.
+constexpr byte SPEED_CMD = 0x77;               // Move motors at the given velocity (rad/s).
 constexpr byte SET_MOTORS_ENABLED_CMD = 0x7A;  // Enable interrupt to control the motors.
 
 // Arduino reboots in around two seconds when a serial connection is initiated.
@@ -114,11 +114,21 @@ DataBuffer responseBuffer{ 255 };
 /**
  * Convert a rotation angle in radians to a number of steps.
  * @param radians The angle in radians.
- * @return long The angle in number of steps.
+ * @return The angle in number of steps.
  */
 long radiansToSteps(float radians)
 {
   return static_cast<long>(roundf(0.5 * radians * TOTAL_STEPS / PI));
+}
+
+/**
+ * Convert a rotation angle in number of steps to radians.
+ * @param steps The angle in steps.
+ * @return The angle in radians.
+ */
+float stepsToRadians(long steps)
+{
+  return static_cast<float>(2 * PI * steps / TOTAL_STEPS);
 }
 
 /**
@@ -171,9 +181,9 @@ void returnStatus(byte requestId)
     Guard stateGuard{ readingMotorStates };
     for (int i = 0; i < 2; i++)
     {
-      responseBuffer.addLong(motorState[i].getPosition(), Location::END);
+      responseBuffer.addFloat(stepsToRadians(motorState[i].getPosition()), Location::END);
       responseBuffer.addFloat(motorState[i].getSpeed(), Location::END);
-      responseBuffer.addLong(motorState[i].getDistanceToGo(), Location::END);
+      responseBuffer.addFloat(stepsToRadians(motorState[i].getDistanceToGo()), Location::END);
     }
   }
   serialPort.write(&responseBuffer);
@@ -199,8 +209,9 @@ void returnControllerInfo(byte requestId)
  * @param requestId The id of the request.
  * @param enabled True to enable the motors control, false to disable.
  */
-void setMotorsEnabled(byte requestId, byte enabled)
+void setMotorsEnabled(byte requestId, DataBuffer* cmd)
 {
+  byte enabled = cmd->removeByte(Location::FRONT);
   if (enabled == 0)
   {
     TimerInterrupt::start(INTERRUPT_TIME_US);
@@ -214,7 +225,7 @@ void setMotorsEnabled(byte requestId, byte enabled)
 
 /**
  * Move the motors at given speed.
- * @param requestId The id of the request.
+ * @param requestId The request id.
  * @param cmd The move command.
  */
 void speedCommand(byte requestId, DataBuffer* cmd)
@@ -224,16 +235,14 @@ void speedCommand(byte requestId, DataBuffer* cmd)
     byte motorId = cmd->removeByte(Location::FRONT);
     float speed = cmd->removeFloat(Location::FRONT);
 
-    float absSpeed = abs(speed);
+    float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
     float sgnSpeed = sgn(speed);
-    if (absSpeed > motorConfig[motorId].getMaxSpeed())
-    {
-      absSpeed = motorConfig[motorId].getMaxSpeed();
-    }
+
     long position = motorState[motorId].getPosition() + sgnSpeed * TOTAL_STEPS;
 
     Guard goalGuard{ writingMotorGoals };
-    // Move a full rotation of a stepper in the direction given by the speed sign.
+
+    // Move the motor a full rotation in the direction dictated by the speed sign.
     motorGoal[motorId].setPosition(position);
     motorGoal[motorId].setSpeed(absSpeed);
   }
@@ -272,11 +281,6 @@ void processBuffer(byte requestId, DataBuffer* cmd)
   {
     returnStatus(requestId);
   }
-  else if (cmdId == SET_MOTORS_ENABLED_CMD)
-  {
-    byte enabled = cmd->removeByte(Location::FRONT);
-    setMotorsEnabled(requestId, enabled);
-  }
   else if (cmdId == MOVE_CMD)
   {
     moveCommand(requestId, cmd);
@@ -288,6 +292,10 @@ void processBuffer(byte requestId, DataBuffer* cmd)
   else if (cmdId == INFO_CMD)
   {
     returnControllerInfo(requestId);
+  }
+  else if (cmdId == SET_MOTORS_ENABLED_CMD)
+  {
+    setMotorsEnabled(requestId, cmd);
   }
   cmd->clear();
 }
@@ -316,9 +324,11 @@ void run()
 
     // Read motor goals.
 
-    // AccelStepper library only supports acceleration to maximum speed and
-    // deceleration to 0 speed. The next code introduces support to
-    // decelerate to a given speed.
+    // When we increase the maximum speed using AccellStepper, the motor will
+    // accelerate to match the new configuration. When we reduce the maximum
+    // speed, the motor will suddently drop the velocity without decelerating.
+    // The following code adds support to decelerate until reaching the lower
+    // maximum speed.
 
     if (!writingMotorGoals)
     {

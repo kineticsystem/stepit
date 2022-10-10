@@ -75,8 +75,6 @@ TEST(TestStepitHardware, load_urdf)
           </hardware>
           <joint name="joint1">
             <param name="id">0</param>
-            <param name="acceleration">3.14159</param>
-            <param name="max_velocity">6.28319</param>
             <command_interface name="position"/>
             <command_interface name="velocity"/>
             <state_interface name="position"/>
@@ -84,8 +82,6 @@ TEST(TestStepitHardware, load_urdf)
           </joint>
           <joint name="joint2">
             <param name="id">1</param>
-            <param name="acceleration">3.14159</param>
-            <param name="max_velocity">6.28319</param>
             <command_interface name="position"/>
             <command_interface name="velocity"/>
             <state_interface name="position"/>
@@ -134,8 +130,6 @@ TEST(TestStepitHardware, read_status)
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
   ON_CALL(*mock_command_interface, init()).WillByDefault(Return());
-  ON_CALL(*mock_command_interface, send(Matcher<const MotorConfigCommand&>(_)))
-      .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, An<const MotorStatusQuery&>())).WillOnce(Return(mocked_response));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
@@ -175,7 +169,7 @@ TEST(TestStepitHardware, write_velocities)
 {
   // clang-format off
   const MotorVelocityCommand expected_request{
-    1,  // request ID
+    0,  // request ID
     {
         MotorVelocityCommand::Goal{ 0, 0.5 },  // Motor 0 goal
         MotorVelocityCommand::Goal{ 1, 0.75 }  // Motor 1 goal
@@ -187,8 +181,6 @@ TEST(TestStepitHardware, write_velocities)
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
   ON_CALL(*mock_command_interface, init()).WillByDefault(Return());
-  ON_CALL(*mock_command_interface, send(Matcher<const MotorConfigCommand&>(_)))
-      .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, Matcher<const MotorVelocityCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ 0x01, Response::Status::Success })));
 
@@ -231,7 +223,7 @@ TEST(TestStepitHardware, write_positions)
 {
   // clang-format off
   const MotorPositionCommand expected_request{
-    1,  // request ID
+    0,  // request ID
     {
         MotorPositionCommand::Goal{ 0, 0.5 },  // Motor 0 goal
         MotorPositionCommand::Goal{ 1, 0.75 }  // Motor 1 goal
@@ -243,8 +235,6 @@ TEST(TestStepitHardware, write_positions)
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
   ON_CALL(*mock_command_interface, init()).WillByDefault(Return());
-  ON_CALL(*mock_command_interface, send(Matcher<const MotorConfigCommand&>(_)))
-      .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, Matcher<const MotorPositionCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ 0x01, Response::Status::Success })));
 
@@ -276,51 +266,5 @@ TEST(TestStepitHardware, write_positions)
   ASSERT_EQ(actual_request.goals()[0].position(), actual_request.goals()[0].position());
   ASSERT_EQ(actual_request.goals()[1].motor_id(), actual_request.goals()[1].motor_id());
   ASSERT_EQ(actual_request.goals()[1].position(), actual_request.goals()[1].position());
-}
-
-/**
- * In this test we set positions goals on the hardware interface.
- * We execute a write operation and expect to see one data frame delivered
- * to the actual hardware, setting positions.
- */
-TEST(TestStepitHardware, configuration)
-{
-  // clang-format off
-   const MotorConfigCommand expected_request{
-     0,  // request ID
-     {
-         MotorConfigCommand::Param{ 0, 0.1, 0.2 },  // Motor 0 goal
-         MotorConfigCommand::Param{ 1, 0.3, 0.4}    // Motor 1 goal
-     }
-   };
-  // clang-format on
-
-  const AcknowledgeResponse mocked_response{ 0x00, Response::Status::Success };
-  MotorConfigCommand actual_request{ 0, {} };
-
-  auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, init()).WillByDefault(Return());
-  EXPECT_CALL(*mock_command_interface, send(Matcher<const MotorConfigCommand&>(_)))
-      .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
-
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
-
-  // Load the component.
-  hardware_interface::ResourceManager rm;
-  rm.import_component(std::move(stepit_hardware), FakeHardwareInfo{});
-
-  // Connect the hardware.
-  rclcpp_lifecycle::State state{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
-                                 hardware_interface::lifecycle_state_names::ACTIVE };
-  rm.set_component_state("StepitHardware", state);
-
-  ASSERT_EQ(actual_request.request_id(), expected_request.request_id());
-  ASSERT_EQ(actual_request.params().size(), actual_request.params().size());
-  ASSERT_EQ(actual_request.params()[0].motor_id(), actual_request.params()[0].motor_id());
-  ASSERT_EQ(actual_request.params()[0].acceleration(), actual_request.params()[0].acceleration());
-  ASSERT_EQ(actual_request.params()[0].max_velocity(), actual_request.params()[0].max_velocity());
-  ASSERT_EQ(actual_request.params()[1].motor_id(), actual_request.params()[1].motor_id());
-  ASSERT_EQ(actual_request.params()[1].acceleration(), actual_request.params()[1].acceleration());
-  ASSERT_EQ(actual_request.params()[1].max_velocity(), actual_request.params()[1].max_velocity());
 }
 }  // namespace stepit_hardware::test

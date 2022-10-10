@@ -39,20 +39,6 @@ void FakeCommandHandler::init()
 {
 }
 
-AcknowledgeResponse FakeCommandHandler::send(const MotorConfigCommand& command) const
-{
-  motors_.clear();
-  for (const auto& param : command.params())
-  {
-    FakeMotor motor;
-    motor.set_acceleration(param.acceleration());
-    motor.set_max_velocity(param.max_velocity());
-    motors_.emplace_back(motor);
-  }
-
-  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
-}
-
 AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorPositionCommand& command) const
 {
   for (const auto& goal : command.goals())

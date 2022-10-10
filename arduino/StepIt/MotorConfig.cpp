@@ -20,17 +20,16 @@
 
 #include "MotorConfig.h"
 
-MotorConfig::MotorConfig(float acceleration, float maxSpeed)
-    : m_acceleration{acceleration}, m_maxSpeed{maxSpeed}
+MotorConfig::MotorConfig(float acceleration, float maxSpeed) : m_acceleration{ acceleration }, m_maxSpeed{ maxSpeed }
 {
 }
 
 float MotorConfig::getAcceleration() const
 {
-    return m_acceleration;
+  return m_acceleration;
 }
 
 float MotorConfig::getMaxSpeed() const
 {
-    return m_maxSpeed;
+  return m_maxSpeed;
 }
