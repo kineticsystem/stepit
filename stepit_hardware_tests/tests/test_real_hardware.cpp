@@ -33,7 +33,7 @@
 #include <stepit_hardware/msgs/msgs.hpp>
 #include <stepit_hardware/stepit_hardware.hpp>
 
-#include <fake/fake_hardware_info.hpp>
+#include <stepit_hardware_info.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -50,11 +50,11 @@ namespace stepit_hardware::test
 /**
  * This test requires connection to a real hardware.
  */
-TEST(TestStepitHardware, real_hardware)
+TEST(TestStepitHardware, test_connection)
 {
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
 
-  FakeHardwareInfo info;
+  StepitHardwareInfo info;
   info.hardware_parameters["use_dummy"] = false;
   info.hardware_parameters["timeout"] = "2.0";  // Seconds.
 
@@ -68,8 +68,26 @@ TEST(TestStepitHardware, real_hardware)
   rm.set_component_state("StepitHardware", state);
 
   // Invoke a read command.
-  const rclcpp::Time time;
-  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
-  rm.read(time, period);
+  rm.read(rclcpp::Time{}, rclcpp::Duration::from_seconds(0));
+
+  // Read state interface values.
+  hardware_interface::LoanedStateInterface joint1_position_state = rm.claim_state_interface("joint1/position");
+  hardware_interface::LoanedStateInterface joint2_position_state = rm.claim_state_interface("joint2/position");
+  hardware_interface::LoanedStateInterface joint1_velocity_state = rm.claim_state_interface("joint1/velocity");
+  hardware_interface::LoanedStateInterface joint2_velocity_state = rm.claim_state_interface("joint2/velocity");
+
+  ASSERT_EQ(0, joint1_position_state.get_value());
+  ASSERT_EQ(0, joint2_position_state.get_value());
+  ASSERT_EQ(0, joint1_velocity_state.get_value());
+  ASSERT_EQ(0, joint2_velocity_state.get_value());
+
+  // Write velocity values.
+  hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
+  hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
+  joint1_velocity_command.set_value(5.9);
+  joint2_velocity_command.set_value(5.9);
+
+  // Invoke a write command.
+  rm.write(rclcpp::Time{}, rclcpp::Duration::from_seconds(0));
 }
 }  // namespace stepit_hardware::test

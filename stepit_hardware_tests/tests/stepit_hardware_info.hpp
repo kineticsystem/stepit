@@ -36,11 +36,11 @@ namespace stepit_hardware::test
 /**
  * Simplified Hardware Interface configuration for testing.
  */
-class FakeHardwareInfo : public hardware_interface::HardwareInfo
+class StepitHardwareInfo : public hardware_interface::HardwareInfo
 {
 public:
   // clang-format off
-  FakeHardwareInfo() : HardwareInfo{
+  StepitHardwareInfo() : HardwareInfo{
     "StepitHardware",
     "system",
     "stepit_hardware/StepitHardware",

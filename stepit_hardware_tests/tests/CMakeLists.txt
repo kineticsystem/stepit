@@ -17,7 +17,7 @@ endif()
 
 ament_add_gmock(test_real_hardware
     test_real_hardware.cpp
-    fake/fake_hardware_info.hpp
+    stepit_hardware_info.hpp
 )
 target_include_directories(test_real_hardware
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}

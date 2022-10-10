@@ -116,9 +116,9 @@ DataBuffer responseBuffer{ 255 };
  * @param radians The angle in radians.
  * @return The angle in number of steps.
  */
-long radiansToSteps(float radians)
+float radiansToSteps(float radians)
 {
-  return static_cast<long>(roundf(0.5 * radians * TOTAL_STEPS / PI));
+  return 0.5f * radians * TOTAL_STEPS / PI;
 }
 
 /**
@@ -126,9 +126,9 @@ long radiansToSteps(float radians)
  * @param steps The angle in steps.
  * @return The angle in radians.
  */
-float stepsToRadians(long steps)
+float stepsToRadians(float steps)
 {
-  return static_cast<float>(2 * PI * steps / TOTAL_STEPS);
+  return 2.0f * PI * steps / TOTAL_STEPS;
 }
 
 /**
@@ -179,10 +179,11 @@ void returnStatus(byte requestId)
   responseBuffer.addByte(SUCCESS_MSG, Location::END);
   {
     Guard stateGuard{ readingMotorStates };
-    for (int i = 0; i < 2; i++)
+    for (byte i = 0; i < 2; i++)
     {
+      responseBuffer.addByte(i, Location::END);
       responseBuffer.addFloat(stepsToRadians(motorState[i].getPosition()), Location::END);
-      responseBuffer.addFloat(motorState[i].getSpeed(), Location::END);
+      responseBuffer.addFloat(stepsToRadians(motorState[i].getSpeed()), Location::END);
       responseBuffer.addFloat(stepsToRadians(motorState[i].getDistanceToGo()), Location::END);
     }
   }
@@ -233,7 +234,7 @@ void speedCommand(byte requestId, DataBuffer* cmd)
   while (cmd->getSize() > 0)
   {
     byte motorId = cmd->removeByte(Location::FRONT);
-    float speed = cmd->removeFloat(Location::FRONT);
+    float speed = radiansToSteps(cmd->removeFloat(Location::FRONT));
 
     float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
     float sgnSpeed = sgn(speed);
@@ -372,7 +373,7 @@ void setup()
   {
     stepper[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
     stepper[i].setAcceleration(motorConfig[i].getAcceleration());
-    stepper[0].setCurrentPosition(0);
+    stepper[i].setCurrentPosition(0);
     motorGoal[i].setSpeed(motorConfig[i].getMaxSpeed());
   }
 
