@@ -40,43 +40,43 @@
 class DataBuffer
 {
 public:
-    explicit DataBuffer(unsigned int bufferSize);
+  explicit DataBuffer(unsigned int bufferSize);
 
-    // Returns how much data is currently stored in the buffer.
-    int getSize();
+  // Returns how much data is currently stored in the buffer.
+  int getSize();
 
-    // Returns the maximum capacity of the buffer
-    int getCapacity();
+  // Returns the maximum capacity of the buffer
+  int getCapacity();
 
-    // Insert a byte at the given location.
-    void addByte(byte in, Location location);
+  // Insert a byte at the given location.
+  void addByte(byte in, Location location);
 
-    // Remove a byte from the given location.
-    byte removeByte(Location location);
+  // Remove a byte from the given location.
+  byte removeByte(Location location);
 
-    // Insert an int at the given location.
-    void addInt(int in, Location location);
+  // Insert an int at the given location.
+  void addInt(int in, Location location);
 
-    // Remove an int from the given location.
-    int removeInt(Location location);
+  // Remove an int from the given location.
+  int removeInt(Location location);
 
-    // Insert a long (4 bytes) at the given location.
-    void addLong(long in, Location location);
+  // Insert a long (4 bytes) at the given location.
+  void addLong(long in, Location location);
 
-    // Remove a long (4 bytes) from the given location.
-    long removeLong(Location location);
+  // Remove a long (4 bytes) from the given location.
+  long removeLong(Location location);
 
-    // Insert a float (4 bytes) at the given location.
-    void addFloat(float in, Location location);
+  // Insert a float (4 bytes) at the given location.
+  void addFloat(float in, Location location);
 
-    // Remove a float (4 bytes) from the given location.
-    float removeFloat(Location location);
+  // Remove a float (4 bytes) from the given location.
+  float removeFloat(Location location);
 
-    // This method resets the buffer into an original state (with no data).
-    void clear();
+  // This method resets the buffer into an original state (with no data).
+  void clear();
 
 private:
-    Buffer<byte> m_buffer;
+  Buffer<byte> m_buffer;
 };
 
-#endif // DATA_BUFFER_H
+#endif  // DATA_BUFFER_H

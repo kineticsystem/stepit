@@ -34,67 +34,64 @@
 class SerialPort
 {
 public:
-    explicit SerialPort(unsigned int inBuffersize, unsigned int outBufferSize);
-    ~SerialPort();
+  explicit SerialPort(unsigned int inBuffersize, unsigned int outBufferSize);
+  ~SerialPort();
 
-    boolean isBusyWriting();
-    void setCallback(void (*callback)(byte requestId, DataBuffer *));
+  boolean isBusyWriting();
+  void setCallback(void (*callback)(byte requestId, DataBuffer*));
 
-    /**
-     * Initialize the serial connection communication speed.
-     */
-    void init(int baudRate);
+  /**
+   * Initialize the serial connection communication speed.
+   */
+  void init(int baudRate);
 
-    /**
-     * This must be called in each arduino loop iteration. It simulatenously
-     * read and write from and to the serial port.
-     */
-    void update();
+  /**
+   * This must be called in each arduino loop iteration. It simulatenously
+   * read and write from and to the serial port.
+   */
+  void update();
 
-    /**
-     * Write the given data buffer.
-     * @param buffer The buffer contains a sequence of bytes representing
-     * a message to the client.
-     */
-    void write(DataBuffer *buffer);
+  /**
+   * Write the given data buffer.
+   * @param buffer The buffer contains a sequence of bytes representing
+   * a message to the client.
+   */
+  void write(DataBuffer* buffer);
 
-    /** Write the data buffer. */
-    void flush();
+  /** Write the data buffer. */
+  void flush();
 
 private:
-    // This is the CRC-16 calculated on incoming data.
-    unsigned short inCRC;
+  // This is the CRC-16 calculated on incoming data.
+  unsigned short inCRC;
 
-    // Protocol flags.
-    static const byte DELIMITER_FLAG = 0x7E;
-    static const byte ESCAPE_FLAG = 0x7D;
-    static const byte ESCAPED_XOR = 0x20;
+  // Protocol flags.
+  static const byte DELIMITER_FLAG = 0x7E;
+  static const byte ESCAPE_FLAG = 0x7D;
+  static const byte ESCAPED_XOR = 0x20;
 
-    // Buffer to read requests.
-    DataBuffer *m_readBuffer;
+  // Buffer to read requests.
+  DataBuffer* m_readBuffer;
 
-    // Buffer to write responses.
-    DataBuffer *m_writeBuffer;
+  // Buffer to write responses.
+  DataBuffer* m_writeBuffer;
 
-    // Function to be called when a command is received.
-    void (*callback)(byte requestId, DataBuffer *);
+  // Function to be called when a command is received.
+  void (*callback)(byte requestId, DataBuffer*);
 
-    // Escape bytes that are equal to the DELIMITER_FLAG or ESCAPE_FLAG.
-    static void addEscapedByte(DataBuffer *buffer, byte value);
+  // Escape bytes that are equal to the DELIMITER_FLAG or ESCAPE_FLAG.
+  static void addEscapedByte(DataBuffer* buffer, byte value);
 
-    // Send and acknowledgement when a frame is received.
-    void sendAck(byte requestId, byte message);
+  // Receiver current state.
 
-    // Receiver current state.
+  enum State
+  {
+    WAITING_STATE,
+    READING_MESSAGE_STATE,
+    ESCAPING_BYTE_STATE
+  };
 
-    enum State
-    {
-        WAITING_STATE,
-        READING_MESSAGE_STATE,
-        ESCAPING_BYTE_STATE
-    };
-
-    State m_state;
+  State m_state;
 };
 
-#endif // SERIAL_PORT_H
+#endif  // SERIAL_PORT_H

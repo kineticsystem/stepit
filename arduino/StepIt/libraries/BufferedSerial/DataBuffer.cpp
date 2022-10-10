@@ -20,33 +20,33 @@
 
 #include <DataBuffer.h>
 
-DataBuffer::DataBuffer(unsigned int bufferSize) : m_buffer{Buffer<byte>{bufferSize}}
+DataBuffer::DataBuffer(unsigned int bufferSize) : m_buffer{ Buffer<byte>{ bufferSize } }
 {
 }
 
 int DataBuffer::getSize()
 {
-    return m_buffer.size();
+  return m_buffer.size();
 }
 
 int DataBuffer::getCapacity()
 {
-    return m_buffer.capacity();
+  return m_buffer.capacity();
 }
 
 void DataBuffer::clear()
 {
-    m_buffer.clear();
+  m_buffer.clear();
 }
 
 void DataBuffer::addByte(byte in, Location location)
 {
-    m_buffer.add(in, location);
+  m_buffer.add(in, location);
 }
 
 byte DataBuffer::removeByte(Location location)
 {
-    return m_buffer.remove(location);
+  return m_buffer.remove(location);
 }
 
 // Following IEEE 754 specification a type int is always sent/received
@@ -56,17 +56,17 @@ byte DataBuffer::removeByte(Location location)
 // [LSB][...][...][MSB].
 void DataBuffer::addInt(int in, Location location)
 {
-    byte *pointer = (byte *)&in;
-    if (location == Location::END)
-    {
-        m_buffer.add(pointer[1], Location::END);
-        m_buffer.add(pointer[0], Location::END);
-    }
-    else
-    {
-        m_buffer.add(pointer[0], Location::FRONT);
-        m_buffer.add(pointer[1], Location::FRONT);
-    }
+  byte* pointer = (byte*)&in;
+  if (location == Location::END)
+  {
+    m_buffer.add(pointer[1], Location::END);
+    m_buffer.add(pointer[0], Location::END);
+  }
+  else
+  {
+    m_buffer.add(pointer[0], Location::FRONT);
+    m_buffer.add(pointer[1], Location::FRONT);
+  }
 }
 
 // Following IEEE 754 specification, a type int is always sent/received
@@ -76,19 +76,19 @@ void DataBuffer::addInt(int in, Location location)
 // [LSB][...][...][MSB].
 int DataBuffer::removeInt(Location location)
 {
-    int ret;
-    byte *pointer = (byte *)&ret;
-    if (location == Location::FRONT)
-    {
-        pointer[1] = m_buffer.remove(Location::FRONT);
-        pointer[0] = m_buffer.remove(Location::FRONT);
-    }
-    else
-    {
-        pointer[0] = m_buffer.remove(Location::END);
-        pointer[1] = m_buffer.remove(Location::END);
-    }
-    return ret;
+  int ret;
+  byte* pointer = (byte*)&ret;
+  if (location == Location::FRONT)
+  {
+    pointer[1] = m_buffer.remove(Location::FRONT);
+    pointer[0] = m_buffer.remove(Location::FRONT);
+  }
+  else
+  {
+    pointer[0] = m_buffer.remove(Location::END);
+    pointer[1] = m_buffer.remove(Location::END);
+  }
+  return ret;
 }
 
 // Following IEEE 754 specification, a type long is always sent/received
@@ -98,21 +98,21 @@ int DataBuffer::removeInt(Location location)
 // [LSB][...][...][MSB].
 void DataBuffer::addLong(long in, Location location)
 {
-    byte *pointer = (byte *)&in;
-    if (location == Location::END)
-    {
-        m_buffer.add(pointer[3], Location::END);
-        m_buffer.add(pointer[2], Location::END);
-        m_buffer.add(pointer[1], Location::END);
-        m_buffer.add(pointer[0], Location::END);
-    }
-    else
-    {
-        m_buffer.add(pointer[0], Location::FRONT);
-        m_buffer.add(pointer[1], Location::FRONT);
-        m_buffer.add(pointer[2], Location::FRONT);
-        m_buffer.add(pointer[3], Location::FRONT);
-    }
+  byte* pointer = (byte*)&in;
+  if (location == Location::END)
+  {
+    m_buffer.add(pointer[3], Location::END);
+    m_buffer.add(pointer[2], Location::END);
+    m_buffer.add(pointer[1], Location::END);
+    m_buffer.add(pointer[0], Location::END);
+  }
+  else
+  {
+    m_buffer.add(pointer[0], Location::FRONT);
+    m_buffer.add(pointer[1], Location::FRONT);
+    m_buffer.add(pointer[2], Location::FRONT);
+    m_buffer.add(pointer[3], Location::FRONT);
+  }
 }
 
 // Following IEEE 754 specification, a type long is always sent/received
@@ -122,23 +122,23 @@ void DataBuffer::addLong(long in, Location location)
 // [LSB][...][...][MSB].
 long DataBuffer::removeLong(Location location)
 {
-    long ret;
-    byte *pointer = (byte *)&ret;
-    if (location == Location::FRONT)
-    {
-        pointer[3] = m_buffer.remove(Location::FRONT);
-        pointer[2] = m_buffer.remove(Location::FRONT);
-        pointer[1] = m_buffer.remove(Location::FRONT);
-        pointer[0] = m_buffer.remove(Location::FRONT);
-    }
-    else
-    {
-        pointer[0] = m_buffer.remove(Location::END);
-        pointer[1] = m_buffer.remove(Location::END);
-        pointer[2] = m_buffer.remove(Location::END);
-        pointer[3] = m_buffer.remove(Location::END);
-    }
-    return ret;
+  long ret;
+  byte* pointer = (byte*)&ret;
+  if (location == Location::FRONT)
+  {
+    pointer[3] = m_buffer.remove(Location::FRONT);
+    pointer[2] = m_buffer.remove(Location::FRONT);
+    pointer[1] = m_buffer.remove(Location::FRONT);
+    pointer[0] = m_buffer.remove(Location::FRONT);
+  }
+  else
+  {
+    pointer[0] = m_buffer.remove(Location::END);
+    pointer[1] = m_buffer.remove(Location::END);
+    pointer[2] = m_buffer.remove(Location::END);
+    pointer[3] = m_buffer.remove(Location::END);
+  }
+  return ret;
 }
 
 // Following IEEE 754 specification, a type float is always sent/received
@@ -146,21 +146,21 @@ long DataBuffer::removeLong(Location location)
 // Most Significant Byte (MSB) first.
 void DataBuffer::addFloat(float in, Location location)
 {
-    byte *pointer = (byte *)&in;
-    if (location == Location::END)
-    {
-        m_buffer.add(pointer[3], Location::END);
-        m_buffer.add(pointer[2], Location::END);
-        m_buffer.add(pointer[1], Location::END);
-        m_buffer.add(pointer[0], Location::END);
-    }
-    else
-    {
-        m_buffer.add(pointer[0], Location::FRONT);
-        m_buffer.add(pointer[1], Location::FRONT);
-        m_buffer.add(pointer[2], Location::FRONT);
-        m_buffer.add(pointer[3], Location::FRONT);
-    }
+  byte* pointer = (byte*)&in;
+  if (location == Location::END)
+  {
+    m_buffer.add(pointer[3], Location::END);
+    m_buffer.add(pointer[2], Location::END);
+    m_buffer.add(pointer[1], Location::END);
+    m_buffer.add(pointer[0], Location::END);
+  }
+  else
+  {
+    m_buffer.add(pointer[0], Location::FRONT);
+    m_buffer.add(pointer[1], Location::FRONT);
+    m_buffer.add(pointer[2], Location::FRONT);
+    m_buffer.add(pointer[3], Location::FRONT);
+  }
 }
 
 // Following IEEE 754 specification a type float is stored in the following way:
@@ -169,21 +169,21 @@ void DataBuffer::addFloat(float in, Location location)
 // - Significand: 23 bits.
 float DataBuffer::removeFloat(Location location)
 {
-    float ret;
-    byte *pointer = (byte *)&ret;
-    if (location == Location::FRONT)
-    {
-        pointer[3] = m_buffer.remove(Location::FRONT);
-        pointer[2] = m_buffer.remove(Location::FRONT);
-        pointer[1] = m_buffer.remove(Location::FRONT);
-        pointer[0] = m_buffer.remove(Location::FRONT);
-    }
-    else
-    {
-        pointer[0] = m_buffer.remove(Location::END);
-        pointer[1] = m_buffer.remove(Location::END);
-        pointer[2] = m_buffer.remove(Location::END);
-        pointer[3] = m_buffer.remove(Location::END);
-    }
-    return ret;
+  float ret;
+  byte* pointer = (byte*)&ret;
+  if (location == Location::FRONT)
+  {
+    pointer[3] = m_buffer.remove(Location::FRONT);
+    pointer[2] = m_buffer.remove(Location::FRONT);
+    pointer[1] = m_buffer.remove(Location::FRONT);
+    pointer[0] = m_buffer.remove(Location::FRONT);
+  }
+  else
+  {
+    pointer[0] = m_buffer.remove(Location::END);
+    pointer[1] = m_buffer.remove(Location::END);
+    pointer[2] = m_buffer.remove(Location::END);
+    pointer[3] = m_buffer.remove(Location::END);
+  }
+  return ret;
 }
