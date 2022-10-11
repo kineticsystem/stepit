@@ -89,7 +89,7 @@ TEST(TestDataHandler, write)
  * Write some data and expect a request frame, with escaped bytes, to be
  * created including delimiters, request ID and CRC.
  */
-TEST(TestDataHandler, write_escaped)
+TEST(TestDataHandler, write_escaped_data)
 {
   const std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -113,6 +113,64 @@ TEST(TestDataHandler, write_escaped)
     0x00,  // Position (LSB)
     0xBA,  // CRC (MSB)
     0xA0,  // CRC (LSB)
+    0x7E   // Delimiter
+  };
+
+  auto mock = std::make_unique<MockSerialInterface>();
+
+  // Use a lambda function to populate a vector with the buffer values.
+  std::vector<uint8_t> actual_frame;
+  auto write = [&actual_frame](const uint8_t* buffer, [[maybe_unused]] std::size_t size) -> std::size_t {
+    actual_frame.emplace_back(buffer[0]);
+    return 1;
+  };
+  EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
+
+  stepit_hardware::DataHandler data_handler{ std::move(mock) };
+  data_handler.write(data);
+  ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_frame), stepit_hardware::data_utils::to_hex(expected_frame));
+}
+
+/**
+ * Write some data and expect a request frame to be created including
+ * delimiters, request ID and escaped CRC.
+ */
+TEST(TestDataHandler, write_escaped_crc)
+{
+  // This specific data will generate a CRC value containing the 0x7D value
+  // that must be escaped.
+  const std::vector<uint8_t> data{
+    0x01,  // Request ID
+    0x77,  // Motor velocity command ID
+    0x00,  // Motor ID
+    0x40,  // Velocity = 4
+    0x80,  // Velocity
+    0x00,  // Velocity
+    0x00,  // Velocity
+    0x01,  // Motor ID
+    0x40,  // Velocity = 3
+    0x40,  // Velocity
+    0x00,  // Velocity
+    0x00   // Velocity
+  };
+
+  const std::vector<uint8_t> expected_frame = {
+    0x7E,  // Delimiter
+    0x01,  // Request ID
+    0x77,  // Motor velocity command ID
+    0x00,  // Motor ID
+    0x40,  // Velocity = 4
+    0x80,  // Velocity
+    0x00,  // Velocity
+    0x00,  // Velocity
+    0x01,  // Motor ID
+    0x40,  // Velocity = 3
+    0x40,  // Velocity
+    0x00,  // Velocity
+    0x00,  // Velocity
+    0x7D,  // Escape command.
+    0x5D,  // XOR CRC (MSB)
+    0x4D,  // CRC (LSB)
     0x7E   // Delimiter
   };
 
