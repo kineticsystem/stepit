@@ -29,34 +29,41 @@
 
 #pragma once
 
-#include <stepit_hardware/command_interface.hpp>
-#include <stepit_hardware/fake/fake_motor.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-
-#include <rclcpp/rclcpp.hpp>
+#include <stepit_hardware/msgs/request.hpp>
 
 #include <vector>
 
 namespace stepit_hardware
 {
 /**
- * @brief The FakeCommandHandler class receives commands and queries from the
- * hardware interface and sends them to a fake hardware.
+ * @brief Command to set the target position a group of motors.
  */
-class FakeCommandHandler : public CommandInterface
+class PositionCommand : public Request
 {
 public:
-  FakeCommandHandler() = default;
-  bool init() override;
-  AcknowledgeResponse send(const ConfigCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
-  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
+  class Goal
+  {
+  public:
+    explicit Goal(uint8_t motor_id, double position) : motor_id_{ motor_id }, position_{ position } {};
+    uint8_t motor_id() const
+    {
+      return motor_id_;
+    }
+    double position() const
+    {
+      return position_;
+    }
+
+  private:
+    uint8_t motor_id_;
+    double position_;
+  };
+
+  explicit PositionCommand(uint8_t request_id, const std::vector<Goal>& goals);
+  uint8_t command_id() const;
+  std::vector<Goal> goals() const;
 
 private:
-  /* Virtual motors behaving like real stepper motors with given acceletation
-   * and absolute maximum velocity.
-   */
-  mutable std::vector<FakeMotor> motors_;
+  std::vector<Goal> goals_;
 };
 }  // namespace stepit_hardware

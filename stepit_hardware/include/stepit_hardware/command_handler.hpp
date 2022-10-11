@@ -46,10 +46,11 @@ class CommandHandler : public CommandInterface
 {
 public:
   explicit CommandHandler(std::unique_ptr<DataInterface> data_interface);
-  void init() override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const override;
-  MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const override;
+  bool init() override;
+  AcknowledgeResponse send(const ConfigCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
+  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
 
 private:
   std::unique_ptr<DataInterface> data_interface_;

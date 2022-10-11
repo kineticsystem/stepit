@@ -124,6 +124,8 @@ private:
   struct Joint
   {
     uint8_t id = 0;
+    double acceleration = 0;
+    double max_velocity = 0;
     JointValue state{};
     JointValue command{};
   };

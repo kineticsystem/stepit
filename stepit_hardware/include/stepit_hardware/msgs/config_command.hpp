@@ -29,34 +29,47 @@
 
 #pragma once
 
-#include <stepit_hardware/command_interface.hpp>
-#include <stepit_hardware/fake/fake_motor.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-
-#include <rclcpp/rclcpp.hpp>
+#include <stepit_hardware/msgs/request.hpp>
 
 #include <vector>
 
 namespace stepit_hardware
 {
 /**
- * @brief The FakeCommandHandler class receives commands and queries from the
- * hardware interface and sends them to a fake hardware.
+ * @brief Command to configure a group of motors.
  */
-class FakeCommandHandler : public CommandInterface
+class ConfigCommand : public Request
 {
 public:
-  FakeCommandHandler() = default;
-  bool init() override;
-  AcknowledgeResponse send(const ConfigCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
-  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
+  class Param
+  {
+  public:
+    explicit Param(uint8_t motor_id, double acceleration, double max_velocity)
+      : motor_id_{ motor_id }, acceleration_{ acceleration }, max_velocity_{ max_velocity } {};
+    uint8_t motor_id() const
+    {
+      return motor_id_;
+    }
+    double acceleration() const
+    {
+      return acceleration_;
+    }
+    double max_velocity() const
+    {
+      return max_velocity_;
+    }
+
+  private:
+    uint8_t motor_id_;
+    double acceleration_;
+    double max_velocity_;
+  };
+
+  explicit ConfigCommand(uint8_t request_id, const std::vector<Param>& params);
+  uint8_t command_id() const;
+  std::vector<Param> params() const;
 
 private:
-  /* Virtual motors behaving like real stepper motors with given acceletation
-   * and absolute maximum velocity.
-   */
-  mutable std::vector<FakeMotor> motors_;
+  std::vector<Param> params_;
 };
 }  // namespace stepit_hardware

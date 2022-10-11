@@ -29,11 +29,11 @@
 
 #include <stepit_hardware/stepit_hardware.hpp>
 #include <stepit_hardware/fake/fake_command_handler.hpp>
-#include <stepit_hardware/msgs/motor_status_query.hpp>
-#include <stepit_hardware/msgs/motor_velocity_command.hpp>
-#include <stepit_hardware/msgs/motor_position_command.hpp>
+#include <stepit_hardware/msgs/status_query.hpp>
+#include <stepit_hardware/msgs/velocity_command.hpp>
+#include <stepit_hardware/msgs/position_command.hpp>
 #include <stepit_hardware/msgs/acknowledge_response.hpp>
-#include <stepit_hardware/msgs/motor_status_response.hpp>
+#include <stepit_hardware/msgs/status_response.hpp>
 
 #include <stepit_hardware/command_handler.hpp>
 #include <stepit_hardware/data_handler.hpp>
@@ -54,10 +54,10 @@ namespace stepit_hardware
 constexpr auto kLogger = "StepitHardware";
 constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
+// This constructor is use for testing only.
 StepitHardware::StepitHardware(std::unique_ptr<CommandInterface> command_interface)
   : command_interface_{ std::move(command_interface) }
 {
-  // This constructor is use for testing only.
 }
 
 hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
@@ -75,6 +75,8 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
   for (uint i = 0; i < info_.joints.size(); i++)
   {
     joints_[i].id = static_cast<uint8_t>(std::stoi(info_.joints[i].parameters.at("id")));
+    joints_[i].acceleration = std::stod(info_.joints[i].parameters.at("acceleration"));
+    joints_[i].max_velocity = std::stod(info_.joints[i].parameters.at("max_velocity"));
     joints_[i].state.position = kNaN;
     joints_[i].state.velocity = kNaN;
     joints_[i].command.position = kNaN;
@@ -112,8 +114,20 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
     }
   }
 
-  // Open the serial port and initialize the hardware.
+  // Open the serial port and handshake.
   command_interface_->init();
+
+  // Send configuration parameters to the hardware.
+  std::vector<ConfigCommand::Param> params;
+  for (const auto joint : joints_)
+  {
+    params.emplace_back(ConfigCommand::Param{ joint.id, joint.acceleration, joint.max_velocity });
+  }
+  const AcknowledgeResponse response = command_interface_->send(ConfigCommand{ request_id++, params });
+  if (response.status() == Response::Status::Failure)
+  {
+    return CallbackReturn::FAILURE;
+  }
 
   return CallbackReturn::SUCCESS;
 }
@@ -163,8 +177,8 @@ StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& pr
 hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
-  MotorStatusQuery query{ request_id++ };
-  MotorStatusResponse response = command_interface_->send(time, query);
+  StatusQuery query{ request_id++ };
+  StatusResponse response = command_interface_->send(time, query);
 
   auto motor_states = response.motor_states();
   if (motor_states.size() != joints_.size())
@@ -192,32 +206,32 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
   {
     // Set velocities.
 
-    std::vector<MotorVelocityCommand::Goal> velocities;
+    std::vector<VelocityCommand::Goal> velocities;
     for (const auto& joint : joints_)
     {
       if (!std::isnan(joint.command.velocity))
       {
-        MotorVelocityCommand::Goal velocity{ joint.id, joint.command.velocity };
+        VelocityCommand::Goal velocity{ joint.id, joint.command.velocity };
         velocities.push_back(velocity);
       }
     }
-    MotorVelocityCommand command{ request_id++, velocities };
+    VelocityCommand command{ request_id++, velocities };
     AcknowledgeResponse response = command_interface_->send(time, command);
   }
   else
   {
     // Set positions.
 
-    std::vector<MotorPositionCommand::Goal> positions;
+    std::vector<PositionCommand::Goal> positions;
     for (const auto& joint : joints_)
     {
       if (!std::isnan(joint.command.position))
       {
-        MotorPositionCommand::Goal position{ joint.id, joint.command.position };
+        PositionCommand::Goal position{ joint.id, joint.command.position };
         positions.push_back(position);
       }
     }
-    MotorPositionCommand command{ request_id++, positions };
+    PositionCommand command{ request_id++, positions };
     AcknowledgeResponse response = command_interface_->send(time, command);
   }
   return hardware_interface::return_type::OK;

@@ -27,18 +27,55 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/msgs/motor_status_query.hpp>
-#include <stepit_hardware/msgs/msgs_ids.hpp>
+#pragma once
+
+#include <stepit_hardware/msgs/response.hpp>
+
+#include <vector>
+#include <cstdint>
 
 namespace stepit_hardware
 {
 
-MotorStatusQuery::MotorStatusQuery(uint8_t request_id) : Request{ request_id }
+class StatusResponse : public Response
 {
-}
+public:
+  // Internal structure to store joint states and targets.
+  class MotorState
+  {
+  public:
+    explicit MotorState(uint8_t id, double position, double velocity, double distance_to_go)
+      : id_{ id }, position_{ position }, velocity_{ velocity }, distance_to_go_{ distance_to_go }
+    {
+    }
+    uint8_t id()
+    {
+      return id_;
+    }
+    double position()
+    {
+      return position_;
+    }
+    double velocity()
+    {
+      return velocity_;
+    }
+    double distance_to_go()
+    {
+      return distance_to_go_;
+    }
 
-uint8_t MotorStatusQuery::query_id() const
-{
-  return constants::kMotorStatusQueryId;
-}
+  private:
+    uint8_t id_;
+    double position_;
+    double velocity_;
+    double distance_to_go_;
+  };
+
+  explicit StatusResponse(uint8_t request_id, Status status, std::vector<MotorState> motor_states);
+  std::vector<MotorState> motor_states() const;
+
+private:
+  std::vector<MotorState> motor_states_;
+};
 }  // namespace stepit_hardware

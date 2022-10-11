@@ -27,55 +27,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <stepit_hardware/msgs/response.hpp>
-
-#include <vector>
-#include <cstdint>
+#include <stepit_hardware/msgs/position_command.hpp>
+#include <stepit_hardware/msgs/msgs_ids.hpp>
+#include <stepit_hardware/data_utils.hpp>
 
 namespace stepit_hardware
 {
-
-class MotorStatusResponse : public Response
+PositionCommand::PositionCommand(uint8_t request_id, const std::vector<Goal>& goals)
+  : Request{ request_id }, goals_{ goals }
 {
-public:
-  // Internal structure to store joint states and targets.
-  class MotorState
-  {
-  public:
-    explicit MotorState(uint8_t id, double position, double velocity, double distance_to_go)
-      : id_{ id }, position_{ position }, velocity_{ velocity }, distance_to_go_{ distance_to_go }
-    {
-    }
-    uint8_t id()
-    {
-      return id_;
-    }
-    double position()
-    {
-      return position_;
-    }
-    double velocity()
-    {
-      return velocity_;
-    }
-    double distance_to_go()
-    {
-      return distance_to_go_;
-    }
+}
 
-  private:
-    uint8_t id_;
-    double position_;
-    double velocity_;
-    double distance_to_go_;
-  };
+uint8_t PositionCommand::command_id() const
+{
+  return constants::kMotorPositionCommandId;
+}
 
-  explicit MotorStatusResponse(uint8_t request_id, Status status, std::vector<MotorState> motor_states);
-  std::vector<MotorState> motor_states() const;
-
-private:
-  std::vector<MotorState> motor_states_;
-};
+std::vector<PositionCommand::Goal> PositionCommand::goals() const
+{
+  return goals_;
+}
 }  // namespace stepit_hardware

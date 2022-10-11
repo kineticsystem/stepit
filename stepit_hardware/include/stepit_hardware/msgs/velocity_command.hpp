@@ -38,7 +38,7 @@ namespace stepit_hardware
 /**
  * Command to set the target velocity a group of motors.
  */
-class MotorVelocityCommand : public Request
+class VelocityCommand : public Request
 {
 public:
   class Goal
@@ -59,7 +59,7 @@ public:
     double velocity_;
   };
 
-  explicit MotorVelocityCommand(uint8_t request_id, const std::vector<Goal>& goals);
+  explicit VelocityCommand(uint8_t request_id, const std::vector<Goal>& goals);
   uint8_t command_id() const;
   std::vector<Goal> goals() const;
 

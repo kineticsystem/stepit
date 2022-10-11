@@ -12,6 +12,8 @@
       </hardware>
       <joint name="joint1">
         <param name="id">0</param>
+        <param name="acceleration">3.14159</param>
+        <param name="max_velocity">6.28319</param>
         <command_interface name="position" />
         <command_interface name="velocity" />
         <state_interface name="position" />
@@ -19,6 +21,8 @@
       </joint>
       <joint name="joint2">
         <param name="id">1</param>
+        <param name="acceleration">3.14159</param>
+        <param name="max_velocity">6.28319</param>
         <command_interface name="position" />
         <command_interface name="velocity" />
         <state_interface name="position" />

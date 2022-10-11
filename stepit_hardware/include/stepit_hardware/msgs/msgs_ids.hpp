@@ -33,6 +33,7 @@
 
 namespace stepit_hardware::constants
 {
+constexpr uint8_t kMotorConfigCommandId = 0x78;
 constexpr uint8_t kMotorPositionCommandId = 0x71;
 constexpr uint8_t kMotorVelocityCommandId = 0x77;
 constexpr uint8_t kMotorStatusQueryId = 0x75;

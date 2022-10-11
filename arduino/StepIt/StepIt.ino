@@ -64,6 +64,7 @@ constexpr byte MOVE_CMD = 0x71;                // Move motors to a given positio
 constexpr byte STATUS_CMD = 0x75;              // Request motors position (rad) and velocity (rad/s).
 constexpr byte INFO_CMD = 0x76;                // Request controller info for connection handshaking.
 constexpr byte SPEED_CMD = 0x77;               // Move motors at the given velocity (rad/s).
+constexpr byte CONFIG_CMD = 0x78;              // Configure the device.
 constexpr byte SET_MOTORS_ENABLED_CMD = 0x7A;  // Enable interrupt to control the motors.
 
 // Arduino reboots in around two seconds when a serial connection is initiated.
@@ -261,6 +262,24 @@ void speedCommand(byte requestId, DataBuffer* cmd)
 }
 
 /**
+ * Move the motors at given speed.
+ * @param requestId The request id.
+ * @param cmd The move command.
+ */
+void configureCommand(byte requestId, DataBuffer* cmd)
+{
+  for (int i = 0; i < 2; ++i)
+  {
+    byte motorId = cmd->removeByte(BufferPosition::Head);
+    float acceleration = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
+    float max_speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
+
+    // TODO: do something.
+  }
+  returnCommandSuccess(requestId);
+}
+
+/**
  * Move the motors at maximum speed to a given position.
  * @param requestId The id of the request.
  * @param cmd The move command.
@@ -307,6 +326,10 @@ void processBuffer(byte requestId, DataBuffer* cmd)
   else if (cmdId == SET_MOTORS_ENABLED_CMD)
   {
     setMotorsEnabled(requestId, cmd);
+  }
+  else if (cmdId == CONFIG_CMD)
+  {
+    configureCommand(requestId, cmd);
   }
   cmd->clear();
 }

@@ -27,16 +27,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <stepit_hardware/msgs/request.hpp>
+#include <stepit_hardware/msgs/status_response.hpp>
+#include <stepit_hardware/data_utils.hpp>
 
 namespace stepit_hardware
 {
-class MotorStatusQuery : public Request
+StatusResponse::StatusResponse(uint8_t request_id, Status status, std::vector<MotorState> motor_states)
+  : Response{ request_id, status }, motor_states_{ motor_states }
 {
-public:
-  explicit MotorStatusQuery(uint8_t request_id);
-  uint8_t query_id() const;
-};
+}
+
+std::vector<StatusResponse::MotorState> StatusResponse::motor_states() const
+{
+  return motor_states_;
+}
 }  // namespace stepit_hardware

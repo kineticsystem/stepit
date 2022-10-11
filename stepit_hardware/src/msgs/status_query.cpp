@@ -27,18 +27,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/msgs/motor_status_response.hpp>
-#include <stepit_hardware/data_utils.hpp>
+#include <stepit_hardware/msgs/status_query.hpp>
+#include <stepit_hardware/msgs/msgs_ids.hpp>
 
 namespace stepit_hardware
 {
-MotorStatusResponse::MotorStatusResponse(uint8_t request_id, Status status, std::vector<MotorState> motor_states)
-  : Response{ request_id, status }, motor_states_{ motor_states }
+
+StatusQuery::StatusQuery(uint8_t request_id) : Request{ request_id }
 {
 }
 
-std::vector<MotorStatusResponse::MotorState> MotorStatusResponse::motor_states() const
+uint8_t StatusQuery::query_id() const
 {
-  return motor_states_;
+  return constants::kMotorStatusQueryId;
 }
 }  // namespace stepit_hardware

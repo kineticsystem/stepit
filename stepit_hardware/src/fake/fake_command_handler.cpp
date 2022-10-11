@@ -35,11 +35,26 @@ namespace stepit_hardware
 {
 constexpr auto kLoggerName = "FakeCommandHandler";
 
-void FakeCommandHandler::init()
+bool FakeCommandHandler::init()
 {
+  return true;
 }
 
-AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorPositionCommand& command) const
+AcknowledgeResponse FakeCommandHandler::send(const ConfigCommand& command) const
+{
+  motors_.clear();
+  for (const auto& param : command.params())
+  {
+    FakeMotor motor;
+    motor.set_acceleration(param.acceleration());
+    motor.set_max_velocity(param.max_velocity());
+    motors_.emplace_back(motor);
+  }
+
+  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
+}
+
+AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const PositionCommand& command) const
 {
   for (const auto& goal : command.goals())
   {
@@ -56,7 +71,7 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Mot
   return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
 }
 
-AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorVelocityCommand& command) const
+AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const VelocityCommand& command) const
 {
   for (const auto& goal : command.goals())
   {
@@ -73,18 +88,18 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Mot
   return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
 }
 
-MotorStatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const MotorStatusQuery& query) const
+StatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const StatusQuery& query) const
 {
   uint8_t id = 0;
-  std::vector<MotorStatusResponse::MotorState> states;
+  std::vector<StatusResponse::MotorState> states;
   for (const auto& motor : motors_)
   {
     auto position = motor.get_position(time);
     auto velocity = motor.get_velocity(time);
     auto distance_to_go = 0.0;
-    MotorStatusResponse::MotorState state{ id++, position, velocity, distance_to_go };
+    StatusResponse::MotorState state{ id++, position, velocity, distance_to_go };
     states.emplace_back(state);
   }
-  return MotorStatusResponse(query.request_id(), Response::Status::Success, states);
+  return StatusResponse(query.request_id(), Response::Status::Success, states);
 }
 }  // namespace stepit_hardware

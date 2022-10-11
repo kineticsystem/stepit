@@ -27,23 +27,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/msgs/motor_position_command.hpp>
+#include <stepit_hardware/msgs/velocity_command.hpp>
 #include <stepit_hardware/msgs/msgs_ids.hpp>
 #include <stepit_hardware/data_utils.hpp>
 
 namespace stepit_hardware
 {
-MotorPositionCommand::MotorPositionCommand(uint8_t request_id, const std::vector<Goal>& goals)
+VelocityCommand::VelocityCommand(uint8_t request_id, const std::vector<Goal>& goals)
   : Request{ request_id }, goals_{ goals }
 {
 }
 
-uint8_t MotorPositionCommand::command_id() const
+uint8_t VelocityCommand::command_id() const
 {
-  return constants::kMotorPositionCommandId;
+  return constants::kMotorVelocityCommandId;
 }
 
-std::vector<MotorPositionCommand::Goal> MotorPositionCommand::goals() const
+std::vector<VelocityCommand::Goal> VelocityCommand::goals() const
 {
   return goals_;
 }

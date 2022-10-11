@@ -47,7 +47,14 @@ public:
   /**
    * @brief Initialize the command interface.
    */
-  virtual void init() = 0;
+  virtual bool init() = 0;
+
+  /**
+   * @brief Configure the hardware.
+   * @param command A command with all required configuration.
+   * @return An aknowledgment response, success or failure.
+   */
+  virtual AcknowledgeResponse send(const ConfigCommand& command) const = 0;
 
   /**
    * @brief Send motor target positions (rad) to the hardware.
@@ -55,7 +62,7 @@ public:
    * @param command A command with all positions (rad).
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorPositionCommand& command) const = 0;
+  virtual AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const = 0;
 
   /**
    * @brief Send motor target velocities (rad/s) to the hardware.
@@ -63,7 +70,7 @@ public:
    * @param command A command with all motor velocities (rad/s).
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse send(const rclcpp::Time& time, const MotorVelocityCommand& command) const = 0;
+  virtual AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const = 0;
 
   /**
    * @brief Request the status of each motor connected to the hardware.
@@ -71,6 +78,6 @@ public:
    * @param command A query for the status of each motor.
    * @return Each motor status and a request status, success or failure.
    */
-  virtual MotorStatusResponse send(const rclcpp::Time& time, const MotorStatusQuery& query) const = 0;
+  virtual StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const = 0;
 };
 }  // namespace stepit_hardware

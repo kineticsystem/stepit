@@ -62,14 +62,14 @@ add_library(
     include/stepit_hardware/serial_interface.hpp
     include/stepit_hardware/serial_exception.hpp
     include/stepit_hardware/msgs/msgs_ids.hpp
-    src/msgs/motor_status_query.cpp
-    include/stepit_hardware/msgs/motor_status_query.hpp
-    src/msgs/motor_status_response.cpp
-    include/stepit_hardware/msgs/motor_status_response.hpp
-    src/msgs/motor_velocity_command.cpp
-    include/stepit_hardware/msgs/motor_velocity_command.hpp
-    src/msgs/motor_position_command.cpp
-    include/stepit_hardware/msgs/motor_position_command.hpp
+    src/msgs/status_query.cpp
+    include/stepit_hardware/msgs/status_query.hpp
+    src/msgs/status_response.cpp
+    include/stepit_hardware/msgs/status_response.hpp
+    src/msgs/velocity_command.cpp
+    include/stepit_hardware/msgs/velocity_command.hpp
+    src/msgs/position_command.cpp
+    include/stepit_hardware/msgs/position_command.hpp
     src/msgs/acknowledge_response.cpp
     include/stepit_hardware/msgs/acknowledge_response.hpp
     src/fake/position_control.cpp
@@ -83,6 +83,8 @@ add_library(
     include/stepit_hardware/fake/fake_command_handler.hpp
     src/fake/fake_motor.cpp
     include/stepit_hardware/fake/fake_motor.hpp
+    src/msgs/config_command.cpp
+    include/stepit_hardware/msgs/config_command.hpp
     include/stepit_hardware/msgs/msgs.hpp
 )
 target_include_directories(

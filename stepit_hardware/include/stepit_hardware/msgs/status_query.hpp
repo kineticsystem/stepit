@@ -27,24 +27,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/msgs/motor_velocity_command.hpp>
-#include <stepit_hardware/msgs/msgs_ids.hpp>
-#include <stepit_hardware/data_utils.hpp>
+#pragma once
+
+#include <stepit_hardware/msgs/request.hpp>
 
 namespace stepit_hardware
 {
-MotorVelocityCommand::MotorVelocityCommand(uint8_t request_id, const std::vector<Goal>& goals)
-  : Request{ request_id }, goals_{ goals }
+class StatusQuery : public Request
 {
-}
-
-uint8_t MotorVelocityCommand::command_id() const
-{
-  return constants::kMotorVelocityCommandId;
-}
-
-std::vector<MotorVelocityCommand::Goal> MotorVelocityCommand::goals() const
-{
-  return goals_;
-}
+public:
+  explicit StatusQuery(uint8_t request_id);
+  uint8_t query_id() const;
+};
 }  // namespace stepit_hardware

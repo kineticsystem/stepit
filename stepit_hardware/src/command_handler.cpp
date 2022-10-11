@@ -37,17 +37,42 @@ CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
 {
 }
 
-void CommandHandler::init()
+bool CommandHandler::init()
 {
   data_interface_->open();
   std::vector<uint8_t> out = data_interface_->read();
-  [[maybe_unused]] uint8_t request_id = out[0];
-  [[maybe_unused]] Response::Status status{ out[1] };
-  std::cout << "out";
+  Response::Status status{ out[1] };
+  return status == Response::Status::Success;
 }
 
-AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
-                                         const MotorPositionCommand& command) const
+AcknowledgeResponse CommandHandler::send(const ConfigCommand& command) const
+{
+  std::vector<uint8_t> in;
+  in.emplace_back(command.request_id());
+  in.emplace_back(command.command_id());
+  for (const auto& param : command.params())
+  {
+    in.emplace_back(param.motor_id());
+    auto acceleration_bytes = data_utils::from_float(static_cast<float>(param.acceleration()));
+    in.emplace_back(acceleration_bytes[0]);
+    in.emplace_back(acceleration_bytes[1]);
+    in.emplace_back(acceleration_bytes[2]);
+    in.emplace_back(acceleration_bytes[3]);
+    auto max_velocity_bytes = data_utils::from_float(static_cast<float>(param.max_velocity()));
+    in.emplace_back(max_velocity_bytes[0]);
+    in.emplace_back(max_velocity_bytes[1]);
+    in.emplace_back(max_velocity_bytes[2]);
+    in.emplace_back(max_velocity_bytes[3]);
+  }
+  data_interface_->write(in);
+  std::vector<uint8_t> out = data_interface_->read();
+  uint8_t request_id = out[0];
+  Response::Status status{ out[1] };
+  AcknowledgeResponse response{ request_id, status };
+  return response;
+}
+
+AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const PositionCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.request_id());
@@ -69,8 +94,7 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   return response;
 }
 
-AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
-                                         const MotorVelocityCommand& command) const
+AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const VelocityCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.request_id());
@@ -92,7 +116,7 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   return response;
 }
 
-MotorStatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const MotorStatusQuery& query) const
+StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.request_id());
@@ -120,17 +144,17 @@ MotorStatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   std::size_t i = 0;
   uint8_t request_id = data[i++];
   Response::Status status{ data[i++] };
-  std::vector<MotorStatusResponse::MotorState> motor_states;
+  std::vector<StatusResponse::MotorState> motor_states;
   while (i < data.size())
   {
     uint8_t id = data[i++];
     float position = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
     float speed = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
     float distance_to_go = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
-    motor_states.push_back(MotorStatusResponse::MotorState{ id, position, speed, distance_to_go });
+    motor_states.push_back(StatusResponse::MotorState{ id, position, speed, distance_to_go });
   }
 
-  MotorStatusResponse response{ request_id, status, motor_states };
+  StatusResponse response{ request_id, status, motor_states };
   return response;
 }
 
