@@ -1,21 +1,30 @@
 /*
- * Copyright (C) 2022 Remigi Giovanni
- * g.remigi@kineticsystem.org
- * www.kineticsystem.org
+ * Copyright (c) 2022, Giovanni Remigi
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option) any
- * later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation, Inc.,
- * 675 Mass Ave, Cambridge, MA 02139, USA.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <AccelStepper.h>
@@ -154,8 +163,8 @@ float sgn(float val)
  */
 void sendReadyMessage()
 {
-  responseBuffer.addByte(messageId++, Location::END);
-  responseBuffer.addByte(READY_MSG, Location::END);
+  responseBuffer.addByte(messageId++, BufferPosition::Tail);
+  responseBuffer.addByte(READY_MSG, BufferPosition::Tail);
   serialPort.write(&responseBuffer);
 }
 
@@ -164,8 +173,8 @@ void sendReadyMessage()
  */
 void returnCommandSuccess(byte requestId)
 {
-  responseBuffer.addByte(requestId, Location::END);
-  responseBuffer.addByte(SUCCESS_MSG, Location::END);
+  responseBuffer.addByte(requestId, BufferPosition::Tail);
+  responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
   serialPort.write(&responseBuffer);
 }
 
@@ -175,16 +184,16 @@ void returnCommandSuccess(byte requestId)
  */
 void returnStatus(byte requestId)
 {
-  responseBuffer.addByte(requestId, Location::END);
-  responseBuffer.addByte(SUCCESS_MSG, Location::END);
+  responseBuffer.addByte(requestId, BufferPosition::Tail);
+  responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
   {
     Guard stateGuard{ readingMotorStates };
     for (byte i = 0; i < 2; i++)
     {
-      responseBuffer.addByte(i, Location::END);
-      responseBuffer.addFloat(stepsToRadians(motorState[i].getPosition()), Location::END);
-      responseBuffer.addFloat(stepsToRadians(motorState[i].getSpeed()), Location::END);
-      responseBuffer.addFloat(stepsToRadians(motorState[i].getDistanceToGo()), Location::END);
+      responseBuffer.addByte(i, BufferPosition::Tail);
+      responseBuffer.addFloat(stepsToRadians(motorState[i].getPosition()), BufferPosition::Tail);
+      responseBuffer.addFloat(stepsToRadians(motorState[i].getSpeed()), BufferPosition::Tail);
+      responseBuffer.addFloat(stepsToRadians(motorState[i].getDistanceToGo()), BufferPosition::Tail);
     }
   }
   serialPort.write(&responseBuffer);
@@ -196,11 +205,11 @@ void returnStatus(byte requestId)
  */
 void returnControllerInfo(byte requestId)
 {
-  responseBuffer.addByte(requestId, Location::END);
-  responseBuffer.addByte(SUCCESS_MSG, Location::END);
+  responseBuffer.addByte(requestId, BufferPosition::Tail);
+  responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
   for (int i = 0; NAME[i] != '\0'; i++)
   {
-    responseBuffer.addByte(NAME[i], Location::END);
+    responseBuffer.addByte(NAME[i], BufferPosition::Tail);
   }
   serialPort.write(&responseBuffer);
 }
@@ -212,7 +221,7 @@ void returnControllerInfo(byte requestId)
  */
 void setMotorsEnabled(byte requestId, DataBuffer* cmd)
 {
-  byte enabled = cmd->removeByte(Location::FRONT);
+  byte enabled = cmd->removeByte(BufferPosition::Head);
   if (enabled == 0)
   {
     TimerInterrupt::start(INTERRUPT_TIME_US);
@@ -233,8 +242,8 @@ void speedCommand(byte requestId, DataBuffer* cmd)
 {
   for (int i = 0; i < 2; ++i)
   {
-    byte motorId = cmd->removeByte(Location::FRONT);
-    float speed = radiansToSteps(cmd->removeFloat(Location::FRONT));  // steps/s
+    byte motorId = cmd->removeByte(BufferPosition::Head);
+    float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));  // steps/s
 
     float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
     float sgnSpeed = sgn(speed);
@@ -260,8 +269,8 @@ void moveCommand(byte requestId, DataBuffer* cmd)
 {
   for (int i = 0; i < 2; ++i)
   {
-    byte motorId = cmd->removeByte(Location::FRONT);
-    long position = radiansToSteps(cmd->removeFloat(Location::FRONT));
+    byte motorId = cmd->removeByte(BufferPosition::Head);
+    long position = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
     float speed = motorConfig[motorId].getMaxSpeed();
 
     Guard goalGuard{ writingMotorGoals };
@@ -277,7 +286,7 @@ void moveCommand(byte requestId, DataBuffer* cmd)
  */
 void processBuffer(byte requestId, DataBuffer* cmd)
 {
-  byte cmdId = cmd->removeByte(Location::FRONT);
+  byte cmdId = cmd->removeByte(BufferPosition::Head);
 
   if (cmdId == STATUS_CMD)
   {

@@ -1,27 +1,40 @@
 /*
- * Copyright (C) 2022 Remigi Giovanni
- * g.remigi@kineticsystem.org
- * www.kineticsystem.org
+ * Copyright (c) 2022, Giovanni Remigi
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option) any
- * later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation, Inc.,
- * 675 Mass Ave, Cambridge, MA 02139, USA.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include <Location.h>
+enum class BufferPosition
+{
+  Head,
+  Tail
+};
 
 /**
  * This template implements a circular buffer. Items can be added and removed
@@ -31,124 +44,124 @@ template <typename T>
 class Buffer
 {
 public:
-    explicit Buffer(unsigned int bufferSize);
-    ~Buffer();
+  explicit Buffer(size_t capacity);
+  ~Buffer();
 
-    // Return how much data is in the buffer.
-    unsigned int size() const;
+  // Return the maximum capacity of the buffer.
+  size_t capacity() const;
 
-    // Return the maximum capacity of the buffer.
-    unsigned int capacity() const;
+  // Return how much data is in the buffer.
+  size_t size() const;
 
-    // Insert an item at the given location.
-    void add(T in, Location location);
+  // Insert an item at the given position.
+  void add(T in, BufferPosition position);
 
-    // Remove an item from the given location.
-    // Removing an item from an empty buffer leads to undefined behavior.
-    T remove(Location location);
+  // Remove an item from the given position.
+  // Removing an item from an empty buffer leads to undefined behavior.
+  T remove(BufferPosition position);
 
-    // Reset the buffer.
-    void clear();
+  // Reset the buffer.
+  void clear();
 
 private:
-    T *m_data;
+  T* m_data;
 
-    // The maximum capacity of the buffer.
-    const unsigned int m_capacity;
+  // "m_position" is the position of the first element of the buffer.
+  size_t m_position = 0;
 
-    // "m_position" is the position of the first element of the buffer.
-    unsigned int m_position;
+  // The maximum capacity of the buffer.
+  size_t m_capacity = 0;
 
-    // This records how much data is in the buffer: it is always greater
-    // than zero and less than or equal to the capacity.
-    // "m_position + m_size - 1" is the position of the last element of the
-    // buffer.
-    unsigned int m_size;
+  // This records how much data is in the buffer: it is always greater
+  // than zero and less than or equal to the capacity.
+  // "m_position + m_size - 1" is the position of the last element of the
+  // buffer.
+  size_t m_size = 0;
 };
 
 template <typename T>
-Buffer<T>::Buffer(unsigned int bufferSize) : m_data{new T[bufferSize]}, m_capacity{bufferSize}, m_position{0}, m_size{0}
+Buffer<T>::Buffer(size_t capacity) : m_data{ new T[capacity] }, m_capacity{ capacity }, m_position{ 0 }, m_size{ 0 }
 {
 }
 
 template <typename T>
 Buffer<T>::~Buffer()
 {
-    delete[] m_data;
+  delete[] m_data;
 }
 
 template <typename T>
-unsigned int Buffer<T>::size() const
+size_t Buffer<T>::size() const
 {
-    return m_size;
+  return m_size;
 }
 
 template <typename T>
-unsigned int Buffer<T>::capacity() const
+size_t Buffer<T>::capacity() const
 {
-    return m_capacity;
+  return m_capacity;
 }
 
 template <typename T>
 void Buffer<T>::clear()
 {
-    m_position = 0;
-    m_size = 0;
+  m_position = 0;
+  m_size = 0;
 }
 
 template <typename T>
-void Buffer<T>::add(T in, Location location)
+void Buffer<T>::add(T in, BufferPosition position)
 {
-    // Please note that there is no exception thrown in integer arithmetic
-    // overflow or underflow.
+  // Please note that there is no exception thrown in integer arithmetic
+  // overflow or underflow.
 
-    if (m_size < m_capacity)
+  if (m_size < m_capacity)
+  {
+    if (position == BufferPosition::Tail)
     {
-        if (location == Location::END)
-        {
-            // Add an item to the end of the buffer.
-            m_data[(m_position + m_size) % m_capacity] = in;
-        }
-        else
-        {
-            // Add an item to the front of the buffer.
-            if (m_position == 0)
-            {
-                m_position = m_capacity - 1;
-            }
-            else
-            {
-                m_position--;
-            }
-            m_data[m_position] = in;
-        }
-        m_size++;
+      // Add an item to the end of the buffer.
+      m_data[(m_position + m_size) % m_capacity] = in;
     }
+    else
+    {
+      // Add an item to the front of the buffer.
+      if (m_position == 0)
+      {
+        m_position = m_capacity - 1;
+      }
+      else
+      {
+        m_position--;
+      }
+      m_data[m_position] = in;
+    }
+    m_size++;
+  }
 }
 
 template <typename T>
-T Buffer<T>::remove(Location location)
+T Buffer<T>::remove(BufferPosition position)
 {
-    // Please note that there is no exception thrown in integer arithmetic
-    // overflow or underflow.
+  // Please note that there is no exception thrown in integer arithmetic
+  // overflow or underflow.
 
-    T out;
-    if (m_size > 0)
+  T out;
+  if (m_size > 0)
+  {
+    if (position == BufferPosition::Tail)
     {
-        if (location == Location::END)
-        {
-            // Remove an item from the end of the buffer.
-            out = m_data[(m_position + m_size - 1) % m_capacity];
-        }
-        else
-        {
-            // Remove an item from the front of the buffer.
-            out = m_data[m_position];
-            m_position = (m_position + 1) % m_capacity;
-        }
-        m_size--;
+      // Remove an item from the end of the buffer.
+      out = m_data[(m_position + m_size - 1) % m_capacity];
     }
-    return out;
+    else
+    {
+      // Remove an item from the front of the buffer.
+      out = m_data[m_position];
+      m_position = (m_position + 1) % m_capacity;
+    }
+    m_size--;
+  }
+  return out;
 }
 
-#endif // BUFFER_H
+#endif  // BUFFER_H

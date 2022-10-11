@@ -1,21 +1,30 @@
 /*
- * Copyright (C) 2022 Remigi Giovanni
- * g.remigi@kineticsystem.org
- * www.kineticsystem.org
+ * Copyright (c) 2022, Giovanni Remigi
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2 of the License, or (at your option) any
- * later version.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
  *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation, Inc.,
- * 675 Mass Ave, Cambridge, MA 02139, USA.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include <DataBuffer.h>
@@ -39,12 +48,12 @@ void DataBuffer::clear()
   m_buffer.clear();
 }
 
-void DataBuffer::addByte(byte in, Location location)
+void DataBuffer::addByte(byte in, BufferPosition location)
 {
   m_buffer.add(in, location);
 }
 
-byte DataBuffer::removeByte(Location location)
+byte DataBuffer::removeByte(BufferPosition location)
 {
   return m_buffer.remove(location);
 }
@@ -54,18 +63,18 @@ byte DataBuffer::removeByte(Location location)
 // In Arduino a type int is stored in memory in Little Endian format,
 // it means a pointer to an int gives the address of the LSB.
 // [LSB][...][...][MSB].
-void DataBuffer::addInt(int in, Location location)
+void DataBuffer::addInt(int in, BufferPosition location)
 {
   byte* pointer = (byte*)&in;
-  if (location == Location::END)
+  if (location == BufferPosition::Tail)
   {
-    m_buffer.add(pointer[1], Location::END);
-    m_buffer.add(pointer[0], Location::END);
+    m_buffer.add(pointer[1], BufferPosition::Tail);
+    m_buffer.add(pointer[0], BufferPosition::Tail);
   }
   else
   {
-    m_buffer.add(pointer[0], Location::FRONT);
-    m_buffer.add(pointer[1], Location::FRONT);
+    m_buffer.add(pointer[0], BufferPosition::Head);
+    m_buffer.add(pointer[1], BufferPosition::Head);
   }
 }
 
@@ -74,19 +83,19 @@ void DataBuffer::addInt(int in, Location location)
 // In Arduino a type int is stored in memory in Little Endian format,
 // it means a pointer to an int gives the address of the LSB.
 // [LSB][...][...][MSB].
-int DataBuffer::removeInt(Location location)
+int DataBuffer::removeInt(BufferPosition location)
 {
   int ret;
   byte* pointer = (byte*)&ret;
-  if (location == Location::FRONT)
+  if (location == BufferPosition::Head)
   {
-    pointer[1] = m_buffer.remove(Location::FRONT);
-    pointer[0] = m_buffer.remove(Location::FRONT);
+    pointer[1] = m_buffer.remove(BufferPosition::Head);
+    pointer[0] = m_buffer.remove(BufferPosition::Head);
   }
   else
   {
-    pointer[0] = m_buffer.remove(Location::END);
-    pointer[1] = m_buffer.remove(Location::END);
+    pointer[0] = m_buffer.remove(BufferPosition::Tail);
+    pointer[1] = m_buffer.remove(BufferPosition::Tail);
   }
   return ret;
 }
@@ -96,22 +105,22 @@ int DataBuffer::removeInt(Location location)
 // In Arduino a long is stored in memory in Little Endian format,
 // it means a pointer to a long gives the address of the LSB.
 // [LSB][...][...][MSB].
-void DataBuffer::addLong(long in, Location location)
+void DataBuffer::addLong(long in, BufferPosition location)
 {
   byte* pointer = (byte*)&in;
-  if (location == Location::END)
+  if (location == BufferPosition::Tail)
   {
-    m_buffer.add(pointer[3], Location::END);
-    m_buffer.add(pointer[2], Location::END);
-    m_buffer.add(pointer[1], Location::END);
-    m_buffer.add(pointer[0], Location::END);
+    m_buffer.add(pointer[3], BufferPosition::Tail);
+    m_buffer.add(pointer[2], BufferPosition::Tail);
+    m_buffer.add(pointer[1], BufferPosition::Tail);
+    m_buffer.add(pointer[0], BufferPosition::Tail);
   }
   else
   {
-    m_buffer.add(pointer[0], Location::FRONT);
-    m_buffer.add(pointer[1], Location::FRONT);
-    m_buffer.add(pointer[2], Location::FRONT);
-    m_buffer.add(pointer[3], Location::FRONT);
+    m_buffer.add(pointer[0], BufferPosition::Head);
+    m_buffer.add(pointer[1], BufferPosition::Head);
+    m_buffer.add(pointer[2], BufferPosition::Head);
+    m_buffer.add(pointer[3], BufferPosition::Head);
   }
 }
 
@@ -120,23 +129,23 @@ void DataBuffer::addLong(long in, Location location)
 // In Arduino, a long is stored in memory in Little Endian format,
 // it means a pointer to a long gives the address of the LSB.
 // [LSB][...][...][MSB].
-long DataBuffer::removeLong(Location location)
+long DataBuffer::removeLong(BufferPosition location)
 {
   long ret;
   byte* pointer = (byte*)&ret;
-  if (location == Location::FRONT)
+  if (location == BufferPosition::Head)
   {
-    pointer[3] = m_buffer.remove(Location::FRONT);
-    pointer[2] = m_buffer.remove(Location::FRONT);
-    pointer[1] = m_buffer.remove(Location::FRONT);
-    pointer[0] = m_buffer.remove(Location::FRONT);
+    pointer[3] = m_buffer.remove(BufferPosition::Head);
+    pointer[2] = m_buffer.remove(BufferPosition::Head);
+    pointer[1] = m_buffer.remove(BufferPosition::Head);
+    pointer[0] = m_buffer.remove(BufferPosition::Head);
   }
   else
   {
-    pointer[0] = m_buffer.remove(Location::END);
-    pointer[1] = m_buffer.remove(Location::END);
-    pointer[2] = m_buffer.remove(Location::END);
-    pointer[3] = m_buffer.remove(Location::END);
+    pointer[0] = m_buffer.remove(BufferPosition::Tail);
+    pointer[1] = m_buffer.remove(BufferPosition::Tail);
+    pointer[2] = m_buffer.remove(BufferPosition::Tail);
+    pointer[3] = m_buffer.remove(BufferPosition::Tail);
   }
   return ret;
 }
@@ -144,22 +153,22 @@ long DataBuffer::removeLong(Location location)
 // Following IEEE 754 specification, a type float is always sent/received
 // with Sign and Exponent first followed by the Significand in
 // Most Significant Byte (MSB) first.
-void DataBuffer::addFloat(float in, Location location)
+void DataBuffer::addFloat(float in, BufferPosition location)
 {
   byte* pointer = (byte*)&in;
-  if (location == Location::END)
+  if (location == BufferPosition::Tail)
   {
-    m_buffer.add(pointer[3], Location::END);
-    m_buffer.add(pointer[2], Location::END);
-    m_buffer.add(pointer[1], Location::END);
-    m_buffer.add(pointer[0], Location::END);
+    m_buffer.add(pointer[3], BufferPosition::Tail);
+    m_buffer.add(pointer[2], BufferPosition::Tail);
+    m_buffer.add(pointer[1], BufferPosition::Tail);
+    m_buffer.add(pointer[0], BufferPosition::Tail);
   }
   else
   {
-    m_buffer.add(pointer[0], Location::FRONT);
-    m_buffer.add(pointer[1], Location::FRONT);
-    m_buffer.add(pointer[2], Location::FRONT);
-    m_buffer.add(pointer[3], Location::FRONT);
+    m_buffer.add(pointer[0], BufferPosition::Head);
+    m_buffer.add(pointer[1], BufferPosition::Head);
+    m_buffer.add(pointer[2], BufferPosition::Head);
+    m_buffer.add(pointer[3], BufferPosition::Head);
   }
 }
 
@@ -167,23 +176,23 @@ void DataBuffer::addFloat(float in, Location location)
 // - Sign: 1bit
 // - Exponent: 8 bits
 // - Significand: 23 bits.
-float DataBuffer::removeFloat(Location location)
+float DataBuffer::removeFloat(BufferPosition location)
 {
   float ret;
   byte* pointer = (byte*)&ret;
-  if (location == Location::FRONT)
+  if (location == BufferPosition::Head)
   {
-    pointer[3] = m_buffer.remove(Location::FRONT);
-    pointer[2] = m_buffer.remove(Location::FRONT);
-    pointer[1] = m_buffer.remove(Location::FRONT);
-    pointer[0] = m_buffer.remove(Location::FRONT);
+    pointer[3] = m_buffer.remove(BufferPosition::Head);
+    pointer[2] = m_buffer.remove(BufferPosition::Head);
+    pointer[1] = m_buffer.remove(BufferPosition::Head);
+    pointer[0] = m_buffer.remove(BufferPosition::Head);
   }
   else
   {
-    pointer[0] = m_buffer.remove(Location::END);
-    pointer[1] = m_buffer.remove(Location::END);
-    pointer[2] = m_buffer.remove(Location::END);
-    pointer[3] = m_buffer.remove(Location::END);
+    pointer[0] = m_buffer.remove(BufferPosition::Tail);
+    pointer[1] = m_buffer.remove(BufferPosition::Tail);
+    pointer[2] = m_buffer.remove(BufferPosition::Tail);
+    pointer[3] = m_buffer.remove(BufferPosition::Tail);
   }
   return ret;
 }
