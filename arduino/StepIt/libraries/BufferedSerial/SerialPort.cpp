@@ -30,11 +30,16 @@
 #include <SerialPort.h>
 #include <CrcUtils.h>
 
+// Protocol flags.
+constexpr byte DELIMITER_FLAG = 0x7E;
+constexpr byte ESCAPE_FLAG = 0x7D;
+constexpr byte ESCAPED_XOR = 0x20;
+
 SerialPort::SerialPort(unsigned int readBuffersize, unsigned int writeBufferSize)
 {
   m_readBuffer = new DataBuffer{ readBuffersize };
   m_writeBuffer = new DataBuffer{ writeBufferSize };
-  m_state = WAITING_STATE;
+  m_state = Waiting;
 }
 
 SerialPort::~SerialPort()
@@ -62,16 +67,16 @@ void SerialPort::flush()
   Serial.flush();
 }
 
-void SerialPort::addEscapedByte(DataBuffer* buffer, byte value)
+void SerialPort::addByte(DataBuffer* buffer, byte ch)
 {
-  if (value == ESCAPE_FLAG || value == DELIMITER_FLAG)
+  if (ch == ESCAPE_FLAG || ch == DELIMITER_FLAG)
   {
     buffer->addByte(ESCAPE_FLAG, BufferPosition::Tail);
-    buffer->addByte(value ^ ESCAPED_XOR, BufferPosition::Tail);
+    buffer->addByte(ch ^ ESCAPED_XOR, BufferPosition::Tail);
   }
   else
   {
-    buffer->addByte(value, BufferPosition::Tail);
+    buffer->addByte(ch, BufferPosition::Tail);
   }
 }
 
@@ -99,15 +104,14 @@ void SerialPort::write(DataBuffer* buffer)
   {
     byte out = buffer->removeByte(BufferPosition::Head);
     crc = crc_utils::crc_ccitt_byte(crc, out);
-    addEscapedByte(m_writeBuffer, out);
+    addByte(m_writeBuffer, out);
   }
 
   // Conversion of CRC-16 from Little Endian to Big Endian.
   unsigned char crcLSB = (crc & 0xff00) >> 8;
   unsigned char crcMSB = (crc & 0x00ff);
-  addEscapedByte(m_writeBuffer, crcMSB);
-  addEscapedByte(m_writeBuffer, crcLSB);
-
+  addByte(m_writeBuffer, crcMSB);
+  addByte(m_writeBuffer, crcLSB);
   m_writeBuffer->addByte(DELIMITER_FLAG, BufferPosition::Tail);
 }
 
@@ -128,27 +132,27 @@ void SerialPort::update()
   // Get the number of bytes (characters) available for reading from the serial port.
   if (Serial.available() > 0)
   {
-    byte in = Serial.read();
+    byte ch = Serial.read();
 
     // State machine.
 
     switch (m_state)
     {
-      case WAITING_STATE:
-        if (in == DELIMITER_FLAG)
+      case Waiting:
+        if (ch == DELIMITER_FLAG)
         {
           crc = 0;
           m_readBuffer->clear();
-          m_state = READING_MESSAGE_STATE;
+          m_state = ReadingMessage;
         }
         break;
 
-      case READING_MESSAGE_STATE:
-        if (in == ESCAPE_FLAG)
-        {  // Ignore the escape character.
-          m_state = ESCAPING_BYTE_STATE;
+      case ReadingMessage:
+        if (ch == ESCAPE_FLAG)
+        {
+          m_state = ReadingEscapedByte;
         }
-        else if (in == DELIMITER_FLAG)
+        else if (ch == DELIMITER_FLAG)
         {
           if (m_readBuffer->getSize() >= 4)
           {
@@ -167,22 +171,22 @@ void SerialPort::update()
               byte requestId = m_readBuffer->removeByte(BufferPosition::Head);
               callback(requestId, m_readBuffer);
             }
-            m_state = WAITING_STATE;
+            m_state = Waiting;
           }
           crc = 0;
           m_readBuffer->clear();
         }
         else
         {
-          crc = crc_utils::crc_ccitt_byte(crc, in);
-          m_readBuffer->addByte(in, BufferPosition::Tail);
+          crc = crc_utils::crc_ccitt_byte(crc, ch);
+          m_readBuffer->addByte(ch, BufferPosition::Tail);
         }
         break;
 
-      case ESCAPING_BYTE_STATE:
-        crc = crc_utils::crc_ccitt_byte(crc, in ^ ESCAPED_XOR);
-        m_readBuffer->addByte(in ^ ESCAPED_XOR, BufferPosition::Tail);
-        m_state = READING_MESSAGE_STATE;
+      case ReadingEscapedByte:
+        crc = crc_utils::crc_ccitt_byte(crc, ch ^ ESCAPED_XOR);
+        m_readBuffer->addByte(ch ^ ESCAPED_XOR, BufferPosition::Tail);
+        m_state = ReadingMessage;
         break;
     }
   }

@@ -73,10 +73,10 @@ private:
   /* States used while reading and parsiong a frame. */
   enum class ReadState
   {
-    StartReading,
+    Waiting,
     ReadingMessage,
     ReadingEscapedByte
-  } state_ = ReadState::StartReading;
+  } state_ = ReadState::Waiting;
 
   /* Circular buffer to read data from the serial port. */
   Buffer<uint8_t> read_buffer_{ 100 };

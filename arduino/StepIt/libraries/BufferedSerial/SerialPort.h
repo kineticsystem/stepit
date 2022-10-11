@@ -74,11 +74,6 @@ private:
   // This is the CRC-16 calculated on incoming data.
   unsigned short crc;
 
-  // Protocol flags.
-  static const byte DELIMITER_FLAG = 0x7E;
-  static const byte ESCAPE_FLAG = 0x7D;
-  static const byte ESCAPED_XOR = 0x20;
-
   // Buffer to read requests.
   DataBuffer* m_readBuffer;
 
@@ -89,18 +84,18 @@ private:
   void (*callback)(byte requestId, DataBuffer*);
 
   // Escape bytes that are equal to the DELIMITER_FLAG or ESCAPE_FLAG.
-  static void addEscapedByte(DataBuffer* buffer, byte value);
+  static void addByte(DataBuffer* buffer, byte ch);
 
   // Receiver current state.
 
-  enum State
+  enum ReadingState
   {
-    WAITING_STATE,
-    READING_MESSAGE_STATE,
-    ESCAPING_BYTE_STATE
+    Waiting,
+    ReadingMessage,
+    ReadingEscapedByte
   };
 
-  State m_state;
+  ReadingState m_state;
 };
 
 #endif  // SERIAL_PORT_H

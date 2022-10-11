@@ -41,6 +41,19 @@ constexpr uint8_t DELIMITER_FLAG = 0x7E;  // Start and end of a packet
 constexpr uint8_t ESCAPE_FLAG = 0x7D;     // Escaping byte.
 constexpr uint8_t ESCAPED_XOR = 0x20;     // XOR value applied to escaped bytes.
 
+void add_escaped_byte(Buffer<uint8_t>& buffer, uint8_t ch)
+{
+  if (ch == ESCAPE_FLAG || ch == DELIMITER_FLAG)
+  {
+    buffer.add(ESCAPE_FLAG, BufferPosition::Tail);
+    buffer.add(ch ^ ESCAPED_XOR, BufferPosition::Tail);
+  }
+  else
+  {
+    buffer.add(ch, BufferPosition::Tail);
+  }
+}
+
 DataHandler::DataHandler(std::unique_ptr<SerialInterface> serial) : serial_{ std::move(serial) }
 {
 }
@@ -55,19 +68,19 @@ std::vector<uint8_t> DataHandler::read()
   read_buffer_.clear();
 
   uint16_t crc = 0;
-  state_ = ReadState::StartReading;
-  uint8_t byte = 0;
+  state_ = ReadState::Waiting;
+  uint8_t ch = 0;
 
   while (true)
   {
-    if (serial_->read(&byte, 1) == 0)
+    if (serial_->read(&ch, 1) == 0)
     {
       throw SerialException("timeout");
     }
 
-    if (state_ == ReadState::StartReading)
+    if (state_ == ReadState::Waiting)
     {
-      if (byte == DELIMITER_FLAG)
+      if (ch == DELIMITER_FLAG)
       {
         state_ = ReadState::ReadingMessage;
       }
@@ -78,11 +91,11 @@ std::vector<uint8_t> DataHandler::read()
     }
     else if (state_ == ReadState::ReadingMessage)
     {
-      if (byte == ESCAPE_FLAG)
+      if (ch == ESCAPE_FLAG)
       {
         state_ = ReadState::ReadingEscapedByte;
       }
-      else if (byte == DELIMITER_FLAG)
+      else if (ch == DELIMITER_FLAG)
       {
         if (read_buffer_.size() < 3)
         {
@@ -103,14 +116,14 @@ std::vector<uint8_t> DataHandler::read()
       }
       else
       {
-        crc = crc_utils::crc_ccitt_byte(crc, byte);
-        read_buffer_.add(byte, BufferPosition::Tail);
+        crc = crc_utils::crc_ccitt_byte(crc, ch);
+        read_buffer_.add(ch, BufferPosition::Tail);
       }
     }
     else if (state_ == ReadState::ReadingEscapedByte)
     {
-      crc = crc_utils::crc_ccitt_byte(crc, byte ^ ESCAPED_XOR);
-      read_buffer_.add(byte ^ ESCAPED_XOR, BufferPosition::Tail);
+      crc = crc_utils::crc_ccitt_byte(crc, ch ^ ESCAPED_XOR);
+      read_buffer_.add(ch ^ ESCAPED_XOR, BufferPosition::Tail);
       state_ = ReadState::ReadingMessage;
     }
   }
@@ -125,35 +138,27 @@ std::vector<uint8_t> DataHandler::read()
   return buffer;
 }
 
-void DataHandler::write(const std::vector<uint8_t>& bytes)
+void DataHandler::write(const std::vector<uint8_t>& buffer)
 {
   write_buffer_.clear();
   uint16_t crc = 0;
 
   write_buffer_.add(DELIMITER_FLAG, BufferPosition::Tail);
-  for (const uint8_t& byte : bytes)
+  for (const uint8_t& ch : buffer)
   {
-    crc = crc_utils::crc_ccitt_byte(crc, byte);
-    if (byte == DELIMITER_FLAG || byte == ESCAPE_FLAG)
-    {
-      write_buffer_.add(ESCAPE_FLAG, BufferPosition::Tail);
-      write_buffer_.add(byte ^ ESCAPED_XOR, BufferPosition::Tail);
-    }
-    else
-    {
-      write_buffer_.add(byte, BufferPosition::Tail);
-    }
+    crc = crc_utils::crc_ccitt_byte(crc, ch);
+    add_escaped_byte(write_buffer_, ch);
   }
   const uint8_t crc_lsb = static_cast<uint8_t>((crc & 0xff00) >> 8);
   const uint8_t crc_msb = static_cast<uint8_t>((crc & 0x00ff));
-  write_buffer_.add(crc_msb, BufferPosition::Tail);
-  write_buffer_.add(crc_lsb, BufferPosition::Tail);
+  add_escaped_byte(write_buffer_, crc_msb);
+  add_escaped_byte(write_buffer_, crc_lsb);
   write_buffer_.add(DELIMITER_FLAG, BufferPosition::Tail);
 
   while (write_buffer_.size() > 0)
   {
-    const uint8_t byte = write_buffer_.remove(BufferPosition::Head);
-    std::size_t size = serial_->write(&byte, 1);
+    const uint8_t ch = write_buffer_.remove(BufferPosition::Head);
+    std::size_t size = serial_->write(&ch, 1);
     if (size == 0)
     {
       throw SerialException("error writing to the serial port");
