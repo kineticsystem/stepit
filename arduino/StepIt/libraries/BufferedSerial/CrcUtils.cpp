@@ -29,7 +29,7 @@
 
 #include <CrcUtils.h>
 
-namespace
+namespace crc_utils
 {
 // Pre-computed crc-table.
 // See https://cs.fit.edu/code/svn/cse2410f13team7/wireshark/wsutil/crc16.c
@@ -69,19 +69,19 @@ constexpr unsigned short crc_ccitt_table[] = {
   0x7BC7, 0x6A4E, 0x58D5, 0x495C, 0x3DE3, 0x2C6A, 0x1EF1, 0x0F78
 };
 // clang-format on
-}  // namespace
 
-unsigned short CrcUtils::crc_ccitt_byte(unsigned short crc, unsigned char byte)
+unsigned short crc_ccitt_byte(unsigned short crc, unsigned char ch)
 {
-  return (crc >> 8) ^ crc_ccitt_table[(crc ^ byte) & 0xff];
+  return (crc >> 8) ^ crc_ccitt_table[(crc ^ ch) & 0xff];
 }
 
-unsigned short CrcUtils::crc_ccitt(const unsigned char* msg, int length)
+unsigned short crc_ccitt(const unsigned char* buffer, int length)
 {
   unsigned short crc = 0x0000;
   while (length--)
   {
-    crc = crc_ccitt_byte(crc, *msg++);
+    crc = crc_ccitt_byte(crc, *buffer++);
   }
   return crc;
 }
+}  // namespace crc_utils

@@ -47,30 +47,29 @@
  * For a sample implementation of different CRC-16 see
  * http://www.lammertbies.nl/comm/software/
  */
-class CrcUtils
+namespace crc_utils
 {
-public:
-  /**
-   * This method updates the given CRC adding a new byte to the original
-   * sequence of bytes where the given CRC was computed.
-   * The CCITT CRC-16 (Kermit) requires to pass an initial CRC equal to 0x0000
-   * the first time the method is invoked.
-   * Please note that the calculated CRC is given in Little Endian Form.
-   * @param crc The CRC value to update.
-   * @param byte The byte to be added to the original sequence of bytes where
-   *     the given CRC was computed.
-   * @return The new CRC computed on the full sequence of bytes.
-   */
-  static unsigned short crc_ccitt_byte(unsigned short crc, unsigned char byte);
+/**
+ * This method updates the given CRC adding a new byte to the original
+ * sequence of bytes where the given CRC was computed.
+ * The CCITT CRC-16 (Kermit) requires to pass an initial CRC equal to 0x0000
+ * the first time the method is invoked.
+ * Please note that the calculated CRC is given in Little Endian Form.
+ * @param crc The CRC value to update.
+ * @param ch The byte to be added to the original sequence of bytes where
+ *     the given CRC was computed.
+ * @return The new CRC computed on the full sequence of bytes.
+ */
+[[nodiscard]] unsigned short crc_ccitt_byte(unsigned short crc, unsigned char ch);
 
-  /**
-   * This method calculates the CRC on the given sequence bytes and length.
-   * Please note that the calculated CRC is given in Little Endian Form.
-   * @param bytes The sequence of bytes to calculate the CRC.
-   * @param length The sequence length in a number of bytes.
-   * @return The CRC calculated on the given sequence of bytes.
-   */
-  static unsigned short crc_ccitt(const unsigned char* bytes, int length);
-};
+/**
+ * This method calculates the CRC on the given sequence bytes and length.
+ * Please note that the calculated CRC is given in Little Endian Form.
+ * @param buffer The sequence of bytes to calculate the CRC.
+ * @param length The sequence length in a number of bytes.
+ * @return The CRC calculated on the given sequence of bytes.
+ */
+[[nodiscard]] unsigned short crc_ccitt(const unsigned char* buffer, int length);
+};  // namespace crc_utils
 
 #endif  // CRC_UTILS_H

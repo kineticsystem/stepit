@@ -58,11 +58,11 @@ namespace stepit_hardware::crc_utils
  * The CCITT CRC-16 (Kermit) requires to pass an initial CRC equal to 0x0000
  * the first time the method is invoked.
  * @param crc The CRC value to update.
- * @param byte The byte to be added to the original sequence of bytes where
+ * @param ch The byte to be added to the original sequence of bytes where
  *     the given CRC was computed.
  * @return The new CRC computed on the full sequence of bytes.
  */
-[[nodiscard]] uint16_t crc_ccitt_byte(uint16_t crc, uint8_t byte);
+[[nodiscard]] uint16_t crc_ccitt_byte(uint16_t crc, uint8_t ch);
 
 /**
  * This method calculates the CRC on the given sequence bytes and length
@@ -70,6 +70,6 @@ namespace stepit_hardware::crc_utils
  * @param bytes The sequence of bytes to calculate the CRC.
  * @return The CRC calculated on the given sequence of bytes.
  */
-[[nodiscard]] uint16_t crc_ccitt(const std::vector<uint8_t>& bytes);
+[[nodiscard]] uint16_t crc_ccitt(const std::vector<uint8_t>& buffer);
 
 }  // namespace stepit_hardware::crc_utils

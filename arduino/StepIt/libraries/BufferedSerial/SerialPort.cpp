@@ -98,7 +98,7 @@ void SerialPort::write(DataBuffer* buffer)
   while (buffer->getSize() > 0)
   {
     byte out = buffer->removeByte(BufferPosition::Head);
-    crc = CrcUtils::crc_ccitt_byte(crc, out);
+    crc = crc_utils::crc_ccitt_byte(crc, out);
     addEscapedByte(m_writeBuffer, out);
   }
 
@@ -174,13 +174,13 @@ void SerialPort::update()
         }
         else
         {
-          crc = CrcUtils::crc_ccitt_byte(crc, in);
+          crc = crc_utils::crc_ccitt_byte(crc, in);
           m_readBuffer->addByte(in, BufferPosition::Tail);
         }
         break;
 
       case ESCAPING_BYTE_STATE:
-        crc = CrcUtils::crc_ccitt_byte(crc, in ^ ESCAPED_XOR);
+        crc = crc_utils::crc_ccitt_byte(crc, in ^ ESCAPED_XOR);
         m_readBuffer->addByte(in ^ ESCAPED_XOR, BufferPosition::Tail);
         m_state = READING_MESSAGE_STATE;
         break;

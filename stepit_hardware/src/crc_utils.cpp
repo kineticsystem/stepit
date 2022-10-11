@@ -72,17 +72,17 @@ constexpr std::array<uint16_t, 256> crc_ccitt_table = {
 };
 // clang-format on
 
-uint16_t crc_ccitt_byte(uint16_t crc, uint8_t byte)
+uint16_t crc_ccitt_byte(uint16_t crc, uint8_t ch)
 {
-  return (crc >> 8) ^ crc_ccitt_table[(crc ^ byte) & 0xff];
+  return (crc >> 8) ^ crc_ccitt_table[(crc ^ ch) & 0xff];
 }
 
-uint16_t crc_ccitt(const std::vector<uint8_t>& bytes)
+uint16_t crc_ccitt(const std::vector<uint8_t>& buffer)
 {
   uint16_t crc = 0x0000;
-  for (const uint8_t byte : bytes)
+  for (const uint8_t ch : buffer)
   {
-    crc = crc_ccitt_byte(crc, byte);
+    crc = crc_ccitt_byte(crc, ch);
   }
   return crc;
 }
