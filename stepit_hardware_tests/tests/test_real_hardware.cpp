@@ -99,7 +99,6 @@ TEST(TestStepitHardware, test_connection)
     RCLCPP_INFO(rclcpp::get_logger("TestStepitHardware"), "%d, p1:%f, v1:%f, p2:%f, v2:%f", i,
                 joint1_position_state.get_value(), joint1_velocity_state.get_value(), joint2_position_state.get_value(),
                 joint2_velocity_state.get_value());
-    rclcpp::sleep_for(std::chrono::milliseconds(30));
   }
 }
 

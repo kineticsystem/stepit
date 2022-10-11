@@ -249,11 +249,12 @@ void speedCommand(byte requestId, DataBuffer* cmd)
     float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
     float sgnSpeed = sgn(speed);
 
-    long position = motorState[motorId].getPosition() + sgnSpeed * TOTAL_STEPS;  // <-- ATTENTION, reading position.
-
-    Guard goalGuard{ writingMotorGoals };
-
     // Move the motor a full rotation in the direction dictated by the speed sign.
+
+    Guard readGuard{ readingMotorStates };
+    long position = motorState[motorId].getPosition() + sgnSpeed * TOTAL_STEPS;
+
+    Guard writeGuard{ writingMotorGoals };
     motorGoal[motorId].setPosition(position);
     motorGoal[motorId].setSpeed(absSpeed);
   }
