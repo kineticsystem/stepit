@@ -32,6 +32,7 @@
 #include <SerialPort.h>
 #include <DataBuffer.h>
 #include <Buffer.h>
+#include <limits.h>
 #include "MotorGoal.h"
 #include "MotorState.h"
 #include "MotorConfig.h"
@@ -65,6 +66,7 @@ constexpr byte STATUS_CMD = 0x75;              // Request motors position (rad) 
 constexpr byte INFO_CMD = 0x76;                // Request controller info for connection handshaking.
 constexpr byte SPEED_CMD = 0x77;               // Move motors at the given velocity (rad/s).
 constexpr byte CONFIG_CMD = 0x78;              // Configure the device.
+constexpr byte ECHO_CMD = 0x79;                // Return the given command, for debug purpose.
 constexpr byte SET_MOTORS_ENABLED_CMD = 0x7A;  // Enable interrupt to control the motors.
 
 // Arduino reboots in around two seconds when a serial connection is initiated.
@@ -244,18 +246,18 @@ void speedCommand(byte requestId, DataBuffer* cmd)
   for (int i = 0; i < 2; ++i)
   {
     byte motorId = cmd->removeByte(BufferPosition::Head);
-    float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));  // steps/s
-
+    float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
     float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
-    float sgnSpeed = sgn(speed);
-
-    // Move the motor a full rotation in the direction dictated by the speed sign.
-
-    Guard readGuard{ readingMotorStates };
-    long position = motorState[motorId].getPosition() + sgnSpeed * TOTAL_STEPS;
 
     Guard writeGuard{ writingMotorGoals };
-    motorGoal[motorId].setPosition(position);
+    if (speed >= 0)
+    {
+      motorGoal[motorId].setPosition(LONG_MAX);  // Move to +infinity.
+    }
+    else
+    {
+      motorGoal[motorId].setPosition(LONG_MIN);  // Move to -infinity.
+    }
     motorGoal[motorId].setSpeed(absSpeed);
   }
 
@@ -301,6 +303,23 @@ void moveCommand(byte requestId, DataBuffer* cmd)
 }
 
 /**
+ * Echo back the given command to test the serial communication.
+ * @param requestId The id of the request.
+ * @param cmd The command to echo.
+ */
+void echoCommand(byte requestId, DataBuffer* cmd)
+{
+  responseBuffer.addByte(requestId, BufferPosition::Tail);
+  responseBuffer.addByte(ECHO_CMD, BufferPosition::Tail);
+  while (cmd->getSize() > 0)
+  {
+    byte ch = cmd->removeByte(BufferPosition::Head);
+    responseBuffer.addByte(ch, BufferPosition::Tail);
+  }
+  serialPort.write(&responseBuffer);
+}
+
+/**
  * Decode the input command and execute the requested action.
  * @param msg The input message containing the command.
  */
@@ -332,10 +351,14 @@ void processBuffer(byte requestId, DataBuffer* cmd)
   {
     configureCommand(requestId, cmd);
   }
+  else if (cmdId == ECHO_CMD)
+  {
+    echoCommand(requestId, cmd);
+  }
   cmd->clear();
 }
 
-/*
+/**
  * Method called by an interrupt timer to move the stepper motors.
  */
 void run()
