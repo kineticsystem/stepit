@@ -140,12 +140,12 @@ TEST(TestStepitHardware, test_velocity_command)
 }
 
 /**
- * Send an echo command and check if it is bounced back by the micro controller.
- * This test is used to check if everything is working correctly at the
- * communication layer and if the microcontroller is running, listening and
- * answering to incoming commands.
+ * Send a sequence of echo commands and check if they are bounced back by the
+ * micro controller.
+ * The test check if everything is working at the communication layer, if the
+ * micro controller is running, listening and answering to incoming commands.
  * The test is designed to generate data buffers that contains bytes which must
- * be escaped including the CRC.
+ * be escaped, including the CRC.
  */
 TEST(TestStepitHardware, test_echo)
 {
