@@ -32,6 +32,8 @@
 
 namespace stepit_hardware
 {
+constexpr auto kLogger = "CommandHandler";
+
 CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
   : data_interface_{ std::move(data_interface) }
 {
@@ -64,8 +66,10 @@ AcknowledgeResponse CommandHandler::send(const ConfigCommand& command) const
     in.emplace_back(max_velocity_bytes[2]);
     in.emplace_back(max_velocity_bytes[3]);
   }
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Config command: %s", data_utils::to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Config response: %s", data_utils::to_hex(out).c_str());
   uint8_t request_id = out[0];
   Response::Status status{ out[1] };
   AcknowledgeResponse response{ request_id, status };
@@ -86,8 +90,10 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
     in.emplace_back(position_bytes[2]);
     in.emplace_back(position_bytes[3]);
   }
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Position command: %s", data_utils::to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Position response: %s", data_utils::to_hex(out).c_str());
   uint8_t request_id = out[0];
   Response::Status status{ out[1] };
   AcknowledgeResponse response{ request_id, status };
@@ -108,8 +114,10 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
     in.emplace_back(velocity_bytes[2]);
     in.emplace_back(velocity_bytes[3]);
   }
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Velocity command: %s", data_utils::to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Velocity response: %s", data_utils::to_hex(out).c_str());
   uint8_t request_id = out[0];
   Response::Status status{ out[1] };
   AcknowledgeResponse response{ request_id, status };
@@ -121,8 +129,10 @@ StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, c
   std::vector<uint8_t> in;
   in.emplace_back(query.request_id());
   in.emplace_back(query.query_id());
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Status query: %s", data_utils::to_hex(in).c_str());
   data_interface_->write(in);
-  auto data = data_interface_->read();
+  auto out = data_interface_->read();
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Status response: %s", data_utils::to_hex(out).c_str());
 
   // The data array contains the following information.
   //
@@ -142,15 +152,15 @@ StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, c
   // ...and so on.
 
   std::size_t i = 0;
-  uint8_t request_id = data[i++];
-  Response::Status status{ data[i++] };
+  uint8_t request_id = out[i++];
+  Response::Status status{ out[i++] };
   std::vector<StatusResponse::MotorState> motor_states;
-  while (i < data.size())
+  while (i < out.size())
   {
-    uint8_t id = data[i++];
-    float position = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
-    float speed = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
-    float distance_to_go = data_utils::to_float({ data[i++], data[i++], data[i++], data[i++] });
+    uint8_t id = out[i++];
+    float position = data_utils::to_float({ out[i++], out[i++], out[i++], out[i++] });
+    float speed = data_utils::to_float({ out[i++], out[i++], out[i++], out[i++] });
+    float distance_to_go = data_utils::to_float({ out[i++], out[i++], out[i++], out[i++] });
     motor_states.push_back(StatusResponse::MotorState{ id, position, speed, distance_to_go });
   }
 
