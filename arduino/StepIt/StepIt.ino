@@ -171,13 +171,19 @@ void sendReadyMessage()
   serialPort.write(&responseBuffer);
 }
 
-/**
- * Send a successful response when Arduino correctly executes a command.
- */
+/** Send a successful response. */
 void returnCommandSuccess(byte requestId)
 {
   responseBuffer.addByte(requestId, BufferPosition::Tail);
   responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
+  serialPort.write(&responseBuffer);
+}
+
+/** Send an error response. */
+void returnCommandError(byte requestId)
+{
+  responseBuffer.addByte(requestId, BufferPosition::Tail);
+  responseBuffer.addByte(ERROR_MSG, BufferPosition::Tail);
   serialPort.write(&responseBuffer);
 }
 
@@ -237,41 +243,19 @@ void setMotorsEnabled(byte requestId, DataBuffer* cmd)
 }
 
 /**
- * Move the motors at given speed.
- * @param requestId The request id.
- * @param cmd The move command.
- */
-void speedCommand(byte requestId, DataBuffer* cmd)
-{
-  for (int i = 0; i < 2; ++i)
-  {
-    byte motorId = cmd->removeByte(BufferPosition::Head);
-    float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
-    float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
-
-    Guard writeGuard{ writingMotorGoals };
-    if (speed >= 0)
-    {
-      motorGoal[motorId].setPosition(LONG_MAX);  // Move to +infinity.
-    }
-    else
-    {
-      motorGoal[motorId].setPosition(LONG_MIN);  // Move to -infinity.
-    }
-    motorGoal[motorId].setSpeed(absSpeed);
-  }
-
-  returnCommandSuccess(requestId);
-}
-
-/**
- * Move the motors at given speed.
+ * Configure the motors.
  * @param requestId The request id.
  * @param cmd The move command.
  */
 void configureCommand(byte requestId, DataBuffer* cmd)
 {
-  for (int i = 0; i < 2; ++i)
+  // We expect at least 9 bytes (motorId, speed) or multiple of 9.
+  if (cmd->getSize() < 9 || cmd->getSize() % 9 != 0)
+  {
+    returnCommandError(requestId);
+  };
+
+  while (cmd->getSize() > 0)
   {
     byte motorId = cmd->removeByte(BufferPosition::Head);
     float acceleration = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
@@ -283,13 +267,53 @@ void configureCommand(byte requestId, DataBuffer* cmd)
 }
 
 /**
+ * Move the motors at given speed.
+ * @param requestId The request id.
+ * @param cmd The move command.
+ */
+void speedCommand(byte requestId, DataBuffer* cmd)
+{
+  // We expect at least 5 bytes (motorId, speed) or multiple of 5.
+  if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
+  {
+    returnCommandError(requestId);
+  };
+
+  while (cmd->getSize() > 0)
+  {
+    byte motorId = cmd->removeByte(BufferPosition::Head);
+    float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
+    float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
+
+    Guard writeGuard{ writingMotorGoals };
+    if (speed >= 0)
+    {
+      motorGoal[motorId].setPosition(INT_MAX);  // Move to +infinity.
+    }
+    else
+    {
+      motorGoal[motorId].setPosition(INT_MIN);  // Move to -infinity.
+    }
+    motorGoal[motorId].setSpeed(absSpeed);
+  }
+
+  returnCommandSuccess(requestId);
+}
+
+/**
  * Move the motors at maximum speed to a given position.
  * @param requestId The id of the request.
  * @param cmd The move command.
  */
 void moveCommand(byte requestId, DataBuffer* cmd)
 {
-  for (int i = 0; i < 2; ++i)
+  // We expect at least 5 bytes (motorId, position) or multiple of 5.
+  if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
+  {
+    returnCommandError(requestId);
+  };
+
+  while (cmd->getSize() > 0)
   {
     byte motorId = cmd->removeByte(BufferPosition::Head);
     long position = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
