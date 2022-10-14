@@ -33,10 +33,14 @@
 #include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/serial_exception.hpp>
 
+#include <rclcpp/logging.hpp>
+
 #include <cstdint>
 
 namespace stepit_hardware
 {
+constexpr auto kLogger = "DataHandler";
+
 constexpr uint8_t DELIMITER_FLAG = 0x7E;  // Start and end of a packet
 constexpr uint8_t ESCAPE_FLAG = 0x7D;     // Escaping byte.
 constexpr uint8_t ESCAPED_XOR = 0x20;     // XOR value applied to escaped bytes.
@@ -104,6 +108,13 @@ std::vector<uint8_t> DataHandler::read()
         }
         else if (crc != 0)
         {
+          std::vector<uint8_t> data;
+          while (read_buffer_.size() > 0)
+          {
+            data.emplace_back(read_buffer_.remove(BufferPosition::Head));
+          }
+
+          RCLCPP_ERROR(rclcpp::get_logger(kLogger), "CRC error on data: %s", data_utils::to_hex(data).c_str());
           throw SerialException("CRC error");
         }
         else
