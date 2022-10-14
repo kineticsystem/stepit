@@ -48,7 +48,7 @@ AcknowledgeResponse FakeCommandHandler::send(const ConfigCommand& command) const
     FakeMotor motor;
     motor.set_acceleration(param.acceleration());
     motor.set_max_velocity(param.max_velocity());
-    motors_.emplace_back(motor);
+    motors_.insert({ param.motor_id(), motor });
   }
 
   return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
@@ -58,14 +58,14 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Pos
 {
   for (const auto& goal : command.goals())
   {
-    const auto motor_id = goal.motor_id();
-    if (motor_id >= motors_.size())
+    auto it = motors_.find(goal.motor_id());
+    if (it == motors_.end())
     {
       RCLCPP_ERROR(rclcpp::get_logger(kLoggerName), "Motor id does not exist.");
     }
     else
     {
-      motors_[motor_id].set_target_position(time, goal.position());
+      it->second.set_target_position(time, goal.position());
     }
   }
   return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
@@ -75,14 +75,14 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Vel
 {
   for (const auto& goal : command.goals())
   {
-    const auto motor_id = goal.motor_id();
-    if (motor_id >= motors_.size())
+    auto it = motors_.find(goal.motor_id());
+    if (it == motors_.end())
     {
       RCLCPP_ERROR(rclcpp::get_logger(kLoggerName), "Motor id does not exist.");
     }
     else
     {
-      motors_[motor_id].set_target_velocity(time, goal.velocity());
+      it->second.set_target_velocity(time, goal.velocity());
     }
   }
   return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
@@ -90,14 +90,13 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Vel
 
 StatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const StatusQuery& query) const
 {
-  uint8_t id = 0;
   std::vector<StatusResponse::MotorState> states;
-  for (const auto& motor : motors_)
+  for (const auto& [motor_id, motor] : motors_)
   {
     auto position = motor.get_position(time);
     auto velocity = motor.get_velocity(time);
     auto distance_to_go = 0.0;
-    StatusResponse::MotorState state{ id++, position, velocity, distance_to_go };
+    StatusResponse::MotorState state{ motor_id, position, velocity, distance_to_go };
     states.emplace_back(state);
   }
   return StatusResponse(query.request_id(), Response::Status::Success, states);

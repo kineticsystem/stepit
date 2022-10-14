@@ -35,7 +35,7 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-#include <vector>
+#include <map>
 
 namespace stepit_hardware
 {
@@ -57,6 +57,6 @@ private:
   /* Virtual motors behaving like real stepper motors with given acceletation
    * and absolute maximum velocity.
    */
-  mutable std::vector<FakeMotor> motors_;
+  mutable std::map<uint8_t, FakeMotor> motors_;
 };
 }  // namespace stepit_hardware
