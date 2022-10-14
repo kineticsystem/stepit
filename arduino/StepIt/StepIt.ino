@@ -32,7 +32,6 @@
 #include <SerialPort.h>
 #include <DataBuffer.h>
 #include <Buffer.h>
-#include <limits.h>
 #include "MotorGoal.h"
 #include "MotorState.h"
 #include "MotorConfig.h"
@@ -45,7 +44,7 @@ constexpr byte STEPPER0_DIR_PIN = 10;
 constexpr byte STEPPER1_STEP_PIN = 11;
 constexpr byte STEPPER1_DIR_PIN = 12;
 
-// Number of full steps to achieve a rotation: 200 * 16 µ-steps
+// Number of steps to achieve a full rotation: 200 * 16 µ-steps
 constexpr long TOTAL_STEPS = 3200;
 
 // This is the information sent by Arduino during the connection handshake.
@@ -58,7 +57,7 @@ constexpr int INTERRUPT_TIME_US = 90;
 // command buffer cleaned.
 constexpr int TIMEOUT_MS = 1000;
 
-// For each command received, Arduino returns a response with success or error
+// For each request received, Arduino returns a response with a success or error
 // code and possibly some data.
 
 constexpr byte MOVE_CMD = 0x71;                // Move motors to a given position (rad) at maximum speed (rad/s).
@@ -81,7 +80,7 @@ constexpr byte SUCCESS_MSG = 0x11;
 constexpr byte ERROR_MSG = 0x12;
 
 // Last time a message was received.
-long int timeMs = 0;
+long int lastMessageReceivedTime = 0;
 
 // Each time Arduino sends a command, this number increases.
 byte messageId = 0;
@@ -125,12 +124,12 @@ DataBuffer responseBuffer{ 50 };
 
 /**
  * Convert a rotation angle in radians to a number of steps.
- * @param radians The angle in radians.
+ * @param angle The angle in radians.
  * @return The angle in number of steps.
  */
-float radiansToSteps(float radians)
+float radiansToSteps(float angle)
 {
-  return 0.5f * radians * TOTAL_STEPS / PI;
+  return 0.5f * angle * TOTAL_STEPS / PI;
 }
 
 /**
@@ -145,16 +144,16 @@ float stepsToRadians(float steps)
 
 /**
  * @brief Compute the sign of the given number.
- * @param val The number to calculate the sign of.
+ * @param value The number to calculate the sign of.
  * @return The sign of the given number.
  */
-float sgn(float val)
+float sgn(float value)
 {
-  if (val > 0)
+  if (value > 0)
   {
     return 1.0f;
   }
-  if (val < 0)
+  if (value < 0)
   {
     return -1.0f;
   }
@@ -285,14 +284,20 @@ void speedCommand(byte requestId, DataBuffer* cmd)
     float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
     float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
 
+    // We move the stepper at constant speed to the maximum or the minimum
+    // possible positions.
+    // LONG_MAX (0x7FFFFFFF) and LONG_MIN (-80000000) do not work, probably
+    // because of inner working in AccelStepper library, so we chose close
+    // enough values.
+
     Guard writeGuard{ writingMotorGoals };
     if (speed >= 0)
     {
-      motorGoal[motorId].setPosition(INT_MAX);  // Move to +infinity.
+      motorGoal[motorId].setPosition(0x7F000000);  // Move to +infinity.
     }
     else
     {
-      motorGoal[motorId].setPosition(INT_MIN);  // Move to -infinity.
+      motorGoal[motorId].setPosition(-0x7F000000);  // Move to -infinity.
     }
     motorGoal[motorId].setSpeed(absSpeed);
   }
@@ -345,10 +350,12 @@ void echoCommand(byte requestId, DataBuffer* cmd)
 
 /**
  * Decode the input command and execute the requested action.
- * @param msg The input message containing the command.
+ * @param requestId The request id.
+ * @param cmd The the command data.
  */
 void processBuffer(byte requestId, DataBuffer* cmd)
 {
+  lastMessageReceivedTime = millis();
   byte cmdId = cmd->removeByte(BufferPosition::Head);
 
   if (cmdId == STATUS_CMD)
@@ -407,8 +414,8 @@ void run()
     // Read motor goals.
 
     // When we increase the maximum speed using AccellStepper, the motor will
-    // accelerate to match the new configuration. When we reduce the maximum
-    // speed, the motor will suddently drop the velocity without decelerating.
+    // accelerate to match it. When we reduce the maximum speed, the motor will
+    // suddently drop the velocity without decelerating.
     // The following code adds support to decelerate until reaching the lower
     // maximum speed.
 
@@ -465,9 +472,9 @@ void setup()
 
   // Send a message to the client that Arduino is ready to read/write data.
 
-  sendReadyMessage();
+  sendReadyMessage();  // TODO: remove this because it breaks the request/response paradigm.
 
-  timeMs = millis();
+  lastMessageReceivedTime = millis();
 }
 
 void loop()
@@ -475,12 +482,11 @@ void loop()
   serialPort.update();  // Read/write serial port data.
 
   // This is a safety measure; the client must keep sending messages.
-  // If no command is received within the given timeframe, motors are
-  // stopped.
+  // If no message (command or query) is received within the given timeframe,
+  // motors are stopped.
 
-  long newTimeMs = millis();
-  long timeDiffMs = newTimeMs - timeMs;
-  if (timeDiffMs > TIMEOUT_MS)
+  long timeFromLastMessage = millis() - lastMessageReceivedTime;
+  if (timeFromLastMessage > TIMEOUT_MS)
   {
     // Stop all motors.
     Guard goalGuard{ writingMotorGoals };
@@ -489,5 +495,4 @@ void loop()
       motorGoal[i].setSpeed(0);
     }
   }
-  timeMs = newTimeMs;
 }
