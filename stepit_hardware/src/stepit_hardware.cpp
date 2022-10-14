@@ -218,7 +218,7 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
     VelocityCommand command{ request_id++, velocities };
     AcknowledgeResponse response = command_interface_->send(time, command);
   }
-  else
+  else if (std::any_of(joints_.cbegin(), joints_.cend(), [](auto joint) { return !std::isnan(joint.command.position); }))
   {
     // Set positions.
 
