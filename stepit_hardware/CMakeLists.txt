@@ -45,53 +45,53 @@ find_package(serial REQUIRED)
 add_library(
     stepit_hardware
     SHARED
-    src/msgs/request.cpp
-    include/stepit_hardware/msgs/request.hpp
-    src/msgs/response.cpp
-    include/stepit_hardware/msgs/response.hpp
-    src/data_utils.cpp
-    include/stepit_hardware/data_utils.hpp
-    src/data_handler.cpp
-    include/stepit_hardware/data_handler.hpp
-    src/crc_utils.cpp
-    include/stepit_hardware/crc_utils.hpp
-    src/serial_handler.cpp
-    include/stepit_hardware/serial_handler.hpp
-    src/stepit_hardware.cpp
-    include/stepit_hardware/stepit_hardware.hpp
     include/stepit_hardware/buffer.hpp
-    include/stepit_hardware/data_interface.hpp
-    include/stepit_hardware/serial_interface.hpp
-    include/stepit_hardware/serial_exception.hpp
-    include/stepit_hardware/msgs/msgs_ids.hpp
-    src/msgs/status_query.cpp
-    include/stepit_hardware/msgs/status_query.hpp
-    src/msgs/status_response.cpp
-    include/stepit_hardware/msgs/status_response.hpp
-    src/msgs/info_query.cpp
-    include/stepit_hardware/msgs/info_query.hpp
-    src/msgs/info_response.cpp
-    include/stepit_hardware/msgs/info_response.hpp
-    src/msgs/velocity_command.cpp
-    include/stepit_hardware/msgs/velocity_command.hpp
-    src/msgs/position_command.cpp
-    include/stepit_hardware/msgs/position_command.hpp
-    src/msgs/acknowledge_response.cpp
-    include/stepit_hardware/msgs/acknowledge_response.hpp
-    src/fake/position_control.cpp
-    include/stepit_hardware/fake/position_control.hpp
-    src/fake/velocity_control.cpp
-    include/stepit_hardware/fake/velocity_control.hpp
-    include/stepit_hardware/command_interface.hpp
-    src/command_handler.cpp
     include/stepit_hardware/command_handler.hpp
-    src/fake/fake_command_handler.cpp
+    include/stepit_hardware/command_interface.hpp
+    include/stepit_hardware/crc_utils.hpp
+    include/stepit_hardware/data_handler.hpp
+    include/stepit_hardware/data_interface.hpp
+    include/stepit_hardware/data_utils.hpp
     include/stepit_hardware/fake/fake_command_handler.hpp
-    src/fake/fake_motor.cpp
     include/stepit_hardware/fake/fake_motor.hpp
-    src/msgs/config_command.cpp
+    include/stepit_hardware/fake/position_control.hpp
+    include/stepit_hardware/fake/velocity_control.hpp
+    include/stepit_hardware/msgs/acknowledge_response.hpp
     include/stepit_hardware/msgs/config_command.hpp
+    include/stepit_hardware/msgs/info_query.hpp
+    include/stepit_hardware/msgs/info_response.hpp
     include/stepit_hardware/msgs/msgs.hpp
+    include/stepit_hardware/msgs/msgs_ids.hpp
+    include/stepit_hardware/msgs/position_command.hpp
+    include/stepit_hardware/msgs/request.hpp
+    include/stepit_hardware/msgs/response.hpp
+    include/stepit_hardware/msgs/status_query.hpp
+    include/stepit_hardware/msgs/status_response.hpp
+    include/stepit_hardware/msgs/velocity_command.hpp
+    include/stepit_hardware/serial_exception.hpp
+    include/stepit_hardware/serial_handler.hpp
+    include/stepit_hardware/serial_interface.hpp
+    include/stepit_hardware/stepit_hardware.hpp
+    src/command_handler.cpp
+    src/crc_utils.cpp
+    src/data_handler.cpp
+    src/data_utils.cpp
+    src/fake/fake_command_handler.cpp
+    src/fake/fake_motor.cpp
+    src/fake/position_control.cpp
+    src/fake/velocity_control.cpp
+    src/msgs/acknowledge_response.cpp
+    src/msgs/config_command.cpp
+    src/msgs/info_query.cpp
+    src/msgs/info_response.cpp
+    src/msgs/position_command.cpp
+    src/msgs/request.cpp
+    src/msgs/response.cpp
+    src/msgs/status_query.cpp
+    src/msgs/status_response.cpp
+    src/msgs/velocity_command.cpp
+    src/serial_handler.cpp
+    src/stepit_hardware.cpp
 )
 target_include_directories(
     stepit_hardware
@@ -158,7 +158,6 @@ install(
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}      # bin
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} # include
 )
-
 
 ###############################################################################
 # TESTS
