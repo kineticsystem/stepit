@@ -29,13 +29,14 @@
 
 #pragma once
 
-#include <stepit_hardware/msgs/acknowledge_response.hpp>
-#include <stepit_hardware/msgs/config_command.hpp>
-#include <stepit_hardware/msgs/position_command.hpp>
-#include <stepit_hardware/msgs/status_query.hpp>
-#include <stepit_hardware/msgs/status_response.hpp>
-#include <stepit_hardware/msgs/velocity_command.hpp>
-#include <stepit_hardware/msgs/info_query.hpp>
-#include <stepit_hardware/msgs/info_response.hpp>
 #include <stepit_hardware/msgs/request.hpp>
-#include <stepit_hardware/msgs/response.hpp>
+
+namespace stepit_hardware
+{
+class InfoQuery : public Request
+{
+public:
+  explicit InfoQuery(uint8_t request_id);
+  uint8_t query_id() const;
+};
+}  // namespace stepit_hardware

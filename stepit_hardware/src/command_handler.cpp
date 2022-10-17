@@ -41,9 +41,8 @@ CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
 
 bool CommandHandler::init()
 {
-  data_interface_->open();
-  std::vector<uint8_t> out = data_interface_->read();
-  Response::Status status{ out[1] };
+  std::vector<uint8_t> ready_msg = data_interface_->open();
+  Response::Status status{ ready_msg[1] };
   return status == Response::Status::Success;
 }
 
@@ -165,6 +164,37 @@ StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, c
   }
 
   StatusResponse response{ request_id, status, motor_states };
+  return response;
+}
+
+InfoResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
+{
+  std::vector<uint8_t> in;
+  in.emplace_back(query.request_id());
+  in.emplace_back(query.query_id());
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Info query: %s", data_utils::to_hex(in).c_str());
+  data_interface_->write(in);
+  auto out = data_interface_->read();
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Info response: %s", data_utils::to_hex(out).c_str());
+
+  // The data array contains the following information.
+  //
+  // request id           - 1 byte
+  // status               - 1 byte
+  // a variable number of bytes representing a string in ASCII format - N bytes
+
+  std::size_t i = 0;
+  uint8_t request_id = out[i++];
+  Response::Status status{ out[i++] };
+  std::vector<uint8_t> data;
+  while (i < out.size())
+  {
+    uint8_t ch = out[i++];
+    data.push_back(ch);
+  }
+
+  std::string info{ data.begin(), data.end() };
+  InfoResponse response{ request_id, status, info };
   return response;
 }
 

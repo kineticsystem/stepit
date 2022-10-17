@@ -75,9 +75,17 @@ public:
   /**
    * @brief Request the status of each motor connected to the hardware.
    * @param time The time the command is sent.
-   * @param command A query for the status of each motor.
+   * @param query A query for the status of each motor.
    * @return Each motor status and a request status, success or failure.
    */
   virtual StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const = 0;
+
+  /**
+   * @brief Request information about the software installed in the micro-controller.
+   * @param time The time the command is sent.
+   * @param query A query to get the installed software information.
+   * @return Information about the installed software.
+   */
+  virtual InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const = 0;
 };
 }  // namespace stepit_hardware

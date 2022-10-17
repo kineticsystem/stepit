@@ -13,17 +13,33 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 endif()
 
 ###############################################################################
-# test_real_hardware
+# test_stepit_hardware
 
-ament_add_gmock(test_real_hardware
-    test_real_hardware.cpp
+ament_add_gmock(test_stepit_hardware
+    test_stepit_hardware.cpp
     stepit_hardware_info.hpp
 )
-target_include_directories(test_real_hardware
+target_include_directories(test_stepit_hardware
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(test_real_hardware stepit_hardware::stepit_hardware)
-ament_target_dependencies(test_real_hardware
+target_link_libraries(test_stepit_hardware stepit_hardware::stepit_hardware)
+ament_target_dependencies(test_stepit_hardware
+    stepit_hardware
+    pluginlib
+    ros2_control_test_assets
+)
+
+###############################################################################
+# test_data_interface
+
+ament_add_gmock(test_data_interface
+    test_data_interface.cpp
+)
+target_include_directories(test_data_interface
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(test_data_interface stepit_hardware::stepit_hardware)
+ament_target_dependencies(test_data_interface
     stepit_hardware
     pluginlib
     ros2_control_test_assets

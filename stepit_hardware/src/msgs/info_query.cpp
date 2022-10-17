@@ -27,15 +27,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <stepit_hardware/msgs/acknowledge_response.hpp>
-#include <stepit_hardware/msgs/config_command.hpp>
-#include <stepit_hardware/msgs/position_command.hpp>
-#include <stepit_hardware/msgs/status_query.hpp>
-#include <stepit_hardware/msgs/status_response.hpp>
-#include <stepit_hardware/msgs/velocity_command.hpp>
 #include <stepit_hardware/msgs/info_query.hpp>
-#include <stepit_hardware/msgs/info_response.hpp>
-#include <stepit_hardware/msgs/request.hpp>
-#include <stepit_hardware/msgs/response.hpp>
+#include <stepit_hardware/msgs/msgs_ids.hpp>
+
+namespace stepit_hardware
+{
+InfoQuery::InfoQuery(uint8_t request_id) : Request{ request_id }
+{
+}
+
+uint8_t InfoQuery::query_id() const
+{
+  return constants::kInfoQueryId;
+}
+}  // namespace stepit_hardware

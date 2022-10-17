@@ -29,13 +29,19 @@
 
 #pragma once
 
-#include <stepit_hardware/msgs/acknowledge_response.hpp>
-#include <stepit_hardware/msgs/config_command.hpp>
-#include <stepit_hardware/msgs/position_command.hpp>
-#include <stepit_hardware/msgs/status_query.hpp>
-#include <stepit_hardware/msgs/status_response.hpp>
-#include <stepit_hardware/msgs/velocity_command.hpp>
-#include <stepit_hardware/msgs/info_query.hpp>
-#include <stepit_hardware/msgs/info_response.hpp>
-#include <stepit_hardware/msgs/request.hpp>
 #include <stepit_hardware/msgs/response.hpp>
+
+#include <string>
+
+namespace stepit_hardware
+{
+class InfoResponse : public Response
+{
+public:
+  explicit InfoResponse(uint8_t request_id, Status status, const std::string& info);
+  std::string info() const;
+
+private:
+  std::string info_;
+};
+}  // namespace stepit_hardware

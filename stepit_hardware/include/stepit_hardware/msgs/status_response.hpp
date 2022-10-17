@@ -36,7 +36,6 @@
 
 namespace stepit_hardware
 {
-
 class StatusResponse : public Response
 {
 public:

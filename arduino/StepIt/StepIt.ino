@@ -48,7 +48,7 @@ constexpr byte STEPPER1_DIR_PIN = 12;
 constexpr long TOTAL_STEPS = 3200;
 
 // This is the information sent by Arduino during the connection handshake.
-constexpr char NAME[] = "STEPPIT\0";
+constexpr char NAME[] = "STEPIT\0";
 
 // The time between each execution of the run method.
 constexpr int INTERRUPT_TIME_US = 90;
@@ -488,6 +488,9 @@ void loop()
   long timeFromLastMessage = millis() - lastMessageReceivedTime;
   if (timeFromLastMessage > TIMEOUT_MS)
   {
+    // TODO: clean input and output buffers.
+    // serialPort.reset();
+
     // Stop all motors.
     Guard goalGuard{ writingMotorGoals };
     for (byte i = 0; i < 2; i++)

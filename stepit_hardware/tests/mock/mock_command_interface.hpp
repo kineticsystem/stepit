@@ -45,5 +45,6 @@ public:
   MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const PositionCommand& command), (override, const));
   MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const VelocityCommand& command), (override, const));
   MOCK_METHOD(StatusResponse, send, (const rclcpp::Time& time, const StatusQuery& query), (override, const));
+  MOCK_METHOD(InfoResponse, send, (const rclcpp::Time& time, const InfoQuery& query), (override, const));
 };
 }  // namespace stepit_hardware::test

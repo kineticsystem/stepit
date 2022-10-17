@@ -49,6 +49,9 @@
 #include <stepit_hardware/serial_handler.hpp>
 #include <stepit_hardware/data_handler.hpp>
 
+#include <thread>
+#include <chrono>
+
 namespace stepit_hardware::test
 {
 
@@ -93,7 +96,7 @@ TEST(TestStepitHardware, test_connection)
   joint1_velocity_command.set_value(4);
   joint2_velocity_command.set_value(1);
 
-  for (int i = 0; i < 100000; ++i)
+  for (int i = 0; i < 10; ++i)
   {
     // Invoke a write command.
     rm.write(rclcpp::Time{}, rclcpp::Duration::from_seconds(0));
@@ -101,81 +104,6 @@ TEST(TestStepitHardware, test_connection)
     RCLCPP_INFO(rclcpp::get_logger("TestStepitHardware"), "%d, p1:%f, v1:%f, p2:%f, v2:%f", i,
                 joint1_position_state.get_value(), joint1_velocity_state.get_value(), joint2_position_state.get_value(),
                 joint2_velocity_state.get_value());
-  }
-}
-
-/**
- * Send a packet of data corresponding to a velocity command and check
- * if the microcontroller answers back with a successful response.
- */
-TEST(TestStepitHardware, test_velocity_command)
-{
-  auto serial_handler = std::make_unique<SerialHandler>();
-  serial_handler->set_port("/dev/ttyUSB0");
-  serial_handler->set_baudrate(9600);
-  serial_handler->set_timeout(2000);
-
-  auto data_handler = std::make_unique<DataHandler>(std::move(serial_handler));
-  data_handler->open();
-  std::vector<uint8_t> out = data_handler->read();
-
-  const std::vector<uint8_t> data{
-    0x01,  // Request ID
-    0x77,  // Motor velocity command ID
-    0x00,  // Motor ID
-    0x40,  // Velocity = 4
-    0x80,  // Velocity
-    0x00,  // Velocity
-    0x00,  // Velocity
-    0x01,  // Motor ID
-    0x40,  // Velocity = 3
-    0x40,  // Velocity
-    0x00,  // Velocity
-    0x00   // Velocity
-  };
-  const std::vector<uint8_t> expected_response{ 0x01, 0x11 };
-  data_handler->write(data);
-  const std::vector<uint8_t> response = data_handler->read();
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(response), stepit_hardware::data_utils::to_hex(expected_response));
-}
-
-/**
- * Send a sequence of echo commands and check if they are bounced back by the
- * micro controller.
- * The test check if everything is working at the communication layer, if the
- * micro controller is running, listening and answering to incoming commands.
- * The test is designed to generate data buffers that contains bytes which must
- * be escaped, including the CRC.
- */
-TEST(TestStepitHardware, test_echo)
-{
-  auto serial_handler = std::make_unique<SerialHandler>();
-  serial_handler->set_port("/dev/ttyUSB0");
-  serial_handler->set_baudrate(9600);
-  serial_handler->set_timeout(2000);
-
-  auto data_handler = std::make_unique<DataHandler>(std::move(serial_handler));
-  data_handler->open();
-  std::vector<uint8_t> out = data_handler->read();
-
-  uint16_t crc = 0;
-  for (uint8_t i = 0; i <= 100; ++i)
-  {
-    const std::vector<uint8_t> data{
-      0x01,  // Request ID
-      0x79,  // Echo command.
-      0x40,  // Some random data.
-      0x7E,  // A delimiter flag which must be escaped.
-      0x03,  // Some random data.
-      0x7D,  // An escape flag which must be escaped.
-      0x01,  // Some random data.
-      0x20,  // An escape XOR, just in case.
-      i      // This value will cause some CRC to contains values which must be escaped.
-    };
-
-    data_handler->write(data);
-    const std::vector<uint8_t> echo = data_handler->read();
-    ASSERT_THAT(stepit_hardware::data_utils::to_hex(data), stepit_hardware::data_utils::to_hex(echo));
   }
 }
 

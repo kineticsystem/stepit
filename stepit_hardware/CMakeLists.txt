@@ -37,9 +37,11 @@ find_package(serial REQUIRED)
 
 # CMake does not need headers listed here and it is generally recommended not
 # to add them to avoid additional maintenance burden.
-# Unfortunately, QtCreator needs them, to display them in the class view,
+# Unfortunately, QtCreator needs them to display them in the class view,
 # for easily navigating between class and header files (F4) and for automatic
 # code formatting.
+# The time spent in the IDE is longer than the time spend maintaining this
+# list, so we added the header files too.
 add_library(
     stepit_hardware
     SHARED
@@ -66,6 +68,10 @@ add_library(
     include/stepit_hardware/msgs/status_query.hpp
     src/msgs/status_response.cpp
     include/stepit_hardware/msgs/status_response.hpp
+    src/msgs/info_query.cpp
+    include/stepit_hardware/msgs/info_query.hpp
+    src/msgs/info_response.cpp
+    include/stepit_hardware/msgs/info_response.hpp
     src/msgs/velocity_command.cpp
     include/stepit_hardware/msgs/velocity_command.hpp
     src/msgs/position_command.cpp
@@ -163,3 +169,13 @@ if (BUILD_TESTING)
 endif()
 
 ament_package()
+
+###############################################################################
+# LINTERS
+
+add_custom_target(format
+    COMMAND clang-format -i `git ls-files *.hpp *.cpp`
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_custom_target(tidy
+    COMMAND clang-tidy -p ${CMAKE_BINARY_DIR} `git ls-files *.cpp`
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

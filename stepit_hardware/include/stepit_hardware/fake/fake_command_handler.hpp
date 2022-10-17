@@ -52,6 +52,7 @@ public:
   AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
   StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
+  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
 
 private:
   /* Virtual motors behaving like real stepper motors with given acceletation

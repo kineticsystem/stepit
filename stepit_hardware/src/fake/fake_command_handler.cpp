@@ -101,4 +101,9 @@ StatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const StatusQu
   }
   return StatusResponse(query.request_id(), Response::Status::Success, states);
 }
+
+InfoResponse FakeCommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
+{
+  return InfoResponse(query.request_id(), Response::Status::Success, "STEPIT");
+}
 }  // namespace stepit_hardware
