@@ -36,44 +36,33 @@
 #include <hardware_interface/hardware_info.hpp>
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
-
-#include <memory>
+#include <rclcpp_lifecycle/state.hpp>
+#include <rclcpp/macros.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace stepit_hardware
 {
-
-class StepitHardwareImpl;
-
-/**
- * https://control.ros.org/master/doc/ros2_control/hardware_interface/doc/writing_new_hardware_interface.html
- */
-class StepitHardware : public hardware_interface::SystemInterface
+class StepitHardwareImpl : public hardware_interface::SystemInterface
 {
 public:
   /**
    * Default constructor.
    */
-  StepitHardware();
+  StepitHardwareImpl() = default;
 
   /**
    * Constructor with given command interface. This method is used for testing.
    * @param command_interface The interface to send commands and queries to
    * the hardware.
    */
-  explicit StepitHardware(std::unique_ptr<CommandInterface> command_interface);
-
-  /**
-   * A destructor is required when using pimpl idiom because it may be called
-   * in places where pimpl is still undefined.
-   */
-  ~StepitHardware();
+  explicit StepitHardwareImpl(std::unique_ptr<CommandInterface> command_interface);
 
   /**
    * Defines aliases and static functions for using the Class with shared_ptrs.
    * With such definitions, the control manager can instantiate the class with
    * auto hardware_interface = StepitHardware::make_shared();
    */
-  RCLCPP_SHARED_PTR_DEFINITIONS(StepitHardware)
+  RCLCPP_SHARED_PTR_DEFINITIONS(StepitHardwareImpl)
 
   /**
    * Initialization of the hardware interface from data parsed from the
@@ -124,6 +113,29 @@ public:
                                                                const rclcpp::Duration& period) override;
 
 private:
-  std::unique_ptr<StepitHardwareImpl> impl_;
+  // Internal structure to store joint states or targets.
+  struct JointValue
+  {
+    double position = 0.0;
+    double velocity = 0.0;
+  };
+
+  // Internal structure to store joint states and targets.
+  struct Joint
+  {
+    uint8_t id = 0;
+    double acceleration = 0;
+    double max_velocity = 0;
+    JointValue state{};
+    JointValue command{};
+  };
+
+  // Store information about current joint states and targets.
+  std::vector<Joint> joints_;
+
+  // Interface to send binary data to the hardware using the serial port.
+  std::unique_ptr<CommandInterface> command_interface_;
+
+  uint8_t request_id = 0;
 };
 }  // namespace stepit_hardware
