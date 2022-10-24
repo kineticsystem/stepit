@@ -63,70 +63,76 @@ StepitHardware::StepitHardware(std::unique_ptr<CommandInterface> command_interfa
 hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "on_init");
-  if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
+  try
+  {
+    // Save hardware info.
+
+    info_ = info;
+
+    // Initialize all joints.
+
+    joints_.resize(info_.joints.size(), Joint{});
+
+    for (uint i = 0; i < info_.joints.size(); i++)
+    {
+      joints_[i].id = static_cast<uint8_t>(std::stoi(info_.joints[i].parameters.at("id")));
+      joints_[i].acceleration = std::stod(info_.joints[i].parameters.at("acceleration"));
+      joints_[i].max_velocity = std::stod(info_.joints[i].parameters.at("max_velocity"));
+      joints_[i].state.position = kNaN;
+      joints_[i].state.velocity = kNaN;
+      joints_[i].command.position = kNaN;
+      joints_[i].command.velocity = kNaN;
+      RCLCPP_INFO(rclcpp::get_logger(kLogger), "joint_id %d: %d", i, joints_[i].id);
+    }
+
+    // If "use_dummy" is true return a fake hardware otherwise return a real one.
+
+    if (!command_interface_)
+    {
+      if (info_.hardware_parameters.find("use_dummy") != info_.hardware_parameters.end() &&
+          info_.hardware_parameters.at("use_dummy") == "true")
+      {
+        command_interface_ = std::make_unique<FakeCommandHandler>();
+      }
+      else
+      {
+        std::string usb_port = info.hardware_parameters.at("usb_port");
+        RCLCPP_INFO(rclcpp::get_logger(kLogger), "usb_port: %s", usb_port.c_str());
+
+        uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
+        RCLCPP_INFO(rclcpp::get_logger(kLogger), "baud_rate: %d", baud_rate);
+
+        double timeout = std::stod(info.hardware_parameters.at("timeout"));
+        uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
+        RCLCPP_INFO(rclcpp::get_logger(kLogger), "timeout: %f", timeout);
+
+        auto serial_handler = std::make_unique<SerialHandler>();
+        serial_handler->set_port(usb_port);
+        serial_handler->set_baudrate(baud_rate);
+        serial_handler->set_timeout(timeout_ms);
+
+        command_interface_ = std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
+      }
+    }
+
+    // Open the serial port and handshake.
+    command_interface_->init();
+
+    // Send configuration parameters to the hardware.
+    std::vector<ConfigCommand::Param> params;
+    for (const auto joint : joints_)
+    {
+      params.emplace_back(ConfigCommand::Param{ joint.id, joint.acceleration, joint.max_velocity });
+    }
+    const AcknowledgeResponse response = command_interface_->send(ConfigCommand{ request_id++, params });
+    if (response.status() == Response::Status::Failure)
+    {
+      return CallbackReturn::FAILURE;
+    }
+  }
+  catch (const std::exception& ex)
   {
     return CallbackReturn::ERROR;
-  }
-
-  // Initialize all joints.
-
-  joints_.resize(info_.joints.size(), Joint{});
-
-  for (uint i = 0; i < info_.joints.size(); i++)
-  {
-    joints_[i].id = static_cast<uint8_t>(std::stoi(info_.joints[i].parameters.at("id")));
-    joints_[i].acceleration = std::stod(info_.joints[i].parameters.at("acceleration"));
-    joints_[i].max_velocity = std::stod(info_.joints[i].parameters.at("max_velocity"));
-    joints_[i].state.position = kNaN;
-    joints_[i].state.velocity = kNaN;
-    joints_[i].command.position = kNaN;
-    joints_[i].command.velocity = kNaN;
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "joint_id %d: %d", i, joints_[i].id);
-  }
-
-  // If "use_dummy" is true return a fake hardware otherwise return a real one.
-
-  if (!command_interface_)
-  {
-    if (info_.hardware_parameters.find("use_dummy") != info_.hardware_parameters.end() &&
-        info_.hardware_parameters.at("use_dummy") == "true")
-    {
-      command_interface_ = std::make_unique<FakeCommandHandler>();
-    }
-    else
-    {
-      std::string usb_port = info.hardware_parameters.at("usb_port");
-      RCLCPP_INFO(rclcpp::get_logger(kLogger), "usb_port: %s", usb_port.c_str());
-
-      uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
-      RCLCPP_INFO(rclcpp::get_logger(kLogger), "baud_rate: %d", baud_rate);
-
-      double timeout = std::stod(info.hardware_parameters.at("timeout"));
-      uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
-      RCLCPP_INFO(rclcpp::get_logger(kLogger), "timeout: %f", timeout);
-
-      auto serial_handler = std::make_unique<SerialHandler>();
-      serial_handler->set_port(usb_port);
-      serial_handler->set_baudrate(baud_rate);
-      serial_handler->set_timeout(timeout_ms);
-
-      command_interface_ = std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
-    }
-  }
-
-  // Open the serial port and handshake.
-  command_interface_->init();
-
-  // Send configuration parameters to the hardware.
-  std::vector<ConfigCommand::Param> params;
-  for (const auto joint : joints_)
-  {
-    params.emplace_back(ConfigCommand::Param{ joint.id, joint.acceleration, joint.max_velocity });
-  }
-  const AcknowledgeResponse response = command_interface_->send(ConfigCommand{ request_id++, params });
-  if (response.status() == Response::Status::Failure)
-  {
-    return CallbackReturn::FAILURE;
   }
 
   return CallbackReturn::SUCCESS;
@@ -135,29 +141,43 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
 std::vector<hardware_interface::StateInterface> StepitHardware::export_state_interfaces()
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "export_state_interfaces");
-  std::vector<hardware_interface::StateInterface> state_interfaces;
-  for (uint i = 0; i < info_.joints.size(); i++)
+  try
   {
-    state_interfaces.emplace_back(hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joints_[i].state.position));
-    state_interfaces.emplace_back(hardware_interface::StateInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joints_[i].state.velocity));
+    std::vector<hardware_interface::StateInterface> state_interfaces;
+    for (uint i = 0; i < info_.joints.size(); i++)
+    {
+      state_interfaces.emplace_back(hardware_interface::StateInterface(
+          info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joints_[i].state.position));
+      state_interfaces.emplace_back(hardware_interface::StateInterface(
+          info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joints_[i].state.velocity));
+    }
+    return state_interfaces;
   }
-  return state_interfaces;
+  catch (const std::exception& ex)
+  {
+    return {};
+  }
 }
 
 std::vector<hardware_interface::CommandInterface> StepitHardware::export_command_interfaces()
 {
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "export_command_interfaces");
-  std::vector<hardware_interface::CommandInterface> command_interfaces;
-  for (uint i = 0; i < info_.joints.size(); i++)
+  try
   {
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joints_[i].command.position));
-    command_interfaces.emplace_back(hardware_interface::CommandInterface(
-        info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joints_[i].command.velocity));
+    std::vector<hardware_interface::CommandInterface> command_interfaces;
+    for (uint i = 0; i < info_.joints.size(); i++)
+    {
+      command_interfaces.emplace_back(hardware_interface::CommandInterface(
+          info_.joints[i].name, hardware_interface::HW_IF_POSITION, &joints_[i].command.position));
+      command_interfaces.emplace_back(hardware_interface::CommandInterface(
+          info_.joints[i].name, hardware_interface::HW_IF_VELOCITY, &joints_[i].command.velocity));
+    }
+    return command_interfaces;
   }
-  return command_interfaces;
+  catch (const std::exception& ex)
+  {
+    return {};
+  }
 }
 
 hardware_interface::CallbackReturn
@@ -177,24 +197,31 @@ StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& pr
 hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
-  StatusQuery query{ request_id++ };
-  StatusResponse response = command_interface_->send(time, query);
-
-  auto motor_states = response.motor_states();
-  if (motor_states.size() != joints_.size())
+  try
   {
-    RCLCPP_ERROR(rclcpp::get_logger(kLogger), "incorrect number of joints");
+    StatusQuery query{ request_id++ };
+    StatusResponse response = command_interface_->send(time, query);
+
+    auto motor_states = response.motor_states();
+    if (motor_states.size() != joints_.size())
+    {
+      RCLCPP_ERROR(rclcpp::get_logger(kLogger), "incorrect number of joints");
+      return hardware_interface::return_type::ERROR;
+    }
+
+    for (std::size_t i = 0; i < motor_states.size(); ++i)
+    {
+      uint8_t motor_id = motor_states[i].id();
+      joints_[motor_id].state.position = motor_states[i].position();
+      joints_[motor_id].state.velocity = motor_states[i].velocity();
+    }
+
+    return hardware_interface::return_type::OK;
+  }
+  catch (const std::exception& ex)
+  {
     return hardware_interface::return_type::ERROR;
   }
-
-  for (std::size_t i = 0; i < motor_states.size(); ++i)
-  {
-    uint8_t motor_id = motor_states[i].id();
-    joints_[motor_id].state.position = motor_states[i].position();
-    joints_[motor_id].state.velocity = motor_states[i].velocity();
-  }
-
-  return hardware_interface::return_type::OK;
 }
 
 // How to set velocity commands using the command line:
@@ -202,39 +229,47 @@ hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
 hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
                                                       [[maybe_unused]] const rclcpp::Duration& period)
 {
-  if (std::any_of(joints_.cbegin(), joints_.cend(), [](auto joint) { return !std::isnan(joint.command.velocity); }))
+  try
   {
-    // Set velocities.
-
-    std::vector<VelocityCommand::Goal> velocities;
-    for (const auto& joint : joints_)
+    if (std::any_of(joints_.cbegin(), joints_.cend(), [](auto joint) { return !std::isnan(joint.command.velocity); }))
     {
-      if (!std::isnan(joint.command.velocity))
+      // Set velocities.
+
+      std::vector<VelocityCommand::Goal> velocities;
+      for (const auto& joint : joints_)
       {
-        VelocityCommand::Goal velocity{ joint.id, joint.command.velocity };
-        velocities.push_back(velocity);
+        if (!std::isnan(joint.command.velocity))
+        {
+          VelocityCommand::Goal velocity{ joint.id, joint.command.velocity };
+          velocities.push_back(velocity);
+        }
       }
+      VelocityCommand command{ request_id++, velocities };
+      AcknowledgeResponse response = command_interface_->send(time, command);
     }
-    VelocityCommand command{ request_id++, velocities };
-    AcknowledgeResponse response = command_interface_->send(time, command);
+    else if (std::any_of(joints_.cbegin(), joints_.cend(),
+                         [](auto joint) { return !std::isnan(joint.command.position); }))
+    {
+      // Set positions.
+
+      std::vector<PositionCommand::Goal> positions;
+      for (const auto& joint : joints_)
+      {
+        if (!std::isnan(joint.command.position))
+        {
+          PositionCommand::Goal position{ joint.id, joint.command.position };
+          positions.push_back(position);
+        }
+      }
+      PositionCommand command{ request_id++, positions };
+      AcknowledgeResponse response = command_interface_->send(time, command);
+    }
+    return hardware_interface::return_type::OK;
   }
-  else if (std::any_of(joints_.cbegin(), joints_.cend(), [](auto joint) { return !std::isnan(joint.command.position); }))
+  catch (const std::exception& ex)
   {
-    // Set positions.
-
-    std::vector<PositionCommand::Goal> positions;
-    for (const auto& joint : joints_)
-    {
-      if (!std::isnan(joint.command.position))
-      {
-        PositionCommand::Goal position{ joint.id, joint.command.position };
-        positions.push_back(position);
-      }
-    }
-    PositionCommand command{ request_id++, positions };
-    AcknowledgeResponse response = command_interface_->send(time, command);
+    return hardware_interface::return_type::ERROR;
   }
-  return hardware_interface::return_type::OK;
 }
 
 }  // namespace stepit_hardware
