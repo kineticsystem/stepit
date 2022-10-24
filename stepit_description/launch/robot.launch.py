@@ -50,7 +50,7 @@ def launch_setup(context, *args, **kwargs):
     # Declare all parameters.
     description_package_param = LaunchConfiguration("description_package")
     description_file_param = LaunchConfiguration("description_file")
-    controllers_file_param = LaunchConfiguration("controllers_file")
+    controllers_config_file_param = LaunchConfiguration("controllers_file")
     launch_rviz = LaunchConfiguration("launch_rviz")
 
     # Extract all parameters' values.
@@ -60,8 +60,12 @@ def launch_setup(context, *args, **kwargs):
     rviz_config_file = PathJoinSubstitution(
         [FindPackageShare(description_package_param), "rviz", "stepit.rviz"]
     ).perform(context)
-    controllers_file = PathJoinSubstitution(
-        [FindPackageShare(description_package_param), "config", controllers_file_param]
+    controllers_config_file = PathJoinSubstitution(
+        [
+            FindPackageShare(description_package_param),
+            "config",
+            controllers_config_file_param,
+        ]
     ).perform(context)
 
     robot_description_content = xacro.process_file(description_file).toxml()
@@ -74,7 +78,7 @@ def launch_setup(context, *args, **kwargs):
         executable="ros2_control_node",
         parameters=[
             {"robot_description": robot_description_content},
-            controllers_file,
+            controllers_config_file,
         ],
     )
 
