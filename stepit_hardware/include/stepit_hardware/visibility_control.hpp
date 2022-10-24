@@ -20,8 +20,8 @@
 
 #pragma once
 
-#define STEPIT_HARDWARE_EXPORT __attribute__((visibility("default")))
-#define STEPIT_HARDWARE_IMPORT
-#define STEPIT_HARDWARE_PUBLIC __attribute__((visibility("default")))
-#define STEPIT_HARDWARE_LOCAL __attribute__((visibility("hidden")))
-#define STEPIT_HARDWARE_PUBLIC_TYPE
+#define stepit_hardware_EXPORT __attribute__((visibility("default")))
+#define stepit_hardware_IMPORT
+#define stepit_hardware_PUBLIC __attribute__((visibility("default")))
+#define stepit_hardware_LOCAL __attribute__((visibility("hidden")))
+#define stepit_hardware_PUBLIC_TYPE

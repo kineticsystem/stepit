@@ -36,14 +36,12 @@
 #include <hardware_interface/hardware_info.hpp>
 #include <hardware_interface/system_interface.hpp>
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
-
-#include <memory>
+#include <rclcpp_lifecycle/state.hpp>
+#include <rclcpp/macros.hpp>
+#include <rclcpp/rclcpp.hpp>
 
 namespace stepit_hardware
 {
-
-class StepitHardwareImpl;
-
 /**
  * https://control.ros.org/master/doc/ros2_control/hardware_interface/doc/writing_new_hardware_interface.html
  */
@@ -53,7 +51,7 @@ public:
   /**
    * Default constructor.
    */
-  StepitHardware();
+  StepitHardware() = default;
 
   /**
    * Constructor with given command interface. This method is used for testing.
@@ -61,12 +59,6 @@ public:
    * the hardware.
    */
   explicit StepitHardware(std::unique_ptr<CommandInterface> command_interface);
-
-  /**
-   * A destructor is required when using pimpl idiom because it may be called
-   * in places where pimpl is still undefined.
-   */
-  ~StepitHardware();
 
   /**
    * Defines aliases and static functions for using the Class with shared_ptrs.
@@ -82,48 +74,68 @@ public:
    * @returns CallbackReturn::SUCCESS if required data are provided and can be
    * parsed or CallbackReturn::ERROR if any error happens or data are missing.
    */
-  STEPIT_HARDWARE_PUBLIC hardware_interface::CallbackReturn
-  on_init(const hardware_interface::HardwareInfo& info) override;
+  stepit_hardware_PUBLIC CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
 
   /**
    * This method exposes position and velocity of joints for reading.
    */
-  STEPIT_HARDWARE_PUBLIC std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
+  stepit_hardware_PUBLIC std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
   /**
    * This method exposes the joints targets for writing.
    */
-  STEPIT_HARDWARE_PUBLIC std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
+  stepit_hardware_PUBLIC std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
   /**
    * This method is invoked when the hardware is connected.
    * @param previous_state Unconfigured, Inactive, Active or Finalized.
    * @returns CallbackReturn::SUCCESS or CallbackReturn::ERROR.
    */
-  STEPIT_HARDWARE_PUBLIC hardware_interface::CallbackReturn
-  on_activate(const rclcpp_lifecycle::State& previous_state) override;
+  stepit_hardware_PUBLIC CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
    * This method is invoked when the hardware is disconnected.
    * @param previous_state Unconfigured, Inactive, Active or Finalized.
    * @returns CallbackReturn::SUCCESS or CallbackReturn::ERROR.
    */
-  STEPIT_HARDWARE_PUBLIC hardware_interface::CallbackReturn
-  on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
+  stepit_hardware_PUBLIC CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
    * Read data from the hardware.
    */
-  STEPIT_HARDWARE_PUBLIC hardware_interface::return_type read(const rclcpp::Time& time,
+  stepit_hardware_PUBLIC hardware_interface::return_type read(const rclcpp::Time& time,
                                                               const rclcpp::Duration& period) override;
 
   /**
    * Write data from to hardware.
    */
-  STEPIT_HARDWARE_PUBLIC hardware_interface::return_type write(const rclcpp::Time& time,
+  stepit_hardware_PUBLIC hardware_interface::return_type write(const rclcpp::Time& time,
                                                                const rclcpp::Duration& period) override;
 
 private:
-  std::unique_ptr<StepitHardwareImpl> impl_;
+  // Internal structure to store joint states or targets.
+  struct JointValue
+  {
+    double position = 0.0;
+    double velocity = 0.0;
+  };
+
+  // Internal structure to store joint states and targets.
+  struct Joint
+  {
+    uint8_t id = 0;
+    double acceleration = 0;
+    double max_velocity = 0;
+    JointValue state{};
+    JointValue command{};
+  };
+
+  // Store information about current joint states and targets.
+  std::vector<Joint> joints_;
+
+  // Interface to send binary data to the hardware using the serial port.
+  std::unique_ptr<CommandInterface> command_interface_;
+
+  uint8_t request_id = 0;
 };
 }  // namespace stepit_hardware

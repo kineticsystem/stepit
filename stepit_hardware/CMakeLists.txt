@@ -72,7 +72,6 @@ add_library(
     include/stepit_hardware/serial_handler.hpp
     include/stepit_hardware/serial_interface.hpp
     include/stepit_hardware/stepit_hardware.hpp
-    include/stepit_hardware/stepit_hardware_impl.hpp
     src/command_handler.cpp
     src/crc_utils.cpp
     src/data_handler.cpp
@@ -93,7 +92,6 @@ add_library(
     src/msgs/velocity_command.cpp
     src/serial_handler.cpp
     src/stepit_hardware.cpp
-    src/stepit_hardware_impl.cpp
 )
 target_include_directories(
     stepit_hardware
