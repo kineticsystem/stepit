@@ -47,7 +47,7 @@ public:
   /**
    * @brief Initialize the command interface.
    */
-  virtual bool init() = 0;
+  virtual bool connect() = 0;
 
   /**
    * @brief Configure the hardware.

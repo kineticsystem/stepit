@@ -39,7 +39,7 @@ CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
 {
 }
 
-bool CommandHandler::init()
+bool CommandHandler::connect()
 {
   std::vector<uint8_t> ready_msg = data_interface_->open();
   Response::Status status{ ready_msg[1] };

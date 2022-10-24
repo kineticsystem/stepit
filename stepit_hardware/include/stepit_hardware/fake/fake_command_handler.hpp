@@ -47,7 +47,7 @@ class FakeCommandHandler : public CommandInterface
 {
 public:
   FakeCommandHandler() = default;
-  bool init() override;
+  bool connect() override;
   AcknowledgeResponse send(const ConfigCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;

@@ -133,7 +133,7 @@ TEST(TestStepitHardware, read_status)
   // clang-format on
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, init()).WillByDefault(Return(true));
+  ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
   ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, An<const StatusQuery&>())).WillOnce(Return(mocked_response));
@@ -186,7 +186,7 @@ TEST(TestStepitHardware, write_velocities)
   VelocityCommand actual_request{ 0, {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, init()).WillByDefault(Return(true));
+  ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
   ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, Matcher<const VelocityCommand&>(_)))
@@ -242,7 +242,7 @@ TEST(TestStepitHardware, write_positions)
   PositionCommand actual_request{ 0, {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, init()).WillByDefault(Return(true));
+  ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
   ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, Matcher<const PositionCommand&>(_)))
@@ -299,7 +299,7 @@ TEST(TestStepitHardware, configuration)
   ConfigCommand actual_request{ 0, {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, init()).WillByDefault(Return(true));
+  ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
   EXPECT_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
       .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
 

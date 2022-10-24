@@ -41,6 +41,7 @@
 
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
+#include <hardware_interface/types/lifecycle_state_names.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
 
@@ -67,7 +68,10 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
   {
     // Save hardware info.
 
-    info_ = info;
+    if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
+    {
+      return CallbackReturn::ERROR;
+    }
 
     // Initialize all joints.
 
@@ -114,9 +118,29 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
         command_interface_ = std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
       }
     }
+    return CallbackReturn::SUCCESS;
+  }
+  catch (const std::exception& ex)
+  {
+    set_state(rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                      hardware_interface::lifecycle_state_names::UNCONFIGURED));
+    return CallbackReturn::ERROR;
+  }
+}
+
+rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
+StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
+{
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "export_state_interfaces");
+  try
+  {
+    if (hardware_interface::SystemInterface::on_configure(previous_state) != CallbackReturn::SUCCESS)
+    {
+      return CallbackReturn::ERROR;
+    }
 
     // Open the serial port and handshake.
-    command_interface_->init();
+    command_interface_->connect();
 
     // Send configuration parameters to the hardware.
     std::vector<ConfigCommand::Param> params;
@@ -129,13 +153,14 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
     {
       return CallbackReturn::FAILURE;
     }
+    return CallbackReturn::SUCCESS;
   }
   catch (const std::exception& ex)
   {
+    set_state(rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                      hardware_interface::lifecycle_state_names::UNCONFIGURED));
     return CallbackReturn::ERROR;
   }
-
-  return CallbackReturn::SUCCESS;
 }
 
 std::vector<hardware_interface::StateInterface> StepitHardware::export_state_interfaces()
@@ -155,6 +180,8 @@ std::vector<hardware_interface::StateInterface> StepitHardware::export_state_int
   }
   catch (const std::exception& ex)
   {
+    set_state(rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                      hardware_interface::lifecycle_state_names::UNCONFIGURED));
     return {};
   }
 }
@@ -176,6 +203,8 @@ std::vector<hardware_interface::CommandInterface> StepitHardware::export_command
   }
   catch (const std::exception& ex)
   {
+    set_state(rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                      hardware_interface::lifecycle_state_names::UNCONFIGURED));
     return {};
   }
 }
@@ -220,6 +249,8 @@ hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
   }
   catch (const std::exception& ex)
   {
+    set_state(rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                      hardware_interface::lifecycle_state_names::UNCONFIGURED));
     return hardware_interface::return_type::ERROR;
   }
 }
@@ -268,6 +299,8 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
   }
   catch (const std::exception& ex)
   {
+    set_state(rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                      hardware_interface::lifecycle_state_names::UNCONFIGURED));
     return hardware_interface::return_type::ERROR;
   }
 }

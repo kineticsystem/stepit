@@ -35,7 +35,7 @@ namespace stepit_hardware
 {
 constexpr auto kLoggerName = "FakeCommandHandler";
 
-bool FakeCommandHandler::init()
+bool FakeCommandHandler::connect()
 {
   return true;
 }

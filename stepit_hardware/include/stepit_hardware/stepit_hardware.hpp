@@ -77,6 +77,14 @@ public:
   stepit_hardware_PUBLIC CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
 
   /**
+   * Connect to the hardware.
+   * @param previous_state The previous state.
+   * @returns CallbackReturn::SUCCESS if required data are provided and can be
+   * parsed or CallbackReturn::ERROR if any error happens or data are missing.
+   */
+  stepit_hardware_PUBLIC CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
+
+  /**
    * This method exposes position and velocity of joints for reading.
    */
   stepit_hardware_PUBLIC std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
