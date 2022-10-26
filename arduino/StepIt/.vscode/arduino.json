@@ -1,8 +1,7 @@
 {
-    "board": "arduino:avr:nano",
+    "board": "arduino:avr:uno",
     "programmer": "arduino:avrisp",
     "sketch": "StepIt.ino",
-    "port": "/dev/ttyUSB0",
-    "configuration": "cpu=atmega328old",
+    "port": "/dev/ttyACM0",
     "output": "../ArduinoOutput"
 }

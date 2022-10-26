@@ -37,12 +37,15 @@
 #include "MotorConfig.h"
 #include "Guard.h"
 
-// Motors connections.
+// X-axis stepper connections.
+constexpr byte STEPPER0_EN_PIN = 8;
+constexpr byte STEPPER0_STEP_PIN = 2;
+constexpr byte STEPPER0_DIR_PIN = 5;
 
-constexpr byte STEPPER0_STEP_PIN = 9;
-constexpr byte STEPPER0_DIR_PIN = 10;
-constexpr byte STEPPER1_STEP_PIN = 11;
-constexpr byte STEPPER1_DIR_PIN = 12;
+// Y-axis stepper connections.
+constexpr byte STEPPER1_EN_PIN = 9;
+constexpr byte STEPPER1_STEP_PIN = 3;
+constexpr byte STEPPER1_DIR_PIN = 6;
 
 // Number of steps to achieve a full rotation: 200 * 16 µ-steps
 constexpr long TOTAL_STEPS = 3200;
@@ -450,6 +453,14 @@ void run()
 
 void setup()
 {
+  // Enable steppers.
+
+  pinMode(STEPPER0_EN_PIN, OUTPUT);
+  digitalWrite(STEPPER0_EN_PIN, LOW);
+
+  pinMode(STEPPER1_EN_PIN, OUTPUT);
+  digitalWrite(STEPPER1_EN_PIN, LOW);
+
   // Initialize serial port.
 
   serialPort.init(9600);
