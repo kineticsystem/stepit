@@ -1,7 +1,0 @@
-{
-    "board": "arduino:avr:uno",
-    "programmer": "arduino:avrisp",
-    "sketch": "StepIt.ino",
-    "port": "/dev/ttyACM0",
-    "output": "../ArduinoOutput"
-}
