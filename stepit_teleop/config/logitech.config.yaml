@@ -6,13 +6,13 @@ teleop_twist_joy_node:
   ros__parameters:
     axis_linear: # Joystick axis used to update the linear x value.
       x: 1
-    scale_linear: # Output value in [-1, 1] interval.
-      x: 1.0
+    scale_linear: # Output value in [-5 rotation/s, +5 rotation/s] interval.
+      x: 31.4159265359
 
     axis_angular: # Joystick axis used to update the twist roll value.
       roll: 3
-    scale_angular: # Output value in [-1, 1] interval.
-      roll: 1.0
+    scale_angular: # Output value in [-5 rotation/s, +5 rotation/s] interval.
+      roll: 31.4159265359
 
     # configure the dead man's switch.
     require_enable_button: false

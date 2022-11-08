@@ -62,11 +62,14 @@ DataHandler::DataHandler(std::unique_ptr<SerialInterface> serial) : serial_{ std
 {
 }
 
-std::vector<uint8_t> DataHandler::open()
+void DataHandler::open()
 {
   serial_->open();
-  std::vector<uint8_t> ready_msg = read();
-  return ready_msg;
+}
+
+void DataHandler::close()
+{
+  serial_->close();
 }
 
 std::vector<uint8_t> DataHandler::read()

@@ -53,7 +53,12 @@ public:
   /**
    * Open the serial connection.
    */
-  std::vector<uint8_t> open() override;
+  void open() override;
+
+  /**
+   * Close the serial connection.
+   */
+  void close() override;
 
   /**
    * Write a sequence of bytes to the serial port.

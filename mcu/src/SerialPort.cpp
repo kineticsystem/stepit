@@ -125,9 +125,22 @@ void SerialPort::setCallback(void (*callback)(byte responseId, DataBuffer*))
   this->callback = callback;
 }
 
+/**
+ * A packet of data has two delimiting flags, a request id, some data and a CRC code:
+ *
+ * delimiter  - 1 byte
+ * request id - 1 byte
+ * ...
+ * data       - any number of bytes
+ * ...
+ * crc        - 2 bytes
+ * delimiter  - 1 byte
+ */
 void SerialPort::update()
 {
   // Read.
+
+  // A message must contain
 
   // Get the number of bytes (characters) available for reading from the serial port.
   if (Serial.available() > 0)
@@ -141,9 +154,16 @@ void SerialPort::update()
       case Waiting:
         if (ch == DELIMITER_FLAG)
         {
-          crc = 0;
+          // When we send a message over a serial port that is not yet connected,
+          // only part of the message may be received.
+          // For this reason, if we find some garbage data, followed by a delimiter,
+          // we throw the partial message away.
           m_readBuffer->clear();
-          m_state = ReadingMessage;
+          if (m_readBuffer->getSize() == 0)
+          {
+            crc = 0;
+            m_state = ReadingMessage;
+          }
         }
         break;
 
@@ -156,11 +176,6 @@ void SerialPort::update()
         {
           if (m_readBuffer->getSize() >= 4)
           {
-            // A packet must contain minimum:
-            // 1 - a request id (1 byte);
-            // 2 - a command (1 byte);
-            // 3 - a CRC (2 bytes).
-
             // CRC calculated on frame data is zero when the frame data
             // is correct.
             if (crc == 0)

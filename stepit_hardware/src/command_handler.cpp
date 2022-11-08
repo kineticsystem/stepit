@@ -41,9 +41,37 @@ CommandHandler::CommandHandler(std::unique_ptr<DataInterface> data_interface)
 
 bool CommandHandler::connect()
 {
-  std::vector<uint8_t> ready_msg = data_interface_->open();
-  Response::Status status{ ready_msg[1] };
-  return status == Response::Status::Success;
+  data_interface_->open();
+
+  // Send a message multiple times until an answer comes back.
+
+  int trial = 0;
+  bool connected = false;
+  while (!connected && trial < 5)
+  {
+    try
+    {
+      RCLCPP_INFO(rclcpp::get_logger(kLogger), "Connecting...");
+
+      StatusQuery query{ 0 };
+      StatusResponse response = send(rclcpp::Time{}, query);
+      connected = response.status() == Response::Status::Success;
+
+      RCLCPP_INFO(rclcpp::get_logger(kLogger), "Connection established");
+    }
+    catch (const std::exception& ex)
+    {
+      RCLCPP_WARN(rclcpp::get_logger(kLogger), "Connection failed");
+      trial++;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  return connected;
+}
+
+void CommandHandler::disconnect()
+{
+  data_interface_->close();
 }
 
 AcknowledgeResponse CommandHandler::send(const ConfigCommand& command) const

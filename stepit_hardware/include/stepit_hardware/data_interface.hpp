@@ -39,7 +39,8 @@ class DataInterface
 public:
   virtual ~DataInterface() = default;
 
-  virtual std::vector<uint8_t> open() = 0;
+  virtual void open() = 0;
+  virtual void close() = 0;
 
   /**
    * Read a sequence of bytes from the serial port.

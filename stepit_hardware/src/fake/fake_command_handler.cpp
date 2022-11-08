@@ -40,6 +40,10 @@ bool FakeCommandHandler::connect()
   return true;
 }
 
+void FakeCommandHandler::disconnect()
+{
+}
+
 AcknowledgeResponse FakeCommandHandler::send(const ConfigCommand& command) const
 {
   motors_.clear();

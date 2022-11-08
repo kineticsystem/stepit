@@ -47,6 +47,7 @@ class CommandHandler : public CommandInterface
 public:
   explicit CommandHandler(std::unique_ptr<DataInterface> data_interface);
   bool connect() override;
+  void disconnect() override;
   AcknowledgeResponse send(const ConfigCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
   AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;

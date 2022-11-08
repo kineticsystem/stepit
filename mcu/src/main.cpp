@@ -57,8 +57,8 @@ constexpr char NAME[] = "STEPIT\0";
 constexpr int INTERRUPT_TIME_US = 20;
 
 // If no command is received within this time, motors are stopped and the
-// command buffer cleaned.
-constexpr int TIMEOUT_MS = 1000;
+// command buffers cleaned.
+constexpr int TIMEOUT_MS = 1000;  // Millis
 
 // For each request received, Arduino returns a response with a success or error
 // code and possibly some data.
@@ -70,11 +70,6 @@ constexpr byte SPEED_CMD = 0x77;               // Move motors at the given veloc
 constexpr byte CONFIG_CMD = 0x78;              // Configure the device.
 constexpr byte ECHO_CMD = 0x79;                // Return the given command, for debugging.
 constexpr byte SET_MOTORS_ENABLED_CMD = 0x7A;  // Enable interrupt to control the motors.
-
-// Arduino reboots in around two seconds when a serial connection is initiated.
-// To notify the client that Arduino is ready to receive and transmit data, a ready message
-// is sent.
-constexpr byte READY_MSG = 0x80;
 
 // Success response code.
 constexpr byte SUCCESS_MSG = 0x11;
@@ -89,21 +84,13 @@ long int lastMessageReceivedTime = 0;
 byte messageId = 0;
 
 // Interrupts.
-IntervalTimer myTimer;
+IntervalTimer timer;
 
 // Stepper motors.
 AccelStepper stepper[] = { AccelStepper{ AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN },
                            AccelStepper{ AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN } };
 
 // Stepper motors configuration: acceleration and max speed.
-// If we make motors run too fast, Arduino will not be able to communicate through
-// the serial port fast enough.
-// AccelStepper library reports that on Arduino at 16Mhz we cannot achieve speeds
-// higher than 4000 steps per second on a single motor. With two motors running
-// at the same time, the maximum speed of each motor is 2000 steps per second.
-// To give Arduino time to read and write from and to the serial port, the speed
-// must be reduced further.
-// http://www.airspayce.com/mikem/arduino/AccelStepper/classAccelStepper.html
 MotorConfig motorConfig[] = { MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 } };
 
 // This structure holds motor goals: the main thread updates the goal and the
@@ -225,16 +212,6 @@ void run()
   }
 }
 
-/**
- * Send a ready message when Arduino is ready to communicate.
- */
-void sendReadyMessage()
-{
-  responseBuffer.addByte(messageId++, BufferPosition::Tail);
-  responseBuffer.addByte(READY_MSG, BufferPosition::Tail);
-  serialPort.write(&responseBuffer);
-}
-
 /** Send a successful response. */
 void returnCommandSuccess(byte requestId)
 {
@@ -297,11 +274,11 @@ void setMotorsEnabled(byte requestId, DataBuffer* cmd)
   byte enabled = cmd->removeByte(BufferPosition::Head);
   if (enabled == 0)
   {
-    myTimer.begin(run, INTERRUPT_TIME_US);
+    timer.begin(run, INTERRUPT_TIME_US);
   }
   else
   {
-    myTimer.end();
+    timer.end();
   }
   returnCommandSuccess(requestId);
 }
@@ -457,7 +434,6 @@ void processBuffer(byte requestId, DataBuffer* cmd)
 void setup()
 {
   // Enable steppers.
-
   pinMode(STEPPER0_EN_PIN, OUTPUT);
   digitalWrite(STEPPER0_EN_PIN, HIGH);
 
@@ -465,12 +441,10 @@ void setup()
   digitalWrite(STEPPER1_EN_PIN, HIGH);
 
   // Initialize serial port.
-
   serialPort.init(9600);
   serialPort.setCallback(&processBuffer);
 
   // Initialize stepper motors.
-
   for (byte i = 0; i < 2; i++)
   {
     stepper[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
@@ -480,15 +454,7 @@ void setup()
   }
 
   // Initialize interrupt.
-
-  myTimer.begin(run, INTERRUPT_TIME_US);
-
-  // Send a message to the client that the Arduino is ready to read/write data.
-  // Unfortunately there is an issue with this message. The client reads this message during the handshake,
-  // but if the client is then disconnected, at the next connection no ready message is ever received.
-  // To reconnect we are required to unplug the Teensy, which is not ideal.
-  // TODO: remove this because it breaks the request/response paradigm.
-  sendReadyMessage();
+  timer.begin(run, INTERRUPT_TIME_US);
 
   lastMessageReceivedTime = millis();
 }

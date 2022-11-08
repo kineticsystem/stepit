@@ -50,6 +50,11 @@ public:
   virtual bool connect() = 0;
 
   /**
+   * @brief Disconnect the interface..
+   */
+  virtual void disconnect() = 0;
+
+  /**
    * @brief Configure the hardware.
    * @param command A command with all required configuration.
    * @return An aknowledgment response, success or failure.
