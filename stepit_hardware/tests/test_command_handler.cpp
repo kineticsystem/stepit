@@ -47,12 +47,10 @@ using ::testing::SaveArg;
 TEST(TestCommandHandler, send_status_query)
 {
   const std::vector<uint8_t> expected_request{
-    0x00,  // request ID
     0x75,  // query ID
   };
 
   const std::vector<uint8_t> mocked_response{
-    0x00,  // request ID
     0x11,  // status success
     0x00,  // motor ID
     0x46,  // position = 32100.0 (rad)
@@ -88,7 +86,7 @@ TEST(TestCommandHandler, send_status_query)
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
   auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
-  StatusQuery request{ 0 };
+  StatusQuery request{};
 
   StatusResponse response = command_handler->send(rclcpp::Time{}, request);
 
@@ -109,7 +107,6 @@ TEST(TestCommandHandler, send_status_query)
 TEST(TestCommandHandler, send_velocity_command)
 {
   const std::vector<uint8_t> expected_request{
-    0x00,  // request ID
     0x77,  // command ID
     0x00,  // motor ID
     0x3F,  // velocity = 0.5 (rad/s)
@@ -124,8 +121,7 @@ TEST(TestCommandHandler, send_velocity_command)
   };
 
   const std::vector<uint8_t> mocked_response{
-    0x00,  // Request Id
-    0x11   // Status
+    0x11  // Status
   };
 
   std::vector<uint8_t> actual_request;
@@ -134,12 +130,11 @@ TEST(TestCommandHandler, send_velocity_command)
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
   auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
-  VelocityCommand request{ 0, { VelocityCommand::Goal{ 0, 0.5 }, VelocityCommand::Goal{ 1, 0.75 } } };
+  VelocityCommand request{ { VelocityCommand::Goal{ 0, 0.5 }, VelocityCommand::Goal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
               stepit_hardware::data_utils::to_hex(expected_request));
-  ASSERT_EQ(0, response.request_id());
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 
@@ -150,7 +145,6 @@ TEST(TestCommandHandler, send_velocity_command)
 TEST(TestCommandHandler, send_position_command)
 {
   const std::vector<uint8_t> expected_request{
-    0x00,  // request ID
     0x71,  // command ID
     0x00,  // motor ID
     0x3F,  // position = 0.5 (rad)
@@ -165,8 +159,7 @@ TEST(TestCommandHandler, send_position_command)
   };
 
   const std::vector<uint8_t> mocked_response{
-    0x00,  // Request Id
-    0x11   // Status
+    0x11  // Status
   };
 
   std::vector<uint8_t> actual_request;
@@ -175,12 +168,11 @@ TEST(TestCommandHandler, send_position_command)
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
   auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
-  PositionCommand request{ 0, { PositionCommand::Goal{ 0, 0.5 }, PositionCommand::Goal{ 1, 0.75 } } };
+  PositionCommand request{ { PositionCommand::Goal{ 0, 0.5 }, PositionCommand::Goal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
               stepit_hardware::data_utils::to_hex(expected_request));
-  ASSERT_EQ(0, response.request_id());
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 
@@ -191,7 +183,6 @@ TEST(TestCommandHandler, send_position_command)
 TEST(TestCommandHandler, send_configure_command)
 {
   const std::vector<uint8_t> expected_request{
-    0x00,  // request ID
     0x78,  // command ID
     0x00,  // motor ID
     0x3F,  // acceleration = 0.5 (rad/s^2)
@@ -214,8 +205,7 @@ TEST(TestCommandHandler, send_configure_command)
   };
 
   const std::vector<uint8_t> mocked_response{
-    0x00,  // Request Id
-    0x11   // Status
+    0x11  // Status
   };
 
   std::vector<uint8_t> actual_request;
@@ -224,12 +214,11 @@ TEST(TestCommandHandler, send_configure_command)
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
   auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
-  ConfigCommand request{ 0, { ConfigCommand::Param{ 0, 0.5, 0.75 }, ConfigCommand::Param{ 1, 0.5, 0.75 } } };
+  ConfigCommand request{ { ConfigCommand::Param{ 0, 0.5, 0.75 }, ConfigCommand::Param{ 1, 0.5, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(request);
 
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
               stepit_hardware::data_utils::to_hex(expected_request));
-  ASSERT_EQ(0, response.request_id());
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 

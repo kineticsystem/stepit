@@ -32,13 +32,8 @@
 namespace stepit_hardware
 {
 
-Request::Request(uint8_t request_id) : request_id_{ request_id }
+Request::Request()
 {
-}
-
-uint8_t Request::request_id() const
-{
-  return request_id_;
 }
 
 }  // namespace stepit_hardware

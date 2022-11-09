@@ -123,7 +123,6 @@ TEST(TestStepitHardware, read_status)
 {
   // clang-format off
   const StatusResponse mocked_response{
-      1,     // request ID
       Response::Status::Success,
       {
           StatusResponse::MotorState{ 0, 32100, 0.5, 150 },     // Motor 0 status
@@ -135,7 +134,7 @@ TEST(TestStepitHardware, read_status)
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
   ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
   ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
-      .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, An<const StatusQuery&>())).WillOnce(Return(mocked_response));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
@@ -175,7 +174,6 @@ TEST(TestStepitHardware, write_velocities)
 {
   // clang-format off
   const VelocityCommand expected_request{
-    1,  // request ID
     {
         VelocityCommand::Goal{ 0, 0.5 },  // Motor 0 goal
         VelocityCommand::Goal{ 1, 0.75 }  // Motor 1 goal
@@ -183,14 +181,14 @@ TEST(TestStepitHardware, write_velocities)
   };
   // clang-format on
 
-  VelocityCommand actual_request{ 0, {} };
+  VelocityCommand actual_request{ {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
   ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
   ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
-      .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, Matcher<const VelocityCommand&>(_)))
-      .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ 0x01, Response::Status::Success })));
+      .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ Response::Status::Success })));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
 
@@ -214,7 +212,6 @@ TEST(TestStepitHardware, write_velocities)
   const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
   rm.write(time, period);
 
-  ASSERT_EQ(actual_request.request_id(), expected_request.request_id());
   ASSERT_EQ(actual_request.goals().size(), actual_request.goals().size());
   ASSERT_EQ(actual_request.goals()[0].motor_id(), actual_request.goals()[0].motor_id());
   ASSERT_EQ(actual_request.goals()[0].velocity(), actual_request.goals()[0].velocity());
@@ -231,7 +228,6 @@ TEST(TestStepitHardware, write_positions)
 {
   // clang-format off
   const PositionCommand expected_request{
-    1,  // request ID
     {
         PositionCommand::Goal{ 0, 0.5 },  // Motor 0 goal
         PositionCommand::Goal{ 1, 0.75 }  // Motor 1 goal
@@ -239,14 +235,14 @@ TEST(TestStepitHardware, write_positions)
   };
   // clang-format on
 
-  PositionCommand actual_request{ 0, {} };
+  PositionCommand actual_request{ {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
   ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
   ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
-      .WillByDefault(Return(AcknowledgeResponse{ 0x00, Response::Status::Success }));
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, Matcher<const PositionCommand&>(_)))
-      .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ 0x01, Response::Status::Success })));
+      .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ Response::Status::Success })));
 
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
 
@@ -270,7 +266,6 @@ TEST(TestStepitHardware, write_positions)
   const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
   rm.write(time, period);
 
-  ASSERT_EQ(actual_request.request_id(), expected_request.request_id());
   ASSERT_EQ(actual_request.goals().size(), actual_request.goals().size());
   ASSERT_EQ(actual_request.goals()[0].motor_id(), actual_request.goals()[0].motor_id());
   ASSERT_EQ(actual_request.goals()[0].position(), actual_request.goals()[0].position());
@@ -287,7 +282,6 @@ TEST(TestStepitHardware, configuration)
 {
   // clang-format off
    const ConfigCommand expected_request{
-     0,  // request ID
      {
          ConfigCommand::Param{ 0, 0.1, 0.2 },  // Motor 0 goal
          ConfigCommand::Param{ 1, 0.3, 0.4}    // Motor 1 goal
@@ -295,8 +289,8 @@ TEST(TestStepitHardware, configuration)
    };
   // clang-format on
 
-  const AcknowledgeResponse mocked_response{ 0x00, Response::Status::Success };
-  ConfigCommand actual_request{ 0, {} };
+  const AcknowledgeResponse mocked_response{ Response::Status::Success };
+  ConfigCommand actual_request{ {} };
 
   auto mock_command_interface = std::make_unique<MockCommandInterface>();
   ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
@@ -314,7 +308,6 @@ TEST(TestStepitHardware, configuration)
                                  hardware_interface::lifecycle_state_names::ACTIVE };
   rm.set_component_state("StepitHardware", state);
 
-  ASSERT_EQ(actual_request.request_id(), expected_request.request_id());
   ASSERT_EQ(actual_request.params().size(), actual_request.params().size());
   ASSERT_EQ(actual_request.params()[0].motor_id(), actual_request.params()[0].motor_id());
   ASSERT_EQ(actual_request.params()[0].acceleration(), actual_request.params()[0].acceleration());

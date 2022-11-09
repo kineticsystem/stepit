@@ -43,13 +43,11 @@ public:
     Failure = 0x12,
   };
 
-  explicit Response(uint8_t request_id, Status status);
+  explicit Response(Status status);
   virtual ~Response() = default;
-  uint8_t request_id() const;
   Status status() const;
 
 private:
-  uint8_t request_id_;
   Status status_;
 };
 }  // namespace stepit_hardware

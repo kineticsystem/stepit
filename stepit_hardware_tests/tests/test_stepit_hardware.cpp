@@ -64,7 +64,6 @@ TEST(TestStepitHardware, test_connection)
 
   StepitHardwareInfo info;
   info.hardware_parameters["use_dummy"] = false;
-  info.hardware_parameters["timeout"] = "2.0";  // Seconds.
 
   // Load the component.
   hardware_interface::ResourceManager rm;

@@ -48,7 +48,7 @@ constexpr byte STEPPER1_STEP_PIN = 3;
 constexpr byte STEPPER1_DIR_PIN = 6;
 
 // Number of steps to achieve a full rotation: 360deg / 1.8deg * 16μsteps = 200
-constexpr long TOTAL_STEPS = 3200;
+constexpr long STEPS_IN_ONE_ROTATION = 3200;
 
 // This is the information sent by Arduino during the connection handshake.
 constexpr char NAME[] = "STEPIT\0";
@@ -122,7 +122,7 @@ DataBuffer responseBuffer{ 50 };
  */
 float radiansToSteps(float angle)
 {
-  return (angle * 0.5f / PI) * TOTAL_STEPS;
+  return (angle * 0.5f / PI) * STEPS_IN_ONE_ROTATION;
 }
 
 /**
@@ -132,7 +132,7 @@ float radiansToSteps(float angle)
  */
 float stepsToRadians(float steps)
 {
-  return (steps / TOTAL_STEPS) * 2.0f * PI;
+  return (steps / STEPS_IN_ONE_ROTATION) * 2.0f * PI;
 }
 
 /**
@@ -213,17 +213,15 @@ void run()
 }
 
 /** Send a successful response. */
-void returnCommandSuccess(byte requestId)
+void returnCommandSuccess()
 {
-  responseBuffer.addByte(requestId, BufferPosition::Tail);
   responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
   serialPort.write(&responseBuffer);
 }
 
 /** Send an error response. */
-void returnCommandError(byte requestId)
+void returnCommandError()
 {
-  responseBuffer.addByte(requestId, BufferPosition::Tail);
   responseBuffer.addByte(ERROR_MSG, BufferPosition::Tail);
   serialPort.write(&responseBuffer);
 }
@@ -232,9 +230,8 @@ void returnCommandError(byte requestId)
  * When a Status command is received, send back the position of the motor (rad) and
  * its speed (rad/s).
  */
-void returnStatus(byte requestId)
+void returnStatus()
 {
-  responseBuffer.addByte(requestId, BufferPosition::Tail);
   responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
   {
     Guard stateGuard{ readingMotorStates };
@@ -253,9 +250,8 @@ void returnStatus(byte requestId)
  * Send information about the software installed on Arduino to help the client
  * identify the correct port where Arduino is connected.
  */
-void returnControllerInfo(byte requestId)
+void returnControllerInfo()
 {
-  responseBuffer.addByte(requestId, BufferPosition::Tail);
   responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
   for (int i = 0; NAME[i] != '\0'; i++)
   {
@@ -266,10 +262,9 @@ void returnControllerInfo(byte requestId)
 
 /**
  * Enable or disable the Service Interrupt Routine (SIR) to move the motors.
- * @param requestId The id of the request.
  * @param enabled True to enable the motors control, false to disable.
  */
-void setMotorsEnabled(byte requestId, DataBuffer* cmd)
+void setMotorsEnabled(DataBuffer* cmd)
 {
   byte enabled = cmd->removeByte(BufferPosition::Head);
   if (enabled == 0)
@@ -280,20 +275,19 @@ void setMotorsEnabled(byte requestId, DataBuffer* cmd)
   {
     timer.end();
   }
-  returnCommandSuccess(requestId);
+  returnCommandSuccess();
 }
 
 /**
  * Configure the motors.
- * @param requestId The request id.
  * @param cmd The move command.
  */
-void configureCommand(byte requestId, DataBuffer* cmd)
+void configureCommand(DataBuffer* cmd)
 {
   // We expect at least 9 bytes (motorId, speed) or multiple of 9.
   if (cmd->getSize() < 9 || cmd->getSize() % 9 != 0)
   {
-    returnCommandError(requestId);
+    returnCommandError();
   };
 
   while (cmd->getSize() > 0)
@@ -304,20 +298,19 @@ void configureCommand(byte requestId, DataBuffer* cmd)
 
     // TODO: do something.
   }
-  returnCommandSuccess(requestId);
+  returnCommandSuccess();
 }
 
 /**
  * Move the motors at given speed.
- * @param requestId The request id.
  * @param cmd The move command.
  */
-void speedCommand(byte requestId, DataBuffer* cmd)
+void speedCommand(DataBuffer* cmd)
 {
   // We expect at least 5 bytes (motorId, speed) or multiple of 5.
   if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
   {
-    returnCommandError(requestId);
+    returnCommandError();
   };
 
   while (cmd->getSize() > 0)
@@ -344,20 +337,19 @@ void speedCommand(byte requestId, DataBuffer* cmd)
     motorGoal[motorId].setSpeed(absSpeed);
   }
 
-  returnCommandSuccess(requestId);
+  returnCommandSuccess();
 }
 
 /**
  * Move the motors at maximum speed to a given position.
- * @param requestId The id of the request.
  * @param cmd The move command.
  */
-void moveCommand(byte requestId, DataBuffer* cmd)
+void moveCommand(DataBuffer* cmd)
 {
   // We expect at least 5 bytes (motorId, position) or multiple of 5.
   if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
   {
-    returnCommandError(requestId);
+    returnCommandError();
   };
 
   while (cmd->getSize() > 0)
@@ -370,17 +362,15 @@ void moveCommand(byte requestId, DataBuffer* cmd)
     motorGoal[motorId].setPosition(position);
     motorGoal[motorId].setSpeed(speed);
   }
-  returnCommandSuccess(requestId);
+  returnCommandSuccess();
 }
 
 /**
  * Echo back the given command to test the serial communication.
- * @param requestId The id of the request.
  * @param cmd The command to echo.
  */
-void echoCommand(byte requestId, DataBuffer* cmd)
+void echoCommand(DataBuffer* cmd)
 {
-  responseBuffer.addByte(requestId, BufferPosition::Tail);
   responseBuffer.addByte(ECHO_CMD, BufferPosition::Tail);
   while (cmd->getSize() > 0)
   {
@@ -392,41 +382,40 @@ void echoCommand(byte requestId, DataBuffer* cmd)
 
 /**
  * Decode the input command and execute the requested action.
- * @param requestId The request id.
  * @param cmd The the command data.
  */
-void processBuffer(byte requestId, DataBuffer* cmd)
+void processBuffer(DataBuffer* cmd)
 {
   lastMessageReceivedTime = millis();
   byte cmdId = cmd->removeByte(BufferPosition::Head);
 
   if (cmdId == STATUS_CMD)
   {
-    returnStatus(requestId);
+    returnStatus();
   }
   else if (cmdId == MOVE_CMD)
   {
-    moveCommand(requestId, cmd);
+    moveCommand(cmd);
   }
   else if (cmdId == SPEED_CMD)
   {
-    speedCommand(requestId, cmd);
+    speedCommand(cmd);
   }
   else if (cmdId == INFO_CMD)
   {
-    returnControllerInfo(requestId);
+    returnControllerInfo();
   }
   else if (cmdId == SET_MOTORS_ENABLED_CMD)
   {
-    setMotorsEnabled(requestId, cmd);
+    setMotorsEnabled(cmd);
   }
   else if (cmdId == CONFIG_CMD)
   {
-    configureCommand(requestId, cmd);
+    configureCommand(cmd);
   }
   else if (cmdId == ECHO_CMD)
   {
-    echoCommand(requestId, cmd);
+    echoCommand(cmd);
   }
   cmd->clear();
 }

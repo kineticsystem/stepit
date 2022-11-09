@@ -36,7 +36,7 @@ namespace stepit_hardware
 class StatusQuery : public Request
 {
 public:
-  explicit StatusQuery(uint8_t request_id);
+  explicit StatusQuery();
   uint8_t query_id() const;
 };
 }  // namespace stepit_hardware

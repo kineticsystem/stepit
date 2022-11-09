@@ -59,7 +59,7 @@ public:
     double velocity_;
   };
 
-  explicit VelocityCommand(uint8_t request_id, const std::vector<Goal>& goals);
+  explicit VelocityCommand(const std::vector<Goal>& goals);
   uint8_t command_id() const;
   std::vector<Goal> goals() const;
 

@@ -38,6 +38,6 @@ namespace stepit_hardware
 class AcknowledgeResponse : public Response
 {
 public:
-  explicit AcknowledgeResponse(uint8_t request_id, Status status);
+  explicit AcknowledgeResponse(Status status);
 };
 }  // namespace stepit_hardware

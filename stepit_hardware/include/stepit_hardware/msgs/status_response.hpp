@@ -71,7 +71,7 @@ public:
     double distance_to_go_;
   };
 
-  explicit StatusResponse(uint8_t request_id, Status status, std::vector<MotorState> motor_states);
+  explicit StatusResponse(Status status, std::vector<MotorState> motor_states);
   std::vector<MotorState> motor_states() const;
 
 private:

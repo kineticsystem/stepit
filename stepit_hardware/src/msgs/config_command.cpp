@@ -32,8 +32,7 @@
 
 namespace stepit_hardware
 {
-ConfigCommand::ConfigCommand(uint8_t request_id, const std::vector<Param>& params)
-  : Request{ request_id }, params_{ params }
+ConfigCommand::ConfigCommand(const std::vector<Param>& params) : Request{}, params_{ params }
 {
 }
 

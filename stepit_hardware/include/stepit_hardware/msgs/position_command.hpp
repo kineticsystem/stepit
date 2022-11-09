@@ -59,7 +59,7 @@ public:
     double position_;
   };
 
-  explicit PositionCommand(uint8_t request_id, const std::vector<Goal>& goals);
+  explicit PositionCommand(const std::vector<Goal>& goals);
   uint8_t command_id() const;
   std::vector<Goal> goals() const;
 

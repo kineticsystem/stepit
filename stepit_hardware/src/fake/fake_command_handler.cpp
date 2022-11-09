@@ -55,7 +55,7 @@ AcknowledgeResponse FakeCommandHandler::send(const ConfigCommand& command) const
     motors_.insert({ param.motor_id(), motor });
   }
 
-  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
+  return AcknowledgeResponse{ Response::Status::Success };
 }
 
 AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const PositionCommand& command) const
@@ -72,7 +72,7 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Pos
       it->second.set_target_position(time, goal.position());
     }
   }
-  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
+  return AcknowledgeResponse{ Response::Status::Success };
 }
 
 AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const VelocityCommand& command) const
@@ -89,10 +89,10 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Vel
       it->second.set_target_velocity(time, goal.velocity());
     }
   }
-  return AcknowledgeResponse{ command.request_id(), Response::Status::Success };
+  return AcknowledgeResponse{ Response::Status::Success };
 }
 
-StatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const StatusQuery& query) const
+StatusResponse FakeCommandHandler::send(const rclcpp::Time& time, [[maybe_unused]] const StatusQuery& query) const
 {
   std::vector<StatusResponse::MotorState> states;
   for (const auto& [motor_id, motor] : motors_)
@@ -103,11 +103,12 @@ StatusResponse FakeCommandHandler::send(const rclcpp::Time& time, const StatusQu
     StatusResponse::MotorState state{ motor_id, position, velocity, distance_to_go };
     states.emplace_back(state);
   }
-  return StatusResponse(query.request_id(), Response::Status::Success, states);
+  return StatusResponse(Response::Status::Success, states);
 }
 
-InfoResponse FakeCommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
+InfoResponse FakeCommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
+                                      [[maybe_unused]] const InfoQuery& query) const
 {
-  return InfoResponse(query.request_id(), Response::Status::Success, "STEPIT");
+  return InfoResponse(Response::Status::Success, "STEPIT");
 }
 }  // namespace stepit_hardware

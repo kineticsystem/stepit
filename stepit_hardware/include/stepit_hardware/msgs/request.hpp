@@ -37,11 +37,7 @@ namespace stepit_hardware
 class Request
 {
 public:
-  explicit Request(uint8_t request_id);
+  explicit Request();
   virtual ~Request() = default;
-  uint8_t request_id() const;
-
-private:
-  uint8_t request_id_;
 };
 }  // namespace stepit_hardware

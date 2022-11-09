@@ -47,7 +47,7 @@ public:
   ~SerialPort();
 
   boolean isBusyWriting();
-  void setCallback(void (*callback)(byte requestId, DataBuffer*));
+  void setCallback(void (*callback)(DataBuffer*));
 
   /**
    * Initialize the serial connection communication speed.
@@ -81,7 +81,7 @@ private:
   DataBuffer* m_writeBuffer;
 
   // Function to be called when a command is received.
-  void (*callback)(byte requestId, DataBuffer*);
+  void (*callback)(DataBuffer*);
 
   // Escape bytes that are equal to the DELIMITER_FLAG or ESCAPE_FLAG.
   static void addByte(DataBuffer* buffer, byte ch);

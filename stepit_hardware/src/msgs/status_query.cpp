@@ -33,7 +33,7 @@
 namespace stepit_hardware
 {
 
-StatusQuery::StatusQuery(uint8_t request_id) : Request{ request_id }
+StatusQuery::StatusQuery() : Request{}
 {
 }
 

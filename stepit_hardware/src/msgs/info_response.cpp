@@ -31,8 +31,7 @@
 
 namespace stepit_hardware
 {
-InfoResponse::InfoResponse(uint8_t request_id, Status status, const std::string& info)
-  : Response{ request_id, status }, info_{ info }
+InfoResponse::InfoResponse(Status status, const std::string& info) : Response{ status }, info_{ info }
 {
 }
 

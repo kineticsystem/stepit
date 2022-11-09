@@ -120,16 +120,15 @@ void SerialPort::write(DataBuffer* buffer)
  * Once a data frame is identified, the actual unescaped data in the
  * frame is sent to the callback function for further processing.
  */
-void SerialPort::setCallback(void (*callback)(byte responseId, DataBuffer*))
+void SerialPort::setCallback(void (*callback)(DataBuffer*))
 {
   this->callback = callback;
 }
 
 /**
- * A packet of data has two delimiting flags, a request id, some data and a CRC code:
+ * A packet of data has two delimiting flags, some data and a CRC code:
  *
  * delimiter  - 1 byte
- * request id - 1 byte
  * ...
  * data       - any number of bytes
  * ...
@@ -154,16 +153,9 @@ void SerialPort::update()
       case Waiting:
         if (ch == DELIMITER_FLAG)
         {
-          // When we send a message over a serial port that is not yet connected,
-          // only part of the message may be received.
-          // For this reason, if we find some garbage data, followed by a delimiter,
-          // we throw the partial message away.
+          crc = 0;
           m_readBuffer->clear();
-          if (m_readBuffer->getSize() == 0)
-          {
-            crc = 0;
-            m_state = ReadingMessage;
-          }
+          m_state = ReadingMessage;
         }
         break;
 
@@ -174,7 +166,7 @@ void SerialPort::update()
         }
         else if (ch == DELIMITER_FLAG)
         {
-          if (m_readBuffer->getSize() >= 4)
+          if (m_readBuffer->getSize() >= 3)
           {
             // CRC calculated on frame data is zero when the frame data
             // is correct.
@@ -182,12 +174,12 @@ void SerialPort::update()
             {
               // Remove the CRC from the buffer.
               m_readBuffer->removeInt(BufferPosition::Tail);
-
-              byte requestId = m_readBuffer->removeByte(BufferPosition::Head);
-              callback(requestId, m_readBuffer);
+              callback(m_readBuffer);
             }
             m_state = Waiting;
           }
+
+          // A partial packet has been received, reset and keep reading.
           crc = 0;
           m_readBuffer->clear();
         }

@@ -36,7 +36,7 @@ namespace stepit_hardware
 class InfoQuery : public Request
 {
 public:
-  explicit InfoQuery(uint8_t request_id);
+  explicit InfoQuery();
   uint8_t query_id() const;
 };
 }  // namespace stepit_hardware

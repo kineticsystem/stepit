@@ -55,22 +55,35 @@
 namespace stepit_hardware::test
 {
 
+class TestDataInterface : public ::testing::Test
+{
+public:
+  void SetUp()
+  {
+    auto serial_handler = std::make_unique<SerialHandler>();
+    serial_handler->set_port("/dev/ttyACM0");
+    serial_handler->set_baudrate(9600);
+    serial_handler->set_timeout(2000);
+
+    data_handler = std::make_unique<DataHandler>(std::move(serial_handler));
+    data_handler->open();
+  }
+
+  void TearDown()
+  {
+    data_handler->close();
+  }
+
+  std::unique_ptr<DataHandler> data_handler;
+};
+
 /**
  * Send a packet of data corresponding to a velocity command and check
  * if the microcontroller answers back with a successful response.
  */
-TEST(TestDataInterface, test_velocity_command)
+TEST_F(TestDataInterface, test_velocity_command)
 {
-  auto serial_handler = std::make_unique<SerialHandler>();
-  serial_handler->set_port("/dev/ttyUSB0");
-  serial_handler->set_baudrate(9600);
-  serial_handler->set_timeout(2000);
-
-  auto data_handler = std::make_unique<DataHandler>(std::move(serial_handler));
-  data_handler->open();
-
   const std::vector<uint8_t> data{
-    0x01,  // Request ID
     0x77,  // Motor velocity command ID
     0x00,  // Motor ID
     0x40,  // Velocity = 4
@@ -83,7 +96,7 @@ TEST(TestDataInterface, test_velocity_command)
     0x00,  // Velocity
     0x00   // Velocity
   };
-  const std::vector<uint8_t> expected_response{ 0x01, 0x11 };
+  const std::vector<uint8_t> expected_response{ 0x11 };
   data_handler->write(data);
   const std::vector<uint8_t> response = data_handler->read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(response), stepit_hardware::data_utils::to_hex(expected_response));
@@ -97,21 +110,12 @@ TEST(TestDataInterface, test_velocity_command)
  * The test is designed to generate data buffers that contains escaped bytes,
  * including the CRC.
  */
-TEST(TestDataInterface, test_echo)
+TEST_F(TestDataInterface, test_echo_command)
 {
-  auto serial_handler = std::make_unique<SerialHandler>();
-  serial_handler->set_port("/dev/ttyUSB0");
-  serial_handler->set_baudrate(9600);
-  serial_handler->set_timeout(2000);
-
-  auto data_handler = std::make_unique<DataHandler>(std::move(serial_handler));
-  data_handler->open();
-
   uint16_t crc = 0;
   for (uint8_t i = 0; i <= 100; ++i)
   {
-    const std::vector<uint8_t> data{
-      0x01,  // Request ID
+    const std::vector<uint8_t> request{
       0x79,  // Echo command.
       0x40,  // Some random data.
       0x7E,  // A delimiter flag which must be escaped.
@@ -122,31 +126,21 @@ TEST(TestDataInterface, test_echo)
       i      // This value will cause some CRC to contains values which must be escaped.
     };
 
-    data_handler->write(data);
-    const std::vector<uint8_t> echo = data_handler->read();
-    ASSERT_THAT(stepit_hardware::data_utils::to_hex(echo), stepit_hardware::data_utils::to_hex(data));
+    data_handler->write(request);
+    const std::vector<uint8_t> response = data_handler->read();
+    ASSERT_THAT(stepit_hardware::data_utils::to_hex(response), stepit_hardware::data_utils::to_hex(request));
   }
 }
 
 /**
  * Send an info command to the micro controller and verify the expected response.
  */
-TEST(TestDataInterface, test_info)
+TEST_F(TestDataInterface, test_info_command)
 {
-  auto serial_handler = std::make_unique<SerialHandler>();
-  serial_handler->set_port("/dev/ttyUSB0");
-  serial_handler->set_baudrate(9600);
-  serial_handler->set_timeout(2000);
-
-  auto data_handler = std::make_unique<DataHandler>(std::move(serial_handler));
-  data_handler->open();
-
-  const std::vector<uint8_t> data{
-    0x01,  // Request ID.
-    0x76,  // Info query.
+  const std::vector<uint8_t> request{
+    0x76  // Info query.
   };
   const std::vector<uint8_t> expected_response{
-    0x01,  // Request ID.
     0x11,  // Success status.
     0x53,  // S.
     0x54,  // T.
@@ -156,7 +150,7 @@ TEST(TestDataInterface, test_info)
     0x54   // T.
   };
 
-  data_handler->write(data);
+  data_handler->write(request);
   const std::vector<uint8_t> response = data_handler->read();
   ASSERT_THAT(stepit_hardware::data_utils::to_hex(expected_response), stepit_hardware::data_utils::to_hex(response));
 }

@@ -38,7 +38,7 @@ namespace stepit_hardware
 class InfoResponse : public Response
 {
 public:
-  explicit InfoResponse(uint8_t request_id, Status status, const std::string& info);
+  explicit InfoResponse(Status status, const std::string& info);
   std::string info() const;
 
 private:

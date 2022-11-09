@@ -32,7 +32,7 @@
 
 namespace stepit_hardware
 {
-InfoQuery::InfoQuery(uint8_t request_id) : Request{ request_id }
+InfoQuery::InfoQuery() : Request{}
 {
 }
 

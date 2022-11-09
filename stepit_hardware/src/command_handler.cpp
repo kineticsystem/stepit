@@ -53,7 +53,7 @@ bool CommandHandler::connect()
     {
       RCLCPP_INFO(rclcpp::get_logger(kLogger), "Connecting...");
 
-      StatusQuery query{ 0 };
+      StatusQuery query{};
       StatusResponse response = send(rclcpp::Time{}, query);
       connected = response.status() == Response::Status::Success;
 
@@ -77,7 +77,6 @@ void CommandHandler::disconnect()
 AcknowledgeResponse CommandHandler::send(const ConfigCommand& command) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(command.request_id());
   in.emplace_back(command.command_id());
   for (const auto& param : command.params())
   {
@@ -97,16 +96,14 @@ AcknowledgeResponse CommandHandler::send(const ConfigCommand& command) const
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Config response: %s", data_utils::to_hex(out).c_str());
-  uint8_t request_id = out[0];
-  Response::Status status{ out[1] };
-  AcknowledgeResponse response{ request_id, status };
+  Response::Status status{ out[0] };
+  AcknowledgeResponse response{ status };
   return response;
 }
 
 AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const PositionCommand& command) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(command.request_id());
   in.emplace_back(command.command_id());
   for (const auto& goal : command.goals())
   {
@@ -121,16 +118,14 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Position response: %s", data_utils::to_hex(out).c_str());
-  uint8_t request_id = out[0];
-  Response::Status status{ out[1] };
-  AcknowledgeResponse response{ request_id, status };
+  Response::Status status{ out[0] };
+  AcknowledgeResponse response{ status };
   return response;
 }
 
 AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const VelocityCommand& command) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(command.request_id());
   in.emplace_back(command.command_id());
   for (const auto& goal : command.goals())
   {
@@ -145,16 +140,14 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Velocity response: %s", data_utils::to_hex(out).c_str());
-  uint8_t request_id = out[0];
-  Response::Status status{ out[1] };
-  AcknowledgeResponse response{ request_id, status };
+  Response::Status status{ out[0] };
+  AcknowledgeResponse response{ status };
   return response;
 }
 
 StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(query.request_id());
   in.emplace_back(query.query_id());
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Status query: %s", data_utils::to_hex(in).c_str());
   data_interface_->write(in);
@@ -163,7 +156,6 @@ StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, c
 
   // The data array contains the following information.
   //
-  // request id           - 1 byte
   // status               - 1 byte
   //
   // motor id             - 1 byte
@@ -179,7 +171,6 @@ StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, c
   // ...and so on.
 
   std::size_t i = 0;
-  uint8_t request_id = out[i++];
   Response::Status status{ out[i++] };
   std::vector<StatusResponse::MotorState> motor_states;
   while (i < out.size())
@@ -191,14 +182,13 @@ StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, c
     motor_states.push_back(StatusResponse::MotorState{ id, position, speed, distance_to_go });
   }
 
-  StatusResponse response{ request_id, status, motor_states };
+  StatusResponse response{ status, motor_states };
   return response;
 }
 
 InfoResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(query.request_id());
   in.emplace_back(query.query_id());
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Info query: %s", data_utils::to_hex(in).c_str());
   data_interface_->write(in);
@@ -207,12 +197,10 @@ InfoResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, con
 
   // The data array contains the following information.
   //
-  // request id           - 1 byte
   // status               - 1 byte
   // a variable number of bytes representing a string in ASCII format - N bytes
 
   std::size_t i = 0;
-  uint8_t request_id = out[i++];
   Response::Status status{ out[i++] };
   std::vector<uint8_t> data;
   while (i < out.size())
@@ -222,7 +210,7 @@ InfoResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, con
   }
 
   std::string info{ data.begin(), data.end() };
-  InfoResponse response{ request_id, status, info };
+  InfoResponse response{ status, info };
   return response;
 }
 

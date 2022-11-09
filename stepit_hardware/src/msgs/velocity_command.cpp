@@ -33,8 +33,7 @@
 
 namespace stepit_hardware
 {
-VelocityCommand::VelocityCommand(uint8_t request_id, const std::vector<Goal>& goals)
-  : Request{ request_id }, goals_{ goals }
+VelocityCommand::VelocityCommand(const std::vector<Goal>& goals) : Request{}, goals_{ goals }
 {
 }
 

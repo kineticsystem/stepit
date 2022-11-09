@@ -65,7 +65,7 @@ public:
     double max_velocity_;
   };
 
-  explicit ConfigCommand(uint8_t request_id, const std::vector<Param>& params);
+  explicit ConfigCommand(const std::vector<Param>& params);
   uint8_t command_id() const;
   std::vector<Param> params() const;
 

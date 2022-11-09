@@ -32,8 +32,8 @@
 
 namespace stepit_hardware
 {
-StatusResponse::StatusResponse(uint8_t request_id, Status status, std::vector<MotorState> motor_states)
-  : Response{ request_id, status }, motor_states_{ motor_states }
+StatusResponse::StatusResponse(Status status, std::vector<MotorState> motor_states)
+  : Response{ status }, motor_states_{ motor_states }
 {
 }
 
