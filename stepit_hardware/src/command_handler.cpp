@@ -43,7 +43,7 @@ bool CommandHandler::connect()
 {
   data_interface_->open();
 
-  // Send a message multiple times until an answer comes back.
+  // Send a status command multiple times until an answer comes back.
 
   int trial = 0;
   bool connected = false;
