@@ -37,15 +37,29 @@
 #include "MotorConfig.h"
 #include "Guard.h"
 
-// X-axis stepper connections.
-constexpr byte STEPPER0_EN_PIN = 8;
-constexpr byte STEPPER0_STEP_PIN = 2;
-constexpr byte STEPPER0_DIR_PIN = 5;
+constexpr byte NUBER_OF_MOTORS = 5;
 
-// Y-axis stepper connections.
-constexpr byte STEPPER1_EN_PIN = 9;
-constexpr byte STEPPER1_STEP_PIN = 3;
-constexpr byte STEPPER1_DIR_PIN = 6;
+// Stepper connections.
+
+constexpr byte STEPPER0_EN_PIN = 0;    // Red
+constexpr byte STEPPER0_DIR_PIN = 1;   // Green
+constexpr byte STEPPER0_STEP_PIN = 2;  // Yellow
+
+constexpr byte STEPPER1_EN_PIN = 3;    // Red
+constexpr byte STEPPER1_DIR_PIN = 4;   // Green
+constexpr byte STEPPER1_STEP_PIN = 5;  // Yellow
+
+constexpr byte STEPPER2_EN_PIN = 6;    // Red
+constexpr byte STEPPER2_DIR_PIN = 7;   // Green
+constexpr byte STEPPER2_STEP_PIN = 8;  // Yellow
+
+constexpr byte STEPPER3_EN_PIN = 9;     // Red
+constexpr byte STEPPER3_DIR_PIN = 10;   // Green
+constexpr byte STEPPER3_STEP_PIN = 11;  // Yellow
+
+constexpr byte STEPPER4_EN_PIN = 13;    // Red
+constexpr byte STEPPER4_DIR_PIN = 14;   // Green
+constexpr byte STEPPER4_STEP_PIN = 15;  // Yellow
 
 // Number of steps to achieve a full rotation: 360deg / 1.8deg * 16μsteps = 200
 constexpr long STEPS_IN_ONE_ROTATION = 3200;
@@ -54,7 +68,9 @@ constexpr long STEPS_IN_ONE_ROTATION = 3200;
 constexpr char NAME[] = "STEPIT\0";
 
 // The time between each execution of the run method.
-constexpr int INTERRUPT_TIME_US = 20;
+// If the interval is too large the motors will lose steps.
+// If the interval is too small the serial communication will be impacted.
+constexpr int INTERRUPT_TIME_US = 5;
 
 // If no command is received within this time, motors are stopped and the
 // command buffers cleaned.
@@ -88,14 +104,19 @@ IntervalTimer timer;
 
 // Stepper motors.
 AccelStepper stepper[] = { AccelStepper{ AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN },
-                           AccelStepper{ AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN } };
+                           AccelStepper{ AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN },
+                           AccelStepper{ AccelStepper::DRIVER, STEPPER2_STEP_PIN, STEPPER2_DIR_PIN },
+                           AccelStepper{ AccelStepper::DRIVER, STEPPER3_STEP_PIN, STEPPER3_DIR_PIN },
+                           AccelStepper{ AccelStepper::DRIVER, STEPPER4_STEP_PIN, STEPPER4_DIR_PIN } };
 
 // Stepper motors configuration: acceleration and max speed.
-MotorConfig motorConfig[] = { MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 } };
+MotorConfig motorConfig[] = { MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 },
+                              MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 },
+                              MotorConfig{ 6000.0, 100530.964915 } };
 
 // This structure holds motor goals: the main thread updates the goal and the
 // ISR reads it.
-MotorGoal motorGoal[] = { MotorGoal{}, MotorGoal{} };
+MotorGoal motorGoal[] = { MotorGoal{}, MotorGoal{}, MotorGoal{}, MotorGoal{}, MotorGoal{} };
 
 // This variable tells the ISR not to read a goal while the main thread is
 // inserting a new one.
@@ -103,17 +124,17 @@ volatile bool writingMotorGoals = false;
 
 // This structure holds motor states: the ISR updates the state and the main
 // thread reads it.
-MotorState motorState[] = { MotorState{}, MotorState{} };
+MotorState motorState[] = { MotorState{}, MotorState{}, MotorState{}, MotorState{}, MotorState{} };
 
 // This variable tells the ISR not to override the state while the main thread
 // is reading it.
 volatile bool readingMotorStates = false;
 
 // Class to read and write over a serial port.
-SerialPort serialPort{ 50, 50 };
+SerialPort serialPort{ 200, 200 };
 
 // Message to be written to the serial port, usually a response.
-DataBuffer responseBuffer{ 50 };
+DataBuffer responseBuffer{ 200 };
 
 /**
  * Convert a rotation angle in radians to the number of steps.
@@ -158,7 +179,7 @@ float sgn(float value)
  */
 void run()
 {
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < NUBER_OF_MOTORS; i++)
   {
     stepper[i].run();
 
@@ -235,7 +256,7 @@ void returnStatus()
   responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
   {
     Guard stateGuard{ readingMotorStates };
-    for (byte i = 0; i < 2; i++)
+    for (byte i = 0; i < NUBER_OF_MOTORS; i++)
     {
       responseBuffer.addByte(i, BufferPosition::Tail);
       responseBuffer.addFloat(stepsToRadians(motorState[i].getPosition()), BufferPosition::Tail);
@@ -284,7 +305,7 @@ void setMotorsEnabled(DataBuffer* cmd)
  */
 void configureCommand(DataBuffer* cmd)
 {
-  // We expect at least 9 bytes (motorId, speed) or multiple of 9.
+  // We expect at least 9 bytes (motorId, speed) or a multiple of 9.
   if (cmd->getSize() < 9 || cmd->getSize() % 9 != 0)
   {
     returnCommandError();
@@ -302,12 +323,12 @@ void configureCommand(DataBuffer* cmd)
 }
 
 /**
- * Move the motors at given speed.
+ * Move the motors at a given speed.
  * @param cmd The move command.
  */
 void speedCommand(DataBuffer* cmd)
 {
-  // We expect at least 5 bytes (motorId, speed) or multiple of 5.
+  // We expect at least 5 bytes (motorId, speed) or a multiple of 5.
   if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
   {
     returnCommandError();
@@ -319,10 +340,10 @@ void speedCommand(DataBuffer* cmd)
     float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
     float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
 
-    // We move the stepper at constant speed to the maximum or the minimum
+    // We move the stepper at a constant speed to the maximum or the minimum
     // possible positions.
     // LONG_MAX (0x7FFFFFFF) and LONG_MIN (-80000000) do not work, probably
-    // because of inner working in AccelStepper library, so we chose close
+    // because of inner logic in AccelStepper library, so we chose close
     // enough values.
 
     Guard writeGuard{ writingMotorGoals };
@@ -346,7 +367,7 @@ void speedCommand(DataBuffer* cmd)
  */
 void moveCommand(DataBuffer* cmd)
 {
-  // We expect at least 5 bytes (motorId, position) or multiple of 5.
+  // We expect at least 5 bytes (motorId, position) or a multiple of 5.
   if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
   {
     returnCommandError();
@@ -429,12 +450,21 @@ void setup()
   pinMode(STEPPER1_EN_PIN, OUTPUT);
   digitalWrite(STEPPER1_EN_PIN, HIGH);
 
+  pinMode(STEPPER2_EN_PIN, OUTPUT);
+  digitalWrite(STEPPER2_EN_PIN, HIGH);
+
+  pinMode(STEPPER3_EN_PIN, OUTPUT);
+  digitalWrite(STEPPER3_EN_PIN, HIGH);
+
+  pinMode(STEPPER4_EN_PIN, OUTPUT);
+  digitalWrite(STEPPER4_EN_PIN, HIGH);
+
   // Initialize serial port.
   serialPort.init(9600);
   serialPort.setCallback(&processBuffer);
 
   // Initialize stepper motors.
-  for (byte i = 0; i < 2; i++)
+  for (byte i = 0; i < NUBER_OF_MOTORS; i++)
   {
     stepper[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
     stepper[i].setAcceleration(motorConfig[i].getAcceleration());
@@ -464,7 +494,7 @@ void loop()
 
     // Stop all motors.
     Guard goalGuard{ writingMotorGoals };
-    for (byte i = 0; i < 2; i++)
+    for (byte i = 0; i < NUBER_OF_MOTORS; i++)
     {
       motorGoal[i].setSpeed(0);
     }
