@@ -5,7 +5,7 @@
     <ros2_control name="${name}" type="system">
       <hardware>
         <plugin>stepit_hardware/StepitHardware</plugin>
-        <param name="use_dummy">true</param>
+        <param name="use_dummy">false</param>
         <param name="usb_port">/dev/ttyACM0</param>
         <param name="baud_rate">9600</param>
         <param name="timeout">2.0</param>
@@ -13,7 +13,7 @@
       <joint name="joint1">
         <param name="id">0</param>
         <param name="acceleration">3.14159</param>
-        <param name="max_velocity">6.28319</param>
+        <param name="max_velocity">31.4159265358979</param> <!-- 5 rotations/s -->
         <command_interface name="position" />
         <command_interface name="velocity" />
         <state_interface name="position" />
@@ -22,7 +22,34 @@
       <joint name="joint2">
         <param name="id">1</param>
         <param name="acceleration">3.14159</param>
-        <param name="max_velocity">6.28319</param>
+        <param name="max_velocity">31.4159265358979</param> <!-- 5 rotations/s -->
+        <command_interface name="position" />
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+      </joint>
+      <joint name="joint3">
+        <param name="id">2</param>
+        <param name="acceleration">3.14159</param>
+        <param name="max_velocity">31.4159265358979</param> <!-- 5 rotations/s -->
+        <command_interface name="position" />
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+      </joint>
+      <joint name="joint4">
+        <param name="id">3</param>
+        <param name="acceleration">3.14159</param>
+        <param name="max_velocity">31.4159265358979</param> <!-- 5 rotations/s -->
+        <command_interface name="position" />
+        <command_interface name="velocity" />
+        <state_interface name="position" />
+        <state_interface name="velocity" />
+      </joint>
+      <joint name="joint5">
+        <param name="id">4</param>
+        <param name="acceleration">3.14159</param>
+        <param name="max_velocity">31.4159265358979</param> <!-- 5 rotations/s -->
         <command_interface name="position" />
         <command_interface name="velocity" />
         <state_interface name="position" />

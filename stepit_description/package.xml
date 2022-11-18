@@ -21,8 +21,6 @@
   <depend>ros2_controllers</depend>
   <depend>stepit_hardware</depend>
 
-  <exec_depend>ign_ros2_control</exec_depend>
-
   <!-- Check code against style conventions using clang-format. -->
   <test_depend>ament_clang_format</test_depend>
   <!-- Check code against style conventions using clang-tidy. -->

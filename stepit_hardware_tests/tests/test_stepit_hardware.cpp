@@ -80,29 +80,54 @@ TEST(TestStepitHardware, test_connection)
   // Read state interface values.
   hardware_interface::LoanedStateInterface joint1_position_state = rm.claim_state_interface("joint1/position");
   hardware_interface::LoanedStateInterface joint2_position_state = rm.claim_state_interface("joint2/position");
+  hardware_interface::LoanedStateInterface joint3_position_state = rm.claim_state_interface("joint3/position");
+  hardware_interface::LoanedStateInterface joint4_position_state = rm.claim_state_interface("joint4/position");
+  hardware_interface::LoanedStateInterface joint5_position_state = rm.claim_state_interface("joint5/position");
+
   hardware_interface::LoanedStateInterface joint1_velocity_state = rm.claim_state_interface("joint1/velocity");
   hardware_interface::LoanedStateInterface joint2_velocity_state = rm.claim_state_interface("joint2/velocity");
+  hardware_interface::LoanedStateInterface joint3_velocity_state = rm.claim_state_interface("joint3/velocity");
+  hardware_interface::LoanedStateInterface joint4_velocity_state = rm.claim_state_interface("joint4/velocity");
+  hardware_interface::LoanedStateInterface joint5_velocity_state = rm.claim_state_interface("joint5/velocity");
 
   ASSERT_EQ(0, joint1_position_state.get_value());
   ASSERT_EQ(0, joint2_position_state.get_value());
+  ASSERT_EQ(0, joint3_position_state.get_value());
+  ASSERT_EQ(0, joint4_position_state.get_value());
+  ASSERT_EQ(0, joint5_position_state.get_value());
+
   ASSERT_EQ(0, joint1_velocity_state.get_value());
   ASSERT_EQ(0, joint2_velocity_state.get_value());
+  ASSERT_EQ(0, joint3_velocity_state.get_value());
+  ASSERT_EQ(0, joint4_velocity_state.get_value());
+  ASSERT_EQ(0, joint5_velocity_state.get_value());
 
   // Write velocity values.
   // Arduino uses its max internal speed if a too high velocity value is given.
   hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
   hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
+  hardware_interface::LoanedCommandInterface joint3_velocity_command = rm.claim_command_interface("joint3/velocity");
+  hardware_interface::LoanedCommandInterface joint4_velocity_command = rm.claim_command_interface("joint4/velocity");
+  hardware_interface::LoanedCommandInterface joint5_velocity_command = rm.claim_command_interface("joint5/velocity");
   joint1_velocity_command.set_value(4);
   joint2_velocity_command.set_value(1);
+  joint3_velocity_command.set_value(1);
+  joint4_velocity_command.set_value(1);
+  joint5_velocity_command.set_value(1);
 
   for (int i = 0; i < 10; ++i)
   {
     // Invoke a write command.
     rm.write(rclcpp::Time{}, rclcpp::Duration::from_seconds(0));
     rm.read(rclcpp::Time{}, rclcpp::Duration::from_seconds(0));
-    RCLCPP_INFO(rclcpp::get_logger("TestStepitHardware"), "%d, p1:%f, v1:%f, p2:%f, v2:%f", i,
+    RCLCPP_INFO(rclcpp::get_logger("TestStepitHardware"),
+                "%d, p1:%f, v1:%f, p2:%f, v2:%f, p2:%f, v2:%f, p2:%f, v2:%f, p2:%f, v2:%f", i,
                 joint1_position_state.get_value(), joint1_velocity_state.get_value(), joint2_position_state.get_value(),
-                joint2_velocity_state.get_value());
+                joint2_velocity_state.get_value(), joint3_position_state.get_value(), joint3_velocity_state.get_value(),
+                joint4_position_state.get_value(), joint4_velocity_state.get_value(), joint5_position_state.get_value(),
+                joint5_velocity_state.get_value()
+
+    );
   }
 }
 

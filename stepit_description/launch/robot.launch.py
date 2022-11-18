@@ -159,31 +159,14 @@ def launch_setup(context, *args, **kwargs):
         )
     )
 
-    # Ignition nodes
-    ignition_spawn_entity = Node(
-        package="ros_ign_gazebo",
-        executable="create",
-        output="screen",
-        arguments=["-string", robot_description_content],
-    )
-
-    ignition_launch_description = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [FindPackageShare("ros_ign_gazebo"), "/launch/ign_gazebo.launch.py"]
-        ),
-        launch_arguments={"ign_args": " -r -v 4 empty.sdf"}.items(),
-    )
-
     nodes_to_start = [
         ros2_control_node,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
-        velocity_controller_spawner,
-        position_controller_spawner,
-        # joint_trajectory_controller_spawner,
+        # velocity_controller_spawner,
+        # position_controller_spawner,
+        joint_trajectory_controller_spawner,
         robot_state_publisher_node,
-        ignition_spawn_entity,
-        # ignition_launch_description,
     ]
     return nodes_to_start
 

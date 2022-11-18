@@ -18,7 +18,7 @@
       <visual name="base_link_visual">
         <origin xyz="0.0 0 0.05" rpy="0 0 0" />
         <geometry>
-          <box size="2 1 0.1" />
+          <box size="5 1 0.1" />
         </geometry>
         <material name="base_link_material" />
       </visual>
@@ -33,7 +33,7 @@
       <visual name="link1_visual">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="file://$(find stepit_description)/meshes/cylinder.dae" scale="1 1 1" />
+          <mesh filename="file://$(find stepit_description)/meshes/stepper_1.dae" scale="1 1 1" />
         </geometry>
       </visual>
     </link>
@@ -47,10 +47,53 @@
       <visual name="link2_visual">
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="file://$(find stepit_description)/meshes/cylinder.dae" scale="1 1 1" />
+          <mesh filename="file://$(find stepit_description)/meshes/stepper_2.dae" scale="1 1 1" />
         </geometry>
       </visual>
     </link>
+
+    <link name="link3">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.1" />
+        <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
+      </inertial>
+      <visual name="link3_visual">
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="file://$(find stepit_description)/meshes/stepper_3.dae" scale="1 1 1" />
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="link4">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.1" />
+        <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
+      </inertial>
+      <visual name="link4_visual">
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="file://$(find stepit_description)/meshes/stepper_4.dae" scale="1 1 1" />
+        </geometry>
+      </visual>
+    </link>
+
+    <link name="link5">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <mass value="0.1" />
+        <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001" />
+      </inertial>
+      <visual name="link5_visual">
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="file://$(find stepit_description)/meshes/stepper_5.dae" scale="1 1 1" />
+        </geometry>
+      </visual>
+    </link>
+
 
     <joint name="base_link_to_world" type="fixed">
       <parent link="world" />
@@ -61,7 +104,7 @@
     <joint name="joint1" type="revolute">
       <parent link="base_link" />
       <child link="link1" />
-      <origin xyz="0.5 0.0 0.15" rpy="0 0 0" />
+      <origin xyz="-2.0 0.0 0.15" rpy="0 0 0" />
       <axis xyz="0 0 1" />
       <limit lower="-3.14159265358979" upper="3.14159265358979" effort="0.0" velocity="0.0" />
     </joint>
@@ -69,7 +112,31 @@
     <joint name="joint2" type="revolute">
       <parent link="base_link" />
       <child link="link2" />
-      <origin xyz="-0.5 0.0 0.15" rpy="0 0 0" />
+      <origin xyz="-1.0 0.0 0.15" rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <limit lower="-3.14159265358979" upper="3.14159265358979" effort="0.0" velocity="0.0" />
+    </joint>
+
+    <joint name="joint3" type="revolute">
+      <parent link="base_link" />
+      <child link="link3" />
+      <origin xyz="0.0 0.0 0.15" rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <limit lower="-3.14159265358979" upper="3.14159265358979" effort="0.0" velocity="0.0" />
+    </joint>
+
+    <joint name="joint4" type="revolute">
+      <parent link="base_link" />
+      <child link="link4" />
+      <origin xyz="1.0 0.0 0.15" rpy="0 0 0" />
+      <axis xyz="0 0 1" />
+      <limit lower="-3.14159265358979" upper="3.14159265358979" effort="0.0" velocity="0.0" />
+    </joint>
+
+    <joint name="joint5" type="revolute">
+      <parent link="base_link" />
+      <child link="link5" />
+      <origin xyz="2.0 0.0 0.15" rpy="0 0 0" />
       <axis xyz="0 0 1" />
       <limit lower="-3.14159265358979" upper="3.14159265358979" effort="0.0" velocity="0.0" />
     </joint>
