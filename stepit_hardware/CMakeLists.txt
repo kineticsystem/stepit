@@ -47,7 +47,9 @@ add_library(
     SHARED
     include/stepit_hardware/buffer.hpp
     include/stepit_hardware/command_handler.hpp
+    include/stepit_hardware/command_handler_factory.hpp
     include/stepit_hardware/command_interface.hpp
+    include/stepit_hardware/command_interface_factory.hpp
     include/stepit_hardware/crc_utils.hpp
     include/stepit_hardware/data_handler.hpp
     include/stepit_hardware/data_interface.hpp
@@ -73,6 +75,7 @@ add_library(
     include/stepit_hardware/serial_interface.hpp
     include/stepit_hardware/stepit_hardware.hpp
     src/command_handler.cpp
+    src/command_handler_factory.cpp
     src/crc_utils.cpp
     src/data_handler.cpp
     src/data_utils.cpp

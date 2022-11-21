@@ -28,7 +28,6 @@
  */
 
 #include <stepit_hardware/stepit_hardware.hpp>
-#include <stepit_hardware/fake/fake_command_handler.hpp>
 #include <stepit_hardware/msgs/status_query.hpp>
 #include <stepit_hardware/msgs/velocity_command.hpp>
 #include <stepit_hardware/msgs/position_command.hpp>
@@ -36,8 +35,7 @@
 #include <stepit_hardware/msgs/status_response.hpp>
 
 #include <stepit_hardware/command_handler.hpp>
-#include <stepit_hardware/data_handler.hpp>
-#include <stepit_hardware/serial_handler.hpp>
+#include <stepit_hardware/command_handler_factory.hpp>
 
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
@@ -55,9 +53,14 @@ namespace stepit_hardware
 constexpr auto kLogger = "StepitHardware";
 constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
+StepitHardware::StepitHardware()
+{
+  command_interface_factory_ = std::make_unique<CommandHandlerFactory>();
+}
+
 // This constructor is use for testing only.
-StepitHardware::StepitHardware(std::unique_ptr<CommandInterface> command_interface)
-  : command_interface_{ std::move(command_interface) }
+StepitHardware::StepitHardware(std::unique_ptr<CommandInterfaceFactory> command_interface_factory)
+  : command_interface_factory_{ std::move(command_interface_factory) }
 {
 }
 
@@ -66,7 +69,7 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
   RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "on_init");
   try
   {
-    // Save hardware info.
+    // Store hardware info for later use.
 
     if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
     {
@@ -89,35 +92,7 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
       RCLCPP_INFO(rclcpp::get_logger(kLogger), "joint_id %d: %d", i, joints_[i].id);
     }
 
-    // If "use_dummy" is true return a fake hardware otherwise return a real one.
-
-    if (!command_interface_)
-    {
-      if (info_.hardware_parameters.find("use_dummy") != info_.hardware_parameters.end() &&
-          info_.hardware_parameters.at("use_dummy") == "true")
-      {
-        command_interface_ = std::make_unique<FakeCommandHandler>();
-      }
-      else
-      {
-        std::string usb_port = info.hardware_parameters.at("usb_port");
-        RCLCPP_INFO(rclcpp::get_logger(kLogger), "usb_port: %s", usb_port.c_str());
-
-        uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
-        RCLCPP_INFO(rclcpp::get_logger(kLogger), "baud_rate: %d", baud_rate);
-
-        double timeout = std::stod(info.hardware_parameters.at("timeout"));
-        uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
-        RCLCPP_INFO(rclcpp::get_logger(kLogger), "timeout: %f", timeout);
-
-        auto serial_handler = std::make_unique<SerialHandler>();
-        serial_handler->set_port(usb_port);
-        serial_handler->set_baudrate(baud_rate);
-        serial_handler->set_timeout(timeout_ms);
-
-        command_interface_ = std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
-      }
-    }
+    command_interface_ = command_interface_factory_->create(info);
     return CallbackReturn::SUCCESS;
   }
   catch (const std::exception& ex)

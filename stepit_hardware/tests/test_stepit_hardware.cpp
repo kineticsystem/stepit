@@ -35,6 +35,7 @@
 
 #include <fake/fake_hardware_info.hpp>
 #include <mock/mock_command_interface.hpp>
+#include <mock/mock_command_interface_factory.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -136,8 +137,10 @@ TEST(TestStepitHardware, read_status)
   ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, An<const StatusQuery&>())).WillOnce(Return(mocked_response));
+  auto mock_command_interface_factory =
+      std::make_unique<MockCommandInterfaceFactory>(std::move(mock_command_interface));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface_factory));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -189,8 +192,10 @@ TEST(TestStepitHardware, write_velocities)
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, Matcher<const VelocityCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ Response::Status::Success })));
+  auto mock_command_interface_factory =
+      std::make_unique<MockCommandInterfaceFactory>(std::move(mock_command_interface));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface_factory));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -243,8 +248,10 @@ TEST(TestStepitHardware, write_positions)
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_command_interface, send(_, Matcher<const PositionCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ Response::Status::Success })));
+  auto mock_command_interface_factory =
+      std::make_unique<MockCommandInterfaceFactory>(std::move(mock_command_interface));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface_factory));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -296,8 +303,10 @@ TEST(TestStepitHardware, configuration)
   ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
   EXPECT_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
       .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
+  auto mock_command_interface_factory =
+      std::make_unique<MockCommandInterfaceFactory>(std::move(mock_command_interface));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface_factory));
 
   // Load the component.
   hardware_interface::ResourceManager rm;

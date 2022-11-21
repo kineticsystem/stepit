@@ -64,6 +64,7 @@ target_link_libraries(test_fake_motor stepit_hardware)
 ament_add_gmock(test_stepit_hardware
     test_stepit_hardware.cpp
     mock/mock_command_interface.hpp
+    mock/mock_command_interface_factory.hpp
     fake/fake_hardware_info.hpp
 )
 target_include_directories(test_stepit_hardware

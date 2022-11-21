@@ -30,6 +30,7 @@
 #pragma once
 
 #include <stepit_hardware/command_interface.hpp>
+#include <stepit_hardware/command_interface_factory.hpp>
 #include <stepit_hardware/visibility_control.hpp>
 
 #include <hardware_interface/handle.hpp>
@@ -51,14 +52,14 @@ public:
   /**
    * Default constructor.
    */
-  StepitHardware() = default;
+  StepitHardware();
 
   /**
    * Constructor with given command interface. This method is used for testing.
    * @param command_interface The interface to send commands and queries to
    * the hardware.
    */
-  explicit StepitHardware(std::unique_ptr<CommandInterface> command_interface);
+  explicit StepitHardware(std::unique_ptr<CommandInterfaceFactory> command_interface_factory);
 
   /**
    * Defines aliases and static functions for using the Class with shared_ptrs.
@@ -143,5 +144,6 @@ private:
 
   // Interface to send binary data to the hardware using the serial port.
   std::unique_ptr<CommandInterface> command_interface_;
+  std::unique_ptr<CommandInterfaceFactory> command_interface_factory_;
 };
 }  // namespace stepit_hardware
