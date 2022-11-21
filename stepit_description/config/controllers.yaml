@@ -1,4 +1,5 @@
 # Configuration file required by the Controller Manager to load the specified controls.
+# See https://github.com/ros-controls/ros2_controllers/blob/master/joint_trajectory_controller/src/joint_trajectory_controller_parameters.yaml
 
 controller_manager:
   ros__parameters:
@@ -36,6 +37,7 @@ position_controller:
 
 joint_trajectory_controller:
   ros__parameters:
+    allow_partial_joints_goal: true
     joints:
       - joint1
       - joint2
