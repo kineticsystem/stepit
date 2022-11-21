@@ -34,7 +34,6 @@
 #include <stepit_hardware/msgs/acknowledge_response.hpp>
 #include <stepit_hardware/msgs/status_response.hpp>
 
-#include <stepit_hardware/command_handler.hpp>
 #include <stepit_hardware/command_handler_factory.hpp>
 
 #include <hardware_interface/types/hardware_interface_return_values.hpp>

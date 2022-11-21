@@ -144,6 +144,8 @@ private:
 
   // Interface to send binary data to the hardware using the serial port.
   std::unique_ptr<CommandInterface> command_interface_;
+
+  // Factory to create the command handler during the initialization step.
   std::unique_ptr<CommandInterfaceFactory> command_interface_factory_;
 };
 }  // namespace stepit_hardware
