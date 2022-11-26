@@ -37,29 +37,14 @@
 #include "MotorConfig.h"
 #include "Guard.h"
 
+#include <array>
+
 constexpr byte NUMBER_OF_MOTORS = 5;
 
 // Stepper connections.
-
-constexpr byte STEPPER0_EN_PIN = 0;    // Red
-constexpr byte STEPPER0_DIR_PIN = 1;   // Green
-constexpr byte STEPPER0_STEP_PIN = 2;  // Yellow
-
-constexpr byte STEPPER1_EN_PIN = 3;    // Red
-constexpr byte STEPPER1_DIR_PIN = 4;   // Green
-constexpr byte STEPPER1_STEP_PIN = 5;  // Yellow
-
-constexpr byte STEPPER2_EN_PIN = 6;    // Red
-constexpr byte STEPPER2_DIR_PIN = 7;   // Green
-constexpr byte STEPPER2_STEP_PIN = 8;  // Yellow
-
-constexpr byte STEPPER3_EN_PIN = 9;     // Red
-constexpr byte STEPPER3_DIR_PIN = 10;   // Green
-constexpr byte STEPPER3_STEP_PIN = 11;  // Yellow
-
-constexpr byte STEPPER4_EN_PIN = 13;    // Red
-constexpr byte STEPPER4_DIR_PIN = 14;   // Green
-constexpr byte STEPPER4_STEP_PIN = 15;  // Yellow
+constexpr std::array<byte, NUMBER_OF_MOTORS> STEPPER_EN_PINS = { 0, 3, 6, 9, 13 };     // Red
+constexpr std::array<byte, NUMBER_OF_MOTORS> STEPPER_DIR_PINS = { 1, 4, 7, 10, 14 };   // Green
+constexpr std::array<byte, NUMBER_OF_MOTORS> STEPPER_STEP_PINS = { 2, 5, 8, 11, 15 };  // Yellow
 
 // Number of steps to achieve a full rotation: 360deg / 1.8deg * 16μsteps = 200
 constexpr long STEPS_IN_ONE_ROTATION = 3200;
@@ -96,27 +81,27 @@ constexpr byte ERROR_MSG = 0x12;
 // Last time a message was received.
 long int lastMessageReceivedTime = 0;
 
-// Each time Arduino sends a command, this number increases.
-byte messageId = 0;
-
 // Interrupts.
 IntervalTimer timer;
 
 // Stepper motors.
-AccelStepper stepper[] = { AccelStepper{ AccelStepper::DRIVER, STEPPER0_STEP_PIN, STEPPER0_DIR_PIN },
-                           AccelStepper{ AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN },
-                           AccelStepper{ AccelStepper::DRIVER, STEPPER2_STEP_PIN, STEPPER2_DIR_PIN },
-                           AccelStepper{ AccelStepper::DRIVER, STEPPER3_STEP_PIN, STEPPER3_DIR_PIN },
-                           AccelStepper{ AccelStepper::DRIVER, STEPPER4_STEP_PIN, STEPPER4_DIR_PIN } };
+std::array<AccelStepper, NUMBER_OF_MOTORS> stepper = {
+  AccelStepper{ AccelStepper::DRIVER, STEPPER_STEP_PINS[0], STEPPER_DIR_PINS[0] },
+  AccelStepper{ AccelStepper::DRIVER, STEPPER_STEP_PINS[1], STEPPER_DIR_PINS[1] },
+  AccelStepper{ AccelStepper::DRIVER, STEPPER_STEP_PINS[2], STEPPER_DIR_PINS[2] },
+  AccelStepper{ AccelStepper::DRIVER, STEPPER_STEP_PINS[3], STEPPER_DIR_PINS[3] },
+  AccelStepper{ AccelStepper::DRIVER, STEPPER_STEP_PINS[4], STEPPER_DIR_PINS[4] }
+};
 
 // Stepper motors configuration: acceleration and max speed.
-MotorConfig motorConfig[] = { MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 },
-                              MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 },
-                              MotorConfig{ 6000.0, 100530.964915 } };
+std::array<MotorConfig, NUMBER_OF_MOTORS> motorConfig = {
+  MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 },
+  MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 }
+};
 
 // This structure holds motor goals: the main thread updates the goal and the
 // ISR reads it.
-MotorGoal motorGoal[] = { MotorGoal{}, MotorGoal{}, MotorGoal{}, MotorGoal{}, MotorGoal{} };
+std::array<MotorGoal, NUMBER_OF_MOTORS> motorGoal;
 
 // This variable tells the ISR not to read a goal while the main thread is
 // inserting a new one.
@@ -124,7 +109,7 @@ volatile bool writingMotorGoals = false;
 
 // This structure holds motor states: the ISR updates the state and the main
 // thread reads it.
-MotorState motorState[] = { MotorState{}, MotorState{}, MotorState{}, MotorState{}, MotorState{} };
+std::array<MotorState, NUMBER_OF_MOTORS> motorState;
 
 // This variable tells the ISR not to override the state while the main thread
 // is reading it.
@@ -343,7 +328,7 @@ void speedCommand(DataBuffer* cmd)
     // We move the stepper at a constant speed to the maximum or the minimum
     // possible positions.
     // LONG_MAX (0x7FFFFFFF) and LONG_MIN (-80000000) do not work, probably
-    // because of inner logic in AccelStepper library, so we chose close
+    // because of inner logic in the AccelStepper library, so we chose close
     // enough values.
 
     Guard writeGuard{ writingMotorGoals };
@@ -443,21 +428,11 @@ void processBuffer(DataBuffer* cmd)
 
 void setup()
 {
-  // Enable steppers.
-  pinMode(STEPPER0_EN_PIN, OUTPUT);
-  digitalWrite(STEPPER0_EN_PIN, HIGH);
-
-  pinMode(STEPPER1_EN_PIN, OUTPUT);
-  digitalWrite(STEPPER1_EN_PIN, HIGH);
-
-  pinMode(STEPPER2_EN_PIN, OUTPUT);
-  digitalWrite(STEPPER2_EN_PIN, HIGH);
-
-  pinMode(STEPPER3_EN_PIN, OUTPUT);
-  digitalWrite(STEPPER3_EN_PIN, HIGH);
-
-  pinMode(STEPPER4_EN_PIN, OUTPUT);
-  digitalWrite(STEPPER4_EN_PIN, HIGH);
+  for (byte i = 0; i < NUMBER_OF_MOTORS; ++i)
+  {
+    pinMode(STEPPER_EN_PINS[i], OUTPUT);
+    digitalWrite(STEPPER_EN_PINS[i], HIGH);
+  }
 
   // Initialize serial port.
   serialPort.init(9600);
