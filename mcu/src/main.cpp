@@ -37,7 +37,7 @@
 #include "MotorConfig.h"
 #include "Guard.h"
 
-constexpr byte NUBER_OF_MOTORS = 5;
+constexpr byte NUMBER_OF_MOTORS = 5;
 
 // Stepper connections.
 
@@ -179,7 +179,7 @@ float sgn(float value)
  */
 void run()
 {
-  for (int i = 0; i < NUBER_OF_MOTORS; i++)
+  for (int i = 0; i < NUMBER_OF_MOTORS; i++)
   {
     stepper[i].run();
 
@@ -256,7 +256,7 @@ void returnStatus()
   responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
   {
     Guard stateGuard{ readingMotorStates };
-    for (byte i = 0; i < NUBER_OF_MOTORS; i++)
+    for (byte i = 0; i < NUMBER_OF_MOTORS; i++)
     {
       responseBuffer.addByte(i, BufferPosition::Tail);
       responseBuffer.addFloat(stepsToRadians(motorState[i].getPosition()), BufferPosition::Tail);
@@ -464,7 +464,7 @@ void setup()
   serialPort.setCallback(&processBuffer);
 
   // Initialize stepper motors.
-  for (byte i = 0; i < NUBER_OF_MOTORS; i++)
+  for (byte i = 0; i < NUMBER_OF_MOTORS; i++)
   {
     stepper[i].setMaxSpeed(motorConfig[i].getMaxSpeed());
     stepper[i].setAcceleration(motorConfig[i].getAcceleration());
@@ -494,7 +494,7 @@ void loop()
 
     // Stop all motors.
     Guard goalGuard{ writingMotorGoals };
-    for (byte i = 0; i < NUBER_OF_MOTORS; i++)
+    for (byte i = 0; i < NUMBER_OF_MOTORS; i++)
     {
       motorGoal[i].setSpeed(0);
     }
