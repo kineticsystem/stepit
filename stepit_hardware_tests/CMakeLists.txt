@@ -12,7 +12,7 @@ find_package(ros2_controllers REQUIRED)
 ###############################################################################
 # TESTS
 
-include(CTest)
+#include(CTest)
 if (BUILD_TESTING)
     add_subdirectory(tests)
 endif()
