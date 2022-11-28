@@ -58,7 +58,7 @@ byte DataBuffer::removeByte(BufferPosition location)
   return m_buffer.remove(location);
 }
 
-// Following IEEE 754 specification a type int is always sent/received
+// Following IEEE 754 specifications a type int is always sent/received
 // with Most Significant Byte (MSB) first.
 // In Arduino a type int is stored in memory in Little Endian format,
 // it means a pointer to an int gives the address of the LSB.
@@ -78,7 +78,7 @@ void DataBuffer::addInt(int in, BufferPosition location)
   }
 }
 
-// Following IEEE 754 specification, a type int is always sent/received
+// Following IEEE 754 specifications, a type int is always sent/received
 // with Most Significant Byte (MSB) first.
 // In Arduino a type int is stored in memory in Little Endian format,
 // it means a pointer to an int gives the address of the LSB.
@@ -100,7 +100,7 @@ int DataBuffer::removeInt(BufferPosition location)
   return ret;
 }
 
-// Following IEEE 754 specification, a type long is always sent/received
+// Following IEEE 754 specifications, a type long is always sent/received
 // with Most Significant Byte (MSB) first.
 // In Arduino a long is stored in memory in Little Endian format,
 // it means a pointer to a long gives the address of the LSB.
@@ -124,7 +124,7 @@ void DataBuffer::addLong(long in, BufferPosition location)
   }
 }
 
-// Following IEEE 754 specification, a type long is always sent/received
+// Following IEEE 754 specifications, a type long is always sent/received
 // with Most Significant Byte (MSB) first.
 // In Arduino, a long is stored in memory in Little Endian format,
 // it means a pointer to a long gives the address of the LSB.
@@ -150,7 +150,7 @@ long DataBuffer::removeLong(BufferPosition location)
   return ret;
 }
 
-// Following IEEE 754 specification, a type float is always sent/received
+// Following IEEE 754 specifications, a type float is always sent/received
 // with Sign and Exponent first followed by the Significand in
 // Most Significant Byte (MSB) first.
 void DataBuffer::addFloat(float in, BufferPosition location)
@@ -172,7 +172,7 @@ void DataBuffer::addFloat(float in, BufferPosition location)
   }
 }
 
-// Following IEEE 754 specification a type float is stored in the following way:
+// Following IEEE 754 specifications a type float is stored in the following way:
 // - Sign: 1bit
 // - Exponent: 8 bits
 // - Significand: 23 bits.

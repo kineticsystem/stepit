@@ -66,11 +66,11 @@ public:
 private:
   T* m_data;
 
-  // "m_position" is the position of the first element of the buffer.
-  size_t m_position = 0;
-
   // The maximum capacity of the buffer.
   size_t m_capacity = 0;
+
+  // "m_position" is the position of the first element of the buffer.
+  size_t m_position = 0;
 
   // This records how much data is in the buffer: it is always greater
   // than zero and less than or equal to the capacity.
@@ -160,6 +160,10 @@ T Buffer<T>::remove(BufferPosition position)
       m_position = (m_position + 1) % m_capacity;
     }
     m_size--;
+  }
+  else
+  {
+    out = T{};  // This never happens.
   }
   return out;
 }
