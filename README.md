@@ -2,15 +2,25 @@
 
 [![CI](https://github.com/kineticsystem/stepit/actions/workflows/industrial_ci_action.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/industrial_ci_action.yml)
 
-A project to control stepper motors and professional cameras for 3D macro photography.
+## Introduction
 
-<img src="docs/pictures/stepit-architecture.png" width="100%">
+StepIt is a project to control stepper motors with a Teensy microcontroller and ROS2.
 
 ## Prerequisites
 
-We need a machine running Ubuntu 22.04 with ROS 2 Humble installed.
+We need a computer with Ubuntu 22.04 and ROS 2 Humble.
 
-To install ROS 2, please refer to the document [Install ROS2 Humble on Ubuntu](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
+To install ROS 2, please refer to the document [Install ROS2 Humble on Ubuntu](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html).
+
+By default, StepIt runs in simulation mode and we do not need actual hardware to play around with it.
+
+For a real application, we recommend attaching the stepper motors to a Teensy microcontroller 4.0 or 4.1. We can hook the motors in many different ways but we suggest the following hardware configuration.
+
+- 1 x [Teensy 4.1](https://www.pjrc.com/store/teensy41.html) or Teensy 4.0.
+- 1 x [PiBot multi-stepper motor driver board rev2.3 ](https://www.pibot.com/pibot-multi-stepper-motor-driver-board-rev2-3.html)
+- 5 x [TMC2208](https://shop.watterott.com/SilentStepStick-TMC2208-Stepper-Motor-Driver-with-soldered-pinheaders)
+
+The Teensy is connected to a computer using a USB cable. For a portable application, we can use a Raspberry PI 4.
 
 ## StepIt Installation
 
@@ -66,63 +76,9 @@ Execute all tests.
 colcon test
 ```
 
-## How to run GitHub actions locally
+## Development
 
-At each commit, the GitHub repository runs all available tests using [GitHub actions](https://docs.github.com/en/actions) and [Industrial CI](https://github.com/ros-industrial/industrial_ci).
-
-A GitHub action fires up a docker container with Ubuntu 22.04 and ROS2 Humble, checks out and builds the code inside the docker container and runs all tests.
-
-Sometimes, it may be desirable to execute the Continuous Integration pipeline locally. This is possible by using [Nektos](https://github.com/nektos/act).
-
-First of all, we must create a GitHub token to access the repository. Then, we
-must install Nektos `act` command in the user folder `~/bin` as explained in Nektos README.md file. We need an `.env` file at the root of the repository to define a few global variables required by Industrial CI. Finally, we can run the following command from the same folder:
-
-`~/bin/act pull_request --workflows ./.github/workflows/industrial_ci_action.yml -s GITHUB_TOKEN`
-
-## Configuration
-
-We want to develop code for Arduino using Visual Studio Code because it provides better tools to format and validate the code. VSC requires Arduino IDE to be installed first and the best option is to install it manually.
-
-At the moment we are developing for Arduino Nano with ATMega 328 old version. Download the file
-
-`arduino-1.8.19-linux64.tar.xz`
-
-and install it under
-
-`/opt/arduino-1.8.19/`
-
-Run Arduino IDE, open the preferences dialog and change the Sketchbook location to
-
-`<USER_HOME>/src/stepit/arduino/StepIt`
-
-We must install Arduino extension in Visual Studio Code. Additionally, we need three files inside
-
-`<USER_HOME>/src/stepit/arduino/StepIt/.vscode`
-
-1. `arduino.json`
-
-```
-{
-    "board": "arduino:avr:nano",
-    "programmer": "arduino:avrisp",
-    "sketch": "StepIt.ino",
-    "port": "/dev/ttyUSB0",
-    "configuration": "cpu=atmega328old",
-    "output": "../ArduinoOutput"
-}
-```
-
-2. `settings.json`
-
-```
-{
-  "makefile.extensionOutputFolder": "./.vscode",
-  "arduino.path": "/opt/arduino-1.8.19",
-  "arduino.commandPath": "arduino"
-}
-```
-
-3. The third file `c_cpp_properties.json` is generated automatically once the previous two are properly configured without errors.
+We want to develop code for the Teensy microcontroller using Visual Studio Code because it provides better tools to format and validate the code. To achieve this goal, we must install [PlatformIO](https://platformio.org) extension which supports different microcontrollers including Arduino. Installing Arduino IDE is not required.
 
 ## Running the application
 
@@ -157,29 +113,45 @@ To control a trajectory with a sequence of positions and velocities run
 
 ```
 ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "{
-  joint_names: ["joint1", "joint2"],
+  joint_names: ["joint1", "joint2", "joint3", "joint4", "joint5"],
   points: [
     {
-      positions: [0, 0],
-      velocities: [0, 0],
+      positions: [0, 0, 0, 0, 0],
+      velocities: [0, 0, 0, 0, 0],
       time_from_start: {
         sec: 0,
         nanosec: 0
       }
     },
     {
-      positions: [6.28, -6.28],
-      velocities: [2, 0],
+      positions: [31.4159265358979,37.6991118430775,43.9822971502571,50.2654824574367,56.5486677646163],
+      velocities: [0, 0, 0, 0, 0],
       time_from_start: {
-        sec: 5,
+        sec: 10,
         nanosec: 0
       }
     },
     {
-      positions: [0, 0],
-      velocities: [0, 0],
+      positions: [0, 0, 0, 0, 0],
+      velocities: [0, 0, 0, 0, 0],
       time_from_start: {
-        sec: 10,
+        sec: 12,
+        nanosec: 0
+      }
+    },
+    {
+      positions: [-31.4159265358979,-37.6991118430775,-43.9822971502571,-50.2654824574367,-56.5486677646163],
+      velocities: [0, 0, 0, 0, 0],
+      time_from_start: {
+        sec: 17,
+        nanosec: 0
+      }
+    },
+    {
+      positions: [0, 0, 0, 0, 0],
+      velocities: [0, 0, 0, 0, 0],
+      time_from_start: {
+        sec: 20,
         nanosec: 0
       }
     },
@@ -188,3 +160,16 @@ ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/
 ```
 
 The trajectory is a list of waypoints, each of them containing the desired position and velocity of each joint at a given time.
+
+## How to run GitHub actions locally
+
+At each commit, the GitHub repository runs all available tests using [GitHub actions](https://docs.github.com/en/actions) and [Industrial CI](https://github.com/ros-industrial/industrial_ci).
+
+A GitHub action fires up a docker container with Ubuntu 22.04 and ROS2 Humble, checks out and builds the code inside the docker container and runs all tests.
+
+Sometimes, it may be desirable to execute the Continuous Integration pipeline locally. This is possible by using [Nektos](https://github.com/nektos/act).
+
+First of all, we must create a GitHub token to access the repository. Then, we
+must install Nektos `act` command in the user folder `~/bin` as explained in Nektos README.md file. We need an `.env` file at the root of the repository to define a few global variables required by Industrial CI. Finally, we can run the following command from the same folder:
+
+`~/bin/act pull_request --workflows ./.github/workflows/industrial_ci_action.yml -s GITHUB_TOKEN`
