@@ -36,6 +36,7 @@
 #include <stepit_hardware/stepit_hardware.hpp>
 
 #include <stepit_hardware_info.hpp>
+#include <test_utils.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -55,10 +56,22 @@
 namespace stepit_hardware::test
 {
 
+class TestStepitHardware : public ::testing::Test
+{
+public:
+  void SetUp()
+  {
+    if (skip_test())
+    {
+      GTEST_SKIP() << "Skipping all tests for this fixture";
+    }
+  }
+};
+
 /**
  * This test requires connection to a real hardware.
  */
-TEST(TestStepitHardware, test_connection)
+TEST_F(TestStepitHardware, test_connection)
 {
   auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
 

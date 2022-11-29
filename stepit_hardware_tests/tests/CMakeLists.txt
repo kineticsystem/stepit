@@ -18,6 +18,8 @@ endif()
 ament_add_gmock(test_stepit_hardware
     test_stepit_hardware.cpp
     stepit_hardware_info.hpp
+    test_utils.hpp
+
 )
 target_include_directories(test_stepit_hardware
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
@@ -34,6 +36,8 @@ ament_target_dependencies(test_stepit_hardware
 
 ament_add_gmock(test_data_interface
     test_data_interface.cpp
+    test_utils.hpp
+
 )
 target_include_directories(test_data_interface
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}

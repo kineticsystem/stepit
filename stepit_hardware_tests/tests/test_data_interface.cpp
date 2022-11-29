@@ -36,6 +36,7 @@
 #include <stepit_hardware/stepit_hardware.hpp>
 
 #include <stepit_hardware_info.hpp>
+#include <test_utils.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -60,6 +61,10 @@ class TestDataInterface : public ::testing::Test
 public:
   void SetUp()
   {
+    if (skip_test())
+    {
+      GTEST_SKIP() << "Skipping all tests for this fixture";
+    }
     auto serial_handler = std::make_unique<SerialHandler>();
     serial_handler->set_port("/dev/ttyACM0");
     serial_handler->set_baudrate(9600);
@@ -71,10 +76,13 @@ public:
 
   void TearDown()
   {
-    data_handler->close();
+    if (data_handler)
+    {
+      data_handler->close();
+    }
   }
 
-  std::unique_ptr<DataHandler> data_handler;
+  std::unique_ptr<DataHandler> data_handler = nullptr;
 };
 
 /**
