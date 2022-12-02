@@ -44,7 +44,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
-            DeclareLaunchArgument("joy_vel", default_value="stepit/cmd_vel"),
+            DeclareLaunchArgument("joy_vel", default_value="/cmd_vel"),
             DeclareLaunchArgument("joy_config", default_value="logitech"),
             DeclareLaunchArgument("joy_dev", default_value="/dev/input/js0"),
             DeclareLaunchArgument(
@@ -66,7 +66,7 @@ def generate_launch_description():
                 parameters=[
                     {
                         "dev": joy_dev,
-                        "deadzone": 0.3,
+                        "deadzone": 0.1,
                         "autorepeat_rate": 20.0,
                     }
                 ],

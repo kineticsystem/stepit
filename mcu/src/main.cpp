@@ -93,11 +93,12 @@ std::array<AccelStepper, NUMBER_OF_MOTORS> stepper = {
   AccelStepper{ AccelStepper::DRIVER, STEPPER_STEP_PINS[4], STEPPER_DIR_PINS[4] }
 };
 
-// Stepper motors configuration: acceleration and max speed.
-std::array<MotorConfig, NUMBER_OF_MOTORS> motorConfig = {
-  MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 },
-  MotorConfig{ 6000.0, 100530.964915 }, MotorConfig{ 6000.0, 100530.964915 }
-};
+// Stepper motors configuration:
+// acceleration (2 rotations per square second)
+// max speed (3 rotations per second)
+std::array<MotorConfig, NUMBER_OF_MOTORS> motorConfig = { MotorConfig{ 6400.0, 9600 }, MotorConfig{ 6400.0, 9600 },
+                                                          MotorConfig{ 6400.0, 9600 }, MotorConfig{ 6400.0, 9600 },
+                                                          MotorConfig{ 6400.0, 9600 } };
 
 // This structure holds motor goals: the main thread updates the goal and the
 // ISR reads it.

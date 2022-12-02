@@ -1,18 +1,69 @@
-# teleop_twist_joy configuration.
-# https://index.ros.org/p/teleop_twist_joy
-
 # Configuration for Logitech gamepad.
+#
+# The joy node publishes a message like the following one on the topic "/joy".
+# http://docs.ros.org/en/api/sensor_msgs/html/msg/Joy.html
+#
+# std_msgs/Header header
+# float32[] axes
+# int32[] buttons
+#
+# axes is an array of values [-1, 1] each corresponding to the
+# state of one of the 3 joysticks on a Logitech Gamepad.
+#
+# 0 - left joystick     left/right
+# 1 - left joystick     up/down
+# 2 - right joystick    left/right
+# 3 - right joystic     up/down
+# 4 - digital joystic   left/right
+# 5 - digital joystic   up/down
+#
+# buttons is an array of vales {0,1} each corresponding to the
+# state of one of the many buttons on a Logitech Gamepad.
+#
+# 0 - button 1
+# 1 - button 2
+# 2 - button 3
+# 3 - button 4
+# 4 - left front upper button
+# 5 - right front upper button
+# 6 - left front bottom button
+# 7 - right front bottom button
+# 8 - button 9
+# 9 - button 10
+#
+# The Teleop Twist node, read the message from the "/joy" topic and converts it
+# into a Twist message like the following.
+# http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/Twist.html
+#
+# geometry_msgs/Vector3 linear
+# geometry_msgs/Vector3 angular
+#
+# This message defines a linear translation along the axes x, y, z and
+# a rotation around the same axes.
+#
+# The Joy message is converted into a Twist message by mapping values
+# from the axes array into the x, y, z coordinates of the linear and angular
+# vectors.
+
 teleop_twist_joy_node:
   ros__parameters:
-    axis_linear: # Joystick axis used to update the linear x value.
-      x: 1
-    scale_linear: # Output value in [-5 rotation/s, +5 rotation/s] interval.
-      x: 31.4159265359
+    axis_linear:
+      x: 0
+      y: 1
+      z: 4
+    scale_linear: # Output value in [-2 rotation/s, +2 rotation/s] interval.
+      x: 18.849555922
+      y: 18.849555922
+      z: 18.849555922
 
-    axis_angular: # Joystick axis used to update the twist roll value.
-      roll: 3
-    scale_angular: # Output value in [-5 rotation/s, +5 rotation/s] interval.
-      roll: 31.4159265359
+    axis_angular:
+      roll: 2
+      pitch: 3
+      yaw: 5
+    scale_angular: # Output value in [-2 rotation/s, +2 rotation/s] interval.
+      roll: 18.849555922
+      pitch: 18.849555922
+      yaw: 18.849555922
 
     # configure the dead man's switch.
     require_enable_button: false

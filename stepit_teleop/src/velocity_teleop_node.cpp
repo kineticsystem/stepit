@@ -37,14 +37,17 @@ VelocityTeleopNode::VelocityTeleopNode() : Node("velocity_teleop_node")
 {
   pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("/velocity_controller/commands", 10);
   sub_ = this->create_subscription<geometry_msgs::msg::Twist>(
-      "/stepit/cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg) { callback(msg); });
+      "/cmd_vel", 10, [this](const geometry_msgs::msg::Twist::SharedPtr msg) { callback(msg); });
 }
 
 void VelocityTeleopNode::callback([[maybe_unused]] const geometry_msgs::msg::Twist::SharedPtr msg)
 {
   auto new_msg = std_msgs::msg::Float64MultiArray();
-  new_msg.data = { msg->angular.x, msg->linear.x };
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "velocity command: {%f, %f}", msg->angular.x, msg->linear.x);
+  const double values[] = { msg->linear.x, msg->linear.y, msg->linear.z, msg->angular.x, msg->angular.y };
+
+  new_msg.data = { values[0], values[1], values[2], values[3], values[4] };
+  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "velocity command: {%f, %f, %f, %f, %f}", values[0], values[1], values[2],
+               values[3], values[4]);
   pub_->publish(new_msg);
 }
 }  // namespace stepit_teleop

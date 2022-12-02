@@ -20,9 +20,13 @@ For a real application, we recommend attaching the stepper motors to a Teensy mi
 - 1 x [PiBot multi-stepper motor driver board rev2.3 ](https://www.pibot.com/pibot-multi-stepper-motor-driver-board-rev2-3.html)
 - 5 x [TMC2208](https://shop.watterott.com/SilentStepStick-TMC2208-Stepper-Motor-Driver-with-soldered-pinheaders)
 
-The Teensy is connected to a computer using a USB cable. For a portable application, we can use a Raspberry PI 4.
+The Teensy is connected to a computer using a USB cable. For a portable application, we can use a [Raspberry PI 4](docs/install_ros_on_rasperry_pi/install_ros2_on_rasperry_pi.md).
 
-## StepIt Installation
+## StepIt microcontroller installation
+
+We developed code for the Teensy microcontroller using Visual Studio Code because it provides very good tools to format and validate the code. To achieve this goal, we must install [PlatformIO](https://platformio.org) extension which supports different microcontrollers including Arduino. Installing Arduino IDE is not required.
+
+## StepIt computer installation
 
 Open a terminal and run the following command to source the ROS 2 Humble installation.
 
@@ -75,10 +79,6 @@ Execute all tests.
 ```
 colcon test
 ```
-
-## Development
-
-We want to develop code for the Teensy microcontroller using Visual Studio Code because it provides better tools to format and validate the code. To achieve this goal, we must install [PlatformIO](https://platformio.org) extension which supports different microcontrollers including Arduino. Installing Arduino IDE is not required.
 
 ## Running the application
 
