@@ -146,7 +146,7 @@ At the first access, we must change the password, log out, and then log in again
 
 ## Install ROS2
 
-Because we are running Ubuntu Server 22.04 LTS, we will install ROS2 Humble Hawksbill. For the details of the installation, please refer to the following link:
+Because we are running Ubuntu Server 22.04 LTS, we will install ROS2 Humble. For the details of the installation, please refer to the following link:
 
 [https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html)
 
