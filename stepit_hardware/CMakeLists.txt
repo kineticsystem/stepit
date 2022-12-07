@@ -20,7 +20,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     pluginlib
     rclcpp
     rclcpp_lifecycle
-    serial
 )
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
@@ -33,7 +32,6 @@ find_package(data_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
-find_package(serial REQUIRED)
 
 # Build stepit_hardware library.
 
