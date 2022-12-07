@@ -1,5 +1,5 @@
 repositories:
   serial:
     type: git
-    url: https://github.com/tylerjw/serial.git
+    url: https://github.com/kineticsystem/serial.git
     version: ros2
