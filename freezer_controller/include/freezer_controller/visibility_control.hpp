@@ -27,54 +27,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <freezer_controller/freezer_controller.hpp>
+#pragma once
 
-namespace freezer_controller
-{
-
-FreezerController::FreezerController()
-{
-}
-
-controller_interface::InterfaceConfiguration FreezerController::command_interface_configuration() const
-{
-  controller_interface::InterfaceConfiguration config;
-  return config;
-}
-
-controller_interface::InterfaceConfiguration FreezerController::state_interface_configuration() const
-{
-  controller_interface::InterfaceConfiguration config;
-  return config;
-}
-
-controller_interface::return_type FreezerController::update([[maybe_unused]] const rclcpp::Time& time,
-                                                            [[maybe_unused]] const rclcpp::Duration& period)
-{
-  return controller_interface::return_type::OK;
-}
-
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-FreezerController::on_configure([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
-{
-  return CallbackReturn::SUCCESS;
-}
-
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-FreezerController::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
-{
-  return CallbackReturn::SUCCESS;
-}
-
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-FreezerController::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
-{
-  return CallbackReturn::SUCCESS;
-}
-
-rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn FreezerController::on_init()
-{
-  return CallbackReturn::SUCCESS;
-}
-
-}  // namespace freezer_controller
+#define FREEZER_CONTROLLER_EXPORT __attribute__((visibility("default")))
+#define FREEZER_CONTROLLER_IMPORT
+#define FREEZER_CONTROLLER_PUBLIC __attribute__((visibility("default")))
+#define FREEZER_CONTROLLER_LOCAL __attribute__((visibility("hidden")))
+#define FREEZER_CONTROLLER_PUBLIC_TYPE

@@ -75,7 +75,7 @@ public:
    * @returns CallbackReturn::SUCCESS if required data are provided and can be
    * parsed or CallbackReturn::ERROR if any error happens or data are missing.
    */
-  stepit_hardware_PUBLIC CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
+  STEPIT_HARDWARE_PUBLIC CallbackReturn on_init(const hardware_interface::HardwareInfo& info) override;
 
   /**
    * Connect to the hardware.
@@ -83,42 +83,42 @@ public:
    * @returns CallbackReturn::SUCCESS if required data are provided and can be
    * parsed or CallbackReturn::ERROR if any error happens or data are missing.
    */
-  stepit_hardware_PUBLIC CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
+  STEPIT_HARDWARE_PUBLIC CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
    * This method exposes position and velocity of joints for reading.
    */
-  stepit_hardware_PUBLIC std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
+  STEPIT_HARDWARE_PUBLIC std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
   /**
    * This method exposes the joints targets for writing.
    */
-  stepit_hardware_PUBLIC std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
+  STEPIT_HARDWARE_PUBLIC std::vector<hardware_interface::CommandInterface> export_command_interfaces() override;
 
   /**
    * This method is invoked when the hardware is connected.
    * @param previous_state Unconfigured, Inactive, Active or Finalized.
    * @returns CallbackReturn::SUCCESS or CallbackReturn::ERROR.
    */
-  stepit_hardware_PUBLIC CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
+  STEPIT_HARDWARE_PUBLIC CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
    * This method is invoked when the hardware is disconnected.
    * @param previous_state Unconfigured, Inactive, Active or Finalized.
    * @returns CallbackReturn::SUCCESS or CallbackReturn::ERROR.
    */
-  stepit_hardware_PUBLIC CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
+  STEPIT_HARDWARE_PUBLIC CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
    * Read data from the hardware.
    */
-  stepit_hardware_PUBLIC hardware_interface::return_type read(const rclcpp::Time& time,
+  STEPIT_HARDWARE_PUBLIC hardware_interface::return_type read(const rclcpp::Time& time,
                                                               const rclcpp::Duration& period) override;
 
   /**
    * Write data from to hardware.
    */
-  stepit_hardware_PUBLIC hardware_interface::return_type write(const rclcpp::Time& time,
+  STEPIT_HARDWARE_PUBLIC hardware_interface::return_type write(const rclcpp::Time& time,
                                                                const rclcpp::Duration& period) override;
 
 private:

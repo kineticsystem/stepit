@@ -66,6 +66,7 @@ add_library(
     include/stepit_hardware/msgs/status_response.hpp
     include/stepit_hardware/msgs/velocity_command.hpp
     include/stepit_hardware/stepit_hardware.hpp
+    include/stepit_hardware/visibility_control.hpp
     src/command_handler.cpp
     src/command_handler_factory.cpp
     src/fake/fake_command_handler.cpp

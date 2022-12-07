@@ -46,6 +46,7 @@ add_library(
     freezer_controller
     SHARED
     include/freezer_controller/freezer_controller.hpp
+    include/freezer_controller/visibility_control.hpp
     src/freezer_controller.cpp
 )
 target_include_directories(
