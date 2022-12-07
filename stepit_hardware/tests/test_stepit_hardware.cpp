@@ -29,9 +29,10 @@
 
 #include <gtest/gtest.h>
 
-#include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/msgs/msgs.hpp>
 #include <stepit_hardware/stepit_hardware.hpp>
+
+#include <data_interface/data_utils.hpp>
 
 #include <fake/fake_hardware_info.hpp>
 #include <mock/mock_command_interface.hpp>
@@ -92,6 +93,33 @@ TEST(TestStepitHardware, load_urdf)
             <state_interface name="position"/>
             <state_interface name="velocity"/>
           </joint>
+          <joint name="joint3">
+            <param name="id">2</param>
+            <param name="acceleration">3.14159</param>
+            <param name="max_velocity">6.28319</param>
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
+          <joint name="joint4">
+            <param name="id">3</param>
+            <param name="acceleration">3.14159</param>
+            <param name="max_velocity">6.28319</param>
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
+          <joint name="joint5">
+            <param name="id">4</param>
+            <param name="acceleration">3.14159</param>
+            <param name="max_velocity">6.28319</param>
+            <command_interface name="position"/>
+            <command_interface name="velocity"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
         </ros2_control>
       )";
 
@@ -100,17 +128,33 @@ TEST(TestStepitHardware, load_urdf)
 
   // Check interfaces
   EXPECT_EQ(1u, rm.system_components_size());
-  ASSERT_EQ(4u, rm.state_interface_keys().size());
+
+  // 5 position and 5 velocity interfaces.
+  ASSERT_EQ(10u, rm.state_interface_keys().size());
+
   EXPECT_TRUE(rm.state_interface_exists("joint1/position"));
   EXPECT_TRUE(rm.state_interface_exists("joint2/position"));
+  EXPECT_TRUE(rm.state_interface_exists("joint3/position"));
+  EXPECT_TRUE(rm.state_interface_exists("joint4/position"));
+  EXPECT_TRUE(rm.state_interface_exists("joint5/position"));
+
   EXPECT_TRUE(rm.state_interface_exists("joint1/velocity"));
   EXPECT_TRUE(rm.state_interface_exists("joint2/velocity"));
+  EXPECT_TRUE(rm.state_interface_exists("joint3/velocity"));
+  EXPECT_TRUE(rm.state_interface_exists("joint4/velocity"));
+  EXPECT_TRUE(rm.state_interface_exists("joint5/velocity"));
 
-  ASSERT_EQ(4u, rm.command_interface_keys().size());
   EXPECT_TRUE(rm.command_interface_exists("joint1/position"));
   EXPECT_TRUE(rm.command_interface_exists("joint2/position"));
+  EXPECT_TRUE(rm.command_interface_exists("joint3/position"));
+  EXPECT_TRUE(rm.command_interface_exists("joint4/position"));
+  EXPECT_TRUE(rm.command_interface_exists("joint5/position"));
+
   EXPECT_TRUE(rm.command_interface_exists("joint1/velocity"));
   EXPECT_TRUE(rm.command_interface_exists("joint2/velocity"));
+  EXPECT_TRUE(rm.command_interface_exists("joint3/velocity"));
+  EXPECT_TRUE(rm.command_interface_exists("joint4/velocity"));
+  EXPECT_TRUE(rm.command_interface_exists("joint5/velocity"));
 }
 
 /**
@@ -127,7 +171,10 @@ TEST(TestStepitHardware, read_status)
       Response::Status::Success,
       {
           StatusResponse::MotorState{ 0, 32100, 0.5, 150 },     // Motor 0 status
-          StatusResponse::MotorState{ 1, -6500, 0.75, 150000 }  // Motor 1 status
+          StatusResponse::MotorState{ 1, -6500, 0.75, 150000 }, // Motor 1 status
+          StatusResponse::MotorState{ 2, -6500, 0.75, 150000 }, // Motor 1 status
+          StatusResponse::MotorState{ 3, -6500, 0.75, 150000 }, // Motor 1 status
+          StatusResponse::MotorState{ 4, -6500, 0.75, 150000 }  // Motor 1 status
       }
   };
   // clang-format on
@@ -159,13 +206,27 @@ TEST(TestStepitHardware, read_status)
   // Read state interface values.
   hardware_interface::LoanedStateInterface joint1_position_state = rm.claim_state_interface("joint1/position");
   hardware_interface::LoanedStateInterface joint2_position_state = rm.claim_state_interface("joint2/position");
+  hardware_interface::LoanedStateInterface joint3_position_state = rm.claim_state_interface("joint3/position");
+  hardware_interface::LoanedStateInterface joint4_position_state = rm.claim_state_interface("joint4/position");
+  hardware_interface::LoanedStateInterface joint5_position_state = rm.claim_state_interface("joint5/position");
+
   hardware_interface::LoanedStateInterface joint1_velocity_state = rm.claim_state_interface("joint1/velocity");
   hardware_interface::LoanedStateInterface joint2_velocity_state = rm.claim_state_interface("joint2/velocity");
+  hardware_interface::LoanedStateInterface joint3_velocity_state = rm.claim_state_interface("joint3/velocity");
+  hardware_interface::LoanedStateInterface joint4_velocity_state = rm.claim_state_interface("joint4/velocity");
+  hardware_interface::LoanedStateInterface joint5_velocity_state = rm.claim_state_interface("joint5/velocity");
 
   ASSERT_EQ(32100, joint1_position_state.get_value());
   ASSERT_EQ(-6500, joint2_position_state.get_value());
+  ASSERT_EQ(-6500, joint3_position_state.get_value());
+  ASSERT_EQ(-6500, joint4_position_state.get_value());
+  ASSERT_EQ(-6500, joint5_position_state.get_value());
+
   ASSERT_EQ(0.5, joint1_velocity_state.get_value());
   ASSERT_EQ(0.75, joint2_velocity_state.get_value());
+  ASSERT_EQ(0.75, joint3_velocity_state.get_value());
+  ASSERT_EQ(0.75, joint4_velocity_state.get_value());
+  ASSERT_EQ(0.75, joint5_velocity_state.get_value());
 }
 
 /**
@@ -179,7 +240,10 @@ TEST(TestStepitHardware, write_velocities)
   const VelocityCommand expected_request{
     {
         VelocityCommand::Goal{ 0, 0.5 },  // Motor 0 goal
-        VelocityCommand::Goal{ 1, 0.75 }  // Motor 1 goal
+        VelocityCommand::Goal{ 1, 0.75 }, // Motor 1 goal
+        VelocityCommand::Goal{ 2, 0.75 }, // Motor 2 goal
+        VelocityCommand::Goal{ 3, 0.75 }, // Motor 3 goal
+        VelocityCommand::Goal{ 4, 0.75 }  // Motor 4 goal
     }
   };
   // clang-format on
@@ -209,8 +273,15 @@ TEST(TestStepitHardware, write_velocities)
   // Write velocity values.
   hardware_interface::LoanedCommandInterface joint1_velocity_command = rm.claim_command_interface("joint1/velocity");
   hardware_interface::LoanedCommandInterface joint2_velocity_command = rm.claim_command_interface("joint2/velocity");
+  hardware_interface::LoanedCommandInterface joint3_velocity_command = rm.claim_command_interface("joint3/velocity");
+  hardware_interface::LoanedCommandInterface joint4_velocity_command = rm.claim_command_interface("joint4/velocity");
+  hardware_interface::LoanedCommandInterface joint5_velocity_command = rm.claim_command_interface("joint5/velocity");
+
   joint1_velocity_command.set_value(0.5);
   joint2_velocity_command.set_value(0.75);
+  joint3_velocity_command.set_value(0.75);
+  joint4_velocity_command.set_value(0.75);
+  joint5_velocity_command.set_value(0.75);
 
   // Invoke a write command.
   const rclcpp::Time time;
@@ -218,10 +289,21 @@ TEST(TestStepitHardware, write_velocities)
   rm.write(time, period);
 
   ASSERT_EQ(actual_request.goals().size(), actual_request.goals().size());
+
   ASSERT_EQ(actual_request.goals()[0].motor_id(), actual_request.goals()[0].motor_id());
   ASSERT_EQ(actual_request.goals()[0].velocity(), actual_request.goals()[0].velocity());
+
   ASSERT_EQ(actual_request.goals()[1].motor_id(), actual_request.goals()[1].motor_id());
   ASSERT_EQ(actual_request.goals()[1].velocity(), actual_request.goals()[1].velocity());
+
+  ASSERT_EQ(actual_request.goals()[2].motor_id(), actual_request.goals()[2].motor_id());
+  ASSERT_EQ(actual_request.goals()[2].velocity(), actual_request.goals()[2].velocity());
+
+  ASSERT_EQ(actual_request.goals()[3].motor_id(), actual_request.goals()[3].motor_id());
+  ASSERT_EQ(actual_request.goals()[3].velocity(), actual_request.goals()[3].velocity());
+
+  ASSERT_EQ(actual_request.goals()[4].motor_id(), actual_request.goals()[4].motor_id());
+  ASSERT_EQ(actual_request.goals()[4].velocity(), actual_request.goals()[4].velocity());
 }
 
 /**
@@ -235,7 +317,10 @@ TEST(TestStepitHardware, write_positions)
   const PositionCommand expected_request{
     {
         PositionCommand::Goal{ 0, 0.5 },  // Motor 0 goal
-        PositionCommand::Goal{ 1, 0.75 }  // Motor 1 goal
+        PositionCommand::Goal{ 1, 0.75 }, // Motor 1 goal
+        PositionCommand::Goal{ 2, 0.75 }, // Motor 2 goal
+        PositionCommand::Goal{ 3, 0.75 }, // Motor 3 goal
+        PositionCommand::Goal{ 4, 0.75 }  // Motor 4 goal
     }
   };
   // clang-format on
@@ -265,8 +350,14 @@ TEST(TestStepitHardware, write_positions)
   // Write position values.
   hardware_interface::LoanedCommandInterface joint1_position_command = rm.claim_command_interface("joint1/position");
   hardware_interface::LoanedCommandInterface joint2_position_command = rm.claim_command_interface("joint2/position");
+  hardware_interface::LoanedCommandInterface joint3_position_command = rm.claim_command_interface("joint3/position");
+  hardware_interface::LoanedCommandInterface joint4_position_command = rm.claim_command_interface("joint4/position");
+  hardware_interface::LoanedCommandInterface joint5_position_command = rm.claim_command_interface("joint5/position");
   joint1_position_command.set_value(0.5);
   joint2_position_command.set_value(0.75);
+  joint3_position_command.set_value(0.75);
+  joint4_position_command.set_value(0.75);
+  joint5_position_command.set_value(0.75);
 
   // Invoke a write command.
   const rclcpp::Time time;
@@ -274,10 +365,21 @@ TEST(TestStepitHardware, write_positions)
   rm.write(time, period);
 
   ASSERT_EQ(actual_request.goals().size(), actual_request.goals().size());
+
   ASSERT_EQ(actual_request.goals()[0].motor_id(), actual_request.goals()[0].motor_id());
   ASSERT_EQ(actual_request.goals()[0].position(), actual_request.goals()[0].position());
+
   ASSERT_EQ(actual_request.goals()[1].motor_id(), actual_request.goals()[1].motor_id());
   ASSERT_EQ(actual_request.goals()[1].position(), actual_request.goals()[1].position());
+
+  ASSERT_EQ(actual_request.goals()[2].motor_id(), actual_request.goals()[2].motor_id());
+  ASSERT_EQ(actual_request.goals()[2].position(), actual_request.goals()[2].position());
+
+  ASSERT_EQ(actual_request.goals()[3].motor_id(), actual_request.goals()[3].motor_id());
+  ASSERT_EQ(actual_request.goals()[3].position(), actual_request.goals()[3].position());
+
+  ASSERT_EQ(actual_request.goals()[4].motor_id(), actual_request.goals()[4].motor_id());
+  ASSERT_EQ(actual_request.goals()[4].position(), actual_request.goals()[4].position());
 }
 
 /**
@@ -291,7 +393,10 @@ TEST(TestStepitHardware, configuration)
    const ConfigCommand expected_request{
      {
          ConfigCommand::Param{ 0, 0.1, 0.2 },  // Motor 0 goal
-         ConfigCommand::Param{ 1, 0.3, 0.4}    // Motor 1 goal
+         ConfigCommand::Param{ 1, 0.3, 0.4},   // Motor 1 goal
+         ConfigCommand::Param{ 2, 0.3, 0.4},   // Motor 1 goal
+         ConfigCommand::Param{ 3, 0.3, 0.4},   // Motor 1 goal
+         ConfigCommand::Param{ 4, 0.3, 0.4}    // Motor 1 goal
      }
    };
   // clang-format on
@@ -321,8 +426,21 @@ TEST(TestStepitHardware, configuration)
   ASSERT_EQ(actual_request.params()[0].motor_id(), actual_request.params()[0].motor_id());
   ASSERT_EQ(actual_request.params()[0].acceleration(), actual_request.params()[0].acceleration());
   ASSERT_EQ(actual_request.params()[0].max_velocity(), actual_request.params()[0].max_velocity());
+
   ASSERT_EQ(actual_request.params()[1].motor_id(), actual_request.params()[1].motor_id());
   ASSERT_EQ(actual_request.params()[1].acceleration(), actual_request.params()[1].acceleration());
   ASSERT_EQ(actual_request.params()[1].max_velocity(), actual_request.params()[1].max_velocity());
+
+  ASSERT_EQ(actual_request.params()[2].motor_id(), actual_request.params()[2].motor_id());
+  ASSERT_EQ(actual_request.params()[2].acceleration(), actual_request.params()[2].acceleration());
+  ASSERT_EQ(actual_request.params()[2].max_velocity(), actual_request.params()[2].max_velocity());
+
+  ASSERT_EQ(actual_request.params()[3].motor_id(), actual_request.params()[3].motor_id());
+  ASSERT_EQ(actual_request.params()[3].acceleration(), actual_request.params()[3].acceleration());
+  ASSERT_EQ(actual_request.params()[3].max_velocity(), actual_request.params()[3].max_velocity());
+
+  ASSERT_EQ(actual_request.params()[4].motor_id(), actual_request.params()[4].motor_id());
+  ASSERT_EQ(actual_request.params()[4].acceleration(), actual_request.params()[4].acceleration());
+  ASSERT_EQ(actual_request.params()[4].max_velocity(), actual_request.params()[4].max_velocity());
 }
 }  // namespace stepit_hardware::test

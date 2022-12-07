@@ -29,7 +29,8 @@
 
 #include <stepit_hardware/msgs/position_command.hpp>
 #include <stepit_hardware/msgs/msgs_ids.hpp>
-#include <stepit_hardware/data_utils.hpp>
+
+#include <data_interface/data_utils.hpp>
 
 namespace stepit_hardware
 {

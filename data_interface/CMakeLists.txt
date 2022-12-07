@@ -5,7 +5,7 @@
 # A fix has been already applied on the next release of Humble.
 
 cmake_minimum_required(VERSION 3.22.1)
-project(stepit_hardware VERSION 0.1.0 LANGUAGES CXX)
+project(data_interface VERSION 0.1.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 
 # Enable output of compile commands during generation.
@@ -15,11 +15,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # will also be exported using ament_export_dependencies to help a client
 # software find all required transitive dependencies to use this library.
 set(THIS_PACKAGE_INCLUDE_DEPENDS
-    hardware_interface
-    data_interface
-    pluginlib
     rclcpp
-    rclcpp_lifecycle
     serial
 )
 
@@ -28,14 +24,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(hardware_interface REQUIRED)
-find_package(data_interface REQUIRED)
-find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
 find_package(serial REQUIRED)
 
-# Build stepit_hardware library.
+# Build data_interface library.
 
 # CMake does not need headers listed here and it is generally recommended not
 # to add them to avoid additional maintenance burden.
@@ -45,81 +37,50 @@ find_package(serial REQUIRED)
 # The time spent in the IDE is longer than the time spend maintaining this
 # list, so we added the header files too.
 add_library(
-    stepit_hardware
+    data_interface
     SHARED
-    include/stepit_hardware/command_handler.hpp
-    include/stepit_hardware/command_handler_factory.hpp
-    include/stepit_hardware/command_interface.hpp
-    include/stepit_hardware/command_interface_factory.hpp
-    include/stepit_hardware/fake/fake_command_handler.hpp
-    include/stepit_hardware/fake/fake_motor.hpp
-    include/stepit_hardware/fake/position_control.hpp
-    include/stepit_hardware/fake/velocity_control.hpp
-    include/stepit_hardware/msgs/acknowledge_response.hpp
-    include/stepit_hardware/msgs/config_command.hpp
-    include/stepit_hardware/msgs/info_query.hpp
-    include/stepit_hardware/msgs/info_response.hpp
-    include/stepit_hardware/msgs/msgs.hpp
-    include/stepit_hardware/msgs/msgs_ids.hpp
-    include/stepit_hardware/msgs/position_command.hpp
-    include/stepit_hardware/msgs/request.hpp
-    include/stepit_hardware/msgs/response.hpp
-    include/stepit_hardware/msgs/status_query.hpp
-    include/stepit_hardware/msgs/status_response.hpp
-    include/stepit_hardware/msgs/velocity_command.hpp
-    include/stepit_hardware/stepit_hardware.hpp
-    src/command_handler.cpp
-    src/command_handler_factory.cpp
-    src/fake/fake_command_handler.cpp
-    src/fake/fake_motor.cpp
-    src/fake/position_control.cpp
-    src/fake/velocity_control.cpp
-    src/msgs/acknowledge_response.cpp
-    src/msgs/config_command.cpp
-    src/msgs/info_query.cpp
-    src/msgs/info_response.cpp
-    src/msgs/position_command.cpp
-    src/msgs/request.cpp
-    src/msgs/response.cpp
-    src/msgs/status_query.cpp
-    src/msgs/status_response.cpp
-    src/msgs/velocity_command.cpp
-    src/stepit_hardware.cpp
+    include/data_interface/buffer.hpp
+    include/data_interface/crc_utils.hpp
+    include/data_interface/data_handler.hpp
+    include/data_interface/data_interface.hpp
+    include/data_interface/data_utils.hpp
+    include/data_interface/serial_exception.hpp
+    include/data_interface/serial_handler.hpp
+    include/data_interface/serial_interface.hpp
+    src/crc_utils.cpp
+    src/data_handler.cpp
+    src/data_utils.cpp
+    src/serial_handler.cpp
 )
 target_include_directories(
-    stepit_hardware
+    data_interface
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(
-    stepit_hardware
+    data_interface
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-target_compile_features(stepit_hardware
+target_compile_features(data_interface
     PUBLIC cxx_std_17
 )
-
-###############################################################################
-# PLUGINS
-
-pluginlib_export_plugin_description_file(hardware_interface stepit_hardware.xml)
 
 ###############################################################################
 # EXPORTS
 
 # This is necessary to allow this library’s clients to use the syntax
 # target_link_libraries(client <pkg>::<target_name>)
-# target_link_libraries(client stepit_hardware::stepit_hardware)
+# target_link_libraries(client data_interface::data_interface)
 # Without this a client cannot find this library.
 # It can take an arbitrary list of targets named as EXPORT in an install call.
 ament_export_targets(
-    stepit_hardware_targets # Must match the EXPORT label below.
+    data_interface_targets # Must match the EXPORT label below.
 )
 # Help downstream packages to find transitive dependencies i.e. export all
 # dependencies required by a package to use this library.
-# When a package calls find_package(stepit_hardware), CMake looks for a file
-# called stepit_hardwareConfig.cmake which sets up everything another project
+# When a package calls find_package(data_interface), CMake looks for a file
+# called data_interfaceConfig.cmake which sets up everything another project
 # would need to depend on this one.
 ament_export_dependencies(
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -130,7 +91,7 @@ ament_export_include_directories(
 )
 # Tell downstream packages our libraries to link against.
 ament_export_libraries(
-    stepit_hardware
+    data_interface
 )
 
 ###############################################################################
@@ -144,8 +105,8 @@ install(
 
 # Install our library.
 install(
-    TARGETS stepit_hardware
-    EXPORT stepit_hardware_targets
+    TARGETS data_interface
+    EXPORT data_interface_targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}      # lib
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}      # lib
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}      # bin

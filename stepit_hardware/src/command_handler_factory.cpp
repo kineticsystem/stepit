@@ -29,9 +29,10 @@
 
 #include <stepit_hardware/command_handler.hpp>
 #include <stepit_hardware/command_handler_factory.hpp>
-#include <stepit_hardware/data_handler.hpp>
 #include <stepit_hardware/fake/fake_command_handler.hpp>
-#include <stepit_hardware/serial_handler.hpp>
+
+#include <data_interface/serial_handler.hpp>
+#include <data_interface/data_handler.hpp>
 
 namespace stepit_hardware
 {
@@ -58,12 +59,12 @@ stepit_hardware::CommandHandlerFactory::create(const hardware_interface::Hardwar
     uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
     RCLCPP_INFO(rclcpp::get_logger(kLogger), "timeout: %f", timeout);
 
-    auto serial_handler = std::make_unique<SerialHandler>();
+    auto serial_handler = std::make_unique<data_interface::SerialHandler>();
     serial_handler->set_port(usb_port);
     serial_handler->set_baudrate(baud_rate);
     serial_handler->set_timeout(timeout_ms);
 
-    return std::make_unique<CommandHandler>(std::make_unique<DataHandler>(std::move(serial_handler)));
+    return std::make_unique<CommandHandler>(std::make_unique<data_interface::DataHandler>(std::move(serial_handler)));
   }
 }
 }  // namespace stepit_hardware

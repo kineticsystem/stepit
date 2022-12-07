@@ -31,8 +31,9 @@
 
 #include <mock/mock_data_interface.hpp>
 #include <stepit_hardware/command_handler.hpp>
-#include <stepit_hardware/data_utils.hpp>
 #include <stepit_hardware/msgs/msgs.hpp>
+
+#include <data_interface/data_utils.hpp>
 
 namespace stepit_hardware::test
 {
@@ -90,8 +91,7 @@ TEST(TestCommandHandler, send_status_query)
 
   StatusResponse response = command_handler->send(rclcpp::Time{}, request);
 
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
-              stepit_hardware::data_utils::to_hex(expected_request));
+  ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
 
   ASSERT_EQ(static_cast<std::size_t>(2), response.motor_states().size());
   ASSERT_EQ(32100, response.motor_states()[0].position());
@@ -133,8 +133,7 @@ TEST(TestCommandHandler, send_velocity_command)
   VelocityCommand request{ { VelocityCommand::Goal{ 0, 0.5 }, VelocityCommand::Goal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
-              stepit_hardware::data_utils::to_hex(expected_request));
+  ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 
@@ -171,8 +170,7 @@ TEST(TestCommandHandler, send_position_command)
   PositionCommand request{ { PositionCommand::Goal{ 0, 0.5 }, PositionCommand::Goal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
-              stepit_hardware::data_utils::to_hex(expected_request));
+  ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 
@@ -217,8 +215,7 @@ TEST(TestCommandHandler, send_configure_command)
   ConfigCommand request{ { ConfigCommand::Param{ 0, 0.5, 0.75 }, ConfigCommand::Param{ 1, 0.5, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(request);
 
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(actual_request),
-              stepit_hardware::data_utils::to_hex(expected_request));
+  ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 

@@ -30,11 +30,11 @@
 #pragma once
 
 #include <gmock/gmock.h>
-#include <stepit_hardware/data_interface.hpp>
+#include <data_interface/data_interface.hpp>
 
 namespace stepit_hardware::test
 {
-class MockDataInterface : public stepit_hardware::DataInterface
+class MockDataInterface : public data_interface::DataInterface
 {
 public:
   MOCK_METHOD(void, open, (), (override));

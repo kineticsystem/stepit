@@ -28,7 +28,8 @@
  */
 
 #include <stepit_hardware/msgs/status_response.hpp>
-#include <stepit_hardware/data_utils.hpp>
+
+#include <data_interface/data_utils.hpp>
 
 namespace stepit_hardware
 {

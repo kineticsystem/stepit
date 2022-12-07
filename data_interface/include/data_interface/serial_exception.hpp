@@ -33,7 +33,7 @@
 #include <string>
 #include <sstream>
 
-namespace stepit_hardware
+namespace data_interface
 {
 class SerialException : public std::exception
 {
@@ -61,4 +61,4 @@ public:
     return what_.c_str();
   }
 };
-}  // namespace stepit_hardware
+}  // namespace data_interface

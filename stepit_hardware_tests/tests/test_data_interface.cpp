@@ -30,8 +30,6 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/crc_utils.hpp>
 #include <stepit_hardware/msgs/msgs.hpp>
 #include <stepit_hardware/stepit_hardware.hpp>
 
@@ -47,8 +45,10 @@
 #include <ros2_control_test_assets/components_urdfs.hpp>
 #include <ros2_control_test_assets/descriptions.hpp>
 
-#include <stepit_hardware/serial_handler.hpp>
-#include <stepit_hardware/data_handler.hpp>
+#include <data_interface/data_utils.hpp>
+#include <data_interface/crc_utils.hpp>
+#include <data_interface/serial_handler.hpp>
+#include <data_interface/data_handler.hpp>
 
 #include <thread>
 #include <chrono>
@@ -65,12 +65,12 @@ public:
     {
       GTEST_SKIP() << "Skipping all tests for this fixture";
     }
-    auto serial_handler = std::make_unique<SerialHandler>();
+    auto serial_handler = std::make_unique<data_interface::SerialHandler>();
     serial_handler->set_port("/dev/ttyACM0");
     serial_handler->set_baudrate(9600);
     serial_handler->set_timeout(2000);
 
-    data_handler = std::make_unique<DataHandler>(std::move(serial_handler));
+    data_handler = std::make_unique<data_interface::DataHandler>(std::move(serial_handler));
     data_handler->open();
   }
 
@@ -82,7 +82,7 @@ public:
     }
   }
 
-  std::unique_ptr<DataHandler> data_handler = nullptr;
+  std::unique_ptr<data_interface::DataHandler> data_handler = nullptr;
 };
 
 /**
@@ -107,7 +107,7 @@ TEST_F(TestDataInterface, test_velocity_command)
   const std::vector<uint8_t> expected_response{ 0x11 };
   data_handler->write(data);
   const std::vector<uint8_t> response = data_handler->read();
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(response), stepit_hardware::data_utils::to_hex(expected_response));
+  ASSERT_THAT(data_interface::to_hex(response), data_interface::to_hex(expected_response));
 }
 
 /**
@@ -136,7 +136,7 @@ TEST_F(TestDataInterface, test_echo_command)
 
     data_handler->write(request);
     const std::vector<uint8_t> response = data_handler->read();
-    ASSERT_THAT(stepit_hardware::data_utils::to_hex(response), stepit_hardware::data_utils::to_hex(request));
+    ASSERT_THAT(data_interface::to_hex(response), data_interface::to_hex(request));
   }
 }
 
@@ -160,7 +160,7 @@ TEST_F(TestDataInterface, test_info_command)
 
   data_handler->write(request);
   const std::vector<uint8_t> response = data_handler->read();
-  ASSERT_THAT(stepit_hardware::data_utils::to_hex(expected_response), stepit_hardware::data_utils::to_hex(response));
+  ASSERT_THAT(data_interface::to_hex(expected_response), data_interface::to_hex(response));
 }
 
 }  // namespace stepit_hardware::test

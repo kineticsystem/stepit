@@ -27,72 +27,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/serial_handler.hpp>
+#include <gtest/gtest.h>
+#include <data_interface/crc_utils.hpp>
 
-#include <serial/serial.h>
-
-namespace stepit_hardware
+namespace data_interface::test
 {
-SerialHandler::SerialHandler() : serial_{ std::make_unique<serial::Serial>() }
+TEST(TestCrcUtils, calculate_crc)
 {
+  ASSERT_EQ(data_interface::crc_ccitt({ 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6 }), 0x3B07);
+  ASSERT_EQ(data_interface::crc_ccitt({ 0xE2, 0x12, 0xF1, 0xFF, 0x00, 0xD2 }), 0x7071);
+  ASSERT_EQ(data_interface::crc_ccitt({ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }), 0xFBE9);
+  ASSERT_EQ(data_interface::crc_ccitt({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }), 0x0000);
+  ASSERT_EQ(data_interface::crc_ccitt({ 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 }), 0x2189);
+  ASSERT_EQ(data_interface::crc_ccitt({ 0x80, 0x00, 0x00, 0x03 }), 0x1ff5);
 }
-
-void SerialHandler::open()
-{
-  serial_->open();
-}
-
-bool SerialHandler::is_open() const
-{
-  return serial_->isOpen();
-}
-
-void SerialHandler::close()
-{
-  serial_->close();
-}
-
-std::size_t SerialHandler::read(uint8_t* buffer, size_t size)
-{
-  return serial_->read(buffer, size);
-}
-
-std::size_t SerialHandler::write(const uint8_t* buffer, size_t size)
-{
-  std::size_t write_size = serial_->write(buffer, size);
-  serial_->flush();
-  return write_size;
-}
-
-void SerialHandler::set_port(const std::string& port)
-{
-  serial_->setPort(port);
-}
-
-std::string SerialHandler::get_port() const
-{
-  return serial_->getPort();
-}
-
-void SerialHandler::set_timeout(uint32_t timeout_ms)
-{
-  timeout_ms_ = timeout_ms;
-  serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
-  serial_->setTimeout(timeout);
-}
-
-uint32_t SerialHandler::get_timeout() const
-{
-  return timeout_ms_;
-}
-
-void SerialHandler::set_baudrate(uint32_t baudrate)
-{
-  serial_->setBaudrate(baudrate);
-}
-
-uint32_t SerialHandler::get_baudrate() const
-{
-  return serial_->getBaudrate();
-}
-}  // namespace stepit_hardware
+}  // namespace data_interface::test

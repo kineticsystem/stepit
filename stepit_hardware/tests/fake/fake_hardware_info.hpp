@@ -76,6 +76,45 @@ public:
           {"velocity", "", "", "", "double", 1}
         },
         {{{ "id", "1" }, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
+      },
+      {
+        "joint3",
+        "joint",
+        {
+          {"position", "", "", "", "double", 1},
+          {"velocity", "", "", "", "double", 1}
+        },
+        {
+          {"position", "", "", "", "double", 1},
+          {"velocity", "", "", "", "double", 1}
+        },
+        {{{ "id", "2" }, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
+      },
+      {
+        "joint4",
+        "joint",
+        {
+          {"position", "", "", "", "double", 1},
+          {"velocity", "", "", "", "double", 1}
+        },
+        {
+          {"position", "", "", "", "double", 1},
+          {"velocity", "", "", "", "double", 1}
+        },
+        {{{ "id", "3" }, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
+      },
+      {
+        "joint5",
+        "joint",
+        {
+          {"position", "", "", "", "double", 1},
+          {"velocity", "", "", "", "double", 1}
+        },
+        {
+          {"position", "", "", "", "double", 1},
+          {"velocity", "", "", "", "double", 1}
+        },
+        {{{ "id", "4" }, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
       }
     },
     {},

@@ -32,7 +32,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace stepit_hardware
+namespace data_interface
 {
 class DataInterface
 {
@@ -45,15 +45,15 @@ public:
   /**
    * Read a sequence of bytes from the serial port.
    * @return The bytes read.
-   * @throw stepit_hardware::SerialException
+   * @throw data_interface::SerialException
    */
   virtual std::vector<uint8_t> read() = 0;
 
   /**
    * Write a sequence of bytes to the serial port.
    * @param bytes The bytes to read.
-   * @throw stepit_hardware::SerialException
+   * @throw data_interface::SerialException
    */
   virtual void write(const std::vector<uint8_t>& bytes) = 0;
 };
-}  // namespace stepit_hardware
+}  // namespace data_interface

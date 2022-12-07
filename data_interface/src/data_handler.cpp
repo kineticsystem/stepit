@@ -27,17 +27,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/data_handler.hpp>
+#include <data_interface/data_handler.hpp>
 
-#include <stepit_hardware/crc_utils.hpp>
-#include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/serial_exception.hpp>
+#include <data_interface/crc_utils.hpp>
+#include <data_interface/data_utils.hpp>
+#include <data_interface/serial_exception.hpp>
 
 #include <rclcpp/logging.hpp>
 
 #include <cstdint>
 
-namespace stepit_hardware
+namespace data_interface
 {
 constexpr auto kLogger = "DataHandler";
 
@@ -119,7 +119,7 @@ std::vector<uint8_t> DataHandler::read()
             data.emplace_back(read_buffer_.remove(BufferPosition::Head));
           }
 
-          RCLCPP_ERROR(rclcpp::get_logger(kLogger), "CRC error on data: %s", data_utils::to_hex(data).c_str());
+          RCLCPP_ERROR(rclcpp::get_logger(kLogger), "CRC error on data: %s", to_hex(data).c_str());
           throw SerialException("CRC error");
         }
         else
@@ -132,13 +132,13 @@ std::vector<uint8_t> DataHandler::read()
       }
       else
       {
-        crc = crc_utils::crc_ccitt_byte(crc, ch);
+        crc = crc_ccitt_byte(crc, ch);
         read_buffer_.add(ch, BufferPosition::Tail);
       }
     }
     else if (state_ == ReadState::ReadingEscapedByte)
     {
-      crc = crc_utils::crc_ccitt_byte(crc, ch ^ ESCAPED_XOR);
+      crc = crc_ccitt_byte(crc, ch ^ ESCAPED_XOR);
       read_buffer_.add(ch ^ ESCAPED_XOR, BufferPosition::Tail);
       state_ = ReadState::ReadingMessage;
     }
@@ -162,7 +162,7 @@ void DataHandler::write(const std::vector<uint8_t>& buffer)
   write_buffer_.add(DELIMITER_FLAG, BufferPosition::Tail);
   for (const uint8_t& ch : buffer)
   {
-    crc = crc_utils::crc_ccitt_byte(crc, ch);
+    crc = crc_ccitt_byte(crc, ch);
     add_escaped_byte(write_buffer_, ch);
   }
   const uint8_t crc_lsb = static_cast<uint8_t>((crc & 0xff00) >> 8);
@@ -182,4 +182,4 @@ void DataHandler::write(const std::vector<uint8_t>& buffer)
   }
 }
 
-}  // namespace stepit_hardware
+}  // namespace data_interface

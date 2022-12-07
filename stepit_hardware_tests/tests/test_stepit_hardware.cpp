@@ -30,13 +30,14 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <stepit_hardware/data_utils.hpp>
-#include <stepit_hardware/crc_utils.hpp>
 #include <stepit_hardware/msgs/msgs.hpp>
 #include <stepit_hardware/stepit_hardware.hpp>
 
 #include <stepit_hardware_info.hpp>
 #include <test_utils.hpp>
+
+#include <data_interface/data_utils.hpp>
+#include <data_interface/crc_utils.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -47,8 +48,8 @@
 #include <ros2_control_test_assets/components_urdfs.hpp>
 #include <ros2_control_test_assets/descriptions.hpp>
 
-#include <stepit_hardware/serial_handler.hpp>
-#include <stepit_hardware/data_handler.hpp>
+#include <data_interface/serial_handler.hpp>
+#include <data_interface/data_handler.hpp>
 
 #include <thread>
 #include <chrono>

@@ -12,35 +12,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 endif()
 
 ###############################################################################
-# test_data_utils
-
-ament_add_gmock(test_data_utils test_data_utils.cpp)
-target_link_libraries(test_data_utils stepit_hardware)
-
-###############################################################################
-# test_crc_utils
-
-ament_add_gmock(test_crc_utils test_crc_utils.cpp)
-target_link_libraries(test_crc_utils stepit_hardware)
-
-###############################################################################
-# test_data_handler
-
-ament_add_gmock(test_data_handler
-    test_data_handler.cpp
-    mock/mock_serial_interface.hpp
-)
-target_include_directories(test_data_handler
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
-)
-target_link_libraries(test_data_handler stepit_hardware)
-
-###############################################################################
 # test_command_handler
 
 ament_add_gmock(test_command_handler
     test_command_handler.cpp
-    mock/mock_serial_interface.hpp
 )
 target_include_directories(test_command_handler
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}

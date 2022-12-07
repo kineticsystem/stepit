@@ -30,8 +30,9 @@
 #pragma once
 
 #include <stepit_hardware/command_interface.hpp>
-#include <stepit_hardware/data_interface.hpp>
 #include <stepit_hardware/msgs/msgs.hpp>
+
+#include <data_interface/data_interface.hpp>
 
 #include <functional>
 #include <memory>
@@ -45,7 +46,7 @@ namespace stepit_hardware
 class CommandHandler : public CommandInterface
 {
 public:
-  explicit CommandHandler(std::unique_ptr<DataInterface> data_interface);
+  explicit CommandHandler(std::unique_ptr<data_interface::DataInterface> data_interface);
   bool connect() override;
   void disconnect() override;
   AcknowledgeResponse send(const ConfigCommand& command) const override;
@@ -55,6 +56,6 @@ public:
   InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
 
 private:
-  std::unique_ptr<DataInterface> data_interface_;
+  std::unique_ptr<data_interface::DataInterface> data_interface_;
 };
 }  // namespace stepit_hardware

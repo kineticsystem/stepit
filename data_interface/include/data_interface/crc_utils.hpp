@@ -50,7 +50,7 @@
  * For a sample implementation of different CRC-16 see
  * http://www.lammertbies.nl/comm/software/
  */
-namespace stepit_hardware::crc_utils
+namespace data_interface
 {
 /**
  * This method updates the given CRC adding a new byte to the original
@@ -72,4 +72,4 @@ namespace stepit_hardware::crc_utils
  */
 [[nodiscard]] uint16_t crc_ccitt(const std::vector<uint8_t>& buffer);
 
-}  // namespace stepit_hardware::crc_utils
+}  // namespace data_interface

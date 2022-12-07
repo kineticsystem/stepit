@@ -31,7 +31,7 @@
 
 #include <vector>
 
-namespace stepit_hardware
+namespace data_interface
 {
 
 enum class BufferPosition
@@ -153,4 +153,4 @@ T Buffer<T>::remove(BufferPosition position)
   }
   return out;
 }
-}  // namespace stepit_hardware
+}  // namespace data_interface

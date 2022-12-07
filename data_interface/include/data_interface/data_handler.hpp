@@ -29,16 +29,16 @@
 
 #pragma once
 
-#include <stepit_hardware/serial_interface.hpp>
-#include <stepit_hardware/data_interface.hpp>
-#include <stepit_hardware/buffer.hpp>
+#include <data_interface/serial_interface.hpp>
+#include <data_interface/data_interface.hpp>
+#include <data_interface/buffer.hpp>
 
 #include <vector>
 #include <cstdint>
 #include <string>
 #include <memory>
 
-namespace stepit_hardware
+namespace data_interface
 {
 /**
  * This class is used to pack a sequence of bytes into a frame and send it to
@@ -63,14 +63,14 @@ public:
   /**
    * Write a sequence of bytes to the serial port.
    * @param bytes The bytes to read.
-   * @throw stepit_hardware::SerialException
+   * @throw data_interface::SerialException
    */
   void write(const std::vector<uint8_t>& bytes) override;
 
   /**
    * Read a sequence of bytes from the serial port.
    * @return The bytes read.
-   * @throw stepit_hardware::SerialException
+   * @throw data_interface::SerialException
    */
   std::vector<uint8_t> read() override;
 
@@ -91,4 +91,4 @@ private:
 
   std::unique_ptr<SerialInterface> serial_;
 };
-}  // namespace stepit_hardware
+}  // namespace data_interface

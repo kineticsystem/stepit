@@ -27,26 +27,72 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <data_interface/serial_handler.hpp>
 
-#include <gmock/gmock.h>
-#include <stepit_hardware/serial_interface.hpp>
+#include <serial/serial.h>
 
-namespace stepit_hardware::test
+namespace data_interface
 {
-class MockSerialInterface : public stepit_hardware::SerialInterface
+SerialHandler::SerialHandler() : serial_{ std::make_unique<serial::Serial>() }
 {
-public:
-  MOCK_METHOD(void, open, (), (override));
-  MOCK_METHOD(bool, is_open, (), (override, const));
-  MOCK_METHOD(void, close, (), (override));
-  MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size), (override));
-  MOCK_METHOD(std::size_t, write, (const uint8_t* buffer, size_t size), (override));
-  MOCK_METHOD(void, set_port, (const std::string& port), (override));
-  MOCK_METHOD(std::string, get_port, (), (override, const));
-  MOCK_METHOD(void, set_timeout, (uint32_t timeout), (override));
-  MOCK_METHOD(uint32_t, get_timeout, (), (override, const));
-  MOCK_METHOD(void, set_baudrate, (uint32_t baudrate), (override));
-  MOCK_METHOD(uint32_t, get_baudrate, (), (override, const));
-};
-}  // namespace stepit_hardware::test
+}
+
+void SerialHandler::open()
+{
+  serial_->open();
+}
+
+bool SerialHandler::is_open() const
+{
+  return serial_->isOpen();
+}
+
+void SerialHandler::close()
+{
+  serial_->close();
+}
+
+std::size_t SerialHandler::read(uint8_t* buffer, size_t size)
+{
+  return serial_->read(buffer, size);
+}
+
+std::size_t SerialHandler::write(const uint8_t* buffer, size_t size)
+{
+  std::size_t write_size = serial_->write(buffer, size);
+  serial_->flush();
+  return write_size;
+}
+
+void SerialHandler::set_port(const std::string& port)
+{
+  serial_->setPort(port);
+}
+
+std::string SerialHandler::get_port() const
+{
+  return serial_->getPort();
+}
+
+void SerialHandler::set_timeout(uint32_t timeout_ms)
+{
+  timeout_ms_ = timeout_ms;
+  serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
+  serial_->setTimeout(timeout);
+}
+
+uint32_t SerialHandler::get_timeout() const
+{
+  return timeout_ms_;
+}
+
+void SerialHandler::set_baudrate(uint32_t baudrate)
+{
+  serial_->setBaudrate(baudrate);
+}
+
+uint32_t SerialHandler::get_baudrate() const
+{
+  return serial_->getBaudrate();
+}
+}  // namespace data_interface

@@ -33,7 +33,7 @@
 #include <cstdint>
 #include <string>
 
-namespace stepit_hardware
+namespace data_interface
 {
 class SerialInterface
 {
@@ -119,4 +119,4 @@ public:
    */
   [[nodiscard]] virtual uint32_t get_baudrate() const = 0;
 };
-}  // namespace stepit_hardware
+}  // namespace data_interface
