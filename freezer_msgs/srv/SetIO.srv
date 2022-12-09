@@ -1,0 +1,11 @@
+# Service to set digital outputs.
+
+# Enum representing a digital state.
+int8 STATE_OFF = 0
+int8 STATE_ON = 1
+
+# Request fields
+int8 pin
+int8 state
+---
+bool success

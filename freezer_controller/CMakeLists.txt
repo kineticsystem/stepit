@@ -17,6 +17,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     controller_interface
     data_interface
+    freezer_msgs
     pluginlib
     rclcpp
     rclcpp_lifecycle
@@ -29,6 +30,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(controller_interface REQUIRED)
 find_package(data_interface REQUIRED)
+find_package(freezer_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)

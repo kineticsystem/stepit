@@ -30,6 +30,7 @@
 #pragma once
 
 #include <freezer_controller/visibility_control.hpp>
+#include <freezer_msgs/srv/set_io.hpp>
 
 #include <controller_interface/controller_interface.hpp>
 
@@ -72,12 +73,15 @@ enum StateInterfaces
   PROGRAM_RUNNING = 70,
 };
 
+/**
+ * This is a plugin which is plugged into the URDF together with a configuration file.
+ * It is automatically wrapped by a ROS node and exposes services and publishers to
+ * write and read digital IO to and from a Freezer motherboard.
+ */
 class FreezerController : public controller_interface::ControllerInterface
 {
 public:
-  /**
-   * Default constructor.
-   */
+  /** Default constructor. */
   FreezerController();
 
   /**
@@ -87,20 +91,32 @@ public:
    */
   RCLCPP_SHARED_PTR_DEFINITIONS(FreezerController)
 
+  FREEZER_CONTROLLER_PUBLIC CallbackReturn on_init() override;
+
+  FREEZER_CONTROLLER_PUBLIC CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
+
+  /**
+   * @brief This method exposes all command interfaces.
+   * @return Return the command interface configuration.
+   */
   FREEZER_CONTROLLER_PUBLIC controller_interface::InterfaceConfiguration
   command_interface_configuration() const override;
 
   FREEZER_CONTROLLER_PUBLIC controller_interface::InterfaceConfiguration state_interface_configuration() const override;
 
-  FREEZER_CONTROLLER_PUBLIC controller_interface::return_type update(const rclcpp::Time& time,
-                                                                     const rclcpp::Duration& period) override;
-
-  FREEZER_CONTROLLER_PUBLIC CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
-
   FREEZER_CONTROLLER_PUBLIC CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
   FREEZER_CONTROLLER_PUBLIC CallbackReturn on_deactivate(const rclcpp_lifecycle::State& previous_state) override;
 
-  FREEZER_CONTROLLER_PUBLIC CallbackReturn on_init() override;
+  FREEZER_CONTROLLER_PUBLIC controller_interface::return_type update(const rclcpp::Time& time,
+                                                                     const rclcpp::Duration& period) override;
+
+private:
+  // Service to set digital outputs.
+  rclcpp::Service<freezer_msgs::srv::SetIO>::SharedPtr set_io_srv_;
+
+  //  std::shared_ptr<rclcpp::Publisher<ur_msgs::msg::IOStates>> io_pub_;
+  //  ur_msgs::msg::IOStates io_msg_;
+  bool setIO(freezer_msgs::srv::SetIO::Request::SharedPtr req, freezer_msgs::srv::SetIO::Response::SharedPtr resp);
 };
 }  // namespace freezer_controller
