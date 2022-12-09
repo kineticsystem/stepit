@@ -80,6 +80,10 @@ def launch_setup(context, *args, **kwargs):
             {"robot_description": robot_description_content},
             controllers_config_file,
         ],
+        output={
+            "stdout": "screen",
+            "stderr": "screen",
+        },
     )
 
     # The broadcaster reads all state interfaces and reports them on /joint_states and /dynamic_joint_states.
