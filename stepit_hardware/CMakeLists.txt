@@ -36,11 +36,11 @@ find_package(rclcpp_lifecycle REQUIRED)
 # Build stepit_hardware library.
 
 # CMake does not need headers listed here and it is generally recommended not
-# to add them to avoid additional maintenance burden.
+# to add them to avoid additional maintenance burdens.
 # Unfortunately, QtCreator needs them to display them in the class view,
 # for easily navigating between class and header files (F4) and for automatic
 # code formatting.
-# The time spent in the IDE is longer than the time spend maintaining this
+# The time spent in the IDE is longer than the time spent maintaining this
 # list, so we added the header files too.
 add_library(
     stepit_hardware
