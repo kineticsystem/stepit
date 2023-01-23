@@ -52,26 +52,24 @@ cd src
 git clone git@github.com:kineticsystem/stepit.git
 ```
 
-Check out the external dependencies.
+Check out all external dependencies.
 
 ```
-sudo apt install python3-vcstool
-vcs import --force < stepit/stepit.repos
-vcs pull
+cd stepit
+git submodule update --init
 ```
 
 Move into the base `<STEPIT_WS>` folder and install all required dependencies.
 
 ```
-rosdep install --ignore-src --from-paths . -y
+rosdep install --ignore-src --from-paths . -y -r
 ```
 
 Run Colcon to build the project.
 
 ```
-cd ..
 sudo apt install python3-colcon-common-extensions
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug --symlink-install --event-handlers log-
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --symlink-install --event-handlers log-
 ```
 
 Execute all tests.
