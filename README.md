@@ -59,6 +59,13 @@ cd stepit
 git submodule update --init
 ```
 
+Remember to enable recursion for relevant git commands, such that regular commands recurse into submodules by default.
+
+
+```
+git config --global submodule.recurse true
+```
+
 Move into the base `<STEPIT_WS>` folder and install all required dependencies.
 
 ```
