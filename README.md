@@ -44,15 +44,15 @@ mkdir stepit_ws
 cd stepit_ws
 ```
 
-Create a source folder and check out this git repository.
+Create a source folder and check out this git repository, including all required submodules.
 
 ```
 mkdir src
 cd src
-git clone git@github.com:kineticsystem/stepit.git
+git clone --recurse-submodules git@github.com:kineticsystem/stepit.git
 ```
 
-Check out all external dependencies.
+If you missed the switch `--recurse-submodules`, you can clone all dependencies with the following commands:
 
 ```
 cd stepit
