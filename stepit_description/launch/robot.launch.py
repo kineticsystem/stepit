@@ -73,7 +73,7 @@ def launch_setup(context, *args, **kwargs):
     # The Controller Manager (CM) connects the controllers’ and hardware-abstraction sides of the ros2_control
     # framework. It also serves as the entry-point for users through ROS services.
     # https://control.ros.org/master/doc/getting_started/getting_started.html#architecture
-    ros2_control_node = Node(
+    controller_manager = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[
@@ -164,7 +164,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     nodes_to_start = [
-        ros2_control_node,
+        controller_manager,
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
         velocity_controller_spawner,
