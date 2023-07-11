@@ -56,11 +56,10 @@ If you missed the switch `--recurse-submodules`, you can clone all dependencies 
 
 ```
 cd stepit
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 Remember to enable recursion for relevant git commands, such that regular commands recurse into submodules by default.
-
 
 ```
 git config --global submodule.recurse true
