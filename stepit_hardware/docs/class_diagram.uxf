@@ -5,10 +5,10 @@ bg=#FFFFFF
 SerialInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>561</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-SerialHandler</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>572</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>451</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+DefaultSerialInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>572</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>451</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-DataHandler</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>341</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+DefaultDataInterfacer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>341</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
 DefaultRequestInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>484</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>374</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
