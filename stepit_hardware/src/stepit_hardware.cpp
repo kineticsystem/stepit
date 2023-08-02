@@ -58,7 +58,7 @@ StepitHardware::StepitHardware()
 }
 
 // This constructor is use for testing only.
-StepitHardware::StepitHardware(std::unique_ptr<CommandInterfaceFactory> command_interface_factory)
+StepitHardware::StepitHardware(std::unique_ptr<RequestInterfaceFactory> command_interface_factory)
   : command_interface_factory_{ std::move(command_interface_factory) }
 {
 }

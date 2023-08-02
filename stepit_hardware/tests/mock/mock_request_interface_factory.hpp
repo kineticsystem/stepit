@@ -27,44 +27,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/command_handler.hpp>
-#include <stepit_hardware/command_handler_factory.hpp>
-#include <stepit_hardware/fake/fake_command_handler.hpp>
+#pragma once
 
-#include <data_interface/serial_handler.hpp>
-#include <data_interface/data_handler.hpp>
+#include <stepit_hardware/request_interface.hpp>
+#include <stepit_hardware/request_interface_factory.hpp>
 
 namespace stepit_hardware
 {
-
-constexpr auto kLogger = "CommandHandlerFactory";
-
-std::unique_ptr<stepit_hardware::CommandInterface>
-stepit_hardware::CommandHandlerFactory::create(const hardware_interface::HardwareInfo& info)
+class MockCommandInterfaceFactory : public RequestInterfaceFactory
 {
-  if (info.hardware_parameters.find("use_dummy") != info.hardware_parameters.end() &&
-      info.hardware_parameters.at("use_dummy") == "true")
+public:
+  explicit MockCommandInterfaceFactory(std::unique_ptr<RequestInterface> command_interface)
+    : command_interface_{ std::move(command_interface) } {
+
+    };
+  std::unique_ptr<RequestInterface> create([[maybe_unused]] const hardware_interface::HardwareInfo& info)
   {
-    return std::make_unique<FakeCommandHandler>();
-  }
-  else
-  {
-    std::string usb_port = info.hardware_parameters.at("usb_port");
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "usb_port: %s", usb_port.c_str());
+    return std::move(command_interface_);
+  };
 
-    uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "baud_rate: %d", baud_rate);
-
-    double timeout = std::stod(info.hardware_parameters.at("timeout"));
-    uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "timeout: %f", timeout);
-
-    auto serial_handler = std::make_unique<data_interface::SerialHandler>();
-    serial_handler->set_port(usb_port);
-    serial_handler->set_baudrate(baud_rate);
-    serial_handler->set_timeout(timeout_ms);
-
-    return std::make_unique<CommandHandler>(std::make_unique<data_interface::DataHandler>(std::move(serial_handler)));
-  }
-}
+private:
+  std::unique_ptr<RequestInterface> command_interface_;
+};
 }  // namespace stepit_hardware

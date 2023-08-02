@@ -28,7 +28,7 @@
  */
 
 #include <gmock/gmock.h>
-#include <data_interface/data_handler.hpp>
+#include <data_interface/default_data_interface.hpp>
 #include <data_interface/data_utils.hpp>
 #include <data_interface/serial_exception.hpp>
 #include <mock/mock_serial_interface.hpp>
@@ -44,7 +44,7 @@ using ::testing::Return;
  * Write some data and expect a request frame to be created including
  * delimiters, request ID and CRC.
  */
-TEST(TestDataHandler, write)
+TEST(TestDefaultDataInterface, write)
 {
   const std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -80,8 +80,8 @@ TEST(TestDataHandler, write)
   };
   EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DataHandler data_handler{ std::move(mock) };
-  data_handler.write(data);
+  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface.write(data);
   ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
 }
 
@@ -89,7 +89,7 @@ TEST(TestDataHandler, write)
  * Write some data and expect a request frame, with escaped bytes, to be
  * created including delimiters, request ID and CRC.
  */
-TEST(TestDataHandler, write_escaped_data)
+TEST(TestDefaultDataInterface, write_escaped_data)
 {
   const std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -126,8 +126,8 @@ TEST(TestDataHandler, write_escaped_data)
   };
   EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DataHandler data_handler{ std::move(mock) };
-  data_handler.write(data);
+  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface.write(data);
   ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
 }
 
@@ -135,7 +135,7 @@ TEST(TestDataHandler, write_escaped_data)
  * Write some data and expect a request frame to be created including
  * delimiters, request ID and escaped CRC.
  */
-TEST(TestDataHandler, write_escaped_crc)
+TEST(TestDefaultDataInterface, write_escaped_crc)
 {
   // This specific data will generate a CRC value containing the 0x7D value
   // that must be escaped.
@@ -184,27 +184,27 @@ TEST(TestDataHandler, write_escaped_crc)
   };
   EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DataHandler data_handler{ std::move(mock) };
-  data_handler.write(data);
+  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface.write(data);
   ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
 }
 
 /**
  * Test that an exception is thrown is no data are written.
  */
-TEST(TestDataHandler, write_error)
+TEST(TestDefaultDataInterface, write_error)
 {
   auto mock = std::make_unique<MockSerialInterface>();
 
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(*mock, write(_, _)).WillOnce(Return(0));
 
-  data_interface::DataHandler data_handler{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
   EXPECT_THROW(
       {
         try
         {
-          data_handler.write({ 0, 0 });
+          data_interface.write({ 0, 0 });
         }
         catch (const data_interface::SerialException& e)
         {
@@ -218,7 +218,7 @@ TEST(TestDataHandler, write_error)
 /**
  * Read a response frame and expect data to be returned.
  */
-TEST(TestDataHandler, read)
+TEST(TestDefaultDataInterface, read)
 {
   const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -252,15 +252,15 @@ TEST(TestDataHandler, read)
   };
   EXPECT_CALL(*mockedSerialInterface, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DataHandler data_handler{ std::move(mockedSerialInterface) };
-  std::vector<uint8_t> actual_data = data_handler.read();
+  data_interface::DefaultDataInterface data_interface{ std::move(mockedSerialInterface) };
+  std::vector<uint8_t> actual_data = data_interface.read();
   ASSERT_THAT(data_interface::to_hex(actual_data), data_interface::to_hex(expected_data));
 }
 
 /**
  * Read a response frame with escaped bytes and expect data to be returned.
  */
-TEST(TestDataHandler, read_escaped)
+TEST(TestDefaultDataInterface, read_escaped)
 {
   const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -295,15 +295,15 @@ TEST(TestDataHandler, read_escaped)
   };
   EXPECT_CALL(*mockedSerialInterface, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DataHandler data_handler{ std::move(mockedSerialInterface) };
-  std::vector<uint8_t> actual_data = data_handler.read();
+  data_interface::DefaultDataInterface data_interface{ std::move(mockedSerialInterface) };
+  std::vector<uint8_t> actual_data = data_interface.read();
   ASSERT_THAT(data_interface::to_hex(actual_data), data_interface::to_hex(expected_data));
 }
 
 /**
  * Test that an exception is thrown when a CRC error is found.
  */
-TEST(TestDataHandler, read_crc_error)
+TEST(TestDefaultDataInterface, read_crc_error)
 {
   const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -329,12 +329,12 @@ TEST(TestDataHandler, read_crc_error)
   };
   EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DataHandler data_handler{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
   EXPECT_THROW(
       {
         try
         {
-          std::vector<uint8_t> actual_data = data_handler.read();
+          std::vector<uint8_t> actual_data = data_interface.read();
         }
         catch (const data_interface::SerialException& e)
         {
@@ -354,7 +354,7 @@ TEST(TestDataHandler, read_crc_error)
  * 4) crc
  * 5) a delimiter.
  */
-TEST(TestDataHandler, read_incorrect_frame_length)
+TEST(TestDefaultDataInterface, read_incorrect_frame_length)
 {
   const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -372,12 +372,12 @@ TEST(TestDataHandler, read_incorrect_frame_length)
   };
   EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DataHandler data_handler{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
   EXPECT_THROW(
       {
         try
         {
-          std::vector<uint8_t> actual_data = data_handler.read();
+          std::vector<uint8_t> actual_data = data_interface.read();
         }
         catch (const data_interface::SerialException& e)
         {
@@ -391,7 +391,7 @@ TEST(TestDataHandler, read_incorrect_frame_length)
 /**
  * Test that an exception is thrown when there is no start delimiter.
  */
-TEST(TestDataHandler, read_start_delimiter_missing)
+TEST(TestDefaultDataInterface, read_start_delimiter_missing)
 {
   const std::vector<uint8_t> frame = {
     // Missing delimiter
@@ -418,12 +418,12 @@ TEST(TestDataHandler, read_start_delimiter_missing)
   };
   EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DataHandler data_handler{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
   EXPECT_THROW(
       {
         try
         {
-          std::vector<uint8_t> actual_data = data_handler.read();
+          std::vector<uint8_t> actual_data = data_interface.read();
         }
         catch (const data_interface::SerialException& e)
         {
@@ -437,19 +437,19 @@ TEST(TestDataHandler, read_start_delimiter_missing)
 /**
  * Test that an exception is thrown when no data is read.
  */
-TEST(TestDataHandler, read_timeout)
+TEST(TestDefaultDataInterface, read_timeout)
 {
   auto mock = std::make_unique<MockSerialInterface>();
 
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(*mock, read(_, _)).WillOnce(Return(0));
 
-  data_interface::DataHandler data_handler{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
   EXPECT_THROW(
       {
         try
         {
-          std::vector<uint8_t> actual_data = data_handler.read();
+          std::vector<uint8_t> actual_data = data_interface.read();
         }
         catch (const data_interface::SerialException& e)
         {

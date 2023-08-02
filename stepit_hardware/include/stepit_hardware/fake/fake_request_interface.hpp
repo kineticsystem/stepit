@@ -29,47 +29,36 @@
 
 #pragma once
 
-#include <data_interface/serial_interface.hpp>
+#include <stepit_hardware/request_interface.hpp>
+#include <stepit_hardware/fake/fake_motor.hpp>
+#include <stepit_hardware/msgs/msgs.hpp>
 
-#include <memory>
-#include "serial/serial.h"
+#include <rclcpp/rclcpp.hpp>
 
-namespace serial
+#include <map>
+
+namespace stepit_hardware
 {
-class Serial;
-}
-
-namespace data_interface
-{
-class SerialHandler : public SerialInterface
+/**
+ * @brief The FakeCommandHandler class receives commands and queries from the
+ * hardware interface and sends them to a fake hardware.
+ */
+class FakeRequestInterface : public RequestInterface
 {
 public:
-  /**
-   * Creates a Serial object to send and receive bytes to and from the serial
-   * port.
-   */
-  SerialHandler();
-
-  void open() override;
-
-  [[nodiscard]] bool is_open() const override;
-
-  void close() override;
-
-  [[nodiscard]] std::size_t read(uint8_t* buffer, size_t size = 1) override;
-  [[nodiscard]] std::size_t write(const uint8_t* buffer, size_t size) override;
-
-  void set_port(const std::string& port) override;
-  [[nodiscard]] std::string get_port() const override;
-
-  void set_timeout(uint32_t timeout_ms) override;
-  [[nodiscard]] uint32_t get_timeout() const override;
-
-  void set_baudrate(uint32_t baudrate) override;
-  [[nodiscard]] uint32_t get_baudrate() const override;
+  FakeRequestInterface() = default;
+  bool connect() override;
+  void disconnect() override;
+  AcknowledgeResponse send(const ConfigCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
+  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
+  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
 
 private:
-  std::unique_ptr<serial::Serial> serial_ = nullptr;
-  uint32_t timeout_ms_ = 0;
+  /* Virtual motors behaving like real stepper motors with given acceletation
+   * and absolute maximum velocity.
+   */
+  mutable std::map<uint8_t, FakeMotor> motors_;
 };
-}  // namespace data_interface
+}  // namespace stepit_hardware

@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include <stepit_hardware/command_interface_factory.hpp>
+#include <stepit_hardware/request_interface_factory.hpp>
 #include <stepit_hardware/command_handler_factory.hpp>
 
 #include <hardware_interface/hardware_info.hpp>
@@ -42,7 +42,7 @@ namespace stepit_hardware
  * @brief The CommandHandlerFactory class is used to create a CommandHandler with the data
  * from the given hardware information.
  */
-class CommandHandlerFactory : public CommandInterfaceFactory
+class CommandHandlerFactory : public RequestInterfaceFactory
 {
 public:
   CommandHandlerFactory() = default;
@@ -52,6 +52,6 @@ public:
    * @param info The hardware information.
    * @return A command handler created using the given hardware information.
    */
-  std::unique_ptr<CommandInterface> create(const hardware_interface::HardwareInfo& info);
+  std::unique_ptr<RequestInterface> create(const hardware_interface::HardwareInfo& info);
 };
 }  // namespace stepit_hardware

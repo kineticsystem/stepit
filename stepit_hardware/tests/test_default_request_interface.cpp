@@ -30,7 +30,7 @@
 #include <gtest/gtest.h>
 
 #include <mock/mock_data_interface.hpp>
-#include <stepit_hardware/command_handler.hpp>
+#include <stepit_hardware/default_request_interface.hpp>
 #include <stepit_hardware/msgs/msgs.hpp>
 
 #include <data_interface/data_utils.hpp>
@@ -42,10 +42,10 @@ using ::testing::Return;
 using ::testing::SaveArg;
 
 /**
- * In this test we send a status query to the command handler,
+ * In this test we send a status query to the request interface,
  * we check the expected binary request and response.
  */
-TEST(TestCommandHandler, send_status_query)
+TEST(TestDefaultRequestInterface, send_status_query)
 {
   const std::vector<uint8_t> expected_request{
     0x75,  // query ID
@@ -86,7 +86,7 @@ TEST(TestCommandHandler, send_status_query)
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
-  auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
+  auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
   StatusQuery request{};
 
   StatusResponse response = command_handler->send(rclcpp::Time{}, request);
@@ -101,10 +101,10 @@ TEST(TestCommandHandler, send_status_query)
 }
 
 /**
- * In this test we send velocity goals to the command handler,
+ * In this test we send velocity goals to the request interface,
  * we check the expected binary request and response.
  */
-TEST(TestCommandHandler, send_velocity_command)
+TEST(TestDefaultRequestInterface, send_velocity_command)
 {
   const std::vector<uint8_t> expected_request{
     0x77,  // command ID
@@ -129,7 +129,7 @@ TEST(TestCommandHandler, send_velocity_command)
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
-  auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
+  auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
   VelocityCommand request{ { VelocityCommand::Goal{ 0, 0.5 }, VelocityCommand::Goal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
@@ -138,10 +138,10 @@ TEST(TestCommandHandler, send_velocity_command)
 }
 
 /**
- * In this test we send positions goals to the command handler,
+ * In this test we send positions goals to the request interface,
  * we check the expected binary request and response.
  */
-TEST(TestCommandHandler, send_position_command)
+TEST(TestDefaultRequestInterface, send_position_command)
 {
   const std::vector<uint8_t> expected_request{
     0x71,  // command ID
@@ -166,7 +166,7 @@ TEST(TestCommandHandler, send_position_command)
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
-  auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
+  auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
   PositionCommand request{ { PositionCommand::Goal{ 0, 0.5 }, PositionCommand::Goal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
@@ -178,7 +178,7 @@ TEST(TestCommandHandler, send_position_command)
  * In this test we we configure a set of motors and
  * check the expected binary request and response.
  */
-TEST(TestCommandHandler, send_configure_command)
+TEST(TestDefaultRequestInterface, send_configure_command)
 {
   const std::vector<uint8_t> expected_request{
     0x78,  // command ID
@@ -211,7 +211,7 @@ TEST(TestCommandHandler, send_configure_command)
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
-  auto command_handler = std::make_unique<stepit_hardware::CommandHandler>(std::move(mock_data_interface));
+  auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
   ConfigCommand request{ { ConfigCommand::Param{ 0, 0.5, 0.75 }, ConfigCommand::Param{ 1, 0.5, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(request);
 

@@ -41,16 +41,16 @@ add_library(
     SHARED
     include/data_interface/buffer.hpp
     include/data_interface/crc_utils.hpp
-    include/data_interface/data_handler.hpp
+    include/data_interface/default_data_interface.hpp
     include/data_interface/data_interface.hpp
     include/data_interface/data_utils.hpp
     include/data_interface/serial_exception.hpp
-    include/data_interface/serial_handler.hpp
+    include/data_interface/default_serial_interface.hpp
     include/data_interface/serial_interface.hpp
     src/crc_utils.cpp
-    src/data_handler.cpp
+    src/default_data_interface.cpp
     src/data_utils.cpp
-    src/serial_handler.cpp
+    src/default_serial_interface.cpp
 )
 target_include_directories(
     data_interface

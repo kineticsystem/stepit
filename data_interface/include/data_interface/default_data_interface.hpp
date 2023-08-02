@@ -29,33 +29,66 @@
 
 #pragma once
 
-#include <stepit_hardware/command_interface.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-
+#include <data_interface/serial_interface.hpp>
 #include <data_interface/data_interface.hpp>
+#include <data_interface/buffer.hpp>
 
-#include <functional>
+#include <vector>
+#include <cstdint>
+#include <string>
 #include <memory>
 
-namespace stepit_hardware
+namespace data_interface
 {
 /**
- * @brief The CommandHandler class receives commands and queries from the
- * hardware interface and sends them to the real hardware.
+ * This class is used to pack a sequence of bytes into a frame and send it to
+ * the serial port and also to parse frames coming from the serial port.
+ * A frames contains the data, a 16-bits CRC and delimiters.
  */
-class CommandHandler : public CommandInterface
+class DefaultDataInterface : public DataInterface
 {
 public:
-  explicit CommandHandler(std::unique_ptr<data_interface::DataInterface> data_interface);
-  bool connect() override;
-  void disconnect() override;
-  AcknowledgeResponse send(const ConfigCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
-  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
-  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
+  explicit DefaultDataInterface(std::unique_ptr<SerialInterface> serial);
+
+  /**
+   * Open the serial connection.
+   */
+  void open() override;
+
+  /**
+   * Close the serial connection.
+   */
+  void close() override;
+
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param bytes The bytes to read.
+   * @throw data_interface::SerialException
+   */
+  void write(const std::vector<uint8_t>& bytes) override;
+
+  /**
+   * Read a sequence of bytes from the serial port.
+   * @return The bytes read.
+   * @throw data_interface::SerialException
+   */
+  std::vector<uint8_t> read() override;
 
 private:
-  std::unique_ptr<data_interface::DataInterface> data_interface_;
+  /* States used while reading and parsiong a frame. */
+  enum class ReadState
+  {
+    Waiting,
+    ReadingMessage,
+    ReadingEscapedByte
+  } state_ = ReadState::Waiting;
+
+  /* Circular buffer to read data from the serial port. */
+  Buffer<uint8_t> read_buffer_{ 100 };
+
+  /* Circular buffer to write data to the serial port. */
+  Buffer<uint8_t> write_buffer_{ 100 };
+
+  std::unique_ptr<SerialInterface> serial_;
 };
-}  // namespace stepit_hardware
+}  // namespace data_interface

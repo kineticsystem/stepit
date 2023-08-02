@@ -24,13 +24,13 @@ ament_add_gmock(test_crc_utils test_crc_utils.cpp)
 target_link_libraries(test_crc_utils data_interface)
 
 ###############################################################################
-# test_data_handler
+# test_default_data_interface
 
-ament_add_gmock(test_data_handler
-    test_data_handler.cpp
+ament_add_gmock(test_default_data_interface
+    test_default_data_interface.cpp
     mock/mock_serial_interface.hpp
 )
-target_include_directories(test_data_handler
+target_include_directories(test_default_data_interface
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(test_data_handler data_interface)
+target_link_libraries(test_default_data_interface data_interface)

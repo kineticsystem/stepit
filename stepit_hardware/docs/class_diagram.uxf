@@ -1,4 +1,4 @@
-<diagram program="umletino" version="15.0.0"><zoom_level>11</zoom_level><element><id>UMLClass</id><coordinates><x>385</x><y>561</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+<diagram program="umletino" version="15.1"><zoom_level>11</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>385</x><y>561</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
 &lt;&lt;interface&gt;&gt;
@@ -11,7 +11,7 @@ bg=#FFFFFF
 DataHandler</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>341</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-CommandHandler</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>484</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>374</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+DefaultRequestInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>484</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>374</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
 StepitHardware</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>264</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>385</x><y>451</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
@@ -22,7 +22,7 @@ DataInterface</panel_attributes><additional_attributes></additional_attributes><
 transparency=0
 bg=#FFFFFF
 &lt;&lt;interface&gt;&gt;
-CommandInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>462</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>352</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>638</x><y>561</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+RequestInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>462</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>352</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>638</x><y>561</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
 Mock
@@ -34,11 +34,11 @@ DataInterface</panel_attributes><additional_attributes></additional_attributes><
 transparency=0
 bg=#FFFFFF
 Mock
-CommandInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>462</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>352</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>385</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+RequestInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>462</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>352</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>385</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
 Fake
-CommandInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>462</x><y>264</y><w>77</w><h>99</h></coordinates><panel_attributes>lt=&lt;&lt;-
+CommandInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>462</x><y>264</y><w>88</w><h>99</h></coordinates><panel_attributes>lt=&lt;&lt;-
 {default}</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>627</x><y>308</y><w>198</w><h>308</h></coordinates><panel_attributes>Test</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>935</x><y>330</y><w>363</w><h>132</h></coordinates><panel_attributes>transparency=0
 bg=#FFFFFF
 &lt;&lt;interface&gt;&gt;

@@ -27,71 +27,71 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <data_interface/serial_handler.hpp>
+#include <data_interface/default_serial_interface.hpp>
 
 #include <serial/serial.h>
 
 namespace data_interface
 {
-SerialHandler::SerialHandler() : serial_{ std::make_unique<serial::Serial>() }
+DefaultSerialInterface::DefaultSerialInterface() : serial_{ std::make_unique<serial::Serial>() }
 {
 }
 
-void SerialHandler::open()
+void DefaultSerialInterface::open()
 {
   serial_->open();
 }
 
-bool SerialHandler::is_open() const
+bool DefaultSerialInterface::is_open() const
 {
   return serial_->isOpen();
 }
 
-void SerialHandler::close()
+void DefaultSerialInterface::close()
 {
   serial_->close();
 }
 
-std::size_t SerialHandler::read(uint8_t* buffer, size_t size)
+std::size_t DefaultSerialInterface::read(uint8_t* buffer, size_t size)
 {
   return serial_->read(buffer, size);
 }
 
-std::size_t SerialHandler::write(const uint8_t* buffer, size_t size)
+std::size_t DefaultSerialInterface::write(const uint8_t* buffer, size_t size)
 {
   std::size_t write_size = serial_->write(buffer, size);
   serial_->flush();
   return write_size;
 }
 
-void SerialHandler::set_port(const std::string& port)
+void DefaultSerialInterface::set_port(const std::string& port)
 {
   serial_->setPort(port);
 }
 
-std::string SerialHandler::get_port() const
+std::string DefaultSerialInterface::get_port() const
 {
   return serial_->getPort();
 }
 
-void SerialHandler::set_timeout(uint32_t timeout_ms)
+void DefaultSerialInterface::set_timeout(uint32_t timeout_ms)
 {
   timeout_ms_ = timeout_ms;
   serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
   serial_->setTimeout(timeout);
 }
 
-uint32_t SerialHandler::get_timeout() const
+uint32_t DefaultSerialInterface::get_timeout() const
 {
   return timeout_ms_;
 }
 
-void SerialHandler::set_baudrate(uint32_t baudrate)
+void DefaultSerialInterface::set_baudrate(uint32_t baudrate)
 {
   serial_->setBaudrate(baudrate);
 }
 
-uint32_t SerialHandler::get_baudrate() const
+uint32_t DefaultSerialInterface::get_baudrate() const
 {
   return serial_->getBaudrate();
 }

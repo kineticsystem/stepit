@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <data_interface/data_handler.hpp>
+#include <data_interface/default_data_interface.hpp>
 
 #include <data_interface/crc_utils.hpp>
 #include <data_interface/data_utils.hpp>
@@ -58,21 +58,21 @@ void add_escaped_byte(Buffer<uint8_t>& buffer, uint8_t ch)
   }
 }
 
-DataHandler::DataHandler(std::unique_ptr<SerialInterface> serial) : serial_{ std::move(serial) }
+DefaultDataInterface::DefaultDataInterface(std::unique_ptr<SerialInterface> serial) : serial_{ std::move(serial) }
 {
 }
 
-void DataHandler::open()
+void DefaultDataInterface::open()
 {
   serial_->open();
 }
 
-void DataHandler::close()
+void DefaultDataInterface::close()
 {
   serial_->close();
 }
 
-std::vector<uint8_t> DataHandler::read()
+std::vector<uint8_t> DefaultDataInterface::read()
 {
   read_buffer_.clear();
 
@@ -154,7 +154,7 @@ std::vector<uint8_t> DataHandler::read()
   return buffer;
 }
 
-void DataHandler::write(const std::vector<uint8_t>& buffer)
+void DefaultDataInterface::write(const std::vector<uint8_t>& buffer)
 {
   write_buffer_.clear();
   uint16_t crc = 0;

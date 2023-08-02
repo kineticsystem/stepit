@@ -12,15 +12,15 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 endif()
 
 ###############################################################################
-# test_command_handler
+# test_default_request_interface
 
-ament_add_gmock(test_command_handler
-    test_command_handler.cpp
+ament_add_gmock(test_default_request_interface
+    test_default_request_interface.cpp
 )
-target_include_directories(test_command_handler
+target_include_directories(test_default_request_interface
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(test_command_handler stepit_hardware)
+target_link_libraries(test_default_request_interface stepit_hardware)
 
 ###############################################################################
 # test_fake_motor
@@ -38,8 +38,8 @@ target_link_libraries(test_fake_motor stepit_hardware)
 
 ament_add_gmock(test_stepit_hardware
     test_stepit_hardware.cpp
-    mock/mock_command_interface.hpp
-    mock/mock_command_interface_factory.hpp
+    mock/mock_request_interface.hpp
+    mock/mock_request_interface_factory.hpp
     fake/fake_hardware_info.hpp
 )
 target_include_directories(test_stepit_hardware

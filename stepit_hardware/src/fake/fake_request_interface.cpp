@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/fake/fake_command_handler.hpp>
+#include <stepit_hardware/fake/fake_request_interface.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -35,16 +35,16 @@ namespace stepit_hardware
 {
 constexpr auto kLoggerName = "FakeCommandHandler";
 
-bool FakeCommandHandler::connect()
+bool FakeRequestInterface::connect()
 {
   return true;
 }
 
-void FakeCommandHandler::disconnect()
+void FakeRequestInterface::disconnect()
 {
 }
 
-AcknowledgeResponse FakeCommandHandler::send(const ConfigCommand& command) const
+AcknowledgeResponse FakeRequestInterface::send(const ConfigCommand& command) const
 {
   motors_.clear();
   for (const auto& param : command.params())
@@ -58,7 +58,7 @@ AcknowledgeResponse FakeCommandHandler::send(const ConfigCommand& command) const
   return AcknowledgeResponse{ Response::Status::Success };
 }
 
-AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const PositionCommand& command) const
+AcknowledgeResponse FakeRequestInterface::send(const rclcpp::Time& time, const PositionCommand& command) const
 {
   for (const auto& goal : command.goals())
   {
@@ -75,7 +75,7 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Pos
   return AcknowledgeResponse{ Response::Status::Success };
 }
 
-AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const VelocityCommand& command) const
+AcknowledgeResponse FakeRequestInterface::send(const rclcpp::Time& time, const VelocityCommand& command) const
 {
   for (const auto& goal : command.goals())
   {
@@ -92,7 +92,7 @@ AcknowledgeResponse FakeCommandHandler::send(const rclcpp::Time& time, const Vel
   return AcknowledgeResponse{ Response::Status::Success };
 }
 
-StatusResponse FakeCommandHandler::send(const rclcpp::Time& time, [[maybe_unused]] const StatusQuery& query) const
+StatusResponse FakeRequestInterface::send(const rclcpp::Time& time, [[maybe_unused]] const StatusQuery& query) const
 {
   std::vector<StatusResponse::MotorState> states;
   for (const auto& [motor_id, motor] : motors_)
@@ -106,7 +106,7 @@ StatusResponse FakeCommandHandler::send(const rclcpp::Time& time, [[maybe_unused
   return StatusResponse(Response::Status::Success, states);
 }
 
-InfoResponse FakeCommandHandler::send([[maybe_unused]] const rclcpp::Time& time,
+InfoResponse FakeRequestInterface::send([[maybe_unused]] const rclcpp::Time& time,
                                       [[maybe_unused]] const InfoQuery& query) const
 {
   return InfoResponse(Response::Status::Success, "STEPIT");

@@ -29,24 +29,33 @@
 
 #pragma once
 
-#include <stepit_hardware/command_interface.hpp>
-#include <stepit_hardware/command_interface_factory.hpp>
+#include <stepit_hardware/request_interface.hpp>
+#include <stepit_hardware/msgs/msgs.hpp>
+
+#include <data_interface/data_interface.hpp>
+
+#include <functional>
+#include <memory>
 
 namespace stepit_hardware
 {
-class MockCommandInterfaceFactory : public CommandInterfaceFactory
+/**
+ * @brief The CommandHandler class receives commands and queries from the
+ * hardware interface and sends them to the real hardware.
+ */
+class DefaultRequestInterface : public RequestInterface
 {
 public:
-  explicit MockCommandInterfaceFactory(std::unique_ptr<CommandInterface> command_interface)
-    : command_interface_{ std::move(command_interface) } {
-
-    };
-  std::unique_ptr<CommandInterface> create([[maybe_unused]] const hardware_interface::HardwareInfo& info)
-  {
-    return std::move(command_interface_);
-  };
+  explicit DefaultRequestInterface(std::unique_ptr<data_interface::DataInterface> data_interface);
+  bool connect() override;
+  void disconnect() override;
+  AcknowledgeResponse send(const ConfigCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
+  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
+  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
 
 private:
-  std::unique_ptr<CommandInterface> command_interface_;
+  std::unique_ptr<data_interface::DataInterface> data_interface_;
 };
 }  // namespace stepit_hardware

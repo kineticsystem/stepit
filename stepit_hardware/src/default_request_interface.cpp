@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/command_handler.hpp>
+#include <stepit_hardware/default_request_interface.hpp>
 
 #include <data_interface/data_utils.hpp>
 
@@ -35,12 +35,12 @@ namespace stepit_hardware
 {
 constexpr auto kLogger = "CommandHandler";
 
-CommandHandler::CommandHandler(std::unique_ptr<data_interface::DataInterface> data_interface)
+DefaultRequestInterface::DefaultRequestInterface(std::unique_ptr<data_interface::DataInterface> data_interface)
   : data_interface_{ std::move(data_interface) }
 {
 }
 
-bool CommandHandler::connect()
+bool DefaultRequestInterface::connect()
 {
   data_interface_->open();
 
@@ -70,12 +70,12 @@ bool CommandHandler::connect()
   return connected;
 }
 
-void CommandHandler::disconnect()
+void DefaultRequestInterface::disconnect()
 {
   data_interface_->close();
 }
 
-AcknowledgeResponse CommandHandler::send(const ConfigCommand& command) const
+AcknowledgeResponse DefaultRequestInterface::send(const ConfigCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -102,7 +102,7 @@ AcknowledgeResponse CommandHandler::send(const ConfigCommand& command) const
   return response;
 }
 
-AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const PositionCommand& command) const
+AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time, const PositionCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -124,7 +124,7 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   return response;
 }
 
-AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const VelocityCommand& command) const
+AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time, const VelocityCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -146,7 +146,7 @@ AcknowledgeResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& ti
   return response;
 }
 
-StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
+StatusResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
@@ -187,7 +187,7 @@ StatusResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, c
   return response;
 }
 
-InfoResponse CommandHandler::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
+InfoResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());

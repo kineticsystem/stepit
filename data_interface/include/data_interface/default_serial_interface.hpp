@@ -30,65 +30,46 @@
 #pragma once
 
 #include <data_interface/serial_interface.hpp>
-#include <data_interface/data_interface.hpp>
-#include <data_interface/buffer.hpp>
 
-#include <vector>
-#include <cstdint>
-#include <string>
 #include <memory>
+#include "serial/serial.h"
+
+namespace serial
+{
+class Serial;
+}
 
 namespace data_interface
 {
-/**
- * This class is used to pack a sequence of bytes into a frame and send it to
- * the serial port and also to parse frames coming from the serial port.
- * A frames contains the data, a 16-bits CRC and delimiters.
- */
-class DataHandler : public DataInterface
+class DefaultSerialInterface : public SerialInterface
 {
 public:
-  explicit DataHandler(std::unique_ptr<SerialInterface> serial);
-
   /**
-   * Open the serial connection.
+   * Creates a Serial object to send and receive bytes to and from the serial
+   * port.
    */
+  DefaultSerialInterface();
+
   void open() override;
 
-  /**
-   * Close the serial connection.
-   */
+  [[nodiscard]] bool is_open() const override;
+
   void close() override;
 
-  /**
-   * Write a sequence of bytes to the serial port.
-   * @param bytes The bytes to read.
-   * @throw data_interface::SerialException
-   */
-  void write(const std::vector<uint8_t>& bytes) override;
+  [[nodiscard]] std::size_t read(uint8_t* buffer, size_t size = 1) override;
+  [[nodiscard]] std::size_t write(const uint8_t* buffer, size_t size) override;
 
-  /**
-   * Read a sequence of bytes from the serial port.
-   * @return The bytes read.
-   * @throw data_interface::SerialException
-   */
-  std::vector<uint8_t> read() override;
+  void set_port(const std::string& port) override;
+  [[nodiscard]] std::string get_port() const override;
+
+  void set_timeout(uint32_t timeout_ms) override;
+  [[nodiscard]] uint32_t get_timeout() const override;
+
+  void set_baudrate(uint32_t baudrate) override;
+  [[nodiscard]] uint32_t get_baudrate() const override;
 
 private:
-  /* States used while reading and parsiong a frame. */
-  enum class ReadState
-  {
-    Waiting,
-    ReadingMessage,
-    ReadingEscapedByte
-  } state_ = ReadState::Waiting;
-
-  /* Circular buffer to read data from the serial port. */
-  Buffer<uint8_t> read_buffer_{ 100 };
-
-  /* Circular buffer to write data to the serial port. */
-  Buffer<uint8_t> write_buffer_{ 100 };
-
-  std::unique_ptr<SerialInterface> serial_;
+  std::unique_ptr<serial::Serial> serial_ = nullptr;
+  uint32_t timeout_ms_ = 0;
 };
 }  // namespace data_interface

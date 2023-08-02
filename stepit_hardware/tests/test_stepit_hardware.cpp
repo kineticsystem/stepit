@@ -35,8 +35,8 @@
 #include <data_interface/data_utils.hpp>
 
 #include <fake/fake_hardware_info.hpp>
-#include <mock/mock_command_interface.hpp>
-#include <mock/mock_command_interface_factory.hpp>
+#include <mock/mock_request_interface.hpp>
+#include <mock/mock_request_interface_factory.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
