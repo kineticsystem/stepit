@@ -40,7 +40,7 @@
 namespace stepit_hardware
 {
 /**
- * @brief The CommandHandler class receives commands and queries from the
+ * @brief The DefaultRequestInterface class receives commands and queries from the
  * hardware interface and sends them to the real hardware.
  */
 class DefaultRequestInterface : public RequestInterface

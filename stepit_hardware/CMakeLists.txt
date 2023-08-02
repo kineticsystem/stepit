@@ -46,7 +46,7 @@ add_library(
     stepit_hardware
     SHARED
     include/stepit_hardware/default_request_interface.hpp
-    include/stepit_hardware/request_interface_factory.hpp
+    include/stepit_hardware/default_request_interface_factory.hpp
     include/stepit_hardware/request_interface.hpp
     include/stepit_hardware/request_interface_factory.hpp
     include/stepit_hardware/fake/fake_request_interface.hpp
@@ -68,7 +68,7 @@ add_library(
     include/stepit_hardware/stepit_hardware.hpp
     include/stepit_hardware/visibility_control.hpp
     src/default_request_interface.cpp
-    src/request_interface_factory.cpp
+    src/default_request_interface_factory.cpp
     src/fake/fake_request_interface.cpp
     src/fake/fake_motor.cpp
     src/fake/position_control.cpp

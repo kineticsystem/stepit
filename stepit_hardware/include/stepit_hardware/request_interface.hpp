@@ -36,7 +36,7 @@
 namespace stepit_hardware
 {
 /**
- * @brief The CommandInterface class receives commands and queries from the
+ * @brief The RequestInterface class receives commands and queries from the
  * hardware interface and sends them to a fake or a real hardware.
  */
 class RequestInterface

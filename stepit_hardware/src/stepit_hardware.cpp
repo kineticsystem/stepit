@@ -34,7 +34,7 @@
 #include <stepit_hardware/msgs/acknowledge_response.hpp>
 #include <stepit_hardware/msgs/status_response.hpp>
 
-#include <stepit_hardware/command_handler_factory.hpp>
+#include <stepit_hardware/default_request_interface_factory.hpp>
 
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
@@ -54,7 +54,7 @@ constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
 
 StepitHardware::StepitHardware()
 {
-  command_interface_factory_ = std::make_unique<CommandHandlerFactory>();
+  command_interface_factory_ = std::make_unique<DefaultRequestInterfaceFactory>();
 }
 
 // This constructor is use for testing only.

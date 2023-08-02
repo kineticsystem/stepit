@@ -33,7 +33,7 @@
 
 namespace stepit_hardware
 {
-constexpr auto kLogger = "CommandHandler";
+constexpr auto kLogger = "DefaultRequestInterface";
 
 DefaultRequestInterface::DefaultRequestInterface(std::unique_ptr<data_interface::DataInterface> data_interface)
   : data_interface_{ std::move(data_interface) }
@@ -102,7 +102,8 @@ AcknowledgeResponse DefaultRequestInterface::send(const ConfigCommand& command) 
   return response;
 }
 
-AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time, const PositionCommand& command) const
+AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time,
+                                                  const PositionCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -124,7 +125,8 @@ AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp:
   return response;
 }
 
-AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time, const VelocityCommand& command) const
+AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time,
+                                                  const VelocityCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());

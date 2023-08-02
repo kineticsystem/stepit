@@ -30,8 +30,7 @@
 #pragma once
 
 #include <stepit_hardware/request_interface_factory.hpp>
-#include <stepit_hardware/command_handler_factory.hpp>
-
+#include <stepit_hardware/default_request_interface_factory.hpp>
 #include <hardware_interface/hardware_info.hpp>
 
 #include <memory>
@@ -39,16 +38,16 @@
 namespace stepit_hardware
 {
 /**
- * @brief The CommandHandlerFactory class is used to create a CommandHandler with the data
- * from the given hardware information.
+ * @brief The DefaultRequestInterfaceFactory class is used to create a
+ * RequestInterface with the data from the given hardware information.
  */
-class CommandHandlerFactory : public RequestInterfaceFactory
+class DefaultRequestInterfaceFactory : public RequestInterfaceFactory
 {
 public:
-  CommandHandlerFactory() = default;
+  DefaultRequestInterfaceFactory() = default;
 
   /**
-   * @brief Create a CommandHandler.
+   * @brief Create a RequestInterface.
    * @param info The hardware information.
    * @return A command handler created using the given hardware information.
    */

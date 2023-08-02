@@ -28,7 +28,7 @@
  */
 
 #include <stepit_hardware/default_request_interface.hpp>
-#include <stepit_hardware/command_handler_factory.hpp>
+#include <stepit_hardware/default_request_interface_factory.hpp>
 #include <stepit_hardware/fake/fake_request_interface.hpp>
 
 #include <data_interface/default_serial_interface.hpp>
@@ -37,10 +37,10 @@
 namespace stepit_hardware
 {
 
-constexpr auto kLogger = "CommandHandlerFactory";
+constexpr auto kLogger = "DefaultRequestInterfaceFactory";
 
 std::unique_ptr<stepit_hardware::RequestInterface>
-stepit_hardware::CommandHandlerFactory::create(const hardware_interface::HardwareInfo& info)
+stepit_hardware::DefaultRequestInterfaceFactory::create(const hardware_interface::HardwareInfo& info)
 {
   if (info.hardware_parameters.find("use_dummy") != info.hardware_parameters.end() &&
       info.hardware_parameters.at("use_dummy") == "true")

@@ -43,9 +43,6 @@
 
 namespace stepit_hardware
 {
-// Not a number variable to initialize class member variables
-constexpr static auto kDoubleNaN = std::numeric_limits<double>::quiet_NaN();
-constexpr static auto kUint8NaN = std::numeric_limits<uint8_t>::quiet_NaN();
 /**
  * https://control.ros.org/master/doc/ros2_control/hardware_interface/doc/writing_new_hardware_interface.html
  */
@@ -128,16 +125,16 @@ private:
   // Internal structure to store joint states or targets.
   struct JointValue
   {
-    double position = kDoubleNaN;
-    double velocity = kDoubleNaN;
+    double position = 0.0;
+    double velocity = 0.0;
   };
 
   // Internal structure to store joint states and targets.
   struct Joint
   {
-    uint8_t id = kUint8NaN;
-    double acceleration = kDoubleNaN;
-    double max_velocity = kDoubleNaN;
+    uint8_t id = 0;
+    double acceleration = 0.0;
+    double max_velocity = 0.0;
     JointValue state{};
     JointValue command{};
   };
