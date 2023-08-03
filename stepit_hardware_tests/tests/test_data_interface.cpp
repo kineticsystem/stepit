@@ -47,8 +47,8 @@
 
 #include <data_interface/data_utils.hpp>
 #include <data_interface/crc_utils.hpp>
-#include <data_interface/serial_handler.hpp>
-#include <data_interface/data_handler.hpp>
+#include <data_interface/default_serial_interface.hpp>
+#include <data_interface/default_data_interface.hpp>
 
 #include <thread>
 #include <chrono>
@@ -65,24 +65,24 @@ public:
     {
       GTEST_SKIP() << "Skipping all tests for this fixture";
     }
-    auto serial_handler = std::make_unique<data_interface::SerialHandler>();
-    serial_handler->set_port("/dev/ttyACM0");
-    serial_handler->set_baudrate(9600);
-    serial_handler->set_timeout(2000);
+    auto serial_interface = std::make_unique<data_interface::DefaultSerialInterface>();
+    serial_interface->set_port("/dev/ttyACM0");
+    serial_interface->set_baudrate(9600);
+    serial_interface->set_timeout(2000);
 
-    data_handler = std::make_unique<data_interface::DataHandler>(std::move(serial_handler));
-    data_handler->open();
+    data_interface = std::make_unique<data_interface::DefaultDataInterface>(std::move(serial_interface));
+    data_interface->open();
   }
 
   void TearDown()
   {
-    if (data_handler)
+    if (data_interface)
     {
-      data_handler->close();
+      data_interface->close();
     }
   }
 
-  std::unique_ptr<data_interface::DataHandler> data_handler = nullptr;
+  std::unique_ptr<data_interface::DefaultDataInterface> data_interface = nullptr;
 };
 
 /**
@@ -105,8 +105,8 @@ TEST_F(TestDataInterface, test_velocity_command)
     0x00   // Velocity
   };
   const std::vector<uint8_t> expected_response{ 0x11 };
-  data_handler->write(data);
-  const std::vector<uint8_t> response = data_handler->read();
+  data_interface->write(data);
+  const std::vector<uint8_t> response = data_interface->read();
   ASSERT_THAT(data_interface::to_hex(response), data_interface::to_hex(expected_response));
 }
 
@@ -134,8 +134,8 @@ TEST_F(TestDataInterface, test_echo_command)
       i      // This value will cause some CRC to contains values which must be escaped.
     };
 
-    data_handler->write(request);
-    const std::vector<uint8_t> response = data_handler->read();
+    data_interface->write(request);
+    const std::vector<uint8_t> response = data_interface->read();
     ASSERT_THAT(data_interface::to_hex(response), data_interface::to_hex(request));
   }
 }
@@ -158,8 +158,8 @@ TEST_F(TestDataInterface, test_info_command)
     0x54   // T.
   };
 
-  data_handler->write(request);
-  const std::vector<uint8_t> response = data_handler->read();
+  data_interface->write(request);
+  const std::vector<uint8_t> response = data_interface->read();
   ASSERT_THAT(data_interface::to_hex(expected_response), data_interface::to_hex(response));
 }
 
