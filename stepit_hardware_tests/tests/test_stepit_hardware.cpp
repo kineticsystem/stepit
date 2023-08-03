@@ -48,9 +48,6 @@
 #include <ros2_control_test_assets/components_urdfs.hpp>
 #include <ros2_control_test_assets/descriptions.hpp>
 
-#include <data_interface/serial_handler.hpp>
-#include <data_interface/data_handler.hpp>
-
 #include <thread>
 #include <chrono>
 
