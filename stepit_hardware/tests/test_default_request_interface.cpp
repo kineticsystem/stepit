@@ -130,7 +130,7 @@ TEST(TestDefaultRequestInterface, send_velocity_command)
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
   auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
-  VelocityCommand request{ { VelocityCommand::Goal{ 0, 0.5 }, VelocityCommand::Goal{ 1, 0.75 } } };
+  VelocityCommand request{ { VelocityGoal{ 0, 0.5 }, VelocityGoal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
@@ -167,7 +167,7 @@ TEST(TestDefaultRequestInterface, send_position_command)
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
   auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
-  PositionCommand request{ { PositionCommand::Goal{ 0, 0.5 }, PositionCommand::Goal{ 1, 0.75 } } };
+  PositionCommand request{ { PositionGoal{ 0, 0.5 }, PositionGoal{ 1, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
@@ -212,7 +212,7 @@ TEST(TestDefaultRequestInterface, send_configure_command)
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
   auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
-  ConfigCommand request{ { ConfigCommand::Param{ 0, 0.5, 0.75 }, ConfigCommand::Param{ 1, 0.5, 0.75 } } };
+  ConfigCommand request{ { ConfigParam{ 0, 0.5, 0.75 }, ConfigParam{ 1, 0.5, 0.75 } } };
   AcknowledgeResponse response = command_handler->send(request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));

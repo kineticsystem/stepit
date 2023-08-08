@@ -38,7 +38,7 @@ StatusResponse::StatusResponse(Status status, std::vector<MotorState> motor_stat
 {
 }
 
-std::vector<StatusResponse::MotorState> StatusResponse::motor_states() const
+std::vector<MotorState> StatusResponse::motor_states() const
 {
   return motor_states_;
 }

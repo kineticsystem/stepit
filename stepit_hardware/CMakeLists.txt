@@ -6,6 +6,8 @@
 
 cmake_minimum_required(VERSION 3.22.1)
 project(stepit_hardware VERSION 0.1.0 LANGUAGES CXX)
+
+# This module provides installation directories as per the GNU coding standards.
 include(GNUInstallDirs)
 
 # Enable output of compile commands during generation.

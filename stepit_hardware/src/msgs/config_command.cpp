@@ -32,7 +32,7 @@
 
 namespace stepit_hardware
 {
-ConfigCommand::ConfigCommand(const std::vector<Param>& params) : Request{}, params_{ params }
+ConfigCommand::ConfigCommand(const std::vector<ConfigParam>& params) : Request{}, params_{ params }
 {
 }
 
@@ -41,7 +41,7 @@ uint8_t ConfigCommand::command_id() const
   return constants::kMotorConfigCommandId;
 }
 
-std::vector<ConfigCommand::Param> ConfigCommand::params() const
+std::vector<ConfigParam> ConfigCommand::params() const
 {
   return params_;
 }

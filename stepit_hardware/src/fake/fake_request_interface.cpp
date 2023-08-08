@@ -33,7 +33,7 @@
 
 namespace stepit_hardware
 {
-constexpr auto kLoggerName = "FakeCommandHandler";
+const auto kLogger = rclcpp::get_logger("FakeCommandHandler");
 
 bool FakeRequestInterface::connect()
 {
@@ -65,7 +65,7 @@ AcknowledgeResponse FakeRequestInterface::send(const rclcpp::Time& time, const P
     auto it = motors_.find(goal.motor_id());
     if (it == motors_.end())
     {
-      RCLCPP_ERROR(rclcpp::get_logger(kLoggerName), "Motor id does not exist.");
+      RCLCPP_ERROR(kLogger, "Motor id does not exist.");
     }
     else
     {
@@ -82,7 +82,7 @@ AcknowledgeResponse FakeRequestInterface::send(const rclcpp::Time& time, const V
     auto it = motors_.find(goal.motor_id());
     if (it == motors_.end())
     {
-      RCLCPP_ERROR(rclcpp::get_logger(kLoggerName), "Motor id does not exist.");
+      RCLCPP_ERROR(kLogger, "Motor id does not exist.");
     }
     else
     {
@@ -94,20 +94,20 @@ AcknowledgeResponse FakeRequestInterface::send(const rclcpp::Time& time, const V
 
 StatusResponse FakeRequestInterface::send(const rclcpp::Time& time, [[maybe_unused]] const StatusQuery& query) const
 {
-  std::vector<StatusResponse::MotorState> states;
+  std::vector<MotorState> states;
   for (const auto& [motor_id, motor] : motors_)
   {
     auto position = motor.get_position(time);
     auto velocity = motor.get_velocity(time);
     auto distance_to_go = 0.0;
-    StatusResponse::MotorState state{ motor_id, position, velocity, distance_to_go };
+    MotorState state{ motor_id, position, velocity, distance_to_go };
     states.emplace_back(state);
   }
   return StatusResponse(Response::Status::Success, states);
 }
 
 InfoResponse FakeRequestInterface::send([[maybe_unused]] const rclcpp::Time& time,
-                                      [[maybe_unused]] const InfoQuery& query) const
+                                        [[maybe_unused]] const InfoQuery& query) const
 {
   return InfoResponse(Response::Status::Success, "STEPIT");
 }

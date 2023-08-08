@@ -49,8 +49,8 @@
 
 namespace stepit_hardware
 {
-constexpr auto kLogger = "StepitHardware";
 constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
+const auto kLogger = rclcpp::get_logger("StepitHardware");
 
 StepitHardware::StepitHardware()
 {
@@ -65,7 +65,7 @@ StepitHardware::StepitHardware(std::unique_ptr<RequestInterfaceFactory> command_
 
 hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interface::HardwareInfo& info)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "on_init");
+  RCLCPP_DEBUG(kLogger, "on_init");
   try
   {
     // Store hardware info for later use.
@@ -88,7 +88,7 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
       joints_[i].state.velocity = kNaN;
       joints_[i].command.position = kNaN;
       joints_[i].command.velocity = kNaN;
-      RCLCPP_INFO(rclcpp::get_logger(kLogger), "joint_id %d: %d", i, joints_[i].id);
+      RCLCPP_INFO(kLogger, "joint_id %d: %d", i, joints_[i].id);
     }
 
     command_interface_ = command_interface_factory_->create(info);
@@ -105,7 +105,7 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "export_state_interfaces");
+  RCLCPP_DEBUG(kLogger, "on_configure");
   try
   {
     if (hardware_interface::SystemInterface::on_configure(previous_state) != CallbackReturn::SUCCESS)
@@ -117,10 +117,10 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
     command_interface_->connect();
 
     // Send configuration parameters to the hardware.
-    std::vector<ConfigCommand::Param> params;
+    std::vector<ConfigParam> params;
     for (const auto joint : joints_)
     {
-      params.emplace_back(ConfigCommand::Param{ joint.id, joint.acceleration, joint.max_velocity });
+      params.emplace_back(ConfigParam{ joint.id, joint.acceleration, joint.max_velocity });
     }
     const AcknowledgeResponse response = command_interface_->send(ConfigCommand{ params });
     if (response.status() == Response::Status::Failure)
@@ -139,7 +139,7 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
 
 std::vector<hardware_interface::StateInterface> StepitHardware::export_state_interfaces()
 {
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "export_state_interfaces");
+  RCLCPP_DEBUG(kLogger, "export_state_interfaces");
   try
   {
     std::vector<hardware_interface::StateInterface> state_interfaces;
@@ -162,7 +162,7 @@ std::vector<hardware_interface::StateInterface> StepitHardware::export_state_int
 
 std::vector<hardware_interface::CommandInterface> StepitHardware::export_command_interfaces()
 {
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "export_command_interfaces");
+  RCLCPP_DEBUG(kLogger, "export_command_interfaces");
   try
   {
     std::vector<hardware_interface::CommandInterface> command_interfaces;
@@ -186,14 +186,14 @@ std::vector<hardware_interface::CommandInterface> StepitHardware::export_command
 hardware_interface::CallbackReturn
 StepitHardware::on_activate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "start");
+  RCLCPP_DEBUG(kLogger, "on_activate");
   return CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn
 StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "stop");
+  RCLCPP_DEBUG(kLogger, "on_deactivate");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -208,7 +208,7 @@ hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
     auto motor_states = response.motor_states();
     if (motor_states.size() != joints_.size())
     {
-      RCLCPP_ERROR(rclcpp::get_logger(kLogger), "incorrect number of joints");
+      RCLCPP_ERROR(kLogger, "incorrect number of joints");
       return hardware_interface::return_type::ERROR;
     }
 
@@ -240,12 +240,12 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
     {
       // Set velocities.
 
-      std::vector<VelocityCommand::Goal> velocities;
+      std::vector<VelocityGoal> velocities;
       for (const auto& joint : joints_)
       {
         if (!std::isnan(joint.command.velocity))
         {
-          VelocityCommand::Goal velocity{ joint.id, joint.command.velocity };
+          VelocityGoal velocity{ joint.id, joint.command.velocity };
           velocities.push_back(velocity);
         }
       }
@@ -257,12 +257,12 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
     {
       // Set positions.
 
-      std::vector<PositionCommand::Goal> positions;
+      std::vector<PositionGoal> positions;
       for (const auto& joint : joints_)
       {
         if (!std::isnan(joint.command.position))
         {
-          PositionCommand::Goal position{ joint.id, joint.command.position };
+          PositionGoal position{ joint.id, joint.command.position };
           positions.push_back(position);
         }
       }

@@ -34,7 +34,7 @@
 
 namespace stepit_hardware
 {
-PositionCommand::PositionCommand(const std::vector<Goal>& goals) : Request{}, goals_{ goals }
+PositionCommand::PositionCommand(const std::vector<PositionGoal>& goals) : Request{}, goals_{ goals }
 {
 }
 
@@ -43,7 +43,7 @@ uint8_t PositionCommand::command_id() const
   return constants::kMotorPositionCommandId;
 }
 
-std::vector<PositionCommand::Goal> PositionCommand::goals() const
+std::vector<PositionGoal> PositionCommand::goals() const
 {
   return goals_;
 }

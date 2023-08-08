@@ -170,11 +170,11 @@ TEST(TestStepitHardware, read_status)
   const StatusResponse mocked_response{
       Response::Status::Success,
       {
-          StatusResponse::MotorState{ 0, 32100, 0.5, 150 },     // Motor 0 status
-          StatusResponse::MotorState{ 1, -6500, 0.75, 150000 }, // Motor 1 status
-          StatusResponse::MotorState{ 2, -6500, 0.75, 150000 }, // Motor 1 status
-          StatusResponse::MotorState{ 3, -6500, 0.75, 150000 }, // Motor 1 status
-          StatusResponse::MotorState{ 4, -6500, 0.75, 150000 }  // Motor 1 status
+          MotorState{ 0, 32100, 0.5, 150 },     // Motor 0 status
+          MotorState{ 1, -6500, 0.75, 150000 }, // Motor 1 status
+          MotorState{ 2, -6500, 0.75, 150000 }, // Motor 1 status
+          MotorState{ 3, -6500, 0.75, 150000 }, // Motor 1 status
+          MotorState{ 4, -6500, 0.75, 150000 }  // Motor 1 status
       }
   };
   // clang-format on
@@ -239,11 +239,11 @@ TEST(TestStepitHardware, write_velocities)
   // clang-format off
   const VelocityCommand expected_request{
     {
-        VelocityCommand::Goal{ 0, 0.5 },  // Motor 0 goal
-        VelocityCommand::Goal{ 1, 0.75 }, // Motor 1 goal
-        VelocityCommand::Goal{ 2, 0.75 }, // Motor 2 goal
-        VelocityCommand::Goal{ 3, 0.75 }, // Motor 3 goal
-        VelocityCommand::Goal{ 4, 0.75 }  // Motor 4 goal
+        VelocityGoal{ 0, 0.5 },  // Motor 0 goal
+        VelocityGoal{ 1, 0.75 }, // Motor 1 goal
+        VelocityGoal{ 2, 0.75 }, // Motor 2 goal
+        VelocityGoal{ 3, 0.75 }, // Motor 3 goal
+        VelocityGoal{ 4, 0.75 }  // Motor 4 goal
     }
   };
   // clang-format on
@@ -316,11 +316,11 @@ TEST(TestStepitHardware, write_positions)
   // clang-format off
   const PositionCommand expected_request{
     {
-        PositionCommand::Goal{ 0, 0.5 },  // Motor 0 goal
-        PositionCommand::Goal{ 1, 0.75 }, // Motor 1 goal
-        PositionCommand::Goal{ 2, 0.75 }, // Motor 2 goal
-        PositionCommand::Goal{ 3, 0.75 }, // Motor 3 goal
-        PositionCommand::Goal{ 4, 0.75 }  // Motor 4 goal
+        PositionGoal{ 0, 0.5 },  // Motor 0 goal
+        PositionGoal{ 1, 0.75 }, // Motor 1 goal
+        PositionGoal{ 2, 0.75 }, // Motor 2 goal
+        PositionGoal{ 3, 0.75 }, // Motor 3 goal
+        PositionGoal{ 4, 0.75 }  // Motor 4 goal
     }
   };
   // clang-format on
@@ -392,11 +392,11 @@ TEST(TestStepitHardware, configuration)
   // clang-format off
    const ConfigCommand expected_request{
      {
-         ConfigCommand::Param{ 0, 0.1, 0.2 },  // Motor 0 goal
-         ConfigCommand::Param{ 1, 0.3, 0.4},   // Motor 1 goal
-         ConfigCommand::Param{ 2, 0.3, 0.4},   // Motor 1 goal
-         ConfigCommand::Param{ 3, 0.3, 0.4},   // Motor 1 goal
-         ConfigCommand::Param{ 4, 0.3, 0.4}    // Motor 1 goal
+         ConfigParam{ 0, 0.1, 0.2 },  // Motor 0 goal
+         ConfigParam{ 1, 0.3, 0.4},   // Motor 1 goal
+         ConfigParam{ 2, 0.3, 0.4},   // Motor 1 goal
+         ConfigParam{ 3, 0.3, 0.4},   // Motor 1 goal
+         ConfigParam{ 4, 0.3, 0.4}    // Motor 1 goal
      }
    };
   // clang-format on

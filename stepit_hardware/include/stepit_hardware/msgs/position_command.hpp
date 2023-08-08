@@ -35,35 +35,35 @@
 
 namespace stepit_hardware
 {
+class PositionGoal
+{
+public:
+  explicit PositionGoal(uint8_t motor_id, double position) : motor_id_{ motor_id }, position_{ position } {};
+  uint8_t motor_id() const
+  {
+    return motor_id_;
+  }
+  double position() const
+  {
+    return position_;
+  }
+
+private:
+  uint8_t motor_id_;
+  double position_;
+};
+
 /**
  * @brief Command to set the target position a group of motors.
  */
 class PositionCommand : public Request
 {
 public:
-  class Goal
-  {
-  public:
-    explicit Goal(uint8_t motor_id, double position) : motor_id_{ motor_id }, position_{ position } {};
-    uint8_t motor_id() const
-    {
-      return motor_id_;
-    }
-    double position() const
-    {
-      return position_;
-    }
-
-  private:
-    uint8_t motor_id_;
-    double position_;
-  };
-
-  explicit PositionCommand(const std::vector<Goal>& goals);
+  explicit PositionCommand(const std::vector<PositionGoal>& goals);
   uint8_t command_id() const;
-  std::vector<Goal> goals() const;
+  std::vector<PositionGoal> goals() const;
 
 private:
-  std::vector<Goal> goals_;
+  std::vector<PositionGoal> goals_;
 };
 }  // namespace stepit_hardware

@@ -34,7 +34,7 @@
 
 namespace stepit_hardware
 {
-VelocityCommand::VelocityCommand(const std::vector<Goal>& goals) : Request{}, goals_{ goals }
+VelocityCommand::VelocityCommand(const std::vector<VelocityGoal>& goals) : Request{}, goals_{ goals }
 {
 }
 
@@ -43,7 +43,7 @@ uint8_t VelocityCommand::command_id() const
   return constants::kMotorVelocityCommandId;
 }
 
-std::vector<VelocityCommand::Goal> VelocityCommand::goals() const
+std::vector<VelocityGoal> VelocityCommand::goals() const
 {
   return goals_;
 }

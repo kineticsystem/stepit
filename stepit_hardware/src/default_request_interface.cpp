@@ -33,7 +33,7 @@
 
 namespace stepit_hardware
 {
-constexpr auto kLogger = "DefaultRequestInterface";
+const auto kLogger = rclcpp::get_logger("DefaultRequestInterface");
 
 DefaultRequestInterface::DefaultRequestInterface(std::unique_ptr<data_interface::DataInterface> data_interface)
   : data_interface_{ std::move(data_interface) }
@@ -52,17 +52,17 @@ bool DefaultRequestInterface::connect()
   {
     try
     {
-      RCLCPP_INFO(rclcpp::get_logger(kLogger), "Connecting...");
+      RCLCPP_INFO(kLogger, "Connecting...");
 
       StatusQuery query{};
       StatusResponse response = send(rclcpp::Time{}, query);
       connected = response.status() == Response::Status::Success;
 
-      RCLCPP_INFO(rclcpp::get_logger(kLogger), "Connection established");
+      RCLCPP_INFO(kLogger, "Connection established");
     }
     catch (const std::exception& ex)
     {
-      RCLCPP_WARN(rclcpp::get_logger(kLogger), "Connection failed");
+      RCLCPP_WARN(kLogger, "Connection failed");
       trial++;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -93,10 +93,10 @@ AcknowledgeResponse DefaultRequestInterface::send(const ConfigCommand& command) 
     in.emplace_back(max_velocity_bytes[2]);
     in.emplace_back(max_velocity_bytes[3]);
   }
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Config command: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Config command: %s", data_interface::to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Config response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Config response: %s", data_interface::to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
   return response;
@@ -116,10 +116,10 @@ AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp:
     in.emplace_back(position_bytes[2]);
     in.emplace_back(position_bytes[3]);
   }
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Position command: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Position command: %s", data_interface::to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Position response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Position response: %s", data_interface::to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
   return response;
@@ -139,10 +139,10 @@ AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp:
     in.emplace_back(velocity_bytes[2]);
     in.emplace_back(velocity_bytes[3]);
   }
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Velocity command: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Velocity command: %s", data_interface::to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Velocity response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Velocity response: %s", data_interface::to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
   return response;
@@ -152,10 +152,10 @@ StatusResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Status query: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Status query: %s", data_interface::to_hex(in).c_str());
   data_interface_->write(in);
   auto out = data_interface_->read();
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Status response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Status response: %s", data_interface::to_hex(out).c_str());
 
   // The data array contains the following information.
   //
@@ -175,14 +175,14 @@ StatusResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time
 
   std::size_t i = 0;
   Response::Status status{ out[i++] };
-  std::vector<StatusResponse::MotorState> motor_states;
+  std::vector<MotorState> motor_states;
   while (i < out.size())
   {
     uint8_t id = out[i++];
     float position = data_interface::to_float({ out[i++], out[i++], out[i++], out[i++] });
     float speed = data_interface::to_float({ out[i++], out[i++], out[i++], out[i++] });
     float distance_to_go = data_interface::to_float({ out[i++], out[i++], out[i++], out[i++] });
-    motor_states.push_back(StatusResponse::MotorState{ id, position, speed, distance_to_go });
+    motor_states.push_back(MotorState{ id, position, speed, distance_to_go });
   }
 
   StatusResponse response{ status, motor_states };
@@ -193,10 +193,10 @@ InfoResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& 
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Info query: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Info query: %s", data_interface::to_hex(in).c_str());
   data_interface_->write(in);
   auto out = data_interface_->read();
-  RCLCPP_DEBUG(rclcpp::get_logger(kLogger), "Info response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Info response: %s", data_interface::to_hex(out).c_str());
 
   // The data array contains the following information.
   //

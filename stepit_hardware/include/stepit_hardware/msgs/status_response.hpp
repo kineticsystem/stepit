@@ -36,41 +36,41 @@
 
 namespace stepit_hardware
 {
+// Internal structure to store joint states and targets.
+class MotorState
+{
+public:
+  explicit MotorState(uint8_t id, double position, double velocity, double distance_to_go)
+    : id_{ id }, position_{ position }, velocity_{ velocity }, distance_to_go_{ distance_to_go }
+  {
+  }
+  uint8_t id()
+  {
+    return id_;
+  }
+  double position()
+  {
+    return position_;
+  }
+  double velocity()
+  {
+    return velocity_;
+  }
+  double distance_to_go()
+  {
+    return distance_to_go_;
+  }
+
+private:
+  uint8_t id_;
+  double position_;
+  double velocity_;
+  double distance_to_go_;
+};
+
 class StatusResponse : public Response
 {
 public:
-  // Internal structure to store joint states and targets.
-  class MotorState
-  {
-  public:
-    explicit MotorState(uint8_t id, double position, double velocity, double distance_to_go)
-      : id_{ id }, position_{ position }, velocity_{ velocity }, distance_to_go_{ distance_to_go }
-    {
-    }
-    uint8_t id()
-    {
-      return id_;
-    }
-    double position()
-    {
-      return position_;
-    }
-    double velocity()
-    {
-      return velocity_;
-    }
-    double distance_to_go()
-    {
-      return distance_to_go_;
-    }
-
-  private:
-    uint8_t id_;
-    double position_;
-    double velocity_;
-    double distance_to_go_;
-  };
-
   explicit StatusResponse(Status status, std::vector<MotorState> motor_states);
   std::vector<MotorState> motor_states() const;
 

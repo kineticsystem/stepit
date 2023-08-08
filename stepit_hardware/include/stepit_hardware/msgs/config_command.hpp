@@ -35,41 +35,42 @@
 
 namespace stepit_hardware
 {
+
+class ConfigParam
+{
+public:
+  explicit ConfigParam(uint8_t motor_id, double acceleration, double max_velocity)
+    : motor_id_{ motor_id }, acceleration_{ acceleration }, max_velocity_{ max_velocity } {};
+  uint8_t motor_id() const
+  {
+    return motor_id_;
+  }
+  double acceleration() const
+  {
+    return acceleration_;
+  }
+  double max_velocity() const
+  {
+    return max_velocity_;
+  }
+
+private:
+  uint8_t motor_id_;
+  double acceleration_;
+  double max_velocity_;
+};
+
 /**
  * @brief Command to configure a group of motors.
  */
 class ConfigCommand : public Request
 {
 public:
-  class Param
-  {
-  public:
-    explicit Param(uint8_t motor_id, double acceleration, double max_velocity)
-      : motor_id_{ motor_id }, acceleration_{ acceleration }, max_velocity_{ max_velocity } {};
-    uint8_t motor_id() const
-    {
-      return motor_id_;
-    }
-    double acceleration() const
-    {
-      return acceleration_;
-    }
-    double max_velocity() const
-    {
-      return max_velocity_;
-    }
-
-  private:
-    uint8_t motor_id_;
-    double acceleration_;
-    double max_velocity_;
-  };
-
-  explicit ConfigCommand(const std::vector<Param>& params);
+  explicit ConfigCommand(const std::vector<ConfigParam>& params);
   uint8_t command_id() const;
-  std::vector<Param> params() const;
+  std::vector<ConfigParam> params() const;
 
 private:
-  std::vector<Param> params_;
+  std::vector<ConfigParam> params_;
 };
 }  // namespace stepit_hardware

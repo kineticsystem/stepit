@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <vector>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace data_interface
 {

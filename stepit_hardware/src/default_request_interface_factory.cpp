@@ -36,8 +36,7 @@
 
 namespace stepit_hardware
 {
-
-constexpr auto kLogger = "DefaultRequestInterfaceFactory";
+const auto kLogger = rclcpp::get_logger("DefaultRequestInterfaceFactory");
 
 std::unique_ptr<stepit_hardware::RequestInterface>
 stepit_hardware::DefaultRequestInterfaceFactory::create(const hardware_interface::HardwareInfo& info)
@@ -50,14 +49,14 @@ stepit_hardware::DefaultRequestInterfaceFactory::create(const hardware_interface
   else
   {
     std::string usb_port = info.hardware_parameters.at("usb_port");
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "usb_port: %s", usb_port.c_str());
+    RCLCPP_INFO(kLogger, "usb_port: %s", usb_port.c_str());
 
     uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "baud_rate: %d", baud_rate);
+    RCLCPP_INFO(kLogger, "baud_rate: %d", baud_rate);
 
     double timeout = std::stod(info.hardware_parameters.at("timeout"));
     uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
-    RCLCPP_INFO(rclcpp::get_logger(kLogger), "timeout: %f", timeout);
+    RCLCPP_INFO(kLogger, "timeout: %f", timeout);
 
     auto serial_interface = std::make_unique<data_interface::DefaultSerialInterface>();
     serial_interface->set_port(usb_port);

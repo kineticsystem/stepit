@@ -35,35 +35,36 @@
 
 namespace stepit_hardware
 {
+
+class VelocityGoal
+{
+public:
+  explicit VelocityGoal(uint8_t motor_id, double velocity) : motor_id_{ motor_id }, velocity_{ velocity } {};
+  uint8_t motor_id() const
+  {
+    return motor_id_;
+  }
+  double velocity() const
+  {
+    return velocity_;
+  }
+
+private:
+  uint8_t motor_id_;
+  double velocity_;
+};
+
 /**
  * Command to set the target velocity a group of motors.
  */
 class VelocityCommand : public Request
 {
 public:
-  class Goal
-  {
-  public:
-    explicit Goal(uint8_t motor_id, double velocity) : motor_id_{ motor_id }, velocity_{ velocity } {};
-    uint8_t motor_id() const
-    {
-      return motor_id_;
-    }
-    double velocity() const
-    {
-      return velocity_;
-    }
-
-  private:
-    uint8_t motor_id_;
-    double velocity_;
-  };
-
-  explicit VelocityCommand(const std::vector<Goal>& goals);
+  explicit VelocityCommand(const std::vector<VelocityGoal>& goals);
   uint8_t command_id() const;
-  std::vector<Goal> goals() const;
+  std::vector<VelocityGoal> goals() const;
 
 private:
-  std::vector<Goal> goals_;
+  std::vector<VelocityGoal> goals_;
 };
 }  // namespace stepit_hardware
