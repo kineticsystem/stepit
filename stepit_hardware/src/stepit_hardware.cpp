@@ -58,8 +58,8 @@ StepitHardware::StepitHardware()
 }
 
 // This constructor is use for testing only.
-StepitHardware::StepitHardware(std::unique_ptr<DriverFactory> command_interface_factory)
-  : driver_factory_{ std::move(command_interface_factory) }
+StepitHardware::StepitHardware(std::unique_ptr<DriverFactory> driver_factory)
+  : driver_factory_{ std::move(driver_factory) }
 {
 }
 
