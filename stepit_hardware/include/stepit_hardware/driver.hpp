@@ -36,13 +36,13 @@
 namespace stepit_hardware
 {
 /**
- * @brief The RequestInterface class receives commands and queries from the
+ * @brief This class receives commands and queries from the
  * hardware interface and sends them to a fake or a real hardware.
  */
-class RequestInterface
+class Driver
 {
 public:
-  virtual ~RequestInterface() = default;
+  virtual ~Driver() = default;
 
   /**
    * @brief Initialize the command interface.

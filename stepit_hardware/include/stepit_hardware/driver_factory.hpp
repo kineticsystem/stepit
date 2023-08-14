@@ -27,44 +27,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/default_request_interface.hpp>
-#include <stepit_hardware/default_request_interface_factory.hpp>
-#include <stepit_hardware/fake/fake_request_interface.hpp>
+#pragma once
 
-#include <data_interface/default_serial_interface.hpp>
-#include <data_interface/default_data_interface.hpp>
+#include <stepit_hardware/driver.hpp>
+
+#include <hardware_interface/hardware_info.hpp>
+
+#include <memory>
 
 namespace stepit_hardware
 {
-const auto kLogger = rclcpp::get_logger("DefaultRequestInterfaceFactory");
-
-std::unique_ptr<stepit_hardware::RequestInterface>
-stepit_hardware::DefaultRequestInterfaceFactory::create(const hardware_interface::HardwareInfo& info)
+class DriverFactory
 {
-  if (info.hardware_parameters.find("use_dummy") != info.hardware_parameters.end() &&
-      info.hardware_parameters.at("use_dummy") == "true")
-  {
-    return std::make_unique<FakeRequestInterface>();
-  }
-  else
-  {
-    std::string usb_port = info.hardware_parameters.at("usb_port");
-    RCLCPP_INFO(kLogger, "usb_port: %s", usb_port.c_str());
-
-    uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
-    RCLCPP_INFO(kLogger, "baud_rate: %d", baud_rate);
-
-    double timeout = std::stod(info.hardware_parameters.at("timeout"));
-    uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
-    RCLCPP_INFO(kLogger, "timeout: %f", timeout);
-
-    auto serial_interface = std::make_unique<data_interface::DefaultSerialInterface>();
-    serial_interface->set_port(usb_port);
-    serial_interface->set_baudrate(baud_rate);
-    serial_interface->set_timeout(timeout_ms);
-
-    return std::make_unique<DefaultRequestInterface>(
-        std::make_unique<data_interface::DefaultDataInterface>(std::move(serial_interface)));
-  }
-}
+public:
+  virtual std::unique_ptr<Driver> create(const hardware_interface::HardwareInfo& info) = 0;
+};
 }  // namespace stepit_hardware

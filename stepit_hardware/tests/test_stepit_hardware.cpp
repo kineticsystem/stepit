@@ -35,8 +35,8 @@
 #include <data_interface/data_utils.hpp>
 
 #include <fake/fake_hardware_info.hpp>
-#include <mock/mock_request_interface.hpp>
-#include <mock/mock_request_interface_factory.hpp>
+#include <mock/mock_driver.hpp>
+#include <mock/mock_driver_factory.hpp>
 
 #include <hardware_interface/loaned_command_interface.hpp>
 #include <hardware_interface/loaned_state_interface.hpp>
@@ -179,15 +179,14 @@ TEST(TestStepitHardware, read_status)
   };
   // clang-format on
 
-  auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
-  ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, send(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
-  EXPECT_CALL(*mock_command_interface, send(_, An<const StatusQuery&>())).WillOnce(Return(mocked_response));
-  auto mock_command_interface_factory =
-      std::make_unique<MockCommandInterfaceFactory>(std::move(mock_command_interface));
+  EXPECT_CALL(*mock_driver, send(_, An<const StatusQuery&>())).WillOnce(Return(mocked_response));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface_factory));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_driver_factory));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -250,16 +249,15 @@ TEST(TestStepitHardware, write_velocities)
 
   VelocityCommand actual_request{ {} };
 
-  auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
-  ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, send(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
-  EXPECT_CALL(*mock_command_interface, send(_, Matcher<const VelocityCommand&>(_)))
+  EXPECT_CALL(*mock_driver, send(_, Matcher<const VelocityCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ Response::Status::Success })));
-  auto mock_command_interface_factory =
-      std::make_unique<MockCommandInterfaceFactory>(std::move(mock_command_interface));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface_factory));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_driver_factory));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -327,16 +325,15 @@ TEST(TestStepitHardware, write_positions)
 
   PositionCommand actual_request{ {} };
 
-  auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
-  ON_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, send(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
-  EXPECT_CALL(*mock_command_interface, send(_, Matcher<const PositionCommand&>(_)))
+  EXPECT_CALL(*mock_driver, send(_, Matcher<const PositionCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ Response::Status::Success })));
-  auto mock_command_interface_factory =
-      std::make_unique<MockCommandInterfaceFactory>(std::move(mock_command_interface));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface_factory));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_driver_factory));
 
   // Load the component.
   hardware_interface::ResourceManager rm;
@@ -404,14 +401,13 @@ TEST(TestStepitHardware, configuration)
   const AcknowledgeResponse mocked_response{ Response::Status::Success };
   ConfigCommand actual_request{ {} };
 
-  auto mock_command_interface = std::make_unique<MockCommandInterface>();
-  ON_CALL(*mock_command_interface, connect()).WillByDefault(Return(true));
-  EXPECT_CALL(*mock_command_interface, send(Matcher<const ConfigCommand&>(_)))
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  EXPECT_CALL(*mock_driver, send(Matcher<const ConfigCommand&>(_)))
       .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
-  auto mock_command_interface_factory =
-      std::make_unique<MockCommandInterfaceFactory>(std::move(mock_command_interface));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_command_interface_factory));
+  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>(std::move(mock_driver_factory));
 
   // Load the component.
   hardware_interface::ResourceManager rm;

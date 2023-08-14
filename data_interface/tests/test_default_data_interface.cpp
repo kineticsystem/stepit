@@ -31,7 +31,7 @@
 #include <data_interface/default_data_interface.hpp>
 #include <data_interface/data_utils.hpp>
 #include <data_interface/serial_exception.hpp>
-#include <mock/mock_serial_interface.hpp>
+#include <mock/mock_serial.hpp>
 
 namespace data_interface::test
 {
@@ -70,7 +70,7 @@ TEST(TestDefaultDataInterface, write)
     0x7E   // Delimiter
   };
 
-  auto mock = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // Use a lambda function to populate a vector with the buffer values.
   std::vector<uint8_t> actual_frame;
@@ -78,9 +78,9 @@ TEST(TestDefaultDataInterface, write)
     actual_frame.emplace_back(buffer[0]);
     return 1;
   };
-  EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
+  EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   data_interface.write(data);
   ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
 }
@@ -116,7 +116,7 @@ TEST(TestDefaultDataInterface, write_escaped_data)
     0x7E   // Delimiter
   };
 
-  auto mock = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // Use a lambda function to populate a vector with the buffer values.
   std::vector<uint8_t> actual_frame;
@@ -124,9 +124,9 @@ TEST(TestDefaultDataInterface, write_escaped_data)
     actual_frame.emplace_back(buffer[0]);
     return 1;
   };
-  EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
+  EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   data_interface.write(data);
   ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
 }
@@ -174,7 +174,7 @@ TEST(TestDefaultDataInterface, write_escaped_crc)
     0x7E   // Delimiter
   };
 
-  auto mock = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // Use a lambda function to populate a vector with the buffer values.
   std::vector<uint8_t> actual_frame;
@@ -182,9 +182,9 @@ TEST(TestDefaultDataInterface, write_escaped_crc)
     actual_frame.emplace_back(buffer[0]);
     return 1;
   };
-  EXPECT_CALL(*mock, write(_, _)).WillRepeatedly(Invoke(write));
+  EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   data_interface.write(data);
   ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
 }
@@ -194,12 +194,12 @@ TEST(TestDefaultDataInterface, write_escaped_crc)
  */
 TEST(TestDefaultDataInterface, write_error)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // We mock the read to simulate a timeout by returning 0 bytes.
-  EXPECT_CALL(*mock, write(_, _)).WillOnce(Return(0));
+  EXPECT_CALL(*serial, write(_, _)).WillOnce(Return(0));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
@@ -242,7 +242,7 @@ TEST(TestDefaultDataInterface, read)
     0xB8   // Position (LSB)
   };
 
-  auto mockedSerialInterface = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
@@ -250,9 +250,9 @@ TEST(TestDefaultDataInterface, read)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(*mockedSerialInterface, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mockedSerialInterface) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   std::vector<uint8_t> actual_data = data_interface.read();
   ASSERT_THAT(data_interface::to_hex(actual_data), data_interface::to_hex(expected_data));
 }
@@ -285,7 +285,7 @@ TEST(TestDefaultDataInterface, read_escaped)
     0x00   // Position (LSB)
   };
 
-  auto mockedSerialInterface = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
@@ -293,9 +293,9 @@ TEST(TestDefaultDataInterface, read_escaped)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(*mockedSerialInterface, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mockedSerialInterface) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   std::vector<uint8_t> actual_data = data_interface.read();
   ASSERT_THAT(data_interface::to_hex(actual_data), data_interface::to_hex(expected_data));
 }
@@ -319,7 +319,7 @@ TEST(TestDefaultDataInterface, read_crc_error)
     0x7E   // Delimiter
   };
 
-  auto mock = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
@@ -327,9 +327,9 @@ TEST(TestDefaultDataInterface, read_crc_error)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
@@ -362,7 +362,7 @@ TEST(TestDefaultDataInterface, read_incorrect_frame_length)
     0x7E   // Delimiter
   };
 
-  auto mock = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
@@ -370,9 +370,9 @@ TEST(TestDefaultDataInterface, read_incorrect_frame_length)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
@@ -408,7 +408,7 @@ TEST(TestDefaultDataInterface, read_start_delimiter_missing)
     0x7E   // Delimiter
   };
 
-  auto mock = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // Use a lambda function to populate an input buffer with vector values.
   auto it = std::begin(frame);
@@ -416,9 +416,9 @@ TEST(TestDefaultDataInterface, read_start_delimiter_missing)
     buffer[0] = *it++;
     return 1;
   };
-  EXPECT_CALL(*mock, read(_, _)).WillRepeatedly(Invoke(read));
+  EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
@@ -439,12 +439,12 @@ TEST(TestDefaultDataInterface, read_start_delimiter_missing)
  */
 TEST(TestDefaultDataInterface, read_timeout)
 {
-  auto mock = std::make_unique<MockSerialInterface>();
+  auto serial = std::make_unique<MockSerial>();
 
   // We mock the read to simulate a timeout by returning 0 bytes.
-  EXPECT_CALL(*mock, read(_, _)).WillOnce(Return(0));
+  EXPECT_CALL(*serial, read(_, _)).WillOnce(Return(0));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(mock) };
+  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try

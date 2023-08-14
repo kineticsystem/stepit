@@ -47,7 +47,7 @@
 
 #include <data_interface/data_utils.hpp>
 #include <data_interface/crc_utils.hpp>
-#include <data_interface/default_serial_interface.hpp>
+#include <data_interface/default_serial.hpp>
 #include <data_interface/default_data_interface.hpp>
 
 #include <thread>
@@ -65,12 +65,12 @@ public:
     {
       GTEST_SKIP() << "Skipping all tests for this fixture";
     }
-    auto serial_interface = std::make_unique<data_interface::DefaultSerialInterface>();
-    serial_interface->set_port("/dev/ttyACM0");
-    serial_interface->set_baudrate(9600);
-    serial_interface->set_timeout(2000);
+    auto serial = std::make_unique<data_interface::DefaultSerial>();
+    serial->set_port("/dev/ttyACM0");
+    serial->set_baudrate(9600);
+    serial->set_timeout(2000);
 
-    data_interface = std::make_unique<data_interface::DefaultDataInterface>(std::move(serial_interface));
+    data_interface = std::make_unique<data_interface::DefaultDataInterface>(std::move(serial));
     data_interface->open();
   }
 

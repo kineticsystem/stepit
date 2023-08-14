@@ -29,33 +29,24 @@
 
 #pragma once
 
-#include <stepit_hardware/request_interface.hpp>
-#include <stepit_hardware/msgs/msgs.hpp>
-
-#include <data_interface/data_interface.hpp>
-
-#include <functional>
-#include <memory>
+#include <stepit_hardware/driver.hpp>
+#include <stepit_hardware/driver_factory.hpp>
 
 namespace stepit_hardware
 {
-/**
- * @brief The DefaultRequestInterface class receives commands and queries from the
- * hardware interface and sends them to the real hardware.
- */
-class DefaultRequestInterface : public RequestInterface
+class MockDriverFactory : public DriverFactory
 {
 public:
-  explicit DefaultRequestInterface(std::unique_ptr<data_interface::DataInterface> data_interface);
-  bool connect() override;
-  void disconnect() override;
-  AcknowledgeResponse send(const ConfigCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
-  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
-  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
+  explicit MockDriverFactory(std::unique_ptr<Driver> command_interface)
+    : command_interface_{ std::move(command_interface) } {
+
+    };
+  std::unique_ptr<Driver> create([[maybe_unused]] const hardware_interface::HardwareInfo& info)
+  {
+    return std::move(command_interface_);
+  };
 
 private:
-  std::unique_ptr<data_interface::DataInterface> data_interface_;
+  std::unique_ptr<Driver> command_interface_;
 };
 }  // namespace stepit_hardware

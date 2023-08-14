@@ -45,12 +45,12 @@ add_library(
     include/data_interface/data_interface.hpp
     include/data_interface/data_utils.hpp
     include/data_interface/serial_exception.hpp
-    include/data_interface/default_serial_interface.hpp
-    include/data_interface/serial_interface.hpp
+    include/data_interface/default_serial.hpp
+    include/data_interface/serial.hpp
     src/crc_utils.cpp
     src/default_data_interface.cpp
     src/data_utils.cpp
-    src/default_serial_interface.cpp
+    src/default_serial.cpp
 )
 target_include_directories(
     data_interface

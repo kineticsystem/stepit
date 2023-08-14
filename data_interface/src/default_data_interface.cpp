@@ -58,7 +58,7 @@ void add_escaped_byte(Buffer<uint8_t>& buffer, uint8_t ch)
   }
 }
 
-DefaultDataInterface::DefaultDataInterface(std::unique_ptr<SerialInterface> serial) : serial_{ std::move(serial) }
+DefaultDataInterface::DefaultDataInterface(std::unique_ptr<Serial> serial) : serial_{ std::move(serial) }
 {
 }
 

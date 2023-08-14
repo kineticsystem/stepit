@@ -27,30 +27,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <stepit_hardware/default_driver.hpp>
+#include <stepit_hardware/default_driver_factory.hpp>
+#include <stepit_hardware/fake/fake_driver.hpp>
 
-#include <stepit_hardware/request_interface_factory.hpp>
-#include <stepit_hardware/default_request_interface_factory.hpp>
-#include <hardware_interface/hardware_info.hpp>
-
-#include <memory>
+#include <data_interface/default_serial.hpp>
+#include <data_interface/default_data_interface.hpp>
 
 namespace stepit_hardware
 {
-/**
- * @brief The DefaultRequestInterfaceFactory class is used to create a
- * RequestInterface with the data from the given hardware information.
- */
-class DefaultRequestInterfaceFactory : public RequestInterfaceFactory
-{
-public:
-  DefaultRequestInterfaceFactory() = default;
+const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
 
-  /**
-   * @brief Create a RequestInterface.
-   * @param info The hardware information.
-   * @return A command handler created using the given hardware information.
-   */
-  std::unique_ptr<RequestInterface> create(const hardware_interface::HardwareInfo& info);
-};
+std::unique_ptr<stepit_hardware::Driver>
+stepit_hardware::DefaultDriverFactory::create(const hardware_interface::HardwareInfo& info)
+{
+  if (info.hardware_parameters.find("use_dummy") != info.hardware_parameters.end() &&
+      info.hardware_parameters.at("use_dummy") == "true")
+  {
+    return std::make_unique<FakeDriver>();
+  }
+  else
+  {
+    std::string usb_port = info.hardware_parameters.at("usb_port");
+    RCLCPP_INFO(kLogger, "usb_port: %s", usb_port.c_str());
+
+    uint32_t baud_rate = static_cast<uint32_t>(std::stoul(info.hardware_parameters.at("baud_rate")));
+    RCLCPP_INFO(kLogger, "baud_rate: %d", baud_rate);
+
+    double timeout = std::stod(info.hardware_parameters.at("timeout"));
+    uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
+    RCLCPP_INFO(kLogger, "timeout: %f", timeout);
+
+    auto serial = std::make_unique<data_interface::DefaultSerial>();
+    serial->set_port(usb_port);
+    serial->set_baudrate(baud_rate);
+    serial->set_timeout(timeout_ms);
+
+    return std::make_unique<DefaultDriver>(std::make_unique<data_interface::DefaultDataInterface>(std::move(serial)));
+  }
+}
 }  // namespace stepit_hardware

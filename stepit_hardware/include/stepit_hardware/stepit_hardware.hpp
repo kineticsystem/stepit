@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <stepit_hardware/request_interface.hpp>
-#include <stepit_hardware/request_interface_factory.hpp>
+#include <stepit_hardware/driver.hpp>
+#include <stepit_hardware/driver_factory.hpp>
 #include <stepit_hardware/visibility_control.hpp>
 
 #include <hardware_interface/handle.hpp>
@@ -59,7 +59,7 @@ public:
    * @param command_interface The interface to send commands and queries to
    * the hardware.
    */
-  explicit StepitHardware(std::unique_ptr<RequestInterfaceFactory> command_interface_factory);
+  explicit StepitHardware(std::unique_ptr<DriverFactory> command_interface_factory);
 
   /**
    * Defines aliases and static functions for using the Class with shared_ptrs.
@@ -143,9 +143,9 @@ private:
   std::vector<Joint> joints_;
 
   // Interface to send binary data to the hardware using the serial port.
-  std::unique_ptr<RequestInterface> command_interface_;
+  std::unique_ptr<Driver> command_interface_;
 
   // Factory to create the command handler during the initialization step.
-  std::unique_ptr<RequestInterfaceFactory> command_interface_factory_;
+  std::unique_ptr<DriverFactory> command_interface_factory_;
 };
 }  // namespace stepit_hardware

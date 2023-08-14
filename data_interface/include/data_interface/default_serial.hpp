@@ -27,72 +27,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <data_interface/default_serial_interface.hpp>
+#pragma once
 
-#include <serial/serial.h>
+#include <data_interface/serial.hpp>
+
+#include <memory>
+#include "serial/serial.h"
+
+namespace serial
+{
+class Serial;
+}
 
 namespace data_interface
 {
-DefaultSerialInterface::DefaultSerialInterface() : serial_{ std::make_unique<serial::Serial>() }
+class DefaultSerial : public Serial
 {
-}
+public:
+  /**
+   * Creates a Serial object to send and receive bytes to and from the serial
+   * port.
+   */
+  DefaultSerial();
 
-void DefaultSerialInterface::open()
-{
-  serial_->open();
-}
+  void open() override;
 
-bool DefaultSerialInterface::is_open() const
-{
-  return serial_->isOpen();
-}
+  [[nodiscard]] bool is_open() const override;
 
-void DefaultSerialInterface::close()
-{
-  serial_->close();
-}
+  void close() override;
 
-std::size_t DefaultSerialInterface::read(uint8_t* buffer, size_t size)
-{
-  return serial_->read(buffer, size);
-}
+  [[nodiscard]] std::size_t read(uint8_t* buffer, size_t size = 1) override;
+  [[nodiscard]] std::size_t write(const uint8_t* buffer, size_t size) override;
 
-std::size_t DefaultSerialInterface::write(const uint8_t* buffer, size_t size)
-{
-  std::size_t write_size = serial_->write(buffer, size);
-  serial_->flush();
-  return write_size;
-}
+  void set_port(const std::string& port) override;
+  [[nodiscard]] std::string get_port() const override;
 
-void DefaultSerialInterface::set_port(const std::string& port)
-{
-  serial_->setPort(port);
-}
+  void set_timeout(uint32_t timeout_ms) override;
+  [[nodiscard]] uint32_t get_timeout() const override;
 
-std::string DefaultSerialInterface::get_port() const
-{
-  return serial_->getPort();
-}
+  void set_baudrate(uint32_t baudrate) override;
+  [[nodiscard]] uint32_t get_baudrate() const override;
 
-void DefaultSerialInterface::set_timeout(uint32_t timeout_ms)
-{
-  timeout_ms_ = timeout_ms;
-  serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
-  serial_->setTimeout(timeout);
-}
-
-uint32_t DefaultSerialInterface::get_timeout() const
-{
-  return timeout_ms_;
-}
-
-void DefaultSerialInterface::set_baudrate(uint32_t baudrate)
-{
-  serial_->setBaudrate(baudrate);
-}
-
-uint32_t DefaultSerialInterface::get_baudrate() const
-{
-  return serial_->getBaudrate();
-}
+private:
+  std::unique_ptr<serial::Serial> serial_ = nullptr;
+  uint32_t timeout_ms_ = 0;
+};
 }  // namespace data_interface

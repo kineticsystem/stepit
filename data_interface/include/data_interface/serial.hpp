@@ -35,10 +35,10 @@
 
 namespace data_interface
 {
-class SerialInterface
+class Serial
 {
 public:
-  virtual ~SerialInterface() = default;
+  virtual ~Serial() = default;
 
   /**
    * Opens the serial port as long as the port is set and the port isn't

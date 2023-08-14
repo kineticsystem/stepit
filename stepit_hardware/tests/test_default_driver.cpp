@@ -30,7 +30,7 @@
 #include <gtest/gtest.h>
 
 #include <mock/mock_data_interface.hpp>
-#include <stepit_hardware/default_request_interface.hpp>
+#include <stepit_hardware/default_driver.hpp>
 #include <stepit_hardware/msgs/msgs.hpp>
 
 #include <data_interface/data_utils.hpp>
@@ -45,7 +45,7 @@ using ::testing::SaveArg;
  * In this test we send a status query to the request interface,
  * we check the expected binary request and response.
  */
-TEST(TestDefaultRequestInterface, send_status_query)
+TEST(TestDefaultDriver, send_status_query)
 {
   const std::vector<uint8_t> expected_request{
     0x75,  // query ID
@@ -86,10 +86,10 @@ TEST(TestDefaultRequestInterface, send_status_query)
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
-  auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
+  auto driver = std::make_unique<stepit_hardware::DefaultDriver>(std::move(mock_data_interface));
   StatusQuery request{};
 
-  StatusResponse response = command_handler->send(rclcpp::Time{}, request);
+  StatusResponse response = driver->send(rclcpp::Time{}, request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
 
@@ -104,7 +104,7 @@ TEST(TestDefaultRequestInterface, send_status_query)
  * In this test we send velocity goals to the request interface,
  * we check the expected binary request and response.
  */
-TEST(TestDefaultRequestInterface, send_velocity_command)
+TEST(TestDefaultDriver, send_velocity_command)
 {
   const std::vector<uint8_t> expected_request{
     0x77,  // command ID
@@ -129,9 +129,9 @@ TEST(TestDefaultRequestInterface, send_velocity_command)
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
-  auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
+  auto driver = std::make_unique<stepit_hardware::DefaultDriver>(std::move(mock_data_interface));
   VelocityCommand request{ { VelocityGoal{ 0, 0.5 }, VelocityGoal{ 1, 0.75 } } };
-  AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
+  AcknowledgeResponse response = driver->send(rclcpp::Time{}, request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
@@ -141,7 +141,7 @@ TEST(TestDefaultRequestInterface, send_velocity_command)
  * In this test we send positions goals to the request interface,
  * we check the expected binary request and response.
  */
-TEST(TestDefaultRequestInterface, send_position_command)
+TEST(TestDefaultDriver, send_position_command)
 {
   const std::vector<uint8_t> expected_request{
     0x71,  // command ID
@@ -166,9 +166,9 @@ TEST(TestDefaultRequestInterface, send_position_command)
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
-  auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
+  auto driver = std::make_unique<stepit_hardware::DefaultDriver>(std::move(mock_data_interface));
   PositionCommand request{ { PositionGoal{ 0, 0.5 }, PositionGoal{ 1, 0.75 } } };
-  AcknowledgeResponse response = command_handler->send(rclcpp::Time{}, request);
+  AcknowledgeResponse response = driver->send(rclcpp::Time{}, request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
@@ -178,7 +178,7 @@ TEST(TestDefaultRequestInterface, send_position_command)
  * In this test we we configure a set of motors and
  * check the expected binary request and response.
  */
-TEST(TestDefaultRequestInterface, send_configure_command)
+TEST(TestDefaultDriver, send_configure_command)
 {
   const std::vector<uint8_t> expected_request{
     0x78,  // command ID
@@ -211,9 +211,9 @@ TEST(TestDefaultRequestInterface, send_configure_command)
   EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
   EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
 
-  auto command_handler = std::make_unique<stepit_hardware::DefaultRequestInterface>(std::move(mock_data_interface));
+  auto driver = std::make_unique<stepit_hardware::DefaultDriver>(std::move(mock_data_interface));
   ConfigCommand request{ { ConfigParam{ 0, 0.5, 0.75 }, ConfigParam{ 1, 0.5, 0.75 } } };
-  AcknowledgeResponse response = command_handler->send(request);
+  AcknowledgeResponse response = driver->send(request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());

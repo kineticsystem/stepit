@@ -29,17 +29,36 @@
 
 #pragma once
 
-#include <stepit_hardware/request_interface.hpp>
+#include <stepit_hardware/driver.hpp>
+#include <stepit_hardware/fake/fake_motor.hpp>
+#include <stepit_hardware/msgs/msgs.hpp>
 
-#include <hardware_interface/hardware_info.hpp>
+#include <rclcpp/rclcpp.hpp>
 
-#include <memory>
+#include <map>
 
 namespace stepit_hardware
 {
-class RequestInterfaceFactory
+/**
+ * @brief The FakeCommandHandler class receives commands and queries from the
+ * hardware interface and sends them to a fake hardware.
+ */
+class FakeDriver : public Driver
 {
 public:
-  virtual std::unique_ptr<RequestInterface> create(const hardware_interface::HardwareInfo& info) = 0;
+  FakeDriver() = default;
+  bool connect() override;
+  void disconnect() override;
+  AcknowledgeResponse send(const ConfigCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
+  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
+  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
+
+private:
+  /* Virtual motors behaving like real stepper motors with given acceletation
+   * and absolute maximum velocity.
+   */
+  mutable std::map<uint8_t, FakeMotor> motors_;
 };
 }  // namespace stepit_hardware

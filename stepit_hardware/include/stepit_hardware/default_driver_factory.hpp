@@ -29,24 +29,28 @@
 
 #pragma once
 
-#include <gmock/gmock.h>
-#include <data_interface/serial_interface.hpp>
+#include <stepit_hardware/driver_factory.hpp>
+#include <stepit_hardware/default_driver_factory.hpp>
+#include <hardware_interface/hardware_info.hpp>
 
-namespace data_interface::test
+#include <memory>
+
+namespace stepit_hardware
 {
-class MockSerialInterface : public data_interface::SerialInterface
+/**
+ * @brief This class class is used to create a default
+ * driver with the data from the given hardware information.
+ */
+class DefaultDriverFactory : public DriverFactory
 {
 public:
-  MOCK_METHOD(void, open, (), (override));
-  MOCK_METHOD(bool, is_open, (), (override, const));
-  MOCK_METHOD(void, close, (), (override));
-  MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size), (override));
-  MOCK_METHOD(std::size_t, write, (const uint8_t* buffer, size_t size), (override));
-  MOCK_METHOD(void, set_port, (const std::string& port), (override));
-  MOCK_METHOD(std::string, get_port, (), (override, const));
-  MOCK_METHOD(void, set_timeout, (uint32_t timeout), (override));
-  MOCK_METHOD(uint32_t, get_timeout, (), (override, const));
-  MOCK_METHOD(void, set_baudrate, (uint32_t baudrate), (override));
-  MOCK_METHOD(uint32_t, get_baudrate, (), (override, const));
+  DefaultDriverFactory() = default;
+
+  /**
+   * @brief Create a default driver..
+   * @param info The hardware information.
+   * @return A command handler created using the given hardware information.
+   */
+  std::unique_ptr<Driver> create(const hardware_interface::HardwareInfo& info);
 };
-}  // namespace data_interface::test
+}  // namespace stepit_hardware

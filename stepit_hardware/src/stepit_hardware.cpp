@@ -34,7 +34,7 @@
 #include <stepit_hardware/msgs/acknowledge_response.hpp>
 #include <stepit_hardware/msgs/status_response.hpp>
 
-#include <stepit_hardware/default_request_interface_factory.hpp>
+#include <stepit_hardware/default_driver_factory.hpp>
 
 #include <hardware_interface/types/hardware_interface_return_values.hpp>
 #include <hardware_interface/types/hardware_interface_type_values.hpp>
@@ -54,11 +54,11 @@ const auto kLogger = rclcpp::get_logger("StepitHardware");
 
 StepitHardware::StepitHardware()
 {
-  command_interface_factory_ = std::make_unique<DefaultRequestInterfaceFactory>();
+  command_interface_factory_ = std::make_unique<DefaultDriverFactory>();
 }
 
 // This constructor is use for testing only.
-StepitHardware::StepitHardware(std::unique_ptr<RequestInterfaceFactory> command_interface_factory)
+StepitHardware::StepitHardware(std::unique_ptr<DriverFactory> command_interface_factory)
   : command_interface_factory_{ std::move(command_interface_factory) }
 {
 }

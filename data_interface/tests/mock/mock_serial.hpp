@@ -29,47 +29,24 @@
 
 #pragma once
 
-#include <data_interface/serial_interface.hpp>
+#include <gmock/gmock.h>
+#include <data_interface/serial.hpp>
 
-#include <memory>
-#include "serial/serial.h"
-
-namespace serial
+namespace data_interface::test
 {
-class Serial;
-}
-
-namespace data_interface
-{
-class DefaultSerialInterface : public SerialInterface
+class MockSerial : public data_interface::Serial
 {
 public:
-  /**
-   * Creates a Serial object to send and receive bytes to and from the serial
-   * port.
-   */
-  DefaultSerialInterface();
-
-  void open() override;
-
-  [[nodiscard]] bool is_open() const override;
-
-  void close() override;
-
-  [[nodiscard]] std::size_t read(uint8_t* buffer, size_t size = 1) override;
-  [[nodiscard]] std::size_t write(const uint8_t* buffer, size_t size) override;
-
-  void set_port(const std::string& port) override;
-  [[nodiscard]] std::string get_port() const override;
-
-  void set_timeout(uint32_t timeout_ms) override;
-  [[nodiscard]] uint32_t get_timeout() const override;
-
-  void set_baudrate(uint32_t baudrate) override;
-  [[nodiscard]] uint32_t get_baudrate() const override;
-
-private:
-  std::unique_ptr<serial::Serial> serial_ = nullptr;
-  uint32_t timeout_ms_ = 0;
+  MOCK_METHOD(void, open, (), (override));
+  MOCK_METHOD(bool, is_open, (), (override, const));
+  MOCK_METHOD(void, close, (), (override));
+  MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size), (override));
+  MOCK_METHOD(std::size_t, write, (const uint8_t* buffer, size_t size), (override));
+  MOCK_METHOD(void, set_port, (const std::string& port), (override));
+  MOCK_METHOD(std::string, get_port, (), (override, const));
+  MOCK_METHOD(void, set_timeout, (uint32_t timeout), (override));
+  MOCK_METHOD(uint32_t, get_timeout, (), (override, const));
+  MOCK_METHOD(void, set_baudrate, (uint32_t baudrate), (override));
+  MOCK_METHOD(uint32_t, get_baudrate, (), (override, const));
 };
-}  // namespace data_interface
+}  // namespace data_interface::test

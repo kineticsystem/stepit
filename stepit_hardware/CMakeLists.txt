@@ -47,11 +47,11 @@ find_package(rclcpp_lifecycle REQUIRED)
 add_library(
     stepit_hardware
     SHARED
-    include/stepit_hardware/default_request_interface.hpp
-    include/stepit_hardware/default_request_interface_factory.hpp
-    include/stepit_hardware/request_interface.hpp
-    include/stepit_hardware/request_interface_factory.hpp
-    include/stepit_hardware/fake/fake_request_interface.hpp
+    include/stepit_hardware/default_driver.hpp
+    include/stepit_hardware/default_driver_factory.hpp
+    include/stepit_hardware/driver.hpp
+    include/stepit_hardware/driver_factory.hpp
+    include/stepit_hardware/fake/fake_driver.hpp
     include/stepit_hardware/fake/fake_motor.hpp
     include/stepit_hardware/fake/position_control.hpp
     include/stepit_hardware/fake/velocity_control.hpp
@@ -69,9 +69,9 @@ add_library(
     include/stepit_hardware/msgs/velocity_command.hpp
     include/stepit_hardware/stepit_hardware.hpp
     include/stepit_hardware/visibility_control.hpp
-    src/default_request_interface.cpp
-    src/default_request_interface_factory.cpp
-    src/fake/fake_request_interface.cpp
+    src/default_driver.cpp
+    src/default_driver_factory.cpp
+    src/fake/fake_driver.cpp
     src/fake/fake_motor.cpp
     src/fake/position_control.cpp
     src/fake/velocity_control.cpp

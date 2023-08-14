@@ -27,20 +27,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_hardware/default_request_interface.hpp>
+#include <stepit_hardware/default_driver.hpp>
 
 #include <data_interface/data_utils.hpp>
 
 namespace stepit_hardware
 {
-const auto kLogger = rclcpp::get_logger("DefaultRequestInterface");
+const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
-DefaultRequestInterface::DefaultRequestInterface(std::unique_ptr<data_interface::DataInterface> data_interface)
+DefaultDriver::DefaultDriver(std::unique_ptr<data_interface::DataInterface> data_interface)
   : data_interface_{ std::move(data_interface) }
 {
 }
 
-bool DefaultRequestInterface::connect()
+bool DefaultDriver::connect()
 {
   data_interface_->open();
 
@@ -70,12 +70,12 @@ bool DefaultRequestInterface::connect()
   return connected;
 }
 
-void DefaultRequestInterface::disconnect()
+void DefaultDriver::disconnect()
 {
   data_interface_->close();
 }
 
-AcknowledgeResponse DefaultRequestInterface::send(const ConfigCommand& command) const
+AcknowledgeResponse DefaultDriver::send(const ConfigCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -102,8 +102,7 @@ AcknowledgeResponse DefaultRequestInterface::send(const ConfigCommand& command) 
   return response;
 }
 
-AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time,
-                                                  const PositionCommand& command) const
+AcknowledgeResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, const PositionCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -125,8 +124,7 @@ AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp:
   return response;
 }
 
-AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time,
-                                                  const VelocityCommand& command) const
+AcknowledgeResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, const VelocityCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -148,7 +146,7 @@ AcknowledgeResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp:
   return response;
 }
 
-StatusResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
+StatusResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
@@ -189,7 +187,7 @@ StatusResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time
   return response;
 }
 
-InfoResponse DefaultRequestInterface::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
+InfoResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());

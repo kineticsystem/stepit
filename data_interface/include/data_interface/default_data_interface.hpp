@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include <data_interface/serial_interface.hpp>
+#include <data_interface/serial.hpp>
 #include <data_interface/data_interface.hpp>
 #include <data_interface/buffer.hpp>
 
@@ -48,7 +48,7 @@ namespace data_interface
 class DefaultDataInterface : public DataInterface
 {
 public:
-  explicit DefaultDataInterface(std::unique_ptr<SerialInterface> serial);
+  explicit DefaultDataInterface(std::unique_ptr<Serial> serial);
 
   /**
    * Open the serial connection.
@@ -89,6 +89,6 @@ private:
   /* Circular buffer to write data to the serial port. */
   Buffer<uint8_t> write_buffer_{ 100 };
 
-  std::unique_ptr<SerialInterface> serial_;
+  std::unique_ptr<Serial> serial_;
 };
 }  // namespace data_interface

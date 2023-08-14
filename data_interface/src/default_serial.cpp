@@ -27,26 +27,72 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <data_interface/default_serial.hpp>
 
-#include <stepit_hardware/request_interface.hpp>
-#include <stepit_hardware/request_interface_factory.hpp>
+#include <serial/serial.h>
 
-namespace stepit_hardware
+namespace data_interface
 {
-class MockCommandInterfaceFactory : public RequestInterfaceFactory
+DefaultSerial::DefaultSerial() : serial_{ std::make_unique<serial::Serial>() }
 {
-public:
-  explicit MockCommandInterfaceFactory(std::unique_ptr<RequestInterface> command_interface)
-    : command_interface_{ std::move(command_interface) } {
+}
 
-    };
-  std::unique_ptr<RequestInterface> create([[maybe_unused]] const hardware_interface::HardwareInfo& info)
-  {
-    return std::move(command_interface_);
-  };
+void DefaultSerial::open()
+{
+  serial_->open();
+}
 
-private:
-  std::unique_ptr<RequestInterface> command_interface_;
-};
-}  // namespace stepit_hardware
+bool DefaultSerial::is_open() const
+{
+  return serial_->isOpen();
+}
+
+void DefaultSerial::close()
+{
+  serial_->close();
+}
+
+std::size_t DefaultSerial::read(uint8_t* buffer, size_t size)
+{
+  return serial_->read(buffer, size);
+}
+
+std::size_t DefaultSerial::write(const uint8_t* buffer, size_t size)
+{
+  std::size_t write_size = serial_->write(buffer, size);
+  serial_->flush();
+  return write_size;
+}
+
+void DefaultSerial::set_port(const std::string& port)
+{
+  serial_->setPort(port);
+}
+
+std::string DefaultSerial::get_port() const
+{
+  return serial_->getPort();
+}
+
+void DefaultSerial::set_timeout(uint32_t timeout_ms)
+{
+  timeout_ms_ = timeout_ms;
+  serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
+  serial_->setTimeout(timeout);
+}
+
+uint32_t DefaultSerial::get_timeout() const
+{
+  return timeout_ms_;
+}
+
+void DefaultSerial::set_baudrate(uint32_t baudrate)
+{
+  serial_->setBaudrate(baudrate);
+}
+
+uint32_t DefaultSerial::get_baudrate() const
+{
+  return serial_->getBaudrate();
+}
+}  // namespace data_interface

@@ -29,23 +29,33 @@
 
 #pragma once
 
-#include <stepit_hardware/request_interface.hpp>
+#include <stepit_hardware/driver.hpp>
+#include <stepit_hardware/msgs/msgs.hpp>
 
-#include <gmock/gmock.h>
+#include <data_interface/data_interface.hpp>
 
-#include <rclcpp/rclcpp.hpp>
+#include <functional>
+#include <memory>
 
-namespace stepit_hardware::test
+namespace stepit_hardware
 {
-class MockCommandInterface : public stepit_hardware::RequestInterface
+/**
+ * @brief This class receives commands and queries from the
+ * hardware interface and sends them to the real hardware.
+ */
+class DefaultDriver : public Driver
 {
 public:
-  MOCK_METHOD(bool, connect, (), (override));
-  MOCK_METHOD(void, disconnect, (), (override));
-  MOCK_METHOD(AcknowledgeResponse, send, (const ConfigCommand& command), (override, const));
-  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const PositionCommand& command), (override, const));
-  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const VelocityCommand& command), (override, const));
-  MOCK_METHOD(StatusResponse, send, (const rclcpp::Time& time, const StatusQuery& query), (override, const));
-  MOCK_METHOD(InfoResponse, send, (const rclcpp::Time& time, const InfoQuery& query), (override, const));
+  explicit DefaultDriver(std::unique_ptr<data_interface::DataInterface> data_interface);
+  bool connect() override;
+  void disconnect() override;
+  AcknowledgeResponse send(const ConfigCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
+  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
+  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
+
+private:
+  std::unique_ptr<data_interface::DataInterface> data_interface_;
 };
-}  // namespace stepit_hardware::test
+}  // namespace stepit_hardware
