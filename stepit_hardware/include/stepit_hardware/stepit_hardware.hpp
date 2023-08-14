@@ -56,10 +56,10 @@ public:
 
   /**
    * Constructor with given command interface. This method is used for testing.
-   * @param command_interface The interface to send commands and queries to
+   * @param driver_factory The interface to send commands and queries to
    * the hardware.
    */
-  explicit StepitHardware(std::unique_ptr<DriverFactory> command_interface_factory);
+  explicit StepitHardware(std::unique_ptr<DriverFactory> driver_factory);
 
   /**
    * Defines aliases and static functions for using the Class with shared_ptrs.
@@ -143,9 +143,9 @@ private:
   std::vector<Joint> joints_;
 
   // Interface to send binary data to the hardware using the serial port.
-  std::unique_ptr<Driver> command_interface_;
+  std::unique_ptr<Driver> driver_;
 
-  // Factory to create the command handler during the initialization step.
-  std::unique_ptr<DriverFactory> command_interface_factory_;
+  // Factory to create the driver during the initialization step.
+  std::unique_ptr<DriverFactory> driver_factory_;
 };
 }  // namespace stepit_hardware

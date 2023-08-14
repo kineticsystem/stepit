@@ -47,9 +47,9 @@ public:
   DefaultDriverFactory() = default;
 
   /**
-   * @brief Create a default driver..
+   * @brief Create a default driver.
    * @param info The hardware information.
-   * @return A command handler created using the given hardware information.
+   * @return A driver created using the given hardware information.
    */
   std::unique_ptr<Driver> create(const hardware_interface::HardwareInfo& info);
 };

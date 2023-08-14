@@ -54,12 +54,12 @@ const auto kLogger = rclcpp::get_logger("StepitHardware");
 
 StepitHardware::StepitHardware()
 {
-  command_interface_factory_ = std::make_unique<DefaultDriverFactory>();
+  driver_factory_ = std::make_unique<DefaultDriverFactory>();
 }
 
 // This constructor is use for testing only.
 StepitHardware::StepitHardware(std::unique_ptr<DriverFactory> command_interface_factory)
-  : command_interface_factory_{ std::move(command_interface_factory) }
+  : driver_factory_{ std::move(command_interface_factory) }
 {
 }
 
@@ -91,7 +91,7 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
       RCLCPP_INFO(kLogger, "joint_id %d: %d", i, joints_[i].id);
     }
 
-    command_interface_ = command_interface_factory_->create(info);
+    driver_ = driver_factory_->create(info);
     return CallbackReturn::SUCCESS;
   }
   catch (const std::exception& ex)
@@ -114,7 +114,7 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
     }
 
     // Open the serial port and handshake.
-    command_interface_->connect();
+    driver_->connect();
 
     // Send configuration parameters to the hardware.
     std::vector<ConfigParam> params;
@@ -122,7 +122,7 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
     {
       params.emplace_back(ConfigParam{ joint.id, joint.acceleration, joint.max_velocity });
     }
-    const AcknowledgeResponse response = command_interface_->send(ConfigCommand{ params });
+    const AcknowledgeResponse response = driver_->send(ConfigCommand{ params });
     if (response.status() == Response::Status::Failure)
     {
       return CallbackReturn::FAILURE;
@@ -203,7 +203,7 @@ hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
   try
   {
     StatusQuery query{};
-    StatusResponse response = command_interface_->send(time, query);
+    StatusResponse response = driver_->send(time, query);
 
     auto motor_states = response.motor_states();
     if (motor_states.size() != joints_.size())
@@ -250,7 +250,7 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
         }
       }
       VelocityCommand command{ velocities };
-      AcknowledgeResponse response = command_interface_->send(time, command);
+      AcknowledgeResponse response = driver_->send(time, command);
     }
     else if (std::any_of(joints_.cbegin(), joints_.cend(),
                          [](auto joint) { return !std::isnan(joint.command.position); }))
@@ -267,7 +267,7 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
         }
       }
       PositionCommand command{ positions };
-      AcknowledgeResponse response = command_interface_->send(time, command);
+      AcknowledgeResponse response = driver_->send(time, command);
     }
     return hardware_interface::return_type::OK;
   }
