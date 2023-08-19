@@ -29,58 +29,31 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
-#include <string>
-
-namespace stepit_driver::test
+namespace stepit_driver::velocity_control
 {
-
-// Trim from start.
-static inline std::string ltrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(value.begin(),
-              std::find_if(value.begin(), value.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-  return value;
-}
-
-// Trim from end.
-static inline std::string rtrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(std::find_if(value.rbegin(), value.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
-              value.end());
-  return value;
-}
-
-// Trim from both ends.
-static inline std::string trim(const std::string& s)
-{
-  std::string value{ s };
-  return ltrim(rtrim(value));
-}
-
-// To lower case.
-static inline std::string to_lower(const std::string& s)
-{
-  std::string value{ s };
-  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char ch) { return std::tolower(ch); });
-  return value;
-}
+/**
+ * @brief Compute the position of a motor with acceleration a while changing
+ * velocity from v0 to v1.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param v0    The initial velocity (rad/s).
+ * @param v1    The target velocity  (rad/s).
+ * @param x0    The initial position (rad).
+ * @param t     The time             (s).
+ * @return      The motor position   (rad).
+ */
+double position(double v_max, double a, double x0, double v0, double v1, double t);
 
 /**
- * @brief If there is a global variable RUN_HARDWARE_TESTS set to true,
- * return false (do not skip the test) else true (skip the test).
- * @return True to skip a test, false to execute it.
+ * @brief Compute the velocity of a motor with acceleration a while changing
+ * velocity from v0 to v1.
+ * @param v_max The maximum velocity (rad/s).
+ * @param a     The acceleration     (rad/s^2).
+ * @param v0    The initial velocity (rad/s).
+ * @param v1    The target velocity  (rad/s).
+ * @param t     The time             (s).
+ * @return      The motor velocity   (rad).
  */
-bool skip_test()
-{
-  const char* env = std::getenv("RUN_HARDWARE_TESTS");
-  if (env)
-  {
-    return to_lower(trim(std::string{ env })) != "true";
-  }
-  return true;
-}
-}  // namespace stepit_driver::test
+double velocity(double v_max, double a, double v0, double v1, double t);
+
+}  // namespace stepit_driver::velocity_control

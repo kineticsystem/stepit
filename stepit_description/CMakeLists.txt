@@ -16,7 +16,7 @@ find_package(xacro REQUIRED)
 find_package(urdf REQUIRED)
 find_package(ros2_control REQUIRED)
 find_package(ros2_controllers REQUIRED)
-find_package(stepit_hardware REQUIRED)
+find_package(stepit_driver REQUIRED)
 #find_package(gazebo_ros REQUIRED)
 #find_package(gazebo_ros2_control REQUIRED)
 

@@ -30,8 +30,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <stepit_hardware/msgs/msgs.hpp>
-#include <stepit_hardware/stepit_hardware.hpp>
+#include <stepit_driver/msgs/msgs.hpp>
+#include <stepit_driver/stepit_hardware.hpp>
 
 #include <stepit_hardware_info.hpp>
 #include <test_utils.hpp>
@@ -51,7 +51,7 @@
 #include <thread>
 #include <chrono>
 
-namespace stepit_hardware::test
+namespace stepit_driver::test
 {
 
 class TestStepitHardware : public ::testing::Test
@@ -71,7 +71,7 @@ public:
  */
 TEST_F(TestStepitHardware, test_connection)
 {
-  auto stepit_hardware = std::make_unique<stepit_hardware::StepitHardware>();
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>();
 
   StepitHardwareInfo info;
   info.hardware_parameters["use_dummy"] = false;
@@ -142,4 +142,4 @@ TEST_F(TestStepitHardware, test_connection)
   }
 }
 
-}  // namespace stepit_hardware::test
+}  // namespace stepit_driver::test

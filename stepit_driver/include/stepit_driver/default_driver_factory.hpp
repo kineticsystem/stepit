@@ -29,58 +29,28 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
-#include <string>
+#include <stepit_driver/driver_factory.hpp>
+#include <stepit_driver/default_driver_factory.hpp>
+#include <hardware_interface/hardware_info.hpp>
 
-namespace stepit_driver::test
+#include <memory>
+
+namespace stepit_driver
 {
-
-// Trim from start.
-static inline std::string ltrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(value.begin(),
-              std::find_if(value.begin(), value.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-  return value;
-}
-
-// Trim from end.
-static inline std::string rtrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(std::find_if(value.rbegin(), value.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
-              value.end());
-  return value;
-}
-
-// Trim from both ends.
-static inline std::string trim(const std::string& s)
-{
-  std::string value{ s };
-  return ltrim(rtrim(value));
-}
-
-// To lower case.
-static inline std::string to_lower(const std::string& s)
-{
-  std::string value{ s };
-  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char ch) { return std::tolower(ch); });
-  return value;
-}
-
 /**
- * @brief If there is a global variable RUN_HARDWARE_TESTS set to true,
- * return false (do not skip the test) else true (skip the test).
- * @return True to skip a test, false to execute it.
+ * @brief This class class is used to create a default
+ * driver with the data from the given hardware information.
  */
-bool skip_test()
+class DefaultDriverFactory : public DriverFactory
 {
-  const char* env = std::getenv("RUN_HARDWARE_TESTS");
-  if (env)
-  {
-    return to_lower(trim(std::string{ env })) != "true";
-  }
-  return true;
-}
-}  // namespace stepit_driver::test
+public:
+  DefaultDriverFactory() = default;
+
+  /**
+   * @brief Create a default driver.
+   * @param info The hardware information.
+   * @return A driver created using the given hardware information.
+   */
+  std::unique_ptr<Driver> create(const hardware_interface::HardwareInfo& info);
+};
+}  // namespace stepit_driver

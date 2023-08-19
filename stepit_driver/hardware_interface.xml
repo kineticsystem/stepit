@@ -1,0 +1,7 @@
+<library path="stepit_driver">
+  <class name="stepit_driver/StepitHardware" type="stepit_driver::StepitHardware" base_class_type="hardware_interface::SystemInterface">
+    <description>
+      The StepIt system interface.
+    </description>
+  </class>
+</library>

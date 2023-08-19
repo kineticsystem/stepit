@@ -27,60 +27,65 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <stepit_driver/fake/velocity_control.hpp>
 
 #include <algorithm>
-#include <cstdlib>
-#include <string>
+#include <cmath>
+#include <iostream>
 
-namespace stepit_driver::test
+namespace stepit_driver::velocity_control
 {
-
-// Trim from start.
-static inline std::string ltrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(value.begin(),
-              std::find_if(value.begin(), value.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-  return value;
-}
-
-// Trim from end.
-static inline std::string rtrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(std::find_if(value.rbegin(), value.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
-              value.end());
-  return value;
-}
-
-// Trim from both ends.
-static inline std::string trim(const std::string& s)
-{
-  std::string value{ s };
-  return ltrim(rtrim(value));
-}
-
-// To lower case.
-static inline std::string to_lower(const std::string& s)
-{
-  std::string value{ s };
-  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char ch) { return std::tolower(ch); });
-  return value;
-}
 
 /**
- * @brief If there is a global variable RUN_HARDWARE_TESTS set to true,
- * return false (do not skip the test) else true (skip the test).
- * @return True to skip a test, false to execute it.
+ * @brief Compute the sign of the given number.
+ * @param val The number to calculate the sign of.
+ * @return The sign of the given number.
  */
-bool skip_test()
+float sgn(double val)
 {
-  const char* env = std::getenv("RUN_HARDWARE_TESTS");
-  if (env)
+  if (val > 0)
   {
-    return to_lower(trim(std::string{ env })) != "true";
+    return 1.0;
   }
-  return true;
+  if (val < 0)
+  {
+    return -1.0;
+  }
+  return 0.0;
 }
-}  // namespace stepit_driver::test
+
+double position(double v_max, double a, double x0, double v0, double v1, double t)
+{
+  double x;
+  v0 = std::clamp(v0, -v_max, v_max);
+  v1 = std::clamp(v1, -v_max, v_max);
+  double t1 = std::abs(v1 - v0) / a;
+  if (t <= t1)
+  {
+    x = x0 + v0 * t + 0.5 * a * pow(t, 2) * sgn(v1 - v0);
+  }
+  else
+  {
+    x = x0 + (v0 - v1) * t1 + 0.5 * a * pow(t1, 2) * sgn(v1 - v0) + v1 * t;
+  }
+  return x;
+}
+
+double velocity(double v_max, double a, double v0, double v1, double t)
+{
+  double v;
+  v0 = std::clamp(v0, -v_max, v_max);
+  v1 = std::clamp(v1, -v_max, v_max);
+  double t1 = std::abs(v1 - v0) / a;
+  if (t <= t1)
+  {
+    v = v0 + a * t * sgn(v1 - v0);
+  }
+  else
+  {
+    v = v1;
+  }
+  return v;
+}
+
+}  // namespace stepit_driver::velocity_control

@@ -36,19 +36,19 @@ namespace stepit_driver::test
 /**
  * Simplified Hardware Interface configuration for testing.
  */
-class StepitHardwareInfo : public hardware_interface::HardwareInfo
+class FakeHardwareInfo : public hardware_interface::HardwareInfo
 {
 public:
   // clang-format off
-  StepitHardwareInfo() : HardwareInfo{
+  FakeHardwareInfo() : HardwareInfo{
     "StepitHardware",
     "system",
     "stepit_driver/StepitHardware",
     {
-      {"usb_port", "/dev/ttyACM0"},
+      {"usb_port", "/dev/ttyUSB0"},
       {"baud_rate", "9600"},
       {"timeout", "0.5"},
-      {"use_dummy", "false"}
+      {"use_dummy", "true"}
     },
     {
       {

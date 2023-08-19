@@ -1,7 +1,0 @@
-<library path="stepit_hardware">
-  <class name="stepit_hardware/StepitHardware" type="stepit_hardware::StepitHardware" base_class_type="hardware_interface::SystemInterface">
-    <description>
-      The StepIt system interface.
-    </description>
-  </class>
-</library>

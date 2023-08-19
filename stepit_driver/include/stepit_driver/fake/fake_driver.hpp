@@ -29,58 +29,36 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
-#include <string>
+#include <stepit_driver/driver.hpp>
+#include <stepit_driver/fake/fake_motor.hpp>
+#include <stepit_driver/msgs/msgs.hpp>
 
-namespace stepit_driver::test
+#include <rclcpp/rclcpp.hpp>
+
+#include <map>
+
+namespace stepit_driver
 {
-
-// Trim from start.
-static inline std::string ltrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(value.begin(),
-              std::find_if(value.begin(), value.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-  return value;
-}
-
-// Trim from end.
-static inline std::string rtrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(std::find_if(value.rbegin(), value.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
-              value.end());
-  return value;
-}
-
-// Trim from both ends.
-static inline std::string trim(const std::string& s)
-{
-  std::string value{ s };
-  return ltrim(rtrim(value));
-}
-
-// To lower case.
-static inline std::string to_lower(const std::string& s)
-{
-  std::string value{ s };
-  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char ch) { return std::tolower(ch); });
-  return value;
-}
-
 /**
- * @brief If there is a global variable RUN_HARDWARE_TESTS set to true,
- * return false (do not skip the test) else true (skip the test).
- * @return True to skip a test, false to execute it.
+ * @brief The FakeCommandHandler class receives commands and queries from the
+ * hardware interface and sends them to a fake hardware.
  */
-bool skip_test()
+class FakeDriver : public Driver
 {
-  const char* env = std::getenv("RUN_HARDWARE_TESTS");
-  if (env)
-  {
-    return to_lower(trim(std::string{ env })) != "true";
-  }
-  return true;
-}
-}  // namespace stepit_driver::test
+public:
+  FakeDriver() = default;
+  bool connect() override;
+  void disconnect() override;
+  AcknowledgeResponse send(const ConfigCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
+  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
+  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
+  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
+
+private:
+  /* Virtual motors behaving like real stepper motors with given acceletation
+   * and absolute maximum velocity.
+   */
+  mutable std::map<uint8_t, FakeMotor> motors_;
+};
+}  // namespace stepit_driver

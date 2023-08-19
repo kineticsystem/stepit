@@ -29,58 +29,52 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
-#include <string>
+#include <stepit_driver/msgs/response.hpp>
 
-namespace stepit_driver::test
-{
+#include <vector>
+#include <cstdint>
 
-// Trim from start.
-static inline std::string ltrim(const std::string& s)
+namespace stepit_driver
 {
-  std::string value{ s };
-  value.erase(value.begin(),
-              std::find_if(value.begin(), value.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-  return value;
-}
-
-// Trim from end.
-static inline std::string rtrim(const std::string& s)
+// Internal structure to store joint states and targets.
+class MotorState
 {
-  std::string value{ s };
-  value.erase(std::find_if(value.rbegin(), value.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
-              value.end());
-  return value;
-}
-
-// Trim from both ends.
-static inline std::string trim(const std::string& s)
-{
-  std::string value{ s };
-  return ltrim(rtrim(value));
-}
-
-// To lower case.
-static inline std::string to_lower(const std::string& s)
-{
-  std::string value{ s };
-  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char ch) { return std::tolower(ch); });
-  return value;
-}
-
-/**
- * @brief If there is a global variable RUN_HARDWARE_TESTS set to true,
- * return false (do not skip the test) else true (skip the test).
- * @return True to skip a test, false to execute it.
- */
-bool skip_test()
-{
-  const char* env = std::getenv("RUN_HARDWARE_TESTS");
-  if (env)
+public:
+  explicit MotorState(uint8_t id, double position, double velocity, double distance_to_go)
+    : id_{ id }, position_{ position }, velocity_{ velocity }, distance_to_go_{ distance_to_go }
   {
-    return to_lower(trim(std::string{ env })) != "true";
   }
-  return true;
-}
-}  // namespace stepit_driver::test
+  uint8_t id()
+  {
+    return id_;
+  }
+  double position()
+  {
+    return position_;
+  }
+  double velocity()
+  {
+    return velocity_;
+  }
+  double distance_to_go()
+  {
+    return distance_to_go_;
+  }
+
+private:
+  uint8_t id_;
+  double position_;
+  double velocity_;
+  double distance_to_go_;
+};
+
+class StatusResponse : public Response
+{
+public:
+  explicit StatusResponse(Status status, std::vector<MotorState> motor_states);
+  std::vector<MotorState> motor_states() const;
+
+private:
+  std::vector<MotorState> motor_states_;
+};
+}  // namespace stepit_driver
