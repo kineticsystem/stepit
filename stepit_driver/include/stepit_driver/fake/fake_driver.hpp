@@ -49,11 +49,11 @@ public:
   FakeDriver() = default;
   bool connect() override;
   void disconnect() override;
-  AcknowledgeResponse send(const ConfigCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const PositionCommand& command) const override;
-  AcknowledgeResponse send(const rclcpp::Time& time, const VelocityCommand& command) const override;
-  StatusResponse send(const rclcpp::Time& time, const StatusQuery& query) const override;
-  InfoResponse send(const rclcpp::Time& time, const InfoQuery& query) const override;
+  AcknowledgeResponse configure(const ConfigCommand& command) const override;
+  AcknowledgeResponse set_position(const rclcpp::Time& time, const PositionCommand& command) const override;
+  AcknowledgeResponse set_velocity(const rclcpp::Time& time, const VelocityCommand& command) const override;
+  StatusResponse get_status(const rclcpp::Time& time, const StatusQuery& query) const override;
+  InfoResponse get_info(const rclcpp::Time& time, const InfoQuery& query) const override;
 
 private:
   /* Virtual motors behaving like real stepper motors with given acceletation

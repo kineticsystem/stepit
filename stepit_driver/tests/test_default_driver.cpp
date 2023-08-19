@@ -89,7 +89,7 @@ TEST(TestDefaultDriver, send_status_query)
   auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(mock_data_interface));
   StatusQuery request{};
 
-  StatusResponse response = driver->send(rclcpp::Time{}, request);
+  StatusResponse response = driver->get_status(rclcpp::Time{}, request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
 
@@ -131,7 +131,7 @@ TEST(TestDefaultDriver, send_velocity_command)
 
   auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(mock_data_interface));
   VelocityCommand request{ { VelocityGoal{ 0, 0.5 }, VelocityGoal{ 1, 0.75 } } };
-  AcknowledgeResponse response = driver->send(rclcpp::Time{}, request);
+  AcknowledgeResponse response = driver->set_velocity(rclcpp::Time{}, request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
@@ -168,7 +168,7 @@ TEST(TestDefaultDriver, send_position_command)
 
   auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(mock_data_interface));
   PositionCommand request{ { PositionGoal{ 0, 0.5 }, PositionGoal{ 1, 0.75 } } };
-  AcknowledgeResponse response = driver->send(rclcpp::Time{}, request);
+  AcknowledgeResponse response = driver->set_position(rclcpp::Time{}, request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
@@ -213,7 +213,7 @@ TEST(TestDefaultDriver, send_configure_command)
 
   auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(mock_data_interface));
   ConfigCommand request{ { ConfigParam{ 0, 0.5, 0.75 }, ConfigParam{ 1, 0.5, 0.75 } } };
-  AcknowledgeResponse response = driver->send(request);
+  AcknowledgeResponse response = driver->configure(request);
 
   ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());

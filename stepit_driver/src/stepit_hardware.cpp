@@ -122,7 +122,7 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
     {
       params.emplace_back(ConfigParam{ joint.id, joint.acceleration, joint.max_velocity });
     }
-    const AcknowledgeResponse response = driver_->send(ConfigCommand{ params });
+    const AcknowledgeResponse response = driver_->configure(ConfigCommand{ params });
     if (response.status() == Response::Status::Failure)
     {
       return CallbackReturn::FAILURE;
@@ -203,7 +203,7 @@ hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
   try
   {
     StatusQuery query{};
-    StatusResponse response = driver_->send(time, query);
+    StatusResponse response = driver_->get_status(time, query);
 
     auto motor_states = response.motor_states();
     if (motor_states.size() != joints_.size())
@@ -250,7 +250,7 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
         }
       }
       VelocityCommand command{ velocities };
-      AcknowledgeResponse response = driver_->send(time, command);
+      AcknowledgeResponse response = driver_->set_velocity(time, command);
     }
     else if (std::any_of(joints_.cbegin(), joints_.cend(),
                          [](auto joint) { return !std::isnan(joint.command.position); }))
@@ -267,7 +267,7 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
         }
       }
       PositionCommand command{ positions };
-      AcknowledgeResponse response = driver_->send(time, command);
+      AcknowledgeResponse response = driver_->set_position(time, command);
     }
     return hardware_interface::return_type::OK;
   }

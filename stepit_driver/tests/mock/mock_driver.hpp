@@ -42,10 +42,12 @@ class MockDriver : public stepit_driver::Driver
 public:
   MOCK_METHOD(bool, connect, (), (override));
   MOCK_METHOD(void, disconnect, (), (override));
-  MOCK_METHOD(AcknowledgeResponse, send, (const ConfigCommand& command), (override, const));
-  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const PositionCommand& command), (override, const));
-  MOCK_METHOD(AcknowledgeResponse, send, (const rclcpp::Time& time, const VelocityCommand& command), (override, const));
-  MOCK_METHOD(StatusResponse, send, (const rclcpp::Time& time, const StatusQuery& query), (override, const));
-  MOCK_METHOD(InfoResponse, send, (const rclcpp::Time& time, const InfoQuery& query), (override, const));
+  MOCK_METHOD(AcknowledgeResponse, configure, (const ConfigCommand& command), (override, const));
+  MOCK_METHOD(AcknowledgeResponse, set_position, (const rclcpp::Time& time, const PositionCommand& command),
+              (override, const));
+  MOCK_METHOD(AcknowledgeResponse, set_velocity, (const rclcpp::Time& time, const VelocityCommand& command),
+              (override, const));
+  MOCK_METHOD(StatusResponse, get_status, (const rclcpp::Time& time, const StatusQuery& query), (override, const));
+  MOCK_METHOD(InfoResponse, get_info, (const rclcpp::Time& time, const InfoQuery& query), (override, const));
 };
 }  // namespace stepit_driver::test

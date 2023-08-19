@@ -55,7 +55,7 @@ bool DefaultDriver::connect()
       RCLCPP_INFO(kLogger, "Connecting...");
 
       StatusQuery query{};
-      StatusResponse response = send(rclcpp::Time{}, query);
+      StatusResponse response = get_status(rclcpp::Time{}, query);
       connected = response.status() == Response::Status::Success;
 
       RCLCPP_INFO(kLogger, "Connection established");
@@ -75,7 +75,7 @@ void DefaultDriver::disconnect()
   data_interface_->close();
 }
 
-AcknowledgeResponse DefaultDriver::send(const ConfigCommand& command) const
+AcknowledgeResponse DefaultDriver::configure(const ConfigCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -102,7 +102,8 @@ AcknowledgeResponse DefaultDriver::send(const ConfigCommand& command) const
   return response;
 }
 
-AcknowledgeResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, const PositionCommand& command) const
+AcknowledgeResponse DefaultDriver::set_position([[maybe_unused]] const rclcpp::Time& time,
+                                                const PositionCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -124,7 +125,8 @@ AcknowledgeResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& tim
   return response;
 }
 
-AcknowledgeResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, const VelocityCommand& command) const
+AcknowledgeResponse DefaultDriver::set_velocity([[maybe_unused]] const rclcpp::Time& time,
+                                                const VelocityCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -146,7 +148,7 @@ AcknowledgeResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& tim
   return response;
 }
 
-StatusResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
+StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
@@ -187,7 +189,7 @@ StatusResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, co
   return response;
 }
 
-InfoResponse DefaultDriver::send([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
+InfoResponse DefaultDriver::get_info([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());

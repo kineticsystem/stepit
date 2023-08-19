@@ -44,7 +44,7 @@ void FakeDriver::disconnect()
 {
 }
 
-AcknowledgeResponse FakeDriver::send(const ConfigCommand& command) const
+AcknowledgeResponse FakeDriver::configure(const ConfigCommand& command) const
 {
   motors_.clear();
   for (const auto& param : command.params())
@@ -58,7 +58,7 @@ AcknowledgeResponse FakeDriver::send(const ConfigCommand& command) const
   return AcknowledgeResponse{ Response::Status::Success };
 }
 
-AcknowledgeResponse FakeDriver::send(const rclcpp::Time& time, const PositionCommand& command) const
+AcknowledgeResponse FakeDriver::set_position(const rclcpp::Time& time, const PositionCommand& command) const
 {
   for (const auto& goal : command.goals())
   {
@@ -75,7 +75,7 @@ AcknowledgeResponse FakeDriver::send(const rclcpp::Time& time, const PositionCom
   return AcknowledgeResponse{ Response::Status::Success };
 }
 
-AcknowledgeResponse FakeDriver::send(const rclcpp::Time& time, const VelocityCommand& command) const
+AcknowledgeResponse FakeDriver::set_velocity(const rclcpp::Time& time, const VelocityCommand& command) const
 {
   for (const auto& goal : command.goals())
   {
@@ -92,7 +92,7 @@ AcknowledgeResponse FakeDriver::send(const rclcpp::Time& time, const VelocityCom
   return AcknowledgeResponse{ Response::Status::Success };
 }
 
-StatusResponse FakeDriver::send(const rclcpp::Time& time, [[maybe_unused]] const StatusQuery& query) const
+StatusResponse FakeDriver::get_status(const rclcpp::Time& time, [[maybe_unused]] const StatusQuery& query) const
 {
   std::vector<MotorState> states;
   for (const auto& [motor_id, motor] : motors_)
@@ -106,7 +106,8 @@ StatusResponse FakeDriver::send(const rclcpp::Time& time, [[maybe_unused]] const
   return StatusResponse(Response::Status::Success, states);
 }
 
-InfoResponse FakeDriver::send([[maybe_unused]] const rclcpp::Time& time, [[maybe_unused]] const InfoQuery& query) const
+InfoResponse FakeDriver::get_info([[maybe_unused]] const rclcpp::Time& time,
+                                  [[maybe_unused]] const InfoQuery& query) const
 {
   return InfoResponse(Response::Status::Success, "STEPIT");
 }

@@ -181,9 +181,9 @@ TEST(TestStepitHardware, read_status)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
-  ON_CALL(*mock_driver, send(Matcher<const ConfigCommand&>(_)))
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
-  EXPECT_CALL(*mock_driver, send(_, An<const StatusQuery&>())).WillOnce(Return(mocked_response));
+  EXPECT_CALL(*mock_driver, get_status(_, An<const StatusQuery&>())).WillOnce(Return(mocked_response));
   auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
   auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
@@ -251,9 +251,9 @@ TEST(TestStepitHardware, write_velocities)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
-  ON_CALL(*mock_driver, send(Matcher<const ConfigCommand&>(_)))
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
-  EXPECT_CALL(*mock_driver, send(_, Matcher<const VelocityCommand&>(_)))
+  EXPECT_CALL(*mock_driver, set_velocity(_, Matcher<const VelocityCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ Response::Status::Success })));
   auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
@@ -327,9 +327,9 @@ TEST(TestStepitHardware, write_positions)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
-  ON_CALL(*mock_driver, send(Matcher<const ConfigCommand&>(_)))
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
-  EXPECT_CALL(*mock_driver, send(_, Matcher<const PositionCommand&>(_)))
+  EXPECT_CALL(*mock_driver, set_position(_, Matcher<const PositionCommand&>(_)))
       .WillOnce(DoAll(SaveArg<1>(&actual_request), Return(AcknowledgeResponse{ Response::Status::Success })));
   auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
@@ -403,7 +403,7 @@ TEST(TestStepitHardware, configuration)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
-  EXPECT_CALL(*mock_driver, send(Matcher<const ConfigCommand&>(_)))
+  EXPECT_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
   auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
