@@ -29,58 +29,46 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cstdlib>
+#include <functional>
+#include <map>
+#include <set>
 #include <string>
-
-namespace stepit_driver::test
-{
-
-// Trim from start.
-static inline std::string ltrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(value.begin(),
-              std::find_if(value.begin(), value.end(), [](unsigned char ch) { return !std::isspace(ch); }));
-  return value;
-}
-
-// Trim from end.
-static inline std::string rtrim(const std::string& s)
-{
-  std::string value{ s };
-  value.erase(std::find_if(value.rbegin(), value.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
-              value.end());
-  return value;
-}
-
-// Trim from both ends.
-static inline std::string trim(const std::string& s)
-{
-  std::string value{ s };
-  return ltrim(rtrim(value));
-}
-
-// To lower case.
-static inline std::string to_lower(const std::string& s)
-{
-  std::string value{ s };
-  std::transform(value.begin(), value.end(), value.begin(), [](unsigned char ch) { return std::tolower(ch); });
-  return value;
-}
+#include <variant>
 
 /**
- * @brief If there is a global variable RUN_HARDWARE_TESTS set to true,
- * return false (do not skip the test) else true (skip the test).
- * @return True to skip a test, false to execute it.
+ *  Class to parse the command line.
  */
-bool skip_test()
+class CommandLineUtility
 {
-  const char* env = std::getenv("RUN_HARDWARE_TESTS");
-  if (env)
-  {
-    return to_lower(trim(std::string{ env })) != "true";
-  }
-  return true;
-}
-}  // namespace stepit_driver::test
+  using LambdaWithValue = std::function<void(const char*)>;
+  using LambdaWithoutValue = std::function<void()>;
+  using ParameterHandler = std::variant<LambdaWithValue, LambdaWithoutValue>;
+
+public:
+  /**
+   * Assign to each command parameter a lambda function to handle it.
+   * @param parameter The parameter to handle.
+   * @param handler The lambda function to handle the parameter value.
+   * @param isMandatory True if the parameter is mandatory, else otherwise.
+   */
+  void registerHandler(const std::string& parameter, ParameterHandler handler, bool isMandatory = false);
+
+  /**
+   * Parse the command line and read all parameters.
+   * @param argc The number of tokens in the command line.
+   * @param argv The list of tokens.
+   * @return True if the parsing is succesful.
+   */
+  bool parse(int argc, char* argv[]);
+
+private:
+  // Map that associates a lambda function to each parameter to process the expected value.
+  std::map<std::string, ParameterHandler> handlers;
+
+  // Store all mandatory parameters.
+  std::set<std::string> mandatoryParams;
+
+  // Store the parameters which are parsed in the command line. If a parameter is mandatory,
+  // but cannot be found in the received  parameters, then print an error.
+  std::set<std::string> receivedParams;
+};
