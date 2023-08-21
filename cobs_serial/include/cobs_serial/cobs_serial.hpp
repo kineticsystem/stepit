@@ -27,30 +27,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_driver/default_driver.hpp>
-#include <stepit_driver/default_driver_factory.hpp>
-#include <stepit_driver/fake/fake_driver.hpp>
+#pragma once
 
-#include <cobs_serial/default_cobs_serial.hpp>
-#include <cobs_serial/default_cobs_serial_factory.hpp>
-#include <cobs_serial/default_cobs_serial.hpp>
+#include <vector>
+#include <cstdint>
 
-namespace stepit_driver
+namespace cobs_serial
 {
-const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
-
-std::unique_ptr<stepit_driver::Driver>
-stepit_driver::DefaultDriverFactory::create(const hardware_interface::HardwareInfo& info)
+class CobsSerial
 {
-  if (info.hardware_parameters.find("use_dummy") != info.hardware_parameters.end() &&
-      info.hardware_parameters.at("use_dummy") == "true")
-  {
-    return std::make_unique<FakeDriver>();
-  }
-  else
-  {
-    auto cobs_serial = cobs_serial::DefaultCobsSerialFactory().create(info);
-    return std::make_unique<DefaultDriver>(std::move(cobs_serial));
-  }
-}
-}  // namespace stepit_driver
+public:
+  virtual ~CobsSerial() = default;
+
+  virtual void open() = 0;
+  virtual void close() = 0;
+
+  /**
+   * Read a sequence of bytes from the serial port.
+   * @return The bytes read.
+   * @throw cobs_serial::SerialException
+   */
+  virtual std::vector<uint8_t> read() = 0;
+
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param bytes The bytes to read.
+   * @throw cobs_serial::SerialException
+   */
+  virtual void write(const std::vector<uint8_t>& bytes) = 0;
+};
+}  // namespace cobs_serial

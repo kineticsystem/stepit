@@ -37,14 +37,14 @@ const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
 using namespace cobs_serial::data_utils;
 
-DefaultDriver::DefaultDriver(std::unique_ptr<cobs_serial::DataInterface> data_interface)
-  : data_interface_{ std::move(data_interface) }
+DefaultDriver::DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> cobs_serial)
+  : cobs_serial_{ std::move(cobs_serial) }
 {
 }
 
 bool DefaultDriver::connect()
 {
-  data_interface_->open();
+  cobs_serial_->open();
 
   // Send a status command multiple times until an answer comes back.
 
@@ -74,7 +74,7 @@ bool DefaultDriver::connect()
 
 void DefaultDriver::disconnect()
 {
-  data_interface_->close();
+  cobs_serial_->close();
 }
 
 AcknowledgeResponse DefaultDriver::configure(const ConfigCommand& command) const
@@ -96,8 +96,8 @@ AcknowledgeResponse DefaultDriver::configure(const ConfigCommand& command) const
     in.emplace_back(max_velocity_bytes[3]);
   }
   RCLCPP_DEBUG(kLogger, "Config command: %s", to_hex(in).c_str());
-  data_interface_->write(in);
-  std::vector<uint8_t> out = data_interface_->read();
+  cobs_serial_->write(in);
+  std::vector<uint8_t> out = cobs_serial_->read();
   RCLCPP_DEBUG(kLogger, "Config response: %s", to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
@@ -119,8 +119,8 @@ AcknowledgeResponse DefaultDriver::set_position([[maybe_unused]] const rclcpp::T
     in.emplace_back(position_bytes[3]);
   }
   RCLCPP_DEBUG(kLogger, "Position command: %s", to_hex(in).c_str());
-  data_interface_->write(in);
-  std::vector<uint8_t> out = data_interface_->read();
+  cobs_serial_->write(in);
+  std::vector<uint8_t> out = cobs_serial_->read();
   RCLCPP_DEBUG(kLogger, "Position response: %s", to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
@@ -142,8 +142,8 @@ AcknowledgeResponse DefaultDriver::set_velocity([[maybe_unused]] const rclcpp::T
     in.emplace_back(velocity_bytes[3]);
   }
   RCLCPP_DEBUG(kLogger, "Velocity command: %s", to_hex(in).c_str());
-  data_interface_->write(in);
-  std::vector<uint8_t> out = data_interface_->read();
+  cobs_serial_->write(in);
+  std::vector<uint8_t> out = cobs_serial_->read();
   RCLCPP_DEBUG(kLogger, "Velocity response: %s", to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
@@ -155,8 +155,8 @@ StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& ti
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
   RCLCPP_DEBUG(kLogger, "Status query: %s", to_hex(in).c_str());
-  data_interface_->write(in);
-  auto out = data_interface_->read();
+  cobs_serial_->write(in);
+  auto out = cobs_serial_->read();
   RCLCPP_DEBUG(kLogger, "Status response: %s", to_hex(out).c_str());
 
   // The data array contains the following information.
@@ -196,8 +196,8 @@ InfoResponse DefaultDriver::get_info([[maybe_unused]] const rclcpp::Time& time, 
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
   RCLCPP_DEBUG(kLogger, "Info query: %s", to_hex(in).c_str());
-  data_interface_->write(in);
-  auto out = data_interface_->read();
+  cobs_serial_->write(in);
+  auto out = cobs_serial_->read();
   RCLCPP_DEBUG(kLogger, "Info response: %s", to_hex(out).c_str());
 
   // The data array contains the following information.

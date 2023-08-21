@@ -26,11 +26,11 @@ target_link_libraries(test_crc_utils cobs_serial)
 ###############################################################################
 # test_default_data_interface
 
-ament_add_gmock(test_default_data_interface
-    test_default_data_interface.cpp
+ament_add_gmock(test_default_cobs_serial
+    test_default_cobs_serial.cpp
     mock/mock_serial.hpp
 )
-target_include_directories(test_default_data_interface
+target_include_directories(test_default_cobs_serial
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(test_default_data_interface cobs_serial)
+target_link_libraries(test_default_cobs_serial cobs_serial)

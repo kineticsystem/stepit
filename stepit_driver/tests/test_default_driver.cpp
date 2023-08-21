@@ -29,7 +29,7 @@
 
 #include <gtest/gtest.h>
 
-#include <mock/mock_data_interface.hpp>
+#include <mock/mock_cobs_serial.hpp>
 #include <stepit_driver/default_driver.hpp>
 #include <stepit_driver/msgs/msgs.hpp>
 
@@ -84,11 +84,11 @@ TEST(TestDefaultDriver, send_status_query)
   };
 
   std::vector<uint8_t> actual_request;
-  auto mock_data_interface = std::make_unique<MockDataInterface>();
-  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
-  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
+  auto serial = std::make_unique<MockCobsSerial>();
+  EXPECT_CALL(*serial, write(_)).WillOnce(SaveArg<0>(&actual_request));
+  EXPECT_CALL(*serial, read()).WillOnce(Return(mocked_response));
 
-  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(mock_data_interface));
+  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
   StatusQuery request{};
 
   StatusResponse response = driver->get_status(rclcpp::Time{}, request);
@@ -127,11 +127,11 @@ TEST(TestDefaultDriver, send_velocity_command)
   };
 
   std::vector<uint8_t> actual_request;
-  auto mock_data_interface = std::make_unique<MockDataInterface>();
-  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
-  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
+  auto serial = std::make_unique<MockCobsSerial>();
+  EXPECT_CALL(*serial, write(_)).WillOnce(SaveArg<0>(&actual_request));
+  EXPECT_CALL(*serial, read()).WillOnce(Return(mocked_response));
 
-  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(mock_data_interface));
+  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
   VelocityCommand request{ { VelocityGoal{ 0, 0.5 }, VelocityGoal{ 1, 0.75 } } };
   AcknowledgeResponse response = driver->set_velocity(rclcpp::Time{}, request);
 
@@ -164,11 +164,11 @@ TEST(TestDefaultDriver, send_position_command)
   };
 
   std::vector<uint8_t> actual_request;
-  auto mock_data_interface = std::make_unique<MockDataInterface>();
-  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
-  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
+  auto serial = std::make_unique<MockCobsSerial>();
+  EXPECT_CALL(*serial, write(_)).WillOnce(SaveArg<0>(&actual_request));
+  EXPECT_CALL(*serial, read()).WillOnce(Return(mocked_response));
 
-  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(mock_data_interface));
+  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
   PositionCommand request{ { PositionGoal{ 0, 0.5 }, PositionGoal{ 1, 0.75 } } };
   AcknowledgeResponse response = driver->set_position(rclcpp::Time{}, request);
 
@@ -209,11 +209,11 @@ TEST(TestDefaultDriver, send_configure_command)
   };
 
   std::vector<uint8_t> actual_request;
-  auto mock_data_interface = std::make_unique<MockDataInterface>();
-  EXPECT_CALL(*mock_data_interface, write(_)).WillOnce(SaveArg<0>(&actual_request));
-  EXPECT_CALL(*mock_data_interface, read()).WillOnce(Return(mocked_response));
+  auto serial = std::make_unique<MockCobsSerial>();
+  EXPECT_CALL(*serial, write(_)).WillOnce(SaveArg<0>(&actual_request));
+  EXPECT_CALL(*serial, read()).WillOnce(Return(mocked_response));
 
-  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(mock_data_interface));
+  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
   ConfigCommand request{ { ConfigParam{ 0, 0.5, 0.75 }, ConfigParam{ 1, 0.5, 0.75 } } };
   AcknowledgeResponse response = driver->configure(request);
 

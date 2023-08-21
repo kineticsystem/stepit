@@ -29,66 +29,17 @@
 
 #pragma once
 
-#include <cobs_serial/serial.hpp>
-#include <cobs_serial/data_interface.hpp>
-#include <cobs_serial/buffer.hpp>
+#include <gmock/gmock.h>
+#include <cobs_serial/cobs_serial.hpp>
 
-#include <vector>
-#include <cstdint>
-#include <string>
-#include <memory>
-
-namespace cobs_serial
+namespace stepit_driver::test
 {
-/**
- * This class is used to pack a sequence of bytes into a frame and send it to
- * the serial port and also to parse frames coming from the serial port.
- * A frames contains the data, a 16-bits CRC and delimiters.
- */
-class DefaultDataInterface : public DataInterface
+class MockCobsSerial : public cobs_serial::CobsSerial
 {
 public:
-  explicit DefaultDataInterface(std::unique_ptr<Serial> serial);
-
-  /**
-   * Open the serial connection.
-   */
-  void open() override;
-
-  /**
-   * Close the serial connection.
-   */
-  void close() override;
-
-  /**
-   * Write a sequence of bytes to the serial port.
-   * @param bytes The bytes to read.
-   * @throw cobs_serial::SerialException
-   */
-  void write(const std::vector<uint8_t>& bytes) override;
-
-  /**
-   * Read a sequence of bytes from the serial port.
-   * @return The bytes read.
-   * @throw cobs_serial::SerialException
-   */
-  std::vector<uint8_t> read() override;
-
-private:
-  /* States used while reading and parsiong a frame. */
-  enum class ReadState
-  {
-    Waiting,
-    ReadingMessage,
-    ReadingEscapedByte
-  } state_ = ReadState::Waiting;
-
-  /* Circular buffer to read data from the serial port. */
-  Buffer<uint8_t> read_buffer_{ 100 };
-
-  /* Circular buffer to write data to the serial port. */
-  Buffer<uint8_t> write_buffer_{ 100 };
-
-  std::unique_ptr<Serial> serial_;
+  MOCK_METHOD(void, open, (), (override));
+  MOCK_METHOD(void, close, (), (override));
+  MOCK_METHOD(std::vector<uint8_t>, read, (), (override));
+  MOCK_METHOD(void, write, (const std::vector<uint8_t>& bytes), (override));
 };
-}  // namespace cobs_serial
+}  // namespace stepit_driver::test

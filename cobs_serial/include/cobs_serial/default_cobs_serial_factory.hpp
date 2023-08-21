@@ -27,30 +27,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_driver/default_driver.hpp>
-#include <stepit_driver/default_driver_factory.hpp>
-#include <stepit_driver/fake/fake_driver.hpp>
+#pragma once
 
-#include <cobs_serial/default_cobs_serial.hpp>
+#include <cobs_serial/cobs_serial_factory.hpp>
 #include <cobs_serial/default_cobs_serial_factory.hpp>
-#include <cobs_serial/default_cobs_serial.hpp>
+#include <hardware_interface/hardware_info.hpp>
 
-namespace stepit_driver
-{
-const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
+#include <memory>
 
-std::unique_ptr<stepit_driver::Driver>
-stepit_driver::DefaultDriverFactory::create(const hardware_interface::HardwareInfo& info)
+namespace cobs_serial
 {
-  if (info.hardware_parameters.find("use_dummy") != info.hardware_parameters.end() &&
-      info.hardware_parameters.at("use_dummy") == "true")
-  {
-    return std::make_unique<FakeDriver>();
-  }
-  else
-  {
-    auto cobs_serial = cobs_serial::DefaultCobsSerialFactory().create(info);
-    return std::make_unique<DefaultDriver>(std::move(cobs_serial));
-  }
-}
-}  // namespace stepit_driver
+/**
+ * This class is used to create a default driver to interact with the hardware.
+ */
+class DefaultCobsSerialFactory : public CobsSerialFactory
+{
+public:
+  DefaultCobsSerialFactory() = default;
+
+  /**
+   * @brief Create a cobs serial interface.
+   * @param info The hardware information.
+   * @return A sarial interface to communicate with the hardware.
+   */
+  std::unique_ptr<CobsSerial> create(const hardware_interface::HardwareInfo& info) const;
+};
+}  // namespace cobs_serial

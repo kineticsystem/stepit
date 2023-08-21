@@ -27,30 +27,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_driver/default_driver.hpp>
-#include <stepit_driver/default_driver_factory.hpp>
-#include <stepit_driver/fake/fake_driver.hpp>
-
 #include <cobs_serial/default_cobs_serial.hpp>
 #include <cobs_serial/default_cobs_serial_factory.hpp>
-#include <cobs_serial/default_cobs_serial.hpp>
+#include <cobs_serial/default_serial_factory.hpp>
+#include <cobs_serial/default_serial.hpp>
 
-namespace stepit_driver
-{
-const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
+#include <rclcpp/logging.hpp>
 
-std::unique_ptr<stepit_driver::Driver>
-stepit_driver::DefaultDriverFactory::create(const hardware_interface::HardwareInfo& info)
+namespace cobs_serial
 {
-  if (info.hardware_parameters.find("use_dummy") != info.hardware_parameters.end() &&
-      info.hardware_parameters.at("use_dummy") == "true")
-  {
-    return std::make_unique<FakeDriver>();
-  }
-  else
-  {
-    auto cobs_serial = cobs_serial::DefaultCobsSerialFactory().create(info);
-    return std::make_unique<DefaultDriver>(std::move(cobs_serial));
-  }
+
+const auto kLogger = rclcpp::get_logger("DefaultCobsSerialFactory");
+
+std::unique_ptr<CobsSerial> DefaultCobsSerialFactory::create(const hardware_interface::HardwareInfo& info) const
+{
+  auto serial = DefaultSerialFactory().create(info);
+  return std::make_unique<DefaultCobsSerial>(std::move(serial));
 }
-}  // namespace stepit_driver
+}  // namespace cobs_serial

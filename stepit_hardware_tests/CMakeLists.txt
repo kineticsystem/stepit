@@ -23,6 +23,6 @@ add_executable(get_status
 target_include_directories(get_status
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(get_status stepit_driver::stepit_driver)
-ament_target_dependencies(get_status stepit_driver)
+ament_target_dependencies(get_status stepit_driver cobs_serial)
 
 ament_package()

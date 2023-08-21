@@ -28,8 +28,10 @@
  */
 
 #include <stepit_driver/default_driver.hpp>
+#include <stepit_driver/default_driver_factory.hpp>
+
 #include <cobs_serial/default_serial.hpp>
-#include <cobs_serial/default_data_interface.hpp>
+#include <cobs_serial/default_cobs_serial.hpp>
 
 #include "command_line_utility.hpp"
 
@@ -82,9 +84,9 @@ int main(int argc, char* argv[])
     serial->set_baudrate(baudrate);
     serial->set_timeout(timeout);
 
-    auto data_interface = std::make_unique<DefaultDataInterface>(std::move(serial));
+    auto cobs_serial = std::make_unique<DefaultCobsSerial>(std::move(serial));
 
-    auto driver = std::make_unique<DefaultDriver>(std::move(data_interface));
+    auto driver = std::make_unique<DefaultDriver>(std::move(cobs_serial));
 
     std::cout << "Using the following parameters: " << std::endl;
     std::cout << " - port: " << port << std::endl;

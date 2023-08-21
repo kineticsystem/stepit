@@ -29,17 +29,31 @@
 
 #pragma once
 
-#include <gmock/gmock.h>
-#include <cobs_serial/data_interface.hpp>
+#include <cobs_serial/serial_factory.hpp>
+#include <cobs_serial/default_serial_factory.hpp>
+#include <hardware_interface/hardware_info.hpp>
 
-namespace stepit_driver::test
+#include <memory>
+
+namespace cobs_serial
 {
-class MockDataInterface : public cobs_serial::DataInterface
+/**
+ * This class is used to create a default driver to interact with the hardware.
+ */
+class DefaultSerialFactory : public SerialFactory
 {
 public:
-  MOCK_METHOD(void, open, (), (override));
-  MOCK_METHOD(void, close, (), (override));
-  MOCK_METHOD(std::vector<uint8_t>, read, (), (override));
-  MOCK_METHOD(void, write, (const std::vector<uint8_t>& bytes), (override));
+  DefaultSerialFactory() = default;
+
+  /**
+   * @brief Create a serial interface.
+   * @param info The hardware information.
+   * @return A sarial interface to communicate with the hardware.
+   */
+  std::unique_ptr<Serial> create(const hardware_interface::HardwareInfo& info) const;
+
+protected:
+  // Seam for testing.
+  virtual std::unique_ptr<Serial> create_objects() const;
 };
-}  // namespace stepit_driver::test
+}  // namespace cobs_serial

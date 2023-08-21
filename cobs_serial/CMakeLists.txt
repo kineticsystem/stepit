@@ -16,6 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # software find all required transitive dependencies to use this library.
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     rclcpp
+    hardware_interface
     serial
 )
 
@@ -24,6 +25,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
 endif()
 
 find_package(ament_cmake REQUIRED)
+find_package(hardware_interface REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(serial REQUIRED)
 
@@ -41,16 +43,23 @@ add_library(
     SHARED
     include/cobs_serial/buffer.hpp
     include/cobs_serial/crc_utils.hpp
-    include/cobs_serial/default_data_interface.hpp
-    include/cobs_serial/data_interface.hpp
+    include/cobs_serial/default_cobs_serial.hpp
+    include/cobs_serial/cobs_serial.hpp
     include/cobs_serial/data_utils.hpp
     include/cobs_serial/serial_exception.hpp
     include/cobs_serial/default_serial.hpp
+    include/cobs_serial/default_serial_factory.hpp
+    include/cobs_serial/default_cobs_serial.hpp
+    include/cobs_serial/default_cobs_serial_factory.hpp
     include/cobs_serial/serial.hpp
+    include/cobs_serial/serial_factory.hpp
     src/crc_utils.cpp
-    src/default_data_interface.cpp
+    src/default_cobs_serial.cpp
     src/data_utils.cpp
     src/default_serial.cpp
+    src/default_serial_factory.cpp
+    src/default_cobs_serial.cpp
+    src/default_cobs_serial_factory.cpp
 )
 target_include_directories(
     cobs_serial

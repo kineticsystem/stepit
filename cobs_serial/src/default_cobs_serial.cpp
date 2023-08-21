@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cobs_serial/default_data_interface.hpp>
+#include <cobs_serial/default_cobs_serial.hpp>
 
 #include <cobs_serial/crc_utils.hpp>
 #include <cobs_serial/data_utils.hpp>
@@ -58,21 +58,21 @@ void add_escaped_byte(Buffer<uint8_t>& buffer, uint8_t ch)
   }
 }
 
-DefaultDataInterface::DefaultDataInterface(std::unique_ptr<Serial> serial) : serial_{ std::move(serial) }
+DefaultCobsSerial::DefaultCobsSerial(std::unique_ptr<Serial> serial) : serial_{ std::move(serial) }
 {
 }
 
-void DefaultDataInterface::open()
+void DefaultCobsSerial::open()
 {
   serial_->open();
 }
 
-void DefaultDataInterface::close()
+void DefaultCobsSerial::close()
 {
   serial_->close();
 }
 
-std::vector<uint8_t> DefaultDataInterface::read()
+std::vector<uint8_t> DefaultCobsSerial::read()
 {
   read_buffer_.clear();
 
@@ -154,7 +154,7 @@ std::vector<uint8_t> DefaultDataInterface::read()
   return buffer;
 }
 
-void DefaultDataInterface::write(const std::vector<uint8_t>& buffer)
+void DefaultCobsSerial::write(const std::vector<uint8_t>& buffer)
 {
   write_buffer_.clear();
   uint16_t crc = 0;

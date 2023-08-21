@@ -28,7 +28,7 @@
  */
 
 #include <gmock/gmock.h>
-#include <cobs_serial/default_data_interface.hpp>
+#include <cobs_serial/default_cobs_serial.hpp>
 #include <cobs_serial/data_utils.hpp>
 #include <cobs_serial/serial_exception.hpp>
 #include <mock/mock_serial.hpp>
@@ -44,7 +44,7 @@ using ::testing::Return;
  * Write some data and expect a request frame to be created including
  * delimiters, request ID and CRC.
  */
-TEST(TestDefaultDataInterface, write)
+TEST(TestDefaultCobsSerial, write)
 {
   const std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -80,7 +80,7 @@ TEST(TestDefaultDataInterface, write)
   };
   EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   data_interface.write(data);
   ASSERT_THAT(data_utils::to_hex(actual_frame), data_utils::to_hex(expected_frame));
 }
@@ -89,7 +89,7 @@ TEST(TestDefaultDataInterface, write)
  * Write some data and expect a request frame, with escaped bytes, to be
  * created including delimiters, request ID and CRC.
  */
-TEST(TestDefaultDataInterface, write_escaped_data)
+TEST(TestDefaultCobsSerial, write_escaped_data)
 {
   const std::vector<uint8_t> data{
     0x00,  // Request ID
@@ -126,7 +126,7 @@ TEST(TestDefaultDataInterface, write_escaped_data)
   };
   EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   data_interface.write(data);
   ASSERT_THAT(data_utils::to_hex(actual_frame), data_utils::to_hex(expected_frame));
 }
@@ -135,7 +135,7 @@ TEST(TestDefaultDataInterface, write_escaped_data)
  * Write some data and expect a request frame to be created including
  * delimiters, request ID and escaped CRC.
  */
-TEST(TestDefaultDataInterface, write_escaped_crc)
+TEST(TestDefaultCobsSerial, write_escaped_crc)
 {
   // This specific data will generate a CRC value containing the 0x7D value
   // that must be escaped.
@@ -184,7 +184,7 @@ TEST(TestDefaultDataInterface, write_escaped_crc)
   };
   EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   data_interface.write(data);
   ASSERT_THAT(data_utils::to_hex(actual_frame), data_utils::to_hex(expected_frame));
 }
@@ -192,14 +192,14 @@ TEST(TestDefaultDataInterface, write_escaped_crc)
 /**
  * Test that an exception is thrown is no data are written.
  */
-TEST(TestDefaultDataInterface, write_error)
+TEST(TestDefaultCobsSerial, write_error)
 {
   auto serial = std::make_unique<MockSerial>();
 
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(*serial, write(_, _)).WillOnce(Return(0));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
@@ -218,7 +218,7 @@ TEST(TestDefaultDataInterface, write_error)
 /**
  * Read a response frame and expect data to be returned.
  */
-TEST(TestDefaultDataInterface, read)
+TEST(TestDefaultCobsSerial, read)
 {
   const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -252,7 +252,7 @@ TEST(TestDefaultDataInterface, read)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   std::vector<uint8_t> actual_data = data_interface.read();
   ASSERT_THAT(data_utils::to_hex(actual_data), data_utils::to_hex(expected_data));
 }
@@ -260,7 +260,7 @@ TEST(TestDefaultDataInterface, read)
 /**
  * Read a response frame with escaped bytes and expect data to be returned.
  */
-TEST(TestDefaultDataInterface, read_escaped)
+TEST(TestDefaultCobsSerial, read_escaped)
 {
   const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -295,7 +295,7 @@ TEST(TestDefaultDataInterface, read_escaped)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   std::vector<uint8_t> actual_data = data_interface.read();
   ASSERT_THAT(data_utils::to_hex(actual_data), data_utils::to_hex(expected_data));
 }
@@ -303,7 +303,7 @@ TEST(TestDefaultDataInterface, read_escaped)
 /**
  * Test that an exception is thrown when a CRC error is found.
  */
-TEST(TestDefaultDataInterface, read_crc_error)
+TEST(TestDefaultCobsSerial, read_crc_error)
 {
   const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -329,7 +329,7 @@ TEST(TestDefaultDataInterface, read_crc_error)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
@@ -354,7 +354,7 @@ TEST(TestDefaultDataInterface, read_crc_error)
  * 4) crc
  * 5) a delimiter.
  */
-TEST(TestDefaultDataInterface, read_incorrect_frame_length)
+TEST(TestDefaultCobsSerial, read_incorrect_frame_length)
 {
   const std::vector<uint8_t> frame = {
     0x7E,  // Delimiter
@@ -372,7 +372,7 @@ TEST(TestDefaultDataInterface, read_incorrect_frame_length)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
@@ -391,7 +391,7 @@ TEST(TestDefaultDataInterface, read_incorrect_frame_length)
 /**
  * Test that an exception is thrown when there is no start delimiter.
  */
-TEST(TestDefaultDataInterface, read_start_delimiter_missing)
+TEST(TestDefaultCobsSerial, read_start_delimiter_missing)
 {
   const std::vector<uint8_t> frame = {
     // Missing delimiter
@@ -418,7 +418,7 @@ TEST(TestDefaultDataInterface, read_start_delimiter_missing)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
@@ -437,14 +437,14 @@ TEST(TestDefaultDataInterface, read_start_delimiter_missing)
 /**
  * Test that an exception is thrown when no data is read.
  */
-TEST(TestDefaultDataInterface, read_timeout)
+TEST(TestDefaultCobsSerial, read_timeout)
 {
   auto serial = std::make_unique<MockSerial>();
 
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(*serial, read(_, _)).WillOnce(Return(0));
 
-  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultCobsSerial data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
