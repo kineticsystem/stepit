@@ -27,68 +27,72 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <cobs_serial/default_serial.hpp>
 
-#include <data_interface/serial.hpp>
-#include <data_interface/data_interface.hpp>
-#include <data_interface/buffer.hpp>
+#include <serial/serial.h>
 
-#include <vector>
-#include <cstdint>
-#include <string>
-#include <memory>
-
-namespace data_interface
+namespace cobs_serial
 {
-/**
- * This class is used to pack a sequence of bytes into a frame and send it to
- * the serial port and also to parse frames coming from the serial port.
- * A frames contains the data, a 16-bits CRC and delimiters.
- */
-class DefaultDataInterface : public DataInterface
+DefaultSerial::DefaultSerial() : serial_{ std::make_unique<serial::Serial>() }
 {
-public:
-  explicit DefaultDataInterface(std::unique_ptr<Serial> serial);
+}
 
-  /**
-   * Open the serial connection.
-   */
-  void open() override;
+void DefaultSerial::open()
+{
+  serial_->open();
+}
 
-  /**
-   * Close the serial connection.
-   */
-  void close() override;
+bool DefaultSerial::is_open() const
+{
+  return serial_->isOpen();
+}
 
-  /**
-   * Write a sequence of bytes to the serial port.
-   * @param bytes The bytes to read.
-   * @throw data_interface::SerialException
-   */
-  void write(const std::vector<uint8_t>& bytes) override;
+void DefaultSerial::close()
+{
+  serial_->close();
+}
 
-  /**
-   * Read a sequence of bytes from the serial port.
-   * @return The bytes read.
-   * @throw data_interface::SerialException
-   */
-  std::vector<uint8_t> read() override;
+std::size_t DefaultSerial::read(uint8_t* buffer, size_t size)
+{
+  return serial_->read(buffer, size);
+}
 
-private:
-  /* States used while reading and parsiong a frame. */
-  enum class ReadState
-  {
-    Waiting,
-    ReadingMessage,
-    ReadingEscapedByte
-  } state_ = ReadState::Waiting;
+std::size_t DefaultSerial::write(const uint8_t* buffer, size_t size)
+{
+  std::size_t write_size = serial_->write(buffer, size);
+  serial_->flush();
+  return write_size;
+}
 
-  /* Circular buffer to read data from the serial port. */
-  Buffer<uint8_t> read_buffer_{ 100 };
+void DefaultSerial::set_port(const std::string& port)
+{
+  serial_->setPort(port);
+}
 
-  /* Circular buffer to write data to the serial port. */
-  Buffer<uint8_t> write_buffer_{ 100 };
+std::string DefaultSerial::get_port() const
+{
+  return serial_->getPort();
+}
 
-  std::unique_ptr<Serial> serial_;
-};
-}  // namespace data_interface
+void DefaultSerial::set_timeout(uint32_t timeout_ms)
+{
+  timeout_ms_ = timeout_ms;
+  serial::Timeout timeout = serial::Timeout::simpleTimeout(timeout_ms);
+  serial_->setTimeout(timeout);
+}
+
+uint32_t DefaultSerial::get_timeout() const
+{
+  return timeout_ms_;
+}
+
+void DefaultSerial::set_baudrate(uint32_t baudrate)
+{
+  serial_->setBaudrate(baudrate);
+}
+
+uint32_t DefaultSerial::get_baudrate() const
+{
+  return serial_->getBaudrate();
+}
+}  // namespace cobs_serial

@@ -29,13 +29,15 @@
 
 #include <stepit_driver/default_driver.hpp>
 
-#include <data_interface/data_utils.hpp>
+#include <cobs_serial/data_utils.hpp>
 
 namespace stepit_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
-DefaultDriver::DefaultDriver(std::unique_ptr<data_interface::DataInterface> data_interface)
+using namespace cobs_serial::data_utils;
+
+DefaultDriver::DefaultDriver(std::unique_ptr<cobs_serial::DataInterface> data_interface)
   : data_interface_{ std::move(data_interface) }
 {
 }
@@ -82,21 +84,21 @@ AcknowledgeResponse DefaultDriver::configure(const ConfigCommand& command) const
   for (const auto& param : command.params())
   {
     in.emplace_back(param.motor_id());
-    auto acceleration_bytes = data_interface::from_float(static_cast<float>(param.acceleration()));
+    auto acceleration_bytes = from_float(static_cast<float>(param.acceleration()));
     in.emplace_back(acceleration_bytes[0]);
     in.emplace_back(acceleration_bytes[1]);
     in.emplace_back(acceleration_bytes[2]);
     in.emplace_back(acceleration_bytes[3]);
-    auto max_velocity_bytes = data_interface::from_float(static_cast<float>(param.max_velocity()));
+    auto max_velocity_bytes = from_float(static_cast<float>(param.max_velocity()));
     in.emplace_back(max_velocity_bytes[0]);
     in.emplace_back(max_velocity_bytes[1]);
     in.emplace_back(max_velocity_bytes[2]);
     in.emplace_back(max_velocity_bytes[3]);
   }
-  RCLCPP_DEBUG(kLogger, "Config command: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Config command: %s", to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
-  RCLCPP_DEBUG(kLogger, "Config response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Config response: %s", to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
   return response;
@@ -110,16 +112,16 @@ AcknowledgeResponse DefaultDriver::set_position([[maybe_unused]] const rclcpp::T
   for (const auto& goal : command.goals())
   {
     in.emplace_back(goal.motor_id());
-    auto position_bytes = data_interface::from_float(static_cast<float>(goal.position()));
+    auto position_bytes = from_float(static_cast<float>(goal.position()));
     in.emplace_back(position_bytes[0]);
     in.emplace_back(position_bytes[1]);
     in.emplace_back(position_bytes[2]);
     in.emplace_back(position_bytes[3]);
   }
-  RCLCPP_DEBUG(kLogger, "Position command: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Position command: %s", to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
-  RCLCPP_DEBUG(kLogger, "Position response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Position response: %s", to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
   return response;
@@ -133,16 +135,16 @@ AcknowledgeResponse DefaultDriver::set_velocity([[maybe_unused]] const rclcpp::T
   for (const auto& goal : command.goals())
   {
     in.emplace_back(goal.motor_id());
-    auto velocity_bytes = data_interface::from_float(static_cast<float>(goal.velocity()));
+    auto velocity_bytes = from_float(static_cast<float>(goal.velocity()));
     in.emplace_back(velocity_bytes[0]);
     in.emplace_back(velocity_bytes[1]);
     in.emplace_back(velocity_bytes[2]);
     in.emplace_back(velocity_bytes[3]);
   }
-  RCLCPP_DEBUG(kLogger, "Velocity command: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Velocity command: %s", to_hex(in).c_str());
   data_interface_->write(in);
   std::vector<uint8_t> out = data_interface_->read();
-  RCLCPP_DEBUG(kLogger, "Velocity response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Velocity response: %s", to_hex(out).c_str());
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
   return response;
@@ -152,10 +154,10 @@ StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& ti
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
-  RCLCPP_DEBUG(kLogger, "Status query: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Status query: %s", to_hex(in).c_str());
   data_interface_->write(in);
   auto out = data_interface_->read();
-  RCLCPP_DEBUG(kLogger, "Status response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Status response: %s", to_hex(out).c_str());
 
   // The data array contains the following information.
   //
@@ -179,9 +181,9 @@ StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& ti
   while (i < out.size())
   {
     uint8_t id = out[i++];
-    float position = data_interface::to_float({ out[i++], out[i++], out[i++], out[i++] });
-    float speed = data_interface::to_float({ out[i++], out[i++], out[i++], out[i++] });
-    float distance_to_go = data_interface::to_float({ out[i++], out[i++], out[i++], out[i++] });
+    float position = to_float({ out[i++], out[i++], out[i++], out[i++] });
+    float speed = to_float({ out[i++], out[i++], out[i++], out[i++] });
+    float distance_to_go = to_float({ out[i++], out[i++], out[i++], out[i++] });
     motor_states.push_back(MotorState{ id, position, speed, distance_to_go });
   }
 
@@ -193,10 +195,10 @@ InfoResponse DefaultDriver::get_info([[maybe_unused]] const rclcpp::Time& time, 
 {
   std::vector<uint8_t> in;
   in.emplace_back(query.query_id());
-  RCLCPP_DEBUG(kLogger, "Info query: %s", data_interface::to_hex(in).c_str());
+  RCLCPP_DEBUG(kLogger, "Info query: %s", to_hex(in).c_str());
   data_interface_->write(in);
   auto out = data_interface_->read();
-  RCLCPP_DEBUG(kLogger, "Info response: %s", data_interface::to_hex(out).c_str());
+  RCLCPP_DEBUG(kLogger, "Info response: %s", to_hex(out).c_str());
 
   // The data array contains the following information.
   //

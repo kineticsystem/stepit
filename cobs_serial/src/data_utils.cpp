@@ -27,9 +27,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <data_interface/data_utils.hpp>
+#include <cobs_serial/data_utils.hpp>
 
-namespace data_interface
+namespace cobs_serial::data_utils
 {
 constexpr std::array<char, 16> vChars = {
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
@@ -131,4 +131,4 @@ std::string to_hex(const std::vector<uint16_t>& bytes)
   return hex;
 }
 
-}  // namespace data_interface
+}  // namespace cobs_serial::data_utils

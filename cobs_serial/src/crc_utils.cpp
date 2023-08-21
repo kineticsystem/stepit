@@ -27,11 +27,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <data_interface/crc_utils.hpp>
+#include <cobs_serial/crc_utils.hpp>
 
 #include <array>
 
-namespace data_interface
+namespace cobs_serial
 {
 // Pre-computed crc-table.
 // See https://cs.fit.edu/code/svn/cse2410f13team7/wireshark/wsutil/crc16.c
@@ -86,4 +86,4 @@ uint16_t crc_ccitt(const std::vector<uint8_t>& buffer)
   }
   return crc;
 }
-}  // namespace data_interface
+}  // namespace cobs_serial

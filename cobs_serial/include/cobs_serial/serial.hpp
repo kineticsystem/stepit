@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-namespace data_interface
+namespace cobs_serial
 {
 class Serial
 {
@@ -119,4 +119,4 @@ public:
    */
   [[nodiscard]] virtual uint32_t get_baudrate() const = 0;
 };
-}  // namespace data_interface
+}  // namespace cobs_serial

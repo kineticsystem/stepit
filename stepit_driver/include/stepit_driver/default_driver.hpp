@@ -32,7 +32,7 @@
 #include <stepit_driver/driver.hpp>
 #include <stepit_driver/msgs/msgs.hpp>
 
-#include <data_interface/data_interface.hpp>
+#include <cobs_serial/data_interface.hpp>
 
 #include <functional>
 #include <memory>
@@ -46,7 +46,7 @@ namespace stepit_driver
 class DefaultDriver : public Driver
 {
 public:
-  explicit DefaultDriver(std::unique_ptr<data_interface::DataInterface> data_interface);
+  explicit DefaultDriver(std::unique_ptr<cobs_serial::DataInterface> data_interface);
   bool connect() override;
   void disconnect() override;
   AcknowledgeResponse configure(const ConfigCommand& command) const override;
@@ -56,6 +56,6 @@ public:
   InfoResponse get_info(const rclcpp::Time& time, const InfoQuery& query) const override;
 
 private:
-  std::unique_ptr<data_interface::DataInterface> data_interface_;
+  std::unique_ptr<cobs_serial::DataInterface> data_interface_;
 };
 }  // namespace stepit_driver

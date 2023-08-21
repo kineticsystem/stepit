@@ -32,7 +32,7 @@
 #include <stepit_driver/msgs/msgs.hpp>
 #include <stepit_driver/stepit_hardware.hpp>
 
-#include <data_interface/data_utils.hpp>
+#include <cobs_serial/data_utils.hpp>
 
 #include <fake/fake_hardware_info.hpp>
 #include <mock/mock_driver.hpp>
@@ -56,6 +56,7 @@ namespace stepit_driver::test
 {
 using ::testing::_;
 using ::testing::An;
+using ::testing::DoAll;
 using ::testing::Matcher;
 using ::testing::Return;
 using ::testing::SaveArg;

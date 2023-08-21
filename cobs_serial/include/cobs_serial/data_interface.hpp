@@ -29,47 +29,31 @@
 
 #pragma once
 
-#include <data_interface/serial.hpp>
+#include <vector>
+#include <cstdint>
 
-#include <memory>
-#include "serial/serial.h"
-
-namespace serial
+namespace cobs_serial
 {
-class Serial;
-}
-
-namespace data_interface
-{
-class DefaultSerial : public Serial
+class DataInterface
 {
 public:
+  virtual ~DataInterface() = default;
+
+  virtual void open() = 0;
+  virtual void close() = 0;
+
   /**
-   * Creates a Serial object to send and receive bytes to and from the serial
-   * port.
+   * Read a sequence of bytes from the serial port.
+   * @return The bytes read.
+   * @throw cobs_serial::SerialException
    */
-  DefaultSerial();
+  virtual std::vector<uint8_t> read() = 0;
 
-  void open() override;
-
-  [[nodiscard]] bool is_open() const override;
-
-  void close() override;
-
-  [[nodiscard]] std::size_t read(uint8_t* buffer, size_t size = 1) override;
-  [[nodiscard]] std::size_t write(const uint8_t* buffer, size_t size) override;
-
-  void set_port(const std::string& port) override;
-  [[nodiscard]] std::string get_port() const override;
-
-  void set_timeout(uint32_t timeout_ms) override;
-  [[nodiscard]] uint32_t get_timeout() const override;
-
-  void set_baudrate(uint32_t baudrate) override;
-  [[nodiscard]] uint32_t get_baudrate() const override;
-
-private:
-  std::unique_ptr<serial::Serial> serial_ = nullptr;
-  uint32_t timeout_ms_ = 0;
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param bytes The bytes to read.
+   * @throw cobs_serial::SerialException
+   */
+  virtual void write(const std::vector<uint8_t>& bytes) = 0;
 };
-}  // namespace data_interface
+}  // namespace cobs_serial

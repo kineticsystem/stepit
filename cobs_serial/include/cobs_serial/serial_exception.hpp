@@ -33,7 +33,7 @@
 #include <string>
 #include <sstream>
 
-namespace data_interface
+namespace cobs_serial
 {
 class SerialException : public std::exception
 {
@@ -61,4 +61,4 @@ public:
     return what_.c_str();
   }
 };
-}  // namespace data_interface
+}  // namespace cobs_serial

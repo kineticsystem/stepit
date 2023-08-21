@@ -27,18 +27,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
-#include <data_interface/crc_utils.hpp>
+#pragma once
 
-namespace data_interface::test
+#include <gmock/gmock.h>
+#include <cobs_serial/serial.hpp>
+
+namespace cobs_serial::test
 {
-TEST(TestCrcUtils, calculate_crc)
+class MockSerial : public cobs_serial::Serial
 {
-  ASSERT_EQ(data_interface::crc_ccitt({ 0xA1, 0xB2, 0xC3, 0xD4, 0xE5, 0xF6 }), 0x3B07);
-  ASSERT_EQ(data_interface::crc_ccitt({ 0xE2, 0x12, 0xF1, 0xFF, 0x00, 0xD2 }), 0x7071);
-  ASSERT_EQ(data_interface::crc_ccitt({ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }), 0xFBE9);
-  ASSERT_EQ(data_interface::crc_ccitt({ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }), 0x0000);
-  ASSERT_EQ(data_interface::crc_ccitt({ 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 }), 0x2189);
-  ASSERT_EQ(data_interface::crc_ccitt({ 0x80, 0x00, 0x00, 0x03 }), 0x1ff5);
-}
-}  // namespace data_interface::test
+public:
+  MOCK_METHOD(void, open, (), (override));
+  MOCK_METHOD(bool, is_open, (), (override, const));
+  MOCK_METHOD(void, close, (), (override));
+  MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size), (override));
+  MOCK_METHOD(std::size_t, write, (const uint8_t* buffer, size_t size), (override));
+  MOCK_METHOD(void, set_port, (const std::string& port), (override));
+  MOCK_METHOD(std::string, get_port, (), (override, const));
+  MOCK_METHOD(void, set_timeout, (uint32_t timeout), (override));
+  MOCK_METHOD(uint32_t, get_timeout, (), (override, const));
+  MOCK_METHOD(void, set_baudrate, (uint32_t baudrate), (override));
+  MOCK_METHOD(uint32_t, get_baudrate, (), (override, const));
+};
+}  // namespace cobs_serial::test

@@ -29,24 +29,66 @@
 
 #pragma once
 
-#include <gmock/gmock.h>
-#include <data_interface/serial.hpp>
+#include <cobs_serial/serial.hpp>
+#include <cobs_serial/data_interface.hpp>
+#include <cobs_serial/buffer.hpp>
 
-namespace data_interface::test
+#include <vector>
+#include <cstdint>
+#include <string>
+#include <memory>
+
+namespace cobs_serial
 {
-class MockSerial : public data_interface::Serial
+/**
+ * This class is used to pack a sequence of bytes into a frame and send it to
+ * the serial port and also to parse frames coming from the serial port.
+ * A frames contains the data, a 16-bits CRC and delimiters.
+ */
+class DefaultDataInterface : public DataInterface
 {
 public:
-  MOCK_METHOD(void, open, (), (override));
-  MOCK_METHOD(bool, is_open, (), (override, const));
-  MOCK_METHOD(void, close, (), (override));
-  MOCK_METHOD(std::size_t, read, (uint8_t * buffer, size_t size), (override));
-  MOCK_METHOD(std::size_t, write, (const uint8_t* buffer, size_t size), (override));
-  MOCK_METHOD(void, set_port, (const std::string& port), (override));
-  MOCK_METHOD(std::string, get_port, (), (override, const));
-  MOCK_METHOD(void, set_timeout, (uint32_t timeout), (override));
-  MOCK_METHOD(uint32_t, get_timeout, (), (override, const));
-  MOCK_METHOD(void, set_baudrate, (uint32_t baudrate), (override));
-  MOCK_METHOD(uint32_t, get_baudrate, (), (override, const));
+  explicit DefaultDataInterface(std::unique_ptr<Serial> serial);
+
+  /**
+   * Open the serial connection.
+   */
+  void open() override;
+
+  /**
+   * Close the serial connection.
+   */
+  void close() override;
+
+  /**
+   * Write a sequence of bytes to the serial port.
+   * @param bytes The bytes to read.
+   * @throw cobs_serial::SerialException
+   */
+  void write(const std::vector<uint8_t>& bytes) override;
+
+  /**
+   * Read a sequence of bytes from the serial port.
+   * @return The bytes read.
+   * @throw cobs_serial::SerialException
+   */
+  std::vector<uint8_t> read() override;
+
+private:
+  /* States used while reading and parsiong a frame. */
+  enum class ReadState
+  {
+    Waiting,
+    ReadingMessage,
+    ReadingEscapedByte
+  } state_ = ReadState::Waiting;
+
+  /* Circular buffer to read data from the serial port. */
+  Buffer<uint8_t> read_buffer_{ 100 };
+
+  /* Circular buffer to write data to the serial port. */
+  Buffer<uint8_t> write_buffer_{ 100 };
+
+  std::unique_ptr<Serial> serial_;
 };
-}  // namespace data_interface::test
+}  // namespace cobs_serial

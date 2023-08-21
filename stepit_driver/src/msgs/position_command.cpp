@@ -30,7 +30,7 @@
 #include <stepit_driver/msgs/position_command.hpp>
 #include <stepit_driver/msgs/msgs_ids.hpp>
 
-#include <data_interface/data_utils.hpp>
+#include <cobs_serial/data_utils.hpp>
 
 namespace stepit_driver
 {

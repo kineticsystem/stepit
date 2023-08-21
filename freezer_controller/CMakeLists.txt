@@ -16,7 +16,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # software find all required transitive dependencies to use this library.
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     controller_interface
-    data_interface
+    cobs_serial
     freezer_msgs
     pluginlib
     rclcpp
@@ -29,7 +29,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(controller_interface REQUIRED)
-find_package(data_interface REQUIRED)
+find_package(cobs_serial REQUIRED)
 find_package(freezer_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)

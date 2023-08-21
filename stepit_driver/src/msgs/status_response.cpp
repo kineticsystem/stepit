@@ -29,7 +29,7 @@
 
 #include <stepit_driver/msgs/status_response.hpp>
 
-#include <data_interface/data_utils.hpp>
+#include <cobs_serial/data_utils.hpp>
 
 namespace stepit_driver
 {

@@ -33,13 +33,15 @@
 #include <stepit_driver/default_driver.hpp>
 #include <stepit_driver/msgs/msgs.hpp>
 
-#include <data_interface/data_utils.hpp>
+#include <cobs_serial/data_utils.hpp>
 
 namespace stepit_driver::test
 {
 using ::testing::_;
 using ::testing::Return;
 using ::testing::SaveArg;
+
+using namespace cobs_serial::data_utils;
 
 /**
  * In this test we send a status query to the request interface,
@@ -91,7 +93,7 @@ TEST(TestDefaultDriver, send_status_query)
 
   StatusResponse response = driver->get_status(rclcpp::Time{}, request);
 
-  ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
+  ASSERT_THAT(to_hex(actual_request), to_hex(expected_request));
 
   ASSERT_EQ(static_cast<std::size_t>(2), response.motor_states().size());
   ASSERT_EQ(32100, response.motor_states()[0].position());
@@ -133,7 +135,7 @@ TEST(TestDefaultDriver, send_velocity_command)
   VelocityCommand request{ { VelocityGoal{ 0, 0.5 }, VelocityGoal{ 1, 0.75 } } };
   AcknowledgeResponse response = driver->set_velocity(rclcpp::Time{}, request);
 
-  ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
+  ASSERT_THAT(to_hex(actual_request), to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 
@@ -170,7 +172,7 @@ TEST(TestDefaultDriver, send_position_command)
   PositionCommand request{ { PositionGoal{ 0, 0.5 }, PositionGoal{ 1, 0.75 } } };
   AcknowledgeResponse response = driver->set_position(rclcpp::Time{}, request);
 
-  ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
+  ASSERT_THAT(to_hex(actual_request), to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 
@@ -215,7 +217,7 @@ TEST(TestDefaultDriver, send_configure_command)
   ConfigCommand request{ { ConfigParam{ 0, 0.5, 0.75 }, ConfigParam{ 1, 0.5, 0.75 } } };
   AcknowledgeResponse response = driver->configure(request);
 
-  ASSERT_THAT(data_interface::to_hex(actual_request), data_interface::to_hex(expected_request));
+  ASSERT_THAT(to_hex(actual_request), to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
 }
 

@@ -28,8 +28,8 @@
  */
 
 #include <stepit_driver/default_driver.hpp>
-#include <data_interface/default_serial.hpp>
-#include <data_interface/default_data_interface.hpp>
+#include <cobs_serial/default_serial.hpp>
+#include <cobs_serial/default_data_interface.hpp>
 
 #include "command_line_utility.hpp"
 
@@ -38,7 +38,7 @@
 // This is a command to read the status of the gripper.
 
 using namespace stepit_driver;
-using namespace data_interface;
+using namespace cobs_serial;
 
 constexpr auto kUsbPort = "/dev/ttyACM0";
 constexpr auto kBaudRate = 9600;

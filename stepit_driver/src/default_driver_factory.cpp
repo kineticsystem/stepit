@@ -31,8 +31,8 @@
 #include <stepit_driver/default_driver_factory.hpp>
 #include <stepit_driver/fake/fake_driver.hpp>
 
-#include <data_interface/default_serial.hpp>
-#include <data_interface/default_data_interface.hpp>
+#include <cobs_serial/default_serial.hpp>
+#include <cobs_serial/default_data_interface.hpp>
 
 namespace stepit_driver
 {
@@ -58,12 +58,12 @@ stepit_driver::DefaultDriverFactory::create(const hardware_interface::HardwareIn
     uint32_t timeout_ms = static_cast<uint32_t>(round(timeout * 1e3));
     RCLCPP_INFO(kLogger, "timeout: %f", timeout);
 
-    auto serial = std::make_unique<data_interface::DefaultSerial>();
+    auto serial = std::make_unique<cobs_serial::DefaultSerial>();
     serial->set_port(usb_port);
     serial->set_baudrate(baud_rate);
     serial->set_timeout(timeout_ms);
 
-    return std::make_unique<DefaultDriver>(std::make_unique<data_interface::DefaultDataInterface>(std::move(serial)));
+    return std::make_unique<DefaultDriver>(std::make_unique<cobs_serial::DefaultDataInterface>(std::move(serial)));
   }
 }
 }  // namespace stepit_driver

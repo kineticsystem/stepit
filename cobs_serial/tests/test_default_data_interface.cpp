@@ -28,12 +28,12 @@
  */
 
 #include <gmock/gmock.h>
-#include <data_interface/default_data_interface.hpp>
-#include <data_interface/data_utils.hpp>
-#include <data_interface/serial_exception.hpp>
+#include <cobs_serial/default_data_interface.hpp>
+#include <cobs_serial/data_utils.hpp>
+#include <cobs_serial/serial_exception.hpp>
 #include <mock/mock_serial.hpp>
 
-namespace data_interface::test
+namespace cobs_serial::test
 {
 
 using ::testing::_;
@@ -80,9 +80,9 @@ TEST(TestDefaultDataInterface, write)
   };
   EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   data_interface.write(data);
-  ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
+  ASSERT_THAT(data_utils::to_hex(actual_frame), data_utils::to_hex(expected_frame));
 }
 
 /**
@@ -126,9 +126,9 @@ TEST(TestDefaultDataInterface, write_escaped_data)
   };
   EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   data_interface.write(data);
-  ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
+  ASSERT_THAT(data_utils::to_hex(actual_frame), data_utils::to_hex(expected_frame));
 }
 
 /**
@@ -184,9 +184,9 @@ TEST(TestDefaultDataInterface, write_escaped_crc)
   };
   EXPECT_CALL(*serial, write(_, _)).WillRepeatedly(Invoke(write));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   data_interface.write(data);
-  ASSERT_THAT(data_interface::to_hex(actual_frame), data_interface::to_hex(expected_frame));
+  ASSERT_THAT(data_utils::to_hex(actual_frame), data_utils::to_hex(expected_frame));
 }
 
 /**
@@ -199,20 +199,20 @@ TEST(TestDefaultDataInterface, write_error)
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(*serial, write(_, _)).WillOnce(Return(0));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
         {
           data_interface.write({ 0, 0 });
         }
-        catch (const data_interface::SerialException& e)
+        catch (const cobs_serial::SerialException& e)
         {
           EXPECT_STREQ("SerialException: error writing to the serial port.", e.what());
           throw;
         }
       },
-      data_interface::SerialException);
+      cobs_serial::SerialException);
 }
 
 /**
@@ -252,9 +252,9 @@ TEST(TestDefaultDataInterface, read)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   std::vector<uint8_t> actual_data = data_interface.read();
-  ASSERT_THAT(data_interface::to_hex(actual_data), data_interface::to_hex(expected_data));
+  ASSERT_THAT(data_utils::to_hex(actual_data), data_utils::to_hex(expected_data));
 }
 
 /**
@@ -295,9 +295,9 @@ TEST(TestDefaultDataInterface, read_escaped)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   std::vector<uint8_t> actual_data = data_interface.read();
-  ASSERT_THAT(data_interface::to_hex(actual_data), data_interface::to_hex(expected_data));
+  ASSERT_THAT(data_utils::to_hex(actual_data), data_utils::to_hex(expected_data));
 }
 
 /**
@@ -329,20 +329,20 @@ TEST(TestDefaultDataInterface, read_crc_error)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
         {
           std::vector<uint8_t> actual_data = data_interface.read();
         }
-        catch (const data_interface::SerialException& e)
+        catch (const cobs_serial::SerialException& e)
         {
           EXPECT_STREQ("SerialException: CRC error.", e.what());
           throw;
         }
       },
-      data_interface::SerialException);
+      cobs_serial::SerialException);
 }
 
 /**
@@ -372,20 +372,20 @@ TEST(TestDefaultDataInterface, read_incorrect_frame_length)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
         {
           std::vector<uint8_t> actual_data = data_interface.read();
         }
-        catch (const data_interface::SerialException& e)
+        catch (const cobs_serial::SerialException& e)
         {
           EXPECT_STREQ("SerialException: incorrect frame length.", e.what());
           throw;
         }
       },
-      data_interface::SerialException);
+      cobs_serial::SerialException);
 }
 
 /**
@@ -418,20 +418,20 @@ TEST(TestDefaultDataInterface, read_start_delimiter_missing)
   };
   EXPECT_CALL(*serial, read(_, _)).WillRepeatedly(Invoke(read));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
         {
           std::vector<uint8_t> actual_data = data_interface.read();
         }
-        catch (const data_interface::SerialException& e)
+        catch (const cobs_serial::SerialException& e)
         {
           EXPECT_STREQ("SerialException: start delimiter missing.", e.what());
           throw;
         }
       },
-      data_interface::SerialException);
+      cobs_serial::SerialException);
 }
 
 /**
@@ -444,19 +444,19 @@ TEST(TestDefaultDataInterface, read_timeout)
   // We mock the read to simulate a timeout by returning 0 bytes.
   EXPECT_CALL(*serial, read(_, _)).WillOnce(Return(0));
 
-  data_interface::DefaultDataInterface data_interface{ std::move(serial) };
+  cobs_serial::DefaultDataInterface data_interface{ std::move(serial) };
   EXPECT_THROW(
       {
         try
         {
           std::vector<uint8_t> actual_data = data_interface.read();
         }
-        catch (const data_interface::SerialException& e)
+        catch (const cobs_serial::SerialException& e)
         {
           EXPECT_STREQ("SerialException: timeout.", e.what());
           throw;
         }
       },
-      data_interface::SerialException);
+      cobs_serial::SerialException);
 }
-}  // namespace data_interface::test
+}  // namespace cobs_serial::test

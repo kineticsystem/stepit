@@ -15,13 +15,13 @@ endif()
 # test_data_utils
 
 ament_add_gmock(test_data_utils test_data_utils.cpp)
-target_link_libraries(test_data_utils data_interface)
+target_link_libraries(test_data_utils cobs_serial)
 
 ###############################################################################
 # test_crc_utils
 
 ament_add_gmock(test_crc_utils test_crc_utils.cpp)
-target_link_libraries(test_crc_utils data_interface)
+target_link_libraries(test_crc_utils cobs_serial)
 
 ###############################################################################
 # test_default_data_interface
@@ -33,4 +33,4 @@ ament_add_gmock(test_default_data_interface
 target_include_directories(test_default_data_interface
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
 )
-target_link_libraries(test_default_data_interface data_interface)
+target_link_libraries(test_default_data_interface cobs_serial)

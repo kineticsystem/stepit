@@ -50,7 +50,7 @@
  * For a sample implementation of different CRC-16 see
  * http://www.lammertbies.nl/comm/software/
  */
-namespace data_interface
+namespace cobs_serial
 {
 /**
  * This method updates the given CRC adding a new byte to the original
@@ -72,4 +72,4 @@ namespace data_interface
  */
 [[nodiscard]] uint16_t crc_ccitt(const std::vector<uint8_t>& buffer);
 
-}  // namespace data_interface
+}  // namespace cobs_serial

@@ -2,10 +2,10 @@
 
 # IMPORTANT: the code does not compile with C++20.
 # See https://bytemeta.vip/repo/ros2/rclcpp/issues/1936
-# A fix has been already applied on the next release of Humble.
+# A fix has been already applied to the next release of Humble.
 
 cmake_minimum_required(VERSION 3.22.1)
-project(data_interface VERSION 0.1.0 LANGUAGES CXX)
+project(cobs_serial VERSION 0.1.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 
 # Enable output of compile commands during generation.
@@ -27,42 +27,42 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(serial REQUIRED)
 
-# Build data_interface library.
+# Build the main library.
 
 # CMake does not need headers listed here and it is generally recommended not
-# to add them to avoid additional maintenance burden.
+# to add them to avoid additional maintenance burdens.
 # Unfortunately, QtCreator needs them to display them in the class view,
 # for easily navigating between class and header files (F4) and for automatic
 # code formatting.
-# The time spent in the IDE is longer than the time spend maintaining this
+# The time spent in the IDE is longer than the time spent maintaining this
 # list, so we added the header files too.
 add_library(
-    data_interface
+    cobs_serial
     SHARED
-    include/data_interface/buffer.hpp
-    include/data_interface/crc_utils.hpp
-    include/data_interface/default_data_interface.hpp
-    include/data_interface/data_interface.hpp
-    include/data_interface/data_utils.hpp
-    include/data_interface/serial_exception.hpp
-    include/data_interface/default_serial.hpp
-    include/data_interface/serial.hpp
+    include/cobs_serial/buffer.hpp
+    include/cobs_serial/crc_utils.hpp
+    include/cobs_serial/default_data_interface.hpp
+    include/cobs_serial/data_interface.hpp
+    include/cobs_serial/data_utils.hpp
+    include/cobs_serial/serial_exception.hpp
+    include/cobs_serial/default_serial.hpp
+    include/cobs_serial/serial.hpp
     src/crc_utils.cpp
     src/default_data_interface.cpp
     src/data_utils.cpp
     src/default_serial.cpp
 )
 target_include_directories(
-    data_interface
+    cobs_serial
     PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
 ament_target_dependencies(
-    data_interface
+    cobs_serial
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-target_compile_features(data_interface
+target_compile_features(cobs_serial
     PUBLIC cxx_std_17
 )
 
@@ -71,16 +71,16 @@ target_compile_features(data_interface
 
 # This is necessary to allow this library’s clients to use the syntax
 # target_link_libraries(client <pkg>::<target_name>)
-# target_link_libraries(client data_interface::data_interface)
+# target_link_libraries(client cobs_serial::cobs_serial)
 # Without this a client cannot find this library.
 # It can take an arbitrary list of targets named as EXPORT in an install call.
 ament_export_targets(
-    data_interface_targets # Must match the EXPORT label below.
+    cobs_serial_targets # Must match the EXPORT label below.
 )
 # Help downstream packages to find transitive dependencies i.e. export all
 # dependencies required by a package to use this library.
-# When a package calls find_package(data_interface), CMake looks for a file
-# called data_interfaceConfig.cmake which sets up everything another project
+# When a package calls find_package(cobs_serial), CMake looks for a file
+# called cobs_serialConfig.cmake which sets up everything another project
 # would need to depend on this one.
 ament_export_dependencies(
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
@@ -91,13 +91,13 @@ ament_export_include_directories(
 )
 # Tell downstream packages our libraries to link against.
 ament_export_libraries(
-    data_interface
+    cobs_serial
 )
 
 ###############################################################################
 # INSTALL
 
-# Install all files of the include folder into the give destination.
+# Install all files of the include folder into the given destination.
 install(
     DIRECTORY include/
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}          # include
@@ -105,8 +105,8 @@ install(
 
 # Install our library.
 install(
-    TARGETS data_interface
-    EXPORT data_interface_targets
+    TARGETS cobs_serial
+    EXPORT cobs_serial_targets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}      # lib
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}      # lib
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}      # bin

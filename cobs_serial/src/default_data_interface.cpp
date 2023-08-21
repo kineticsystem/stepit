@@ -27,17 +27,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <data_interface/default_data_interface.hpp>
+#include <cobs_serial/default_data_interface.hpp>
 
-#include <data_interface/crc_utils.hpp>
-#include <data_interface/data_utils.hpp>
-#include <data_interface/serial_exception.hpp>
+#include <cobs_serial/crc_utils.hpp>
+#include <cobs_serial/data_utils.hpp>
+#include <cobs_serial/serial_exception.hpp>
 
 #include <rclcpp/logging.hpp>
 
 #include <cstdint>
 
-namespace data_interface
+namespace cobs_serial
 {
 constexpr auto kLogger = "DataHandler";
 
@@ -119,7 +119,7 @@ std::vector<uint8_t> DefaultDataInterface::read()
             data.emplace_back(read_buffer_.remove(BufferPosition::Head));
           }
 
-          RCLCPP_ERROR(rclcpp::get_logger(kLogger), "CRC error on data: %s", to_hex(data).c_str());
+          RCLCPP_ERROR(rclcpp::get_logger(kLogger), "CRC error on data: %s", data_utils::to_hex(data).c_str());
           throw SerialException("CRC error");
         }
         else
@@ -182,4 +182,4 @@ void DefaultDataInterface::write(const std::vector<uint8_t>& buffer)
   }
 }
 
-}  // namespace data_interface
+}  // namespace cobs_serial

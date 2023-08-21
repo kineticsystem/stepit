@@ -13,7 +13,7 @@ find_package(ament_cmake REQUIRED)
 find_package(ros2_control REQUIRED)
 find_package(ros2_controllers REQUIRED)
 find_package(stepit_driver REQUIRED)
-find_package(data_interface REQUIRED)
+find_package(cobs_serial REQUIRED)
 
 add_executable(get_status
     src/get_status.cpp

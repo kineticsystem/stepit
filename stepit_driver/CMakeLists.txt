@@ -18,7 +18,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # software find all required transitive dependencies to use this library.
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     hardware_interface
-    data_interface
+    cobs_serial
     pluginlib
     rclcpp
     rclcpp_lifecycle
@@ -30,7 +30,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(hardware_interface REQUIRED)
-find_package(data_interface REQUIRED)
+find_package(cobs_serial REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)

@@ -30,11 +30,11 @@
 #pragma once
 
 #include <gmock/gmock.h>
-#include <data_interface/data_interface.hpp>
+#include <cobs_serial/data_interface.hpp>
 
 namespace stepit_driver::test
 {
-class MockDataInterface : public data_interface::DataInterface
+class MockDataInterface : public cobs_serial::DataInterface
 {
 public:
   MOCK_METHOD(void, open, (), (override));

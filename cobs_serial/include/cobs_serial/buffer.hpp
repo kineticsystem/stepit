@@ -31,7 +31,7 @@
 
 #include <vector>
 
-namespace data_interface
+namespace cobs_serial
 {
 
 enum class BufferPosition
@@ -153,4 +153,4 @@ T Buffer<T>::remove(BufferPosition position)
   }
   return out;
 }
-}  // namespace data_interface
+}  // namespace cobs_serial
