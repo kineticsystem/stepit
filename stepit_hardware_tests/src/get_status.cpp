@@ -44,7 +44,7 @@ using namespace cobs_serial;
 
 constexpr auto kUsbPort = "/dev/ttyACM0";
 constexpr auto kBaudRate = 9600;
-constexpr auto kTimeout = 200;  // milliseconds
+constexpr auto kTimeout = 0.2;
 
 int main(int argc, char* argv[])
 {
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
   cli.registerHandler(
       "--baudrate", [&baudrate](const char* value) { baudrate = std::stoi(value); }, false);
 
-  int timeout = kTimeout;
+  double timeout = kTimeout;
   cli.registerHandler(
       "--timeout", [&timeout](const char* value) { timeout = std::stoi(value); }, false);
 
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
               << "Options:\n"
               << "  --port VALUE                 Set the com port (default " << kUsbPort << ")\n"
               << "  --baudrate VALUE             Set the baudrate (default " << kBaudRate << "bps)\n"
-              << "  --timeout VALUE              Set the read/write timeout (default " << kTimeout << "ms)\n"
+              << "  --timeout VALUE              Set the read/write timeout (default " << kTimeout << "s)\n"
               << "  -h                           Show this help message\n";
     exit(0);
   });
@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
     auto serial = std::make_unique<DefaultSerial>();
     serial->set_port(port);
     serial->set_baudrate(baudrate);
-    serial->set_timeout(timeout);
+    serial->set_timeout(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(timeout)));
 
     auto cobs_serial = std::make_unique<DefaultCobsSerial>(std::move(serial));
 
@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     std::cout << "Using the following parameters: " << std::endl;
     std::cout << " - port: " << port << std::endl;
     std::cout << " - baudrate: " << baudrate << "bps" << std::endl;
-    std::cout << " - read/write timeut: " << timeout << "ms" << std::endl;
+    std::cout << " - read/write timeout: " << timeout << "s" << std::endl;
 
     std::cout << "Checking if the driver is connected..." << std::endl;
     bool connected = driver->connect();
