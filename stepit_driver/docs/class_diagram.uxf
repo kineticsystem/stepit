@@ -1,75 +1,74 @@
-<diagram program="umletino" version="15.1"><zoom_level>11</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>385</x><y>561</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+<diagram program="umletino" version="15.1"><zoom_level>11</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>297</x><y>539</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
 &lt;&lt;interface&gt;&gt;
-Serial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>561</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+Serial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>44</x><y>539</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-DefaultSerial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>572</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>451</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+DefaultSerial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>209</x><y>550</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>44</x><y>429</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-DefaultDataInterfacer</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>341</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+DefaultCobsSerial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>44</x><y>319</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-DefaultDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>484</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>374</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>132</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+DefaultDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>209</x><y>462</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>209</x><y>352</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>44</x><y>209</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-StepitHardware</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>264</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>385</x><y>451</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
-transparency=0
-bg=#FFFFFF
-&lt;&lt;interface&gt;&gt;
-DataInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>385</x><y>341</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+StepitHardware</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>209</x><y>242</y><w>110</w><h>99</h></coordinates><panel_attributes>lt=&lt;-</panel_attributes><additional_attributes>80;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>297</x><y>429</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
 &lt;&lt;interface&gt;&gt;
-Driver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>462</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>297</x><y>352</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>638</x><y>561</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+CobsSerial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>297</x><y>319</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-MockSerial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>572</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>638</x><y>451</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+&lt;&lt;interface&gt;&gt;
+Driver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>209</x><y>440</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>209</x><y>330</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>550</x><y>539</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-Mock
-DataInterface</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>638</x><y>341</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+MockSerial</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>462</x><y>550</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>550</x><y>429</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-MockDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>462</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>352</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>385</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+MockCobsSerial</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>550</x><y>319</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-FakeDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>462</x><y>264</y><w>77</w><h>99</h></coordinates><panel_attributes>lt=&lt;&lt;-
-{default}</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>627</x><y>308</y><w>198</w><h>308</h></coordinates><panel_attributes>Test</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>935</x><y>330</y><w>363</w><h>132</h></coordinates><panel_attributes>transparency=0
+MockDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>462</x><y>440</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>Relation</id><coordinates><x>462</x><y>330</y><w>110</w><h>33</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;80;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>297</x><y>209</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+transparency=0
+bg=#FFFFFF
+FakeDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>374</x><y>242</y><w>77</w><h>99</h></coordinates><panel_attributes>lt=&lt;&lt;-
+{default}</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>539</x><y>286</y><w>198</w><h>308</h></coordinates><panel_attributes>Test</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>847</x><y>308</y><w>363</w><h>132</h></coordinates><panel_attributes>transparency=0
 bg=#FFFFFF
 &lt;&lt;interface&gt;&gt;
 Driver
 --
-+send(MotorConfigCommand): AcknowledgeResponse
-+send(MotorPositionCommand): AcknowledgeResponse
-+send(MotorVelocityCommand): AcknowledgeResponse
-+send(MotorStatusQuery): MotorStatusResponse
++configure(ConfigCommand): AcknowledgeResponse
++set_position(PositionCommand): AcknowledgeResponse
++set_velocity(VelocityCommand): AcknowledgeResponse
++get_status(StatusQuery): MotorStatusResponse
 +init(): void
 
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1001</x><y>484</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>913</x><y>462</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-MotorConfigCommand</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1001</x><y>539</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+MotorConfigCommand</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>913</x><y>517</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-MotorPositionCommand</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>935</x><y>451</y><w>88</w><h>77</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>60;50;10;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>935</x><y>495</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>60;60;10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1001</x><y>594</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+MotorPositionCommand</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>847</x><y>429</y><w>88</w><h>77</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>60;50;10;50;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>847</x><y>473</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>60;60;10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>913</x><y>572</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-MotorVelocityCommand</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>935</x><y>550</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>60;60;10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1287</x><y>484</y><w>88</w><h>44</h></coordinates><panel_attributes>valign=center
+MotorVelocityCommand</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>847</x><y>528</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>60;60;10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1199</x><y>462</y><w>88</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-Request</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1166</x><y>495</y><w>143</w><h>33</h></coordinates><panel_attributes>lt=-&gt;&gt;</panel_attributes><additional_attributes>10;10;110;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1166</x><y>495</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;60;60;60;60;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1166</x><y>550</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;60;60;60;60;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>935</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+Request</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1078</x><y>473</y><w>143</w><h>33</h></coordinates><panel_attributes>lt=-&gt;&gt;</panel_attributes><additional_attributes>10;10;110;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1078</x><y>473</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;60;60;60;60;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1078</x><y>528</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;60;60;60;60;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>847</x><y>209</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-DefaultDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1012</x><y>264</y><w>33</w><h>88</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>638</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+DefaultDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>924</x><y>242</y><w>33</w><h>88</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>550</x><y>209</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-FakeMotor</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>550</x><y>242</y><w>110</w><h>44</h></coordinates><panel_attributes>lt=&lt;-
-m1=*</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1122</x><y>231</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+FakeMotor</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>462</x><y>220</y><w>110</w><h>44</h></coordinates><panel_attributes>lt=&lt;-
+m1=*</panel_attributes><additional_attributes>80;10;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1034</x><y>209</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-FakeDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1199</x><y>264</y><w>33</w><h>88</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1001</x><y>649</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
+FakeDriver</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1111</x><y>242</y><w>33</w><h>88</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>913</x><y>627</y><w>176</w><h>44</h></coordinates><panel_attributes>valign=center
 transparency=0
 bg=#FFFFFF
-MotorStatusQuery</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>935</x><y>605</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>60;60;10;60;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1166</x><y>605</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;60;60;60;60;10</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>374</x><y>198</y><w>451</w><h>88</h></coordinates><panel_attributes>Simulation</panel_attributes><additional_attributes></additional_attributes></element></diagram>
+MotorStatusQuery</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>847</x><y>583</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=&lt;.</panel_attributes><additional_attributes>60;60;10;60;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1078</x><y>583</y><w>88</w><h>88</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;60;60;60;60;10</additional_attributes></element><element><id>UMLPackage</id><coordinates><x>286</x><y>176</y><w>451</w><h>88</h></coordinates><panel_attributes>Simulation</panel_attributes><additional_attributes></additional_attributes></element></diagram>

@@ -1,3 +1,0 @@
-REINTERPRET CAST
-
-reinterpret_cast is used when you want to convert one type to another fundamentally different type without changing the bits.
