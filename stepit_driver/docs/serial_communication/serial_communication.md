@@ -1,26 +1,32 @@
-# Arduino serial communication
+# Serial Communication for Teensy
 
-## Introduction
+## Overview
 
-To control stepper motors connected to a Teensy board via motor drivers, we need first a solution to send commands to the microcontroller using the serial port. Because ROS is the most common open-source framework in robotics, we would like to create a ROS node to deal with the low-level communication with the Teensy and use it as a proxy in all our robotics projects.
+The objective of this document is to detail the protocol and technicalities of establishing a serial communication link between stepper motors connected to a Teensy microcontroller board and a Robotic Operating System (ROS) node. ROS is the prevailing open-source framework in the field of robotics. Our intention is to design a ROS node responsible for low-level communications with the Teensy board, thus acting as a middleware layer for robotic applications.
 
-In ROS1, there is a valuable library to exchange information to and from microcontrollers: this library is [rosserial](http://wiki.ros.org/rosserial). The official library description is that rosserial is a protocol for wrapping standard ROS serialized messages and multiplexing multiple topics and services over a character device such as a serial port or network socket. Unfortunately, this library is unavailable in ROS2; the closest option is [Micro-ROS](https://micro.ros.org/docs/overview/features/), but it does not support AVR 8-bit microcontrollers, including Arduino Uno and Arduino Nano.
+Traditionally, ROS1 provided a feature-rich library known as [rosserial](http://wiki.ros.org/rosserial) for serial communications with microcontrollers. However, ROS2 lacks native support for the same. The closest alternative is [Micro-ROS](https://micro.ros.org/docs/overview/features/), which is unfortunately incompatible with AVR 8-bit microcontrollers like Arduino Uno and Arduino Nano.
 
-For this reason, we implemented a simple Point-to-Point Protocol (PPP) data link layer from scratch to send and receive data to and from the Teensy microcontroller over a serial connection. On top of it, we implemented a Request/Response communication pattern between a C++ ROS2 node and Arduino. Please refer to [Point-to-PointProtocol.pdf (PPP)](<./references/Point-to-Point%20Protocol%20(PPP).pdf>) for more information.
+To bridge this gap, we have devised a frame-based serial communication protocol employing Consistent Overhead Byte Stuffing (COBS). This protocol facilitates Request/Response communication patterns between a C++ ROS2 node and the Teensy board, thereby enabling effective data exchange.
 
-PPP separates frames by using the delimiter flag 0x7e. Should the same byte code appear in the frame data, the escape flag 0x7D will be inserted in place, followed by the delimiter flag XOR'd with 0x20, resulting in the sequence of two bytes 0x7d 0x5e. Following is a table describing a frame structure.
+### Technical Specifications
+
+The COBS algorithm utilizes a delimiter flag `0x7e` to distinguish between different frames. In scenarios where the delimiter flag appears within the frame data, an escape flag `0x7D` is introduced, followed by the XOR of the delimiter flag with `0x20`. The resulting two-byte sequence becomes `0x7d 0x5e`.
+
+Below is the structure of a data frame:
 
 <table align="center" border="2px">
-  <tr><td><b>PPP frame</b></td></tr>
-  <tr><td>delimiter flag</td></tr>
-  <tr><td>...</td></tr>
-  <tr><td>data</td></tr>
-  <tr><td>...</td></tr>
-  <tr><td>checksum</td></tr>
-  <tr><td>delimiter flag</td></tr>
+  <tr><td align="center"><b>Frame</b></td></tr>
+  <tr><td align="center">Delimiter flag</td></tr>
+  <tr><td align="center">...</td></tr>
+  <tr><td align="center">Data</td></tr>
+  <tr><td align="center">...</td></tr>
+  <tr><td align="center">Checksum</td></tr>
+  <tr><td align="center">Delimiter flag</td></tr>
 </table>
 
-In this implementation, each frame contains a command and all required parameters in binary format. The following example shows a Move Command request to move motor 0 forward 20000 steps and the corresponding response.
+Each frame encapsulates a specific command along with its requisite parameters in binary format. A practical example representing a 'Move Command' to propel motor 0 forward by 20,000 steps is detailed below.
+
+Request:
 
 <table align="center" border="2px">
   <tr>
@@ -61,6 +67,8 @@ In this implementation, each frame contains a command and all required parameter
   </tr>
 </table>
 
+Response:
+
 <table align="center" border="2px">
   <tr>
     <td align="center"><b>Delimiter</b></td>
@@ -83,7 +91,9 @@ In this implementation, each frame contains a command and all required parameter
   </tr>
 </table>
 
-Following is a short list of all numeric Arduino data types.
+## Data Types and Byte Order
+
+For reference, listed below are the numeric data types supported by Arduino:
 
 <table align="center" border="2px">
   <tr><td><b>Type</b></td><td><b>Bytes</b></td></tr>
@@ -102,13 +112,13 @@ Following is a short list of all numeric Arduino data types.
   <tr><td>double</td><td>4 bytes</td></tr>
 </table>
 
-As a general rule in network communication, when sending a value of type int, long, or float, the Most Significant Byte (MSB) is transmitted first.
+In network communications, values of type `int`, `long`, and `float` are transmitted with the Most Significant Byte (MSB) first.
 
-## Commands
+## Command Interface
 
-As stated at the beginning of the document, the project's main scope is to control stepper motors connected to a Teensy microcontroller via a motor driver circuit. A motor does not move instantaneously at maximum speed but accelerates, maintains a predefined velocity, and then decelerates until reaching the target position. To control the motor movement with acceleration and deceleration, we use an Arduino well-known library called [AccelStepper](https://www.airspayce.com/mikem/arduino/AccelStepper/).
+The primary focus of this project lies in the real-time control of stepper motors connected to a Teensy microcontroller via motor driver circuits. For advanced control that includes acceleration and deceleration, we leverage the [AccelStepper](https://www.airspayce.com/mikem/arduino/AccelStepper/) library.
 
-Following is a list of all desired commands to control the motor movements.
+Below are the supported commands for controlling motor movements:
 
 <table align="center" border="2px">
     <tr>
@@ -158,3 +168,7 @@ Following is a list of all desired commands to control the motor movements.
         <td colspan="3"></td>
     </tr>
 </table>
+
+Note: Multiple position or speed parameters can be set in a single command by repeating the corresponding segments.
+
+By implementing these protocols and command sets, we aim to facilitate seamless communication for robotic applications that involve stepper motors and ROS environments.
