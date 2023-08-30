@@ -12,7 +12,7 @@ https://string-functions.com/string-hex.aspx
 On-line CRC calculation and free library
 https://www.lammertbies.nl/comm/info/crc-calculation
 
-With the first you can copy and paste the text received in the Serial Monitor to convert it into a sequence of Hexadecimal numbers.
+With the first, you can copy and paste the text received in the Serial Monitor to convert it into a sequence of Hexadecimal numbers.
 
 With the second you can calculate the CRC-16 of a sequence of Hexadecimal numbers.
 
