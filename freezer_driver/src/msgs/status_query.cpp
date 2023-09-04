@@ -28,10 +28,10 @@
  */
 
 #include <freezer_driver/msgs/status_query.hpp>
-#include <freezer_driver/msgs/msgs_ids.hpp>
 
 namespace freezer_driver
 {
+constexpr uint8_t kStatusQueryId = 0x75;
 
 StatusQuery::StatusQuery() : Request{}
 {
@@ -39,6 +39,6 @@ StatusQuery::StatusQuery() : Request{}
 
 uint8_t StatusQuery::query_id() const
 {
-  return constants::kMotorStatusQueryId;
+  return kStatusQueryId;
 }
 }  // namespace freezer_driver

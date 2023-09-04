@@ -49,7 +49,6 @@ add_library(
     include/freezer_driver/driver.hpp
     include/freezer_driver/default_driver.hpp
     include/freezer_driver/msgs/msgs.hpp
-    include/freezer_driver/msgs/msgs_ids.hpp
     include/freezer_driver/msgs/request.hpp
     include/freezer_driver/msgs/response.hpp
     include/freezer_driver/msgs/status_query.hpp
