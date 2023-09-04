@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stepit_driver/default_driver.hpp>
+#include <freezer_driver/default_driver.hpp>
 
 #include <cobs_serial/data_utils.hpp>
 
@@ -36,7 +36,7 @@
 
 #include <thread>
 
-namespace stepit_driver
+namespace freezer_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
@@ -82,79 +82,6 @@ void DefaultDriver::disconnect()
   cobs_serial_->close();
 }
 
-AcknowledgeResponse DefaultDriver::configure(const ConfigCommand& command) const
-{
-  std::vector<uint8_t> in;
-  in.emplace_back(command.command_id());
-  for (const auto& param : command.params())
-  {
-    in.emplace_back(param.motor_id());
-    auto acceleration_bytes = from_float(static_cast<float>(param.acceleration()));
-    in.emplace_back(acceleration_bytes[0]);
-    in.emplace_back(acceleration_bytes[1]);
-    in.emplace_back(acceleration_bytes[2]);
-    in.emplace_back(acceleration_bytes[3]);
-    auto max_velocity_bytes = from_float(static_cast<float>(param.max_velocity()));
-    in.emplace_back(max_velocity_bytes[0]);
-    in.emplace_back(max_velocity_bytes[1]);
-    in.emplace_back(max_velocity_bytes[2]);
-    in.emplace_back(max_velocity_bytes[3]);
-  }
-  RCLCPP_DEBUG(kLogger, "Config command: %s", to_hex(in).c_str());
-  cobs_serial_->write(in);
-  std::vector<uint8_t> out = cobs_serial_->read();
-  RCLCPP_DEBUG(kLogger, "Config response: %s", to_hex(out).c_str());
-  Response::Status status{ out[0] };
-  AcknowledgeResponse response{ status };
-  return response;
-}
-
-AcknowledgeResponse DefaultDriver::set_position([[maybe_unused]] const rclcpp::Time& time,
-                                                const PositionCommand& command) const
-{
-  std::vector<uint8_t> in;
-  in.emplace_back(command.command_id());
-  for (const auto& goal : command.goals())
-  {
-    in.emplace_back(goal.motor_id());
-    auto position_bytes = from_float(static_cast<float>(goal.position()));
-    in.emplace_back(position_bytes[0]);
-    in.emplace_back(position_bytes[1]);
-    in.emplace_back(position_bytes[2]);
-    in.emplace_back(position_bytes[3]);
-  }
-  RCLCPP_DEBUG(kLogger, "Position command: %s", to_hex(in).c_str());
-  cobs_serial_->write(in);
-  std::vector<uint8_t> out = cobs_serial_->read();
-  RCLCPP_DEBUG(kLogger, "Position response: %s", to_hex(out).c_str());
-  Response::Status status{ out[0] };
-  AcknowledgeResponse response{ status };
-  return response;
-}
-
-AcknowledgeResponse DefaultDriver::set_velocity([[maybe_unused]] const rclcpp::Time& time,
-                                                const VelocityCommand& command) const
-{
-  std::vector<uint8_t> in;
-  in.emplace_back(command.command_id());
-  for (const auto& goal : command.goals())
-  {
-    in.emplace_back(goal.motor_id());
-    auto velocity_bytes = from_float(static_cast<float>(goal.velocity()));
-    in.emplace_back(velocity_bytes[0]);
-    in.emplace_back(velocity_bytes[1]);
-    in.emplace_back(velocity_bytes[2]);
-    in.emplace_back(velocity_bytes[3]);
-  }
-  RCLCPP_DEBUG(kLogger, "Velocity command: %s", to_hex(in).c_str());
-  cobs_serial_->write(in);
-  std::vector<uint8_t> out = cobs_serial_->read();
-  RCLCPP_DEBUG(kLogger, "Velocity response: %s", to_hex(out).c_str());
-  Response::Status status{ out[0] };
-  AcknowledgeResponse response{ status };
-  return response;
-}
-
 StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
 {
   std::vector<uint8_t> in;
@@ -196,32 +123,4 @@ StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& ti
   return response;
 }
 
-InfoResponse DefaultDriver::get_info([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
-{
-  std::vector<uint8_t> in;
-  in.emplace_back(query.query_id());
-  RCLCPP_DEBUG(kLogger, "Info query: %s", to_hex(in).c_str());
-  cobs_serial_->write(in);
-  auto out = cobs_serial_->read();
-  RCLCPP_DEBUG(kLogger, "Info response: %s", to_hex(out).c_str());
-
-  // The data array contains the following information.
-  //
-  // status               - 1 byte
-  // a variable number of bytes representing a string in ASCII format - N bytes
-
-  std::size_t i = 0;
-  Response::Status status{ out[i++] };
-  std::vector<uint8_t> data;
-  while (i < out.size())
-  {
-    uint8_t ch = out[i++];
-    data.push_back(ch);
-  }
-
-  std::string info{ data.begin(), data.end() };
-  InfoResponse response{ status, info };
-  return response;
-}
-
-}  // namespace stepit_driver
+}  // namespace freezer_driver

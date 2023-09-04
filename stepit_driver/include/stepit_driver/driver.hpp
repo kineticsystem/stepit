@@ -4,8 +4,8 @@
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
@@ -17,30 +17,29 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
 
 #pragma once
 
 #include <stepit_driver/msgs/msgs.hpp>
 
-#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/time.hpp>
 
-namespace stepit_driver
-{
+namespace stepit_driver {
 /**
  * @brief This class receives commands and queries from the
  * hardware interface and sends them to a fake or a real hardware.
  */
-class Driver
-{
+class Driver {
 public:
   virtual ~Driver() = default;
 
@@ -59,7 +58,7 @@ public:
    * @param command A command with all required configuration.
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse configure(const ConfigCommand& command) const = 0;
+  virtual AcknowledgeResponse configure(const ConfigCommand &command) const = 0;
 
   /**
    * @brief Send motor target positions (rad) to the hardware.
@@ -67,7 +66,9 @@ public:
    * @param command A command with all positions (rad).
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse set_position(const rclcpp::Time& time, const PositionCommand& command) const = 0;
+  virtual AcknowledgeResponse
+  set_position(const rclcpp::Time &time,
+               const PositionCommand &command) const = 0;
 
   /**
    * @brief Send motor target velocities (rad/s) to the hardware.
@@ -75,7 +76,9 @@ public:
    * @param command A command with all motor velocities (rad/s).
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse set_velocity(const rclcpp::Time& time, const VelocityCommand& command) const = 0;
+  virtual AcknowledgeResponse
+  set_velocity(const rclcpp::Time &time,
+               const VelocityCommand &command) const = 0;
 
   /**
    * @brief Request the status of each motor connected to the hardware.
@@ -83,14 +86,17 @@ public:
    * @param query A query for the status of each motor.
    * @return Each motor status and a request status, success or failure.
    */
-  virtual StatusResponse get_status(const rclcpp::Time& time, const StatusQuery& query) const = 0;
+  virtual StatusResponse get_status(const rclcpp::Time &time,
+                                    const StatusQuery &query) const = 0;
 
   /**
-   * @brief Request information about the software installed in the micro-controller.
+   * @brief Request information about the software installed in the
+   * micro-controller.
    * @param time The time the command is sent.
    * @param query A query to get the installed software information.
    * @return Information about the installed software.
    */
-  virtual InfoResponse get_info(const rclcpp::Time& time, const InfoQuery& query) const = 0;
+  virtual InfoResponse get_info(const rclcpp::Time &time,
+                                const InfoQuery &query) const = 0;
 };
-}  // namespace stepit_driver
+} // namespace stepit_driver

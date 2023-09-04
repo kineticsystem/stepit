@@ -30,12 +30,12 @@
 
 #pragma once
 
-#include <stepit_driver/msgs/response.hpp>
+#include <freezer_driver/msgs/response.hpp>
 
 #include <cstdint>
 #include <vector>
 
-namespace stepit_driver
+namespace freezer_driver
 {
 // Internal structure to store joint states and targets.
 class MotorState
@@ -78,4 +78,4 @@ public:
 private:
   std::vector<MotorState> motor_states_;
 };
-}  // namespace stepit_driver
+}  // namespace freezer_driver
