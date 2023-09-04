@@ -28,16 +28,17 @@
  */
 
 #include <stepit_driver/msgs/info_query.hpp>
-#include <stepit_driver/msgs/msgs_ids.hpp>
 
 namespace stepit_driver
 {
+constexpr uint8_t kInfoQueryId = 0x76;
+
 InfoQuery::InfoQuery() : Request{}
 {
 }
 
 uint8_t InfoQuery::query_id() const
 {
-  return constants::kInfoQueryId;
+  return kInfoQueryId;
 }
 }  // namespace stepit_driver

@@ -28,17 +28,18 @@
  */
 
 #include <stepit_driver/msgs/config_command.hpp>
-#include <stepit_driver/msgs/msgs_ids.hpp>
 
 namespace stepit_driver
 {
+constexpr uint8_t kMotorConfigCommandId = 0x78;
+
 ConfigCommand::ConfigCommand(const std::vector<ConfigParam>& params) : Request{}, params_{ params }
 {
 }
 
 uint8_t ConfigCommand::command_id() const
 {
-  return constants::kMotorConfigCommandId;
+  return kMotorConfigCommandId;
 }
 
 std::vector<ConfigParam> ConfigCommand::params() const

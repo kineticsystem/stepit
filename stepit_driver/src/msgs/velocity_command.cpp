@@ -28,19 +28,20 @@
  */
 
 #include <stepit_driver/msgs/velocity_command.hpp>
-#include <stepit_driver/msgs/msgs_ids.hpp>
 
 #include <cobs_serial/data_utils.hpp>
 
 namespace stepit_driver
 {
+constexpr uint8_t kMotorVelocityCommandId = 0x77;
+
 VelocityCommand::VelocityCommand(const std::vector<VelocityGoal>& goals) : Request{}, goals_{ goals }
 {
 }
 
 uint8_t VelocityCommand::command_id() const
 {
-  return constants::kMotorVelocityCommandId;
+  return kMotorVelocityCommandId;
 }
 
 std::vector<VelocityGoal> VelocityCommand::goals() const

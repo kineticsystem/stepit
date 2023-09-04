@@ -63,7 +63,6 @@ add_library(
     include/stepit_driver/msgs/info_query.hpp
     include/stepit_driver/msgs/info_response.hpp
     include/stepit_driver/msgs/msgs.hpp
-    include/stepit_driver/msgs/msgs_ids.hpp
     include/stepit_driver/msgs/position_command.hpp
     include/stepit_driver/msgs/request.hpp
     include/stepit_driver/msgs/response.hpp

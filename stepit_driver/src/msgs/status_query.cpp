@@ -28,10 +28,10 @@
  */
 
 #include <stepit_driver/msgs/status_query.hpp>
-#include <stepit_driver/msgs/msgs_ids.hpp>
 
 namespace stepit_driver
 {
+constexpr uint8_t kMotorStatusQueryId = 0x75;
 
 StatusQuery::StatusQuery() : Request{}
 {
@@ -39,6 +39,6 @@ StatusQuery::StatusQuery() : Request{}
 
 uint8_t StatusQuery::query_id() const
 {
-  return constants::kMotorStatusQueryId;
+  return kMotorStatusQueryId;
 }
 }  // namespace stepit_driver
