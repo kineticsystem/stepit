@@ -92,7 +92,7 @@ AcknowledgeResponse FakeDriver::set_velocity(const rclcpp::Time& time, const Vel
   return AcknowledgeResponse{ Response::Status::Success };
 }
 
-StatusResponse FakeDriver::get_status(const rclcpp::Time& time, [[maybe_unused]] const StatusQuery& query) const
+StatusResponse FakeDriver::get_status(const rclcpp::Time& time) const
 {
   std::vector<MotorState> states;
   for (const auto& [motor_id, motor] : motors_)
@@ -106,8 +106,7 @@ StatusResponse FakeDriver::get_status(const rclcpp::Time& time, [[maybe_unused]]
   return StatusResponse(Response::Status::Success, states);
 }
 
-InfoResponse FakeDriver::get_info([[maybe_unused]] const rclcpp::Time& time,
-                                  [[maybe_unused]] const InfoQuery& query) const
+InfoResponse FakeDriver::get_info([[maybe_unused]] const rclcpp::Time& time) const
 {
   return InfoResponse(Response::Status::Success, "STEPIT");
 }

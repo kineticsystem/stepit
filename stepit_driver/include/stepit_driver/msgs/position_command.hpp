@@ -60,7 +60,6 @@ class PositionCommand : public Request
 {
 public:
   explicit PositionCommand(const std::vector<PositionGoal>& goals);
-  uint8_t command_id() const;
   std::vector<PositionGoal> goals() const;
 
 private:

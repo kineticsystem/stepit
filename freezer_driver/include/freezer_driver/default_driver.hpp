@@ -49,7 +49,7 @@ public:
   explicit DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> data_interface);
   bool connect() override;
   void disconnect() override;
-  StatusResponse get_status(const rclcpp::Time& time, const StatusQuery& query) const override;
+  StatusResponse get_status(const rclcpp::Time& time) const override;
 
 private:
   std::unique_ptr<cobs_serial::CobsSerial> cobs_serial_;

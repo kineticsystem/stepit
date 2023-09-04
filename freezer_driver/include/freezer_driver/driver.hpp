@@ -57,9 +57,8 @@ public:
   /**
    * @brief Request the status of the hardware.
    * @param time The time the command is sent.
-   * @param query A query for the status of the hardware.
    * @return the status of the hardware.
    */
-  virtual StatusResponse get_status(const rclcpp::Time& time, const StatusQuery& query) const = 0;
+  virtual StatusResponse get_status(const rclcpp::Time& time) const = 0;
 };
 }  // namespace freezer_driver

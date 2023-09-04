@@ -40,6 +40,11 @@ namespace stepit_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
+constexpr uint8_t kMotorConfigCommandId = 0x78;
+constexpr uint8_t kMotorPositionCommandId = 0x71;
+constexpr uint8_t kInfoQueryId = 0x76;
+constexpr uint8_t kMotorStatusQueryId = 0x75;
+
 using namespace cobs_serial::data_utils;
 
 DefaultDriver::DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> cobs_serial)
@@ -61,8 +66,7 @@ bool DefaultDriver::connect()
     {
       RCLCPP_INFO(kLogger, "Connecting...");
 
-      StatusQuery query{};
-      StatusResponse response = get_status(rclcpp::Time{}, query);
+      StatusResponse response = get_status(rclcpp::Time{});
       connected = response.status() == Response::Status::Success;
 
       RCLCPP_INFO(kLogger, "Connection established");
@@ -85,7 +89,7 @@ void DefaultDriver::disconnect()
 AcknowledgeResponse DefaultDriver::configure(const ConfigCommand& command) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(command.command_id());
+  in.emplace_back(kMotorConfigCommandId);
   for (const auto& param : command.params())
   {
     in.emplace_back(param.motor_id());
@@ -113,7 +117,7 @@ AcknowledgeResponse DefaultDriver::set_position([[maybe_unused]] const rclcpp::T
                                                 const PositionCommand& command) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(command.command_id());
+  in.emplace_back(kMotorPositionCommandId);
   for (const auto& goal : command.goals())
   {
     in.emplace_back(goal.motor_id());
@@ -155,10 +159,10 @@ AcknowledgeResponse DefaultDriver::set_velocity([[maybe_unused]] const rclcpp::T
   return response;
 }
 
-StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
+StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& time) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(query.query_id());
+  in.emplace_back(kMotorStatusQueryId);
   RCLCPP_DEBUG(kLogger, "Status query: %s", to_hex(in).c_str());
   cobs_serial_->write(in);
   auto out = cobs_serial_->read();
@@ -196,10 +200,10 @@ StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& ti
   return response;
 }
 
-InfoResponse DefaultDriver::get_info([[maybe_unused]] const rclcpp::Time& time, const InfoQuery& query) const
+InfoResponse DefaultDriver::get_info([[maybe_unused]] const rclcpp::Time& time) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(query.query_id());
+  in.emplace_back(kInfoQueryId);
   RCLCPP_DEBUG(kLogger, "Info query: %s", to_hex(in).c_str());
   cobs_serial_->write(in);
   auto out = cobs_serial_->read();

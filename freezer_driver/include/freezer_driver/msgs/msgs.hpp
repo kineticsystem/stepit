@@ -29,7 +29,6 @@
 
 #pragma once
 
-#include <freezer_driver/msgs/status_query.hpp>
 #include <freezer_driver/msgs/status_response.hpp>
 #include <freezer_driver/msgs/request.hpp>
 #include <freezer_driver/msgs/response.hpp>

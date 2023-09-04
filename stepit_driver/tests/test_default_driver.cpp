@@ -89,9 +89,8 @@ TEST(TestDefaultDriver, send_status_query)
   EXPECT_CALL(*serial, read()).WillOnce(Return(mocked_response));
 
   auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
-  StatusQuery request{};
 
-  StatusResponse response = driver->get_status(rclcpp::Time{}, request);
+  StatusResponse response = driver->get_status(rclcpp::Time{});
 
   ASSERT_THAT(to_hex(actual_request), to_hex(expected_request));
 

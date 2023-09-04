@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
     std::cout << "The driver is connected." << std::endl;
     std::cout << "Reading the driver status..." << std::endl;
 
-    auto response = driver->get_status(rclcpp::Time{}, StatusQuery{});
+    auto response = driver->get_status(rclcpp::Time{});
 
     std::cout << "Status retrieved:" << std::endl;
 

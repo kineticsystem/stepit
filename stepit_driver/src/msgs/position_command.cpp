@@ -33,15 +33,9 @@
 
 namespace stepit_driver
 {
-constexpr uint8_t kMotorPositionCommandId = 0x71;
 
 PositionCommand::PositionCommand(const std::vector<PositionGoal>& goals) : Request{}, goals_{ goals }
 {
-}
-
-uint8_t PositionCommand::command_id() const
-{
-  return kMotorPositionCommandId;
 }
 
 std::vector<PositionGoal> PositionCommand::goals() const

@@ -34,12 +34,14 @@
 
 #include <rclcpp/time.hpp>
 
-namespace stepit_driver {
+namespace stepit_driver
+{
 /**
  * @brief This class receives commands and queries from the
  * hardware interface and sends them to a fake or a real hardware.
  */
-class Driver {
+class Driver
+{
 public:
   virtual ~Driver() = default;
 
@@ -58,7 +60,7 @@ public:
    * @param command A command with all required configuration.
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse configure(const ConfigCommand &command) const = 0;
+  virtual AcknowledgeResponse configure(const ConfigCommand& command) const = 0;
 
   /**
    * @brief Send motor target positions (rad) to the hardware.
@@ -66,9 +68,7 @@ public:
    * @param command A command with all positions (rad).
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse
-  set_position(const rclcpp::Time &time,
-               const PositionCommand &command) const = 0;
+  virtual AcknowledgeResponse set_position(const rclcpp::Time& time, const PositionCommand& command) const = 0;
 
   /**
    * @brief Send motor target velocities (rad/s) to the hardware.
@@ -76,27 +76,21 @@ public:
    * @param command A command with all motor velocities (rad/s).
    * @return An aknowledgment response, success or failure.
    */
-  virtual AcknowledgeResponse
-  set_velocity(const rclcpp::Time &time,
-               const VelocityCommand &command) const = 0;
+  virtual AcknowledgeResponse set_velocity(const rclcpp::Time& time, const VelocityCommand& command) const = 0;
 
   /**
    * @brief Request the status of each motor connected to the hardware.
    * @param time The time the command is sent.
-   * @param query A query for the status of each motor.
    * @return Each motor status and a request status, success or failure.
    */
-  virtual StatusResponse get_status(const rclcpp::Time &time,
-                                    const StatusQuery &query) const = 0;
+  virtual StatusResponse get_status(const rclcpp::Time& time) const = 0;
 
   /**
    * @brief Request information about the software installed in the
    * micro-controller.
    * @param time The time the command is sent.
-   * @param query A query to get the installed software information.
    * @return Information about the installed software.
    */
-  virtual InfoResponse get_info(const rclcpp::Time &time,
-                                const InfoQuery &query) const = 0;
+  virtual InfoResponse get_info(const rclcpp::Time& time) const = 0;
 };
-} // namespace stepit_driver
+}  // namespace stepit_driver

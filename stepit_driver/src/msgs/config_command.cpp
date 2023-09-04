@@ -31,15 +31,8 @@
 
 namespace stepit_driver
 {
-constexpr uint8_t kMotorConfigCommandId = 0x78;
-
 ConfigCommand::ConfigCommand(const std::vector<ConfigParam>& params) : Request{}, params_{ params }
 {
-}
-
-uint8_t ConfigCommand::command_id() const
-{
-  return kMotorConfigCommandId;
 }
 
 std::vector<ConfigParam> ConfigCommand::params() const

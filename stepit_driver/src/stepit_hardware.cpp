@@ -28,7 +28,6 @@
  */
 
 #include <stepit_driver/stepit_hardware.hpp>
-#include <stepit_driver/msgs/status_query.hpp>
 #include <stepit_driver/msgs/velocity_command.hpp>
 #include <stepit_driver/msgs/position_command.hpp>
 #include <stepit_driver/msgs/acknowledge_response.hpp>
@@ -202,8 +201,7 @@ hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
 {
   try
   {
-    StatusQuery query{};
-    StatusResponse response = driver_->get_status(time, query);
+    StatusResponse response = driver_->get_status(time);
 
     auto motor_states = response.motor_states();
     if (motor_states.size() != joints_.size())

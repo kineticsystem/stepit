@@ -51,12 +51,10 @@ add_library(
     include/freezer_driver/msgs/msgs.hpp
     include/freezer_driver/msgs/request.hpp
     include/freezer_driver/msgs/response.hpp
-    include/freezer_driver/msgs/status_query.hpp
     include/freezer_driver/msgs/status_response.hpp
     src/default_driver.cpp
     src/msgs/request.cpp
     src/msgs/response.cpp
-    src/msgs/status_query.cpp
     src/msgs/status_response.cpp
 )
 target_include_directories(

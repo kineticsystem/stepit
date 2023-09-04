@@ -32,10 +32,8 @@
 #include <stepit_driver/msgs/acknowledge_response.hpp>
 #include <stepit_driver/msgs/config_command.hpp>
 #include <stepit_driver/msgs/position_command.hpp>
-#include <stepit_driver/msgs/status_query.hpp>
 #include <stepit_driver/msgs/status_response.hpp>
 #include <stepit_driver/msgs/velocity_command.hpp>
-#include <stepit_driver/msgs/info_query.hpp>
 #include <stepit_driver/msgs/info_response.hpp>
 #include <stepit_driver/msgs/request.hpp>
 #include <stepit_driver/msgs/response.hpp>

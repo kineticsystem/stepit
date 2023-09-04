@@ -60,13 +60,11 @@ add_library(
     include/stepit_driver/fake/velocity_control.hpp
     include/stepit_driver/msgs/acknowledge_response.hpp
     include/stepit_driver/msgs/config_command.hpp
-    include/stepit_driver/msgs/info_query.hpp
     include/stepit_driver/msgs/info_response.hpp
     include/stepit_driver/msgs/msgs.hpp
     include/stepit_driver/msgs/position_command.hpp
     include/stepit_driver/msgs/request.hpp
     include/stepit_driver/msgs/response.hpp
-    include/stepit_driver/msgs/status_query.hpp
     include/stepit_driver/msgs/status_response.hpp
     include/stepit_driver/msgs/velocity_command.hpp
     include/stepit_driver/stepit_hardware.hpp
@@ -79,12 +77,10 @@ add_library(
     src/fake/velocity_control.cpp
     src/msgs/acknowledge_response.cpp
     src/msgs/config_command.cpp
-    src/msgs/info_query.cpp
     src/msgs/info_response.cpp
     src/msgs/position_command.cpp
     src/msgs/request.cpp
     src/msgs/response.cpp
-    src/msgs/status_query.cpp
     src/msgs/status_response.cpp
     src/msgs/velocity_command.cpp
     src/stepit_hardware.cpp

@@ -67,7 +67,6 @@ class ConfigCommand : public Request
 {
 public:
   explicit ConfigCommand(const std::vector<ConfigParam>& params);
-  uint8_t command_id() const;
   std::vector<ConfigParam> params() const;
 
 private:

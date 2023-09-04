@@ -40,6 +40,8 @@ namespace freezer_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
+constexpr uint8_t kStatusQueryId = 0x75;
+
 using namespace cobs_serial::data_utils;
 
 DefaultDriver::DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> cobs_serial)
@@ -61,8 +63,7 @@ bool DefaultDriver::connect()
     {
       RCLCPP_INFO(kLogger, "Connecting...");
 
-      StatusQuery query{};
-      StatusResponse response = get_status(rclcpp::Time{}, query);
+      StatusResponse response = get_status(rclcpp::Time{});
       connected = response.status() == Response::Status::Success;
 
       RCLCPP_INFO(kLogger, "Connection established");
@@ -82,10 +83,10 @@ void DefaultDriver::disconnect()
   cobs_serial_->close();
 }
 
-StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& time, const StatusQuery& query) const
+StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& time) const
 {
   std::vector<uint8_t> in;
-  in.emplace_back(query.query_id());
+  in.emplace_back(kStatusQueryId);
   RCLCPP_DEBUG(kLogger, "Status query: %s", to_hex(in).c_str());
   cobs_serial_->write(in);
   auto out = cobs_serial_->read();

@@ -184,7 +184,7 @@ TEST(TestStepitHardware, read_status)
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
-  EXPECT_CALL(*mock_driver, get_status(_, An<const StatusQuery&>())).WillOnce(Return(mocked_response));
+  EXPECT_CALL(*mock_driver, get_status(_)).WillOnce(Return(mocked_response));
   auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
   auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
