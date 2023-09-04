@@ -1,9 +1,5 @@
 # See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html
 
-# IMPORTANT: The code does not compile with C++20.
-# See https://bytemeta.vip/repo/ros2/rclcpp/issues/1936
-# A fix has already been applied to the next release of Humble.
-
 cmake_minimum_required(VERSION 3.22.1)
 project(freezer_driver VERSION 0.1.0 LANGUAGES CXX)
 
@@ -12,6 +8,13 @@ include(GNUInstallDirs)
 
 # Enable output of compile commands during generation.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+    add_compile_options(-Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast -Wno-gnu-zero-variadic-macro-arguments)
+endif()
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # All the dependencies required to build this library. These dependencies
 # will also be exported using ament_export_dependencies to help a client
@@ -23,10 +26,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     rclcpp
     rclcpp_lifecycle
 )
-
-if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-    add_compile_options(-Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast -Wno-gnu-zero-variadic-macro-arguments)
-endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(hardware_interface REQUIRED)
@@ -70,9 +69,6 @@ target_include_directories(
 ament_target_dependencies(
     freezer_driver
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
-target_compile_features(freezer_driver
-    PUBLIC cxx_std_17
 )
 
 ###############################################################################
