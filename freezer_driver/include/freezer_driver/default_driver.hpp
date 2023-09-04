@@ -30,7 +30,6 @@
 #pragma once
 
 #include <freezer_driver/driver.hpp>
-#include <freezer_driver/msgs/msgs.hpp>
 
 #include <cobs_serial/cobs_serial.hpp>
 

@@ -31,7 +31,6 @@
 
 #include <stepit_driver/driver.hpp>
 #include <stepit_driver/fake/fake_motor.hpp>
-#include <stepit_driver/msgs/msgs.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 

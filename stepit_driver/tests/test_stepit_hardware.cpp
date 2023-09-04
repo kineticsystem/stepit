@@ -29,7 +29,6 @@
 
 #include <gtest/gtest.h>
 
-#include <stepit_driver/msgs/msgs.hpp>
 #include <stepit_driver/stepit_hardware.hpp>
 
 #include <cobs_serial/data_utils.hpp>

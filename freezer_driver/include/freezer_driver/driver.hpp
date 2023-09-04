@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include <freezer_driver/msgs/msgs.hpp>
+#include <freezer_driver/msgs/status_response.hpp>
 
 #include <rclcpp/time.hpp>
 

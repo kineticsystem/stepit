@@ -31,7 +31,6 @@
 
 #include <mock/mock_cobs_serial.hpp>
 #include <stepit_driver/default_driver.hpp>
-#include <stepit_driver/msgs/msgs.hpp>
 
 #include <cobs_serial/data_utils.hpp>
 

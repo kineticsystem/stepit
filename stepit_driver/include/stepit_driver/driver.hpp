@@ -30,7 +30,12 @@
 
 #pragma once
 
-#include <stepit_driver/msgs/msgs.hpp>
+#include <stepit_driver/msgs/acknowledge_response.hpp>
+#include <stepit_driver/msgs/config_command.hpp>
+#include <stepit_driver/msgs/info_response.hpp>
+#include <stepit_driver/msgs/position_command.hpp>
+#include <stepit_driver/msgs/status_response.hpp>
+#include <stepit_driver/msgs/velocity_command.hpp>
 
 #include <rclcpp/time.hpp>
 
