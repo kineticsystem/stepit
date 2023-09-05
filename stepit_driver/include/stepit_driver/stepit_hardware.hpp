@@ -55,7 +55,7 @@ public:
   StepitHardware();
 
   /**
-   * Constructor with given command interface. This method is used for testing.
+   * Constructor with driver factory. This method is used for testing.
    * @param driver_factory The interface to send commands and queries to
    * the hardware.
    */
