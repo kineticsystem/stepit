@@ -27,14 +27,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <thread>
+
 #include <stepit_driver/default_driver.hpp>
 
 #include <cobs_serial/data_utils.hpp>
 
 #include <rclcpp/logging.hpp>
 #include <rclcpp/time.hpp>
-
-#include <thread>
 
 namespace stepit_driver
 {
@@ -45,7 +45,9 @@ constexpr uint8_t kMotorPositionCommandId = 0x71;
 constexpr uint8_t kInfoQueryId = 0x76;
 constexpr uint8_t kMotorStatusQueryId = 0x75;
 
-using namespace cobs_serial::data_utils;
+using cobs_serial::data_utils::from_float;
+using cobs_serial::data_utils::to_float;
+using cobs_serial::data_utils::to_hex;
 
 DefaultDriver::DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> cobs_serial)
   : cobs_serial_{ std::move(cobs_serial) }

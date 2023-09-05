@@ -30,6 +30,9 @@
 #pragma once
 
 #include <gmock/gmock.h>
+
+#include <vector>
+
 #include <cobs_serial/cobs_serial.hpp>
 
 namespace stepit_driver::test

@@ -33,7 +33,6 @@
 
 #include <cobs_serial/default_cobs_serial.hpp>
 #include <cobs_serial/default_cobs_serial_factory.hpp>
-#include <cobs_serial/default_cobs_serial.hpp>
 
 namespace stepit_driver
 {

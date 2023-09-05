@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <stepit_driver/msgs/response.hpp>
-
 #include <string>
+
+#include <stepit_driver/msgs/response.hpp>
 
 namespace stepit_driver
 {

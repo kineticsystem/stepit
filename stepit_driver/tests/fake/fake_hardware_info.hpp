@@ -62,7 +62,7 @@ public:
           {"position", "", "", "", "double", 1},
           {"velocity", "", "", "", "double", 1}
         },
-        {{{"id","0"}, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
+        {{{"id", "0"}, {"acceleration", "3.14159"}, {"max_velocity", "6.28319"}}}
       },
       {
         "joint2",

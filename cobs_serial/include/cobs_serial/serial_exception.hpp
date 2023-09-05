@@ -30,8 +30,8 @@
 #pragma once
 
 #include <exception>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace cobs_serial
 {

@@ -27,9 +27,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cobs_serial/crc_utils.hpp>
-
 #include <array>
+
+#include <cobs_serial/crc_utils.hpp>
 
 namespace cobs_serial
 {

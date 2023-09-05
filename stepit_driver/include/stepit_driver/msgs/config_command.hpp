@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <stepit_driver/msgs/request.hpp>
-
 #include <vector>
+
+#include <stepit_driver/msgs/request.hpp>
 
 namespace stepit_driver
 {

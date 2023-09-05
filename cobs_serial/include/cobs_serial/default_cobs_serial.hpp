@@ -29,14 +29,14 @@
 
 #pragma once
 
-#include <cobs_serial/serial.hpp>
-#include <cobs_serial/cobs_serial.hpp>
-#include <cobs_serial/buffer.hpp>
-
 #include <vector>
 #include <cstdint>
 #include <string>
 #include <memory>
+
+#include <cobs_serial/serial.hpp>
+#include <cobs_serial/cobs_serial.hpp>
+#include <cobs_serial/buffer.hpp>
 
 namespace cobs_serial
 {

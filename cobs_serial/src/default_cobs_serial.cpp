@@ -27,6 +27,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdint>
+
 #include <cobs_serial/default_cobs_serial.hpp>
 
 #include <cobs_serial/crc_utils.hpp>
@@ -34,8 +36,6 @@
 #include <cobs_serial/serial_exception.hpp>
 
 #include <rclcpp/logging.hpp>
-
-#include <cstdint>
 
 namespace cobs_serial
 {

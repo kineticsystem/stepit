@@ -29,6 +29,9 @@
 
 #pragma once
 
+#include <memory>
+#include <utility>
+
 #include <stepit_driver/driver.hpp>
 #include <stepit_driver/driver_factory.hpp>
 
@@ -38,9 +41,7 @@ class MockDriverFactory : public DriverFactory
 {
 public:
   explicit MockDriverFactory(std::unique_ptr<Driver> command_interface)
-    : command_interface_{ std::move(command_interface) } {
-
-    };
+    : command_interface_{ std::move(command_interface) } {};
   std::unique_ptr<Driver> create([[maybe_unused]] const hardware_interface::HardwareInfo& info)
   {
     return std::move(command_interface_);

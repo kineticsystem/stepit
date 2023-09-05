@@ -37,7 +37,7 @@ namespace freezer_driver
 class Request
 {
 public:
-  explicit Request();
+  Request();
   virtual ~Request() = default;
 };
 }  // namespace freezer_driver

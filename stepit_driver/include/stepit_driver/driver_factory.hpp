@@ -29,11 +29,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include <stepit_driver/driver.hpp>
 
 #include <hardware_interface/hardware_info.hpp>
-
-#include <memory>
 
 namespace stepit_driver
 {

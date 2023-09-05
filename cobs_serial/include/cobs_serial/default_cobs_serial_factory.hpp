@@ -29,11 +29,11 @@
 
 #pragma once
 
+#include <memory>
+
 #include <cobs_serial/cobs_serial_factory.hpp>
 #include <cobs_serial/default_cobs_serial_factory.hpp>
 #include <hardware_interface/hardware_info.hpp>
-
-#include <memory>
 
 namespace cobs_serial
 {

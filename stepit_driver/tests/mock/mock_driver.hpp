@@ -29,9 +29,9 @@
 
 #pragma once
 
-#include <stepit_driver/driver.hpp>
-
 #include <gmock/gmock.h>
+
+#include <stepit_driver/driver.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 

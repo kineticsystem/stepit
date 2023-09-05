@@ -29,6 +29,9 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include <stepit_driver/driver.hpp>
 #include <stepit_driver/driver_factory.hpp>
 #include <stepit_driver/visibility_control.hpp>

@@ -29,6 +29,11 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include <stepit_driver/stepit_hardware.hpp>
 
 #include <cobs_serial/data_utils.hpp>
@@ -45,11 +50,6 @@
 #include <rclcpp_lifecycle/state.hpp>
 #include <ros2_control_test_assets/components_urdfs.hpp>
 #include <ros2_control_test_assets/descriptions.hpp>
-
-#include <cmath>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace stepit_driver::test
 {
@@ -170,11 +170,11 @@ TEST(TestStepitHardware, read_status)
   const StatusResponse mocked_response{
       Response::Status::Success,
       {
-          MotorState{ 0, 32100, 0.5, 150 },     // Motor 0 status
-          MotorState{ 1, -6500, 0.75, 150000 }, // Motor 1 status
-          MotorState{ 2, -6500, 0.75, 150000 }, // Motor 1 status
-          MotorState{ 3, -6500, 0.75, 150000 }, // Motor 1 status
-          MotorState{ 4, -6500, 0.75, 150000 }  // Motor 1 status
+          MotorState{ 0, 32100, 0.5, 150 },      // Motor 0 status
+          MotorState{ 1, -6500, 0.75, 150000 },  // Motor 1 status
+          MotorState{ 2, -6500, 0.75, 150000 },  // Motor 1 status
+          MotorState{ 3, -6500, 0.75, 150000 },  // Motor 1 status
+          MotorState{ 4, -6500, 0.75, 150000 }   // Motor 1 status
       }
   };
   // clang-format on
@@ -238,11 +238,11 @@ TEST(TestStepitHardware, write_velocities)
   // clang-format off
   const VelocityCommand expected_request{
     {
-        VelocityGoal{ 0, 0.5 },  // Motor 0 goal
-        VelocityGoal{ 1, 0.75 }, // Motor 1 goal
-        VelocityGoal{ 2, 0.75 }, // Motor 2 goal
-        VelocityGoal{ 3, 0.75 }, // Motor 3 goal
-        VelocityGoal{ 4, 0.75 }  // Motor 4 goal
+        VelocityGoal{ 0, 0.5 },   // Motor 0 goal
+        VelocityGoal{ 1, 0.75 },  // Motor 1 goal
+        VelocityGoal{ 2, 0.75 },  // Motor 2 goal
+        VelocityGoal{ 3, 0.75 },  // Motor 3 goal
+        VelocityGoal{ 4, 0.75 }   // Motor 4 goal
     }
   };
   // clang-format on
@@ -314,11 +314,11 @@ TEST(TestStepitHardware, write_positions)
   // clang-format off
   const PositionCommand expected_request{
     {
-        PositionGoal{ 0, 0.5 },  // Motor 0 goal
-        PositionGoal{ 1, 0.75 }, // Motor 1 goal
-        PositionGoal{ 2, 0.75 }, // Motor 2 goal
-        PositionGoal{ 3, 0.75 }, // Motor 3 goal
-        PositionGoal{ 4, 0.75 }  // Motor 4 goal
+        PositionGoal{ 0, 0.5 },   // Motor 0 goal
+        PositionGoal{ 1, 0.75 },  // Motor 1 goal
+        PositionGoal{ 2, 0.75 },  // Motor 2 goal
+        PositionGoal{ 3, 0.75 },  // Motor 3 goal
+        PositionGoal{ 4, 0.75 }   // Motor 4 goal
     }
   };
   // clang-format on

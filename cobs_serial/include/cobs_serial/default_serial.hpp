@@ -29,9 +29,11 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+
 #include <cobs_serial/serial.hpp>
 
-#include <memory>
 #include "serial/serial.h"
 
 namespace serial

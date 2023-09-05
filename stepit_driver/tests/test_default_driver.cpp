@@ -40,7 +40,7 @@ using ::testing::_;
 using ::testing::Return;
 using ::testing::SaveArg;
 
-using namespace cobs_serial::data_utils;
+using cobs_serial::data_utils::to_hex;
 
 /**
  * In this test we send a status query to the request interface,

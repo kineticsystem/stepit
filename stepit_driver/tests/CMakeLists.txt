@@ -15,6 +15,7 @@ endif()
 # test_default_driver
 
 ament_add_gmock(test_default_driver
+    mock/mock_cobs_serial.hpp
     test_default_driver.cpp
 )
 target_include_directories(test_default_driver

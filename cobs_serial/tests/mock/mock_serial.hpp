@@ -30,6 +30,9 @@
 #pragma once
 
 #include <gmock/gmock.h>
+
+#include <string>
+
 #include <cobs_serial/serial.hpp>
 
 namespace cobs_serial::test

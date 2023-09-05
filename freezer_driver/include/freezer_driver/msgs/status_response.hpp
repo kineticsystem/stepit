@@ -30,10 +30,10 @@
 
 #pragma once
 
-#include <freezer_driver/msgs/response.hpp>
-
 #include <cstdint>
 #include <vector>
+
+#include <freezer_driver/msgs/response.hpp>
 
 namespace freezer_driver
 {

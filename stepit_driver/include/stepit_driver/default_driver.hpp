@@ -30,12 +30,12 @@
 
 #pragma once
 
+#include <functional>
+#include <memory>
+
 #include <stepit_driver/driver.hpp>
 
 #include <cobs_serial/cobs_serial.hpp>
-
-#include <functional>
-#include <memory>
 
 namespace stepit_driver
 {

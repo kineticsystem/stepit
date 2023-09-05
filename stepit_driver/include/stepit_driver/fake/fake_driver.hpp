@@ -29,12 +29,12 @@
 
 #pragma once
 
+#include <map>
+
 #include <stepit_driver/driver.hpp>
 #include <stepit_driver/fake/fake_motor.hpp>
 
 #include <rclcpp/rclcpp.hpp>
-
-#include <map>
 
 namespace stepit_driver
 {

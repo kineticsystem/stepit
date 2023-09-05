@@ -37,7 +37,7 @@ namespace stepit_driver
 class Request
 {
 public:
-  explicit Request();
+  Request();
   virtual ~Request() = default;
 };
 }  // namespace stepit_driver

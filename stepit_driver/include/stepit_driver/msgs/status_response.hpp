@@ -30,10 +30,10 @@
 
 #pragma once
 
-#include <stepit_driver/msgs/response.hpp>
-
 #include <cstdint>
 #include <vector>
+
+#include <stepit_driver/msgs/response.hpp>
 
 namespace stepit_driver
 {

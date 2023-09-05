@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace cobs_serial
 {

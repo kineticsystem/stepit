@@ -27,6 +27,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <limits>
+#include <vector>
+#include <string>
+#include <cmath>
+
 #include <stepit_driver/stepit_hardware.hpp>
 #include <stepit_driver/msgs/velocity_command.hpp>
 #include <stepit_driver/msgs/position_command.hpp>
@@ -40,11 +45,6 @@
 #include <hardware_interface/types/lifecycle_state_names.hpp>
 
 #include <pluginlib/class_list_macros.hpp>
-
-#include <limits>
-#include <vector>
-#include <string>
-#include <cmath>
 
 namespace stepit_driver
 {

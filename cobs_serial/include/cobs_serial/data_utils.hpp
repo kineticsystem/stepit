@@ -31,8 +31,8 @@
 
 #include <array>
 #include <vector>
-#include <string>
 #include <sstream>
+#include <string>
 
 /**
  * Utility class to convert standard types into sequence of bytes and back.

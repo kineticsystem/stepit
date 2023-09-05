@@ -27,6 +27,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <iostream>
+
 #include <stepit_driver/default_driver.hpp>
 #include <stepit_driver/default_driver_factory.hpp>
 
@@ -35,16 +37,14 @@
 
 #include "command_line_utility.hpp"
 
-#include <iostream>
-
-// This is a command to read the status of the gripper.
-
-using namespace stepit_driver;
-using namespace cobs_serial;
-
 constexpr auto kUsbPort = "/dev/ttyACM0";
 constexpr auto kBaudRate = 9600;
 constexpr auto kTimeout = 0.2;
+
+using cobs_serial::DefaultCobsSerial;
+using cobs_serial::DefaultSerial;
+using stepit_driver::DefaultDriver;
+using stepit_driver::MotorState;
 
 int main(int argc, char* argv[])
 {
