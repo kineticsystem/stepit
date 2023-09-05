@@ -7,7 +7,7 @@ include(GNUInstallDirs)
 # Enable output of compile commands during generation.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
     add_compile_options(
         -Werror
         -Wall
@@ -135,7 +135,7 @@ install(
 # CTest module automatically creates a BUILD_TESTING option that selects
 # whether to enable testing support (ON by default).
 include(CTest)
-if (BUILD_TESTING)
+if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
