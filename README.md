@@ -1,7 +1,7 @@
 # StepIt
 
 [![CI](https://github.com/kineticsystem/stepit/actions/workflows/industrial_ci.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/industrial_ci.yml)
-[![Format](https://github.com/kineticsystem/stepit/actions/workflows/format.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/format.yml)
+[![Format](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml)
 
 ## Introduction
 
