@@ -1,6 +1,5 @@
 name: ROS Lint
-on:
-  pull_request:
+on: [push, pull_request]
 
 jobs:
   ament_lint:
