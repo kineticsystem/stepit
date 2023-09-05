@@ -16,8 +16,7 @@ jobs:
         with:
           distribution: humble
           linter: ${{ matrix.linter }}
-          package-name: robotiq_driver
-            cobs_serial
+          package-name: cobs_serial
             freezer_controller
             freezer_description
             freezer_driver
@@ -28,7 +27,7 @@ jobs:
             stepit_hardware_tests
             stepit_teleop
 
-  ament_lint_100:
+  ament_lint_120:
     name: ament_${{ matrix.linter }}
     runs-on: ubuntu-latest
     strategy:
@@ -42,9 +41,8 @@ jobs:
         with:
           distribution: humble
           linter: cpplint
-          arguments: "--linelength=100 --filter=-whitespace/newline"
-          package-name: robotiq_driver
-            cobs_serial
+          arguments: "--linelength=120 --filter=-whitespace/newline"
+          package-name: cobs_serial
             freezer_controller
             freezer_description
             freezer_driver
