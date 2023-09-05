@@ -54,9 +54,9 @@ int main(int argc, char* argv[])
   cli.registerHandler(
       "--port", [&port](const char* value) { port = value; }, false);
 
-  int baudrate = kBaudRate;
+  uint32_t baudrate = kBaudRate;
   cli.registerHandler(
-      "--baudrate", [&baudrate](const char* value) { baudrate = std::stoi(value); }, false);
+      "--baudrate", [&baudrate](const char* value) { baudrate = static_cast<uint32_t>(std::stoul(value)); }, false);
 
   double timeout = kTimeout;
   cli.registerHandler(
