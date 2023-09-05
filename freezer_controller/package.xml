@@ -18,17 +18,31 @@
   <depend>controller_interface</depend>
   <depend>pluginlib</depend>
 
+  <!--
+  When you include the following linter dependencies and run tests on your ROS2
+  package (typically with colcon test), these linters will check your codebase
+  for any violations of coding standards and best practices.
+  You only need to add ament_lint_auto_find_test_dependencies() to your test
+  CMakeLists.txt.
+  -->
+
   <!-- Check code against style conventions using clang-format. -->
   <test_depend>ament_clang_format</test_depend>
   <!-- Check code against style conventions using clang-tidy. -->
   <test_depend>ament_clang_tidy</test_depend>
-  <!-- Check every source file contains copyright reference. -->
+  <!-- Check that every source file contains copyright reference. -->
   <test_depend>ament_cmake_copyright</test_depend>
   <!-- Lint CMake code using cmakelint. -->
   <test_depend>ament_cmake_lint_cmake</test_depend>
-  <!-- The auto-magic functions for ease to use of the ament linters in CMake. -->
+  <!--
+  Provides automation functions that make it easier to use the ament linters
+  within a CMake environment.
+  -->
   <test_depend>ament_lint_auto</test_depend>
-  <!-- The list of commonly used linters in the ament build system in CMake. -->
+  <!--
+  This is a collection of commonly-used linters in the ament build system when
+  working with CMake.
+  -->
   <test_depend>ament_lint_common</test_depend>
 
   <!-- Support for gtest and gmock-based tests in the ament buildsystem in CMake. -->
