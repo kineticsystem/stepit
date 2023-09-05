@@ -37,28 +37,25 @@
 #include <functional>
 #include <memory>
 
-namespace stepit_driver {
+namespace stepit_driver
+{
 /**
  * @brief This class receives commands and queries from the
  * hardware interface and sends them to the real hardware.
  */
-class DefaultDriver : public Driver {
+class DefaultDriver : public Driver
+{
 public:
-  explicit DefaultDriver(
-      std::unique_ptr<cobs_serial::CobsSerial> data_interface);
+  explicit DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> data_interface);
   bool connect() override;
   void disconnect() override;
-  AcknowledgeResponse configure(const ConfigCommand &command) const override;
-  AcknowledgeResponse
-  set_position(const rclcpp::Time &time,
-               const PositionCommand &command) const override;
-  AcknowledgeResponse
-  set_velocity(const rclcpp::Time &time,
-               const VelocityCommand &command) const override;
-  StatusResponse get_status(const rclcpp::Time &time) const override;
-  InfoResponse get_info(const rclcpp::Time &time) const override;
+  AcknowledgeResponse configure(const ConfigCommand& command) const override;
+  AcknowledgeResponse set_position(const rclcpp::Time& time, const PositionCommand& command) const override;
+  AcknowledgeResponse set_velocity(const rclcpp::Time& time, const VelocityCommand& command) const override;
+  StatusResponse get_status(const rclcpp::Time& time) const override;
+  InfoResponse get_info(const rclcpp::Time& time) const override;
 
 private:
   std::unique_ptr<cobs_serial::CobsSerial> cobs_serial_;
 };
-} // namespace stepit_driver
+}  // namespace stepit_driver
