@@ -168,8 +168,6 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-ament_package()
-
 ###############################################################################
 # LINTERS
 
@@ -179,3 +177,5 @@ add_custom_target(format
 add_custom_target(tidy
     COMMAND clang-tidy -p ${CMAKE_BINARY_DIR} `git ls-files *.cpp`
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+ament_package()
