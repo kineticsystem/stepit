@@ -55,6 +55,7 @@ add_library(
     include/cobs_serial/crc_utils.hpp
     include/cobs_serial/default_cobs_serial.hpp
     include/cobs_serial/cobs_serial.hpp
+    include/cobs_serial/cobs_serial_factory.hpp
     include/cobs_serial/data_utils.hpp
     include/cobs_serial/serial_exception.hpp
     include/cobs_serial/default_serial.hpp
