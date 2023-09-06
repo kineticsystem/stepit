@@ -11,7 +11,7 @@ jobs:
           - { ROS_DISTRO: humble, ROS_REPO: main }
     env:
       UPSTREAM_WORKSPACE: stepit.repos
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v1
       - uses: "ros-industrial/industrial_ci@master"

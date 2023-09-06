@@ -1,0 +1,55 @@
+name: ROS Lint
+on:
+  pull_request:
+
+jobs:
+  ament_lint:
+    name: ament_${{ matrix.linter }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        linter: [copyright, lint_cmake]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ros-tooling/setup-ros@0.6.2
+      - uses: ros-tooling/action-ros-lint@v0.1
+        with:
+          distribution: humble
+          linter: ${{ matrix.linter }}
+          package-name: cobs_serial
+            freezer_controller
+            freezer_description
+            freezer_driver
+            freezer_msgs
+            stepit_bringup
+            stepit_description
+            stepit_driver
+            stepit_hardware_tests
+            stepit_teleop
+
+  ament_lint_121:
+    name: ament_${{ matrix.linter }}
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        linter: [cpplint]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ros-tooling/setup-ros@0.6.2
+      - uses: ros-tooling/action-ros-lint@v0.1
+        with:
+          distribution: humble
+          linter: cpplint
+          arguments: "--linelength=121 --filter=-whitespace/newline"
+          package-name: cobs_serial
+            freezer_controller
+            freezer_description
+            freezer_driver
+            freezer_msgs
+            stepit_bringup
+            stepit_description
+            stepit_driver
+            stepit_hardware_tests
+            stepit_teleop
