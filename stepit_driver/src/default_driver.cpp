@@ -44,6 +44,8 @@ constexpr uint8_t kMotorPositionCommandId = 0x71;
 constexpr uint8_t kInfoQueryId = 0x76;
 constexpr uint8_t kMotorStatusQueryId = 0x75;
 
+constexpr uint8_t kMaxConnectionTrials = 5;
+
 using cobs_serial::data_utils::from_float;
 using cobs_serial::data_utils::to_float;
 using cobs_serial::data_utils::to_hex;
@@ -61,20 +63,20 @@ bool DefaultDriver::connect()
 
   int trial = 0;
   bool connected = false;
-  while (!connected && trial < 5)
+  while (!connected && trial < kMaxConnectionTrials)
   {
     try
     {
-      RCLCPP_INFO(kLogger, "Connecting...");
+      RCLCPP_INFO(kLogger, "Connecting (%d of %d)...", trial + 1, kMaxConnectionTrials);
 
       StatusResponse response = get_status(rclcpp::Time{});
       connected = response.status() == Response::Status::Success;
 
-      RCLCPP_INFO(kLogger, "Connection established");
+      RCLCPP_INFO(kLogger, "Connection established.");
     }
     catch (const std::exception& ex)
     {
-      RCLCPP_WARN(kLogger, "Connection failed");
+      RCLCPP_WARN(kLogger, "Connection failed.");
       trial++;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));

@@ -28,6 +28,10 @@ The Teensy is connected to a computer using a USB cable. For a portable applicat
 
 We developed code for the Teensy microcontroller using Visual Studio Code because it provides very good tools to format and validate the code. To achieve this goal, we must install [PlatformIO](https://platformio.org) extension which supports different microcontrollers including Arduino. Installing Arduino IDE is not required.
 
+If PlatformIO cannot find the Python interpreter, install the following:
+
+`sudo apt install python3-venv`
+
 ## StepIt computer installation
 
 Open a terminal and run the following command to source the ROS 2 Humble installation.

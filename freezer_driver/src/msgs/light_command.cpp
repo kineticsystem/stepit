@@ -26,42 +26,13 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <freezer_driver/msgs/light_command.hpp>
 
-#include <freezer_driver/msgs/acknowledge_response.hpp>
-#include <freezer_driver/msgs/bitset_command.hpp>
-#include <freezer_driver/msgs/shoot_command.hpp>
-#include <freezer_driver/msgs/status_response.hpp>
-
-#include <rclcpp/time.hpp>
+#include <cobs_serial/data_utils.hpp>
 
 namespace freezer_driver
 {
-/**
- * @brief This class receives commands and queries from the
- * hardware interface and sends them to a fake or a real hardware.
- */
-class Driver
+LightCommand::LightCommand()
 {
-public:
-  virtual ~Driver() = default;
-
-  /**
-   * Initialize the command interface.
-   */
-  virtual bool connect() = 0;
-
-  /**
-   * Disconnect the interface..
-   */
-  virtual void disconnect() = 0;
-
-  /**
-   * Send a sequence of bits and delays to be executed atomically on the
-   * hardware.
-   * @param command The command containing a sequence of bits and delays to
-   * be executed.
-   */
-  virtual AcknowledgeResponse execute(const BitsetCommand& command) = 0;
-};
+}
 }  // namespace freezer_driver

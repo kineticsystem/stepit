@@ -39,8 +39,9 @@ namespace freezer_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
-constexpr uint8_t kStatusQueryId = 0x75;
+constexpr uint8_t kExecuteCommandId = 0x78;
 
+using cobs_serial::data_utils::from_int32;
 using cobs_serial::data_utils::to_float;
 using cobs_serial::data_utils::to_hex;
 
@@ -53,29 +54,9 @@ bool DefaultDriver::connect()
 {
   cobs_serial_->open();
 
-  // Send a status command multiple times until an answer comes back.
+  // TODO: send an handshake command multiple times until an answer comes back.
 
-  int trial = 0;
-  bool connected = false;
-  while (!connected && trial < 5)
-  {
-    try
-    {
-      RCLCPP_INFO(kLogger, "Connecting...");
-
-      StatusResponse response = get_status(rclcpp::Time{});
-      connected = response.status() == Response::Status::Success;
-
-      RCLCPP_INFO(kLogger, "Connection established");
-    }
-    catch (const std::exception& ex)
-    {
-      RCLCPP_WARN(kLogger, "Connection failed");
-      trial++;
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  }
-  return connected;
+  return true;
 }
 
 void DefaultDriver::disconnect()
@@ -83,44 +64,29 @@ void DefaultDriver::disconnect()
   cobs_serial_->close();
 }
 
-StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& time) const
+AcknowledgeResponse DefaultDriver::execute(const BitsetCommand& command)
 {
   std::vector<uint8_t> in;
-  in.emplace_back(kStatusQueryId);
-  RCLCPP_DEBUG(kLogger, "Status query: %s", to_hex(in).c_str());
-  cobs_serial_->write(in);
-  auto out = cobs_serial_->read();
-  RCLCPP_DEBUG(kLogger, "Status response: %s", to_hex(out).c_str());
-
-  // The data array contains the following information.
-  //
-  // status               - 1 byte
-  //
-  // motor id             - 1 byte
-  // motor position       - 4 bytes
-  // motor speed          - 4 bytes
-  // motor distance to go - 4 bytes
-  //
-  // motor id             - 1 byte
-  // motor position       - 4 bytes
-  // motor speed          - 4 bytes
-  // motor distance to go - 4 bytes
-  //
-  // ...and so on.
-
-  std::size_t i = 0;
-  Response::Status status{ out[i++] };
-  std::vector<MotorState> motor_states;
-  while (i < out.size())
+  in.emplace_back(kExecuteCommandId);
+  for (const auto& step : command.steps())
   {
-    uint8_t id = out[i++];
-    float position = to_float({ out[i++], out[i++], out[i++], out[i++] });
-    float speed = to_float({ out[i++], out[i++], out[i++], out[i++] });
-    float distance_to_go = to_float({ out[i++], out[i++], out[i++], out[i++] });
-    motor_states.push_back(MotorState{ id, position, speed, distance_to_go });
+    auto bits = from_int32(static_cast<int32_t>(step.bits()));
+    in.emplace_back(bits[0]);
+    in.emplace_back(bits[1]);
+    in.emplace_back(bits[2]);
+    in.emplace_back(bits[3]);
+    auto delay = from_int32(static_cast<int32_t>(step.delay().count()));
+    in.emplace_back(delay[0]);
+    in.emplace_back(delay[1]);
+    in.emplace_back(delay[2]);
+    in.emplace_back(delay[3]);
   }
-
-  StatusResponse response{ status, motor_states };
+  RCLCPP_DEBUG(kLogger, "Bitset command: %s", to_hex(in).c_str());
+  cobs_serial_->write(in);
+  std::vector<uint8_t> out = cobs_serial_->read();
+  RCLCPP_DEBUG(kLogger, "Bitset response: %s", to_hex(out).c_str());
+  Response::Status status{ out[0] };
+  AcknowledgeResponse response{ status };
   return response;
 }
 

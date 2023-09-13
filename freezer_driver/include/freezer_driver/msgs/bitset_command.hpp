@@ -28,40 +28,39 @@
 
 #pragma once
 
-#include <freezer_driver/msgs/acknowledge_response.hpp>
-#include <freezer_driver/msgs/bitset_command.hpp>
-#include <freezer_driver/msgs/shoot_command.hpp>
-#include <freezer_driver/msgs/status_response.hpp>
+#include <chrono>
 
-#include <rclcpp/time.hpp>
+#include <freezer_driver/msgs/request.hpp>
 
 namespace freezer_driver
 {
-/**
- * @brief This class receives commands and queries from the
- * hardware interface and sends them to a fake or a real hardware.
- */
-class Driver
+// Structure containing a set of bits and a delay.
+class BitsetStep
 {
 public:
-  virtual ~Driver() = default;
+  explicit BitsetStep(uint32_t bits, std::chrono::milliseconds delay) : bits_{ bits }, delay_{ delay } {};
+  uint32_t bits() const
+  {
+    return bits_;
+  }
+  std::chrono::milliseconds delay() const
+  {
+    return delay_;
+  }
 
-  /**
-   * Initialize the command interface.
-   */
-  virtual bool connect() = 0;
+private:
+  uint32_t bits_;
+  std::chrono::milliseconds delay_;
+};
 
-  /**
-   * Disconnect the interface..
-   */
-  virtual void disconnect() = 0;
+// Command that delivers a set of bits and delays.
+class BitsetCommand : public Request
+{
+public:
+  explicit BitsetCommand(const std::vector<BitsetStep>& steps);
+  std::vector<BitsetStep> steps() const;
 
-  /**
-   * Send a sequence of bits and delays to be executed atomically on the
-   * hardware.
-   * @param command The command containing a sequence of bits and delays to
-   * be executed.
-   */
-  virtual AcknowledgeResponse execute(const BitsetCommand& command) = 0;
+private:
+  std::vector<BitsetStep> steps_;
 };
 }  // namespace freezer_driver

@@ -28,40 +28,15 @@
 
 #pragma once
 
-#include <freezer_driver/msgs/acknowledge_response.hpp>
-#include <freezer_driver/msgs/bitset_command.hpp>
-#include <freezer_driver/msgs/shoot_command.hpp>
-#include <freezer_driver/msgs/status_response.hpp>
+#include <vector>
 
-#include <rclcpp/time.hpp>
+#include <freezer_driver/msgs/response.hpp>
 
 namespace freezer_driver
 {
-/**
- * @brief This class receives commands and queries from the
- * hardware interface and sends them to a fake or a real hardware.
- */
-class Driver
+class AcknowledgeResponse : public Response
 {
 public:
-  virtual ~Driver() = default;
-
-  /**
-   * Initialize the command interface.
-   */
-  virtual bool connect() = 0;
-
-  /**
-   * Disconnect the interface..
-   */
-  virtual void disconnect() = 0;
-
-  /**
-   * Send a sequence of bits and delays to be executed atomically on the
-   * hardware.
-   * @param command The command containing a sequence of bits and delays to
-   * be executed.
-   */
-  virtual AcknowledgeResponse execute(const BitsetCommand& command) = 0;
+  explicit AcknowledgeResponse(Status status);
 };
 }  // namespace freezer_driver

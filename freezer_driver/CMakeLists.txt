@@ -59,12 +59,20 @@ add_library(
     SHARED
     include/freezer_driver/driver.hpp
     include/freezer_driver/default_driver.hpp
+    include/freezer_driver/msgs/acknowledge_response.hpp
+    include/freezer_driver/msgs/bitset_command.hpp
+    include/freezer_driver/msgs/light_command.hpp
     include/freezer_driver/msgs/request.hpp
     include/freezer_driver/msgs/response.hpp
+    include/freezer_driver/msgs/shoot_command.hpp
     include/freezer_driver/msgs/status_response.hpp
     src/default_driver.cpp
+    src/msgs/acknowledge_response.cpp
+    src/msgs/bitset_command.cpp
+    src/msgs/light_command.cpp
     src/msgs/request.cpp
     src/msgs/response.cpp
+    src/msgs/shoot_command.cpp
     src/msgs/status_response.cpp
 )
 target_include_directories(
