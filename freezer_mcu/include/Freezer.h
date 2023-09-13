@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation, Inc.,
  * 675 Mass Ave, Cambridge, MA 02139, USA.
  */
- 
+
 #ifndef FREEZER_H
 #define FREEZER_H
 
@@ -28,32 +28,29 @@
  * A write method with a 16 bits value allows the user to control the
  * 16 outputs of the shift registers.
  */
-class Freezer {
-
+class Freezer
+{
 public:
+  Freezer(byte overridingClearPin, byte clockPin, byte dataPin, byte outputEnabledPin, byte latchPin);
+  ~Freezer();
+  void initialize();
+  void write(unsigned int value);
 
-    Freezer(byte overridingClearPin, byte clockPin, byte dataPin, byte outputEnabledPin, byte latchPin);
-    ~Freezer();
-    void initialize();
-    void write(unsigned int value);
-    
 private:
+  // Pin D2 connected to MR of of 74HC595. Low active.
+  byte overridingClearPin;
 
-    // Pin D2 connected to MR of of 74HC595. Low active.
-    byte overridingClearPin;
+  // Pin D3 connected to SH_CP of 74HC595.
+  byte clockPin;
 
-    // Pin D3 connected to SH_CP of 74HC595.
-    byte clockPin;
+  // Pin D4 connected to DS of 74HC595.
+  byte dataPin;
 
-    // Pin D4 connected to DS of 74HC595.
-    byte dataPin;
-    
-    // Pin D5 connected to OE of 74HC595. Low active.
-    byte outputEnabledPin;
-    
-    // Pin D6 connected to ST_CP of 74HC595.
-    byte latchPin;
+  // Pin D5 connected to OE of 74HC595. Low active.
+  byte outputEnabledPin;
+
+  // Pin D6 connected to ST_CP of 74HC595.
+  byte latchPin;
 };
 
 #endif
-
