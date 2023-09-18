@@ -28,7 +28,8 @@
 
 #include <iostream>
 
-#include <stepit_driver/default_driver.hpp>
+#include <freezer_driver/msgs/bitset_command.hpp>
+#include <freezer_driver/default_driver.hpp>
 
 #include <cobs_serial/default_serial.hpp>
 #include <cobs_serial/default_cobs_serial.hpp>
@@ -41,8 +42,8 @@ constexpr auto kTimeout = 0.2;
 
 using cobs_serial::DefaultCobsSerial;
 using cobs_serial::DefaultSerial;
-using stepit_driver::DefaultDriver;
-using stepit_driver::MotorState;
+using freezer_driver::BitsetCommand;
+using freezer_driver::DefaultDriver;
 
 int main(int argc, char* argv[])
 {
@@ -100,19 +101,12 @@ int main(int argc, char* argv[])
     }
 
     std::cout << "The driver is connected." << std::endl;
-    std::cout << "Reading the driver status..." << std::endl;
+    std::cout << "Executing a bitset sequence..." << std::endl;
 
-    auto response = driver->get_status(rclcpp::Time{});
+    BitsetCommand command{ {} };
+    auto response = driver->execute(rclcpp::Time{}, command);
 
-    std::cout << "Status retrieved:" << std::endl;
-
-    for (const MotorState& state : response.motor_states())
-    {
-      std::cout << " - motor id: " << state.id() << "rad" << std::endl;
-      std::cout << " - motor position: " << state.position() << "rad" << std::endl;
-      std::cout << " - motor velocity: " << state.velocity() << "rad/s" << std::endl;
-      std::cout << " - distance to go: " << state.distance_to_go() << "rad" << std::endl;
-    }
+    std::cout << "Sequence executed:" << std::endl;
   }
   catch (const serial::IOException& e)
   {

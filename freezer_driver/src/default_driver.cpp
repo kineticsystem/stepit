@@ -64,7 +64,7 @@ void DefaultDriver::disconnect()
   cobs_serial_->close();
 }
 
-AcknowledgeResponse DefaultDriver::execute(const BitsetCommand& command)
+AcknowledgeResponse DefaultDriver::execute(const rclcpp::Time&, const BitsetCommand& command)
 {
   std::vector<uint8_t> in;
   in.emplace_back(kExecuteCommandId);

@@ -26,42 +26,62 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include "command_line_utility.hpp"
 
-#include <freezer_driver/msgs/acknowledge_response.hpp>
-#include <freezer_driver/msgs/bitset_command.hpp>
-#include <freezer_driver/msgs/shoot_command.hpp>
-#include <freezer_driver/msgs/status_response.hpp>
+#include <iostream>
 
-#include <rclcpp/time.hpp>
-
-namespace freezer_driver
+void CommandLineUtility::registerHandler(const std::string& parameter, ParameterHandler handler, bool isMandatory)
 {
-/**
- * @brief This class receives commands and queries from the
- * hardware interface and sends them to a fake or a real hardware.
- */
-class Driver
+  handlers[parameter] = handler;
+  if (isMandatory)
+  {
+    mandatoryParams.insert(parameter);
+  }
+}
+
+bool CommandLineUtility::parse(int argc, char* argv[])
 {
-public:
-  virtual ~Driver() = default;
+  for (int i = 1; i < argc; i++)
+  {
+    auto it = handlers.find(argv[i]);
+    if (it != handlers.end())
+    {
+      receivedParams.insert(it->first);
 
-  /**
-   * Initialize the command interface.
-   */
-  virtual bool connect() = 0;
+      if (std::holds_alternative<LambdaWithValue>(it->second))
+      {
+        auto& handler = std::get<LambdaWithValue>(it->second);
+        i++;
+        if (i < argc)
+        {
+          handler(argv[i]);
+        }
+        else
+        {
+          std::cerr << it->first << " requires a value.\n";
+        }
+      }
+      else if (std::holds_alternative<LambdaWithoutValue>(it->second))
+      {
+        auto& handler = std::get<LambdaWithoutValue>(it->second);
+        handler();
+      }
+    }
+    else
+    {
+      std::cerr << "Unknown argument: " << argv[i] << "\n";
+      return false;
+    }
+  }
 
-  /**
-   * Disconnect the interface..
-   */
-  virtual void disconnect() = 0;
+  for (const auto& param : mandatoryParams)
+  {
+    if (receivedParams.find(param) == receivedParams.end())
+    {
+      std::cerr << "Missing mandatory argument: " << param << "\n";
+      return false;
+    }
+  }
 
-  /**
-   * Send a sequence of bits and delays to be executed atomically on the
-   * hardware.
-   * @param command The command containing a sequence of bits and delays to
-   * be executed.
-   */
-  virtual AcknowledgeResponse execute(const rclcpp::Time& time, const BitsetCommand& command) = 0;
-};
-}  // namespace freezer_driver
+  return true;
+}

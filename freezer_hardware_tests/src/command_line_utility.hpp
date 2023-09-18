@@ -28,40 +28,46 @@
 
 #pragma once
 
-#include <freezer_driver/msgs/acknowledge_response.hpp>
-#include <freezer_driver/msgs/bitset_command.hpp>
-#include <freezer_driver/msgs/shoot_command.hpp>
-#include <freezer_driver/msgs/status_response.hpp>
+#include <functional>
+#include <map>
+#include <set>
+#include <string>
+#include <variant>
 
-#include <rclcpp/time.hpp>
-
-namespace freezer_driver
-{
 /**
- * @brief This class receives commands and queries from the
- * hardware interface and sends them to a fake or a real hardware.
+ *  Class to parse the command line.
  */
-class Driver
+class CommandLineUtility
 {
+  using LambdaWithValue = std::function<void(const char*)>;
+  using LambdaWithoutValue = std::function<void()>;
+  using ParameterHandler = std::variant<LambdaWithValue, LambdaWithoutValue>;
+
 public:
-  virtual ~Driver() = default;
+  /**
+   * Assign to each command parameter a lambda function to handle it.
+   * @param parameter The parameter to handle.
+   * @param handler The lambda function to handle the parameter value.
+   * @param isMandatory True if the parameter is mandatory, else otherwise.
+   */
+  void registerHandler(const std::string& parameter, ParameterHandler handler, bool isMandatory = false);
 
   /**
-   * Initialize the command interface.
+   * Parse the command line and read all parameters.
+   * @param argc The number of tokens in the command line.
+   * @param argv The list of tokens.
+   * @return True if the parsing is successful.
    */
-  virtual bool connect() = 0;
+  bool parse(int argc, char* argv[]);
 
-  /**
-   * Disconnect the interface..
-   */
-  virtual void disconnect() = 0;
+private:
+  // Map that associates a lambda function to each parameter to process the expected value.
+  std::map<std::string, ParameterHandler> handlers;
 
-  /**
-   * Send a sequence of bits and delays to be executed atomically on the
-   * hardware.
-   * @param command The command containing a sequence of bits and delays to
-   * be executed.
-   */
-  virtual AcknowledgeResponse execute(const rclcpp::Time& time, const BitsetCommand& command) = 0;
+  // Store all mandatory parameters.
+  std::set<std::string> mandatoryParams;
+
+  // Store the parameters which are parsed in the command line. If a parameter is mandatory,
+  // but cannot be found in the received  parameters, then print an error.
+  std::set<std::string> receivedParams;
 };
-}  // namespace freezer_driver

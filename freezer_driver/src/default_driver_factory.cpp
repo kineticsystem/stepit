@@ -26,42 +26,22 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <freezer_driver/default_driver.hpp>
+#include <freezer_driver/default_driver_factory.hpp>
 
-#include <freezer_driver/msgs/acknowledge_response.hpp>
-#include <freezer_driver/msgs/bitset_command.hpp>
-#include <freezer_driver/msgs/shoot_command.hpp>
-#include <freezer_driver/msgs/status_response.hpp>
+#include <cobs_serial/default_cobs_serial.hpp>
+#include <cobs_serial/default_cobs_serial_factory.hpp>
 
-#include <rclcpp/time.hpp>
+#include <rclcpp/logging.hpp>
 
 namespace freezer_driver
 {
-/**
- * @brief This class receives commands and queries from the
- * hardware interface and sends them to a fake or a real hardware.
- */
-class Driver
+const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
+
+std::unique_ptr<freezer_driver::Driver>
+freezer_driver::DefaultDriverFactory::create(const hardware_interface::HardwareInfo& info)
 {
-public:
-  virtual ~Driver() = default;
-
-  /**
-   * Initialize the command interface.
-   */
-  virtual bool connect() = 0;
-
-  /**
-   * Disconnect the interface..
-   */
-  virtual void disconnect() = 0;
-
-  /**
-   * Send a sequence of bits and delays to be executed atomically on the
-   * hardware.
-   * @param command The command containing a sequence of bits and delays to
-   * be executed.
-   */
-  virtual AcknowledgeResponse execute(const rclcpp::Time& time, const BitsetCommand& command) = 0;
-};
+  auto cobs_serial = cobs_serial::DefaultCobsSerialFactory().create(info);
+  return std::make_unique<DefaultDriver>(std::move(cobs_serial));
+}
 }  // namespace freezer_driver

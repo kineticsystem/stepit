@@ -33,6 +33,8 @@
 #include <cobs_serial/default_cobs_serial.hpp>
 #include <cobs_serial/default_cobs_serial_factory.hpp>
 
+#include <rclcpp/logging.hpp>
+
 namespace stepit_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
