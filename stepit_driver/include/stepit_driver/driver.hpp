@@ -102,7 +102,7 @@ public:
    * @brief Command asking to echo back its content.
    * @param time The time the command is sent.
    * @param command The command containing the information to be echoed back.
-   * @return A reponse with the command content.
+   * @return A response with the command content.
    */
   virtual EchoResponse echo(const rclcpp::Time& time, const EchoCommand& command) const = 0;
 };
