@@ -41,6 +41,7 @@ const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
 constexpr uint8_t kMotorConfigCommandId = 0x78;
 constexpr uint8_t kMotorPositionCommandId = 0x71;
+constexpr uint8_t kEchoCommandId = 0x79;
 constexpr uint8_t kInfoQueryId = 0x76;
 constexpr uint8_t kMotorStatusQueryId = 0x75;
 
@@ -116,8 +117,7 @@ AcknowledgeResponse DefaultDriver::configure(const ConfigCommand& command) const
   return response;
 }
 
-AcknowledgeResponse DefaultDriver::set_position([[maybe_unused]] const rclcpp::Time& time,
-                                                const PositionCommand& command) const
+AcknowledgeResponse DefaultDriver::set_position(const rclcpp::Time&, const PositionCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(kMotorPositionCommandId);
@@ -139,8 +139,7 @@ AcknowledgeResponse DefaultDriver::set_position([[maybe_unused]] const rclcpp::T
   return response;
 }
 
-AcknowledgeResponse DefaultDriver::set_velocity([[maybe_unused]] const rclcpp::Time& time,
-                                                const VelocityCommand& command) const
+AcknowledgeResponse DefaultDriver::set_velocity(const rclcpp::Time&, const VelocityCommand& command) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(command.command_id());
@@ -162,7 +161,7 @@ AcknowledgeResponse DefaultDriver::set_velocity([[maybe_unused]] const rclcpp::T
   return response;
 }
 
-StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& time) const
+StatusResponse DefaultDriver::get_status(const rclcpp::Time&) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(kMotorStatusQueryId);
@@ -171,7 +170,7 @@ StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& ti
   auto out = cobs_serial_->read();
   RCLCPP_DEBUG(kLogger, "Status response: %s", to_hex(out).c_str());
 
-  // The data array contains the following information.
+  // The response contains the following information.
   //
   // status               - 1 byte
   //
@@ -203,7 +202,7 @@ StatusResponse DefaultDriver::get_status([[maybe_unused]] const rclcpp::Time& ti
   return response;
 }
 
-InfoResponse DefaultDriver::get_info([[maybe_unused]] const rclcpp::Time& time) const
+InfoResponse DefaultDriver::get_info(const rclcpp::Time&) const
 {
   std::vector<uint8_t> in;
   in.emplace_back(kInfoQueryId);
@@ -229,6 +228,22 @@ InfoResponse DefaultDriver::get_info([[maybe_unused]] const rclcpp::Time& time) 
   std::string info{ data.begin(), data.end() };
   InfoResponse response{ status, info };
   return response;
+}
+
+EchoResponse DefaultDriver::echo(const rclcpp::Time&, const EchoCommand& command) const
+{
+  const auto content = command.content();
+
+  std::vector<uint8_t> in;
+  in.emplace_back(kEchoCommandId);
+  in.insert(in.end(), content.begin(), content.end());
+
+  RCLCPP_DEBUG(kLogger, "Echo command: %s", to_hex(in).c_str());
+  cobs_serial_->write(in);
+  auto out = cobs_serial_->read();
+  RCLCPP_DEBUG(kLogger, "Echo response: %s", to_hex(out).c_str());
+
+  return EchoResponse{ Response::Status{ out[0] }, std::vector<uint8_t>{ out.begin() + 1, out.end() } };
 }
 
 }  // namespace stepit_driver

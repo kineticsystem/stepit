@@ -28,33 +28,24 @@
 
 #pragma once
 
-#include <functional>
-#include <memory>
+#include <cstdint>
+#include <vector>
 
-#include <stepit_driver/driver.hpp>
-
-#include <cobs_serial/cobs_serial.hpp>
+#include <stepit_driver/msgs/request.hpp>
 
 namespace stepit_driver
 {
+
 /**
- * @brief This class receives commands and queries from the
- * hardware interface and sends them to the real hardware.
+ * A command that expects a response with the same binary content.
  */
-class DefaultDriver : public Driver
+class EchoCommand : public Request
 {
 public:
-  explicit DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> data_interface);
-  bool connect() override;
-  void disconnect() override;
-  AcknowledgeResponse configure(const ConfigCommand& command) const override;
-  AcknowledgeResponse set_position(const rclcpp::Time& time, const PositionCommand& command) const override;
-  AcknowledgeResponse set_velocity(const rclcpp::Time& time, const VelocityCommand& command) const override;
-  StatusResponse get_status(const rclcpp::Time& time) const override;
-  InfoResponse get_info(const rclcpp::Time& time) const override;
-  EchoResponse echo(const rclcpp::Time& time, const EchoCommand& command) const override;
+  explicit EchoCommand(const std::vector<uint8_t>& content);
+  std::vector<uint8_t> content() const;
 
 private:
-  std::unique_ptr<cobs_serial::CobsSerial> cobs_serial_;
+  std::vector<uint8_t> content_;
 };
 }  // namespace stepit_driver

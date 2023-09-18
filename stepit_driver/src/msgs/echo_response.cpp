@@ -26,35 +26,14 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#pragma once
+#include <stepit_driver/msgs/echo_response.hpp>
 
-#include <functional>
-#include <memory>
-
-#include <stepit_driver/driver.hpp>
-
-#include <cobs_serial/cobs_serial.hpp>
-
-namespace stepit_driver
+stepit_driver::EchoResponse::EchoResponse(Status status, const std::vector<uint8_t>& content)
+  : Response{ status }, content_{ content }
 {
-/**
- * @brief This class receives commands and queries from the
- * hardware interface and sends them to the real hardware.
- */
-class DefaultDriver : public Driver
-{
-public:
-  explicit DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> data_interface);
-  bool connect() override;
-  void disconnect() override;
-  AcknowledgeResponse configure(const ConfigCommand& command) const override;
-  AcknowledgeResponse set_position(const rclcpp::Time& time, const PositionCommand& command) const override;
-  AcknowledgeResponse set_velocity(const rclcpp::Time& time, const VelocityCommand& command) const override;
-  StatusResponse get_status(const rclcpp::Time& time) const override;
-  InfoResponse get_info(const rclcpp::Time& time) const override;
-  EchoResponse echo(const rclcpp::Time& time, const EchoCommand& command) const override;
+}
 
-private:
-  std::unique_ptr<cobs_serial::CobsSerial> cobs_serial_;
-};
-}  // namespace stepit_driver
+std::vector<uint8_t> stepit_driver::EchoResponse::content() const
+{
+  return content_;
+}
