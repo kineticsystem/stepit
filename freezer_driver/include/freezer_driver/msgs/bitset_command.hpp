@@ -29,6 +29,7 @@
 #pragma once
 
 #include <chrono>
+#include <vector>
 
 #include <freezer_driver/msgs/request.hpp>
 

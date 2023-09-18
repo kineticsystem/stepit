@@ -54,7 +54,7 @@ bool DefaultDriver::connect()
 {
   cobs_serial_->open();
 
-  // TODO: send an handshake command multiple times until an answer comes back.
+  // TODO(Giovanni Remigi): send an handshake command multiple times until an answer comes back.
 
   return true;
 }

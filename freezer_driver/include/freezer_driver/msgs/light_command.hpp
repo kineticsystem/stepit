@@ -35,6 +35,6 @@ namespace freezer_driver
 class LightCommand : public Request
 {
 public:
-  explicit LightCommand();
+  LightCommand();
 };
 }  // namespace freezer_driver
