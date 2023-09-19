@@ -89,12 +89,12 @@ void returnCommandError()
 
 void executeCommand(DataBuffer* cmd)
 {
+  returnCommandSuccess();
   while (cmd->getSize() > 0)
   {
     freezer.write(cmd->removeInt(BufferPosition::Head));  // Set the hardware bits.
     delay(cmd->removeLong(BufferPosition::Head));         // Wait for a given amount of time.
   }
-  returnCommandSuccess();
 }
 
 /**

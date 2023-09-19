@@ -66,6 +66,11 @@ void DefaultCobsSerial::open()
   serial_->open();
 }
 
+bool cobs_serial::DefaultCobsSerial::is_open()
+{
+  return serial_->is_open();
+}
+
 void DefaultCobsSerial::close()
 {
   serial_->close();

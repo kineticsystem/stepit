@@ -38,60 +38,18 @@
 #include <cobs_serial/default_cobs_serial.hpp>
 
 #include "command_line_utility.hpp"
+#include "common_utils.hpp"
 
-constexpr auto kUsbPort = "/dev/ttyACM0";
+constexpr auto kUsbPort = "/dev/ttyUSB0";
 constexpr auto kBaudRate = 9600;
 constexpr auto kTimeout = 0.2;
 
 using cobs_serial::DefaultCobsSerial;
 using cobs_serial::DefaultSerial;
+using common_utils::safe_convert;
 using freezer_driver::BitsetCommand;
 using freezer_driver::BitsetStep;
 using freezer_driver::DefaultDriver;
-
-/**
- * Safely convert a string representing a number in a given base to an
- * unsigned integer.
- * The base is determined by the format of the string:
- * - If the string starts with "0x" or "0X", it's interpreted as hexadecimal (base 16).
- * - If the string starts with "0", it's interpreted as octal (base 8).
- * - Otherwise, it's interpreted as decimal (base 10).
- * @param str The string representing a number in a given.
- * @param base The representation base.
- * @return The resulting integer value.
- */
-template <typename T>
-T safe_convert(const std::string& str)
-{
-  static_assert(std::is_same<T, uint8_t>::value || std::is_same<T, uint16_t>::value || std::is_same<T, uint32_t>::value,
-                "Type T must be uint8_t, uint16_t, or uint32_t.");
-
-  unsigned long value;
-  try
-  {
-    if (str.starts_with("0x"))  // Hexadecimal.
-    {
-      value = std::stoul(str.substr(2), nullptr, 16);
-    }
-    else if (str.starts_with("0b"))  // Binary.
-    {
-      value = std::stoul(str.substr(2), nullptr, 2);
-    }
-    else  // Decimal.
-    {
-      value = std::stoul(str, nullptr, 10);
-    }
-  }
-  catch (const std::out_of_range& e)
-  {
-    throw std::out_of_range(std::string{ "Out of range error while parsing: " } + str);
-  }
-  if (value > std::numeric_limits<T>::max())
-  {
-    throw std::overflow_error("Overflow error while parsing: " + str);
-  }
-  return static_cast<uint16_t>(value);
-}
 
 /**
  * Convert a string containing comma separated values of bits and delays

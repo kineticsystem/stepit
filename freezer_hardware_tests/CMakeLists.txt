@@ -35,9 +35,18 @@ find_package(cobs_serial REQUIRED)
 
 add_executable(execute_sequence
     src/execute_sequence.cpp
+    src/common_utils.hpp
     src/command_line_utility.hpp
     src/command_line_utility.cpp
 )
 ament_target_dependencies(execute_sequence freezer_driver cobs_serial)
+
+add_executable(echo
+    src/echo.cpp
+    src/common_utils.hpp
+    src/command_line_utility.hpp
+    src/command_line_utility.cpp
+)
+ament_target_dependencies(echo cobs_serial)
 
 ament_package()
