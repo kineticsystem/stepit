@@ -27,6 +27,9 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
+#include <limits>
+#include <type_traits>
+#include <vector>
 
 #include <freezer_driver/msgs/bitset_command.hpp>
 #include <freezer_driver/default_driver.hpp>
@@ -43,8 +46,110 @@ constexpr auto kTimeout = 0.2;
 using cobs_serial::DefaultCobsSerial;
 using cobs_serial::DefaultSerial;
 using freezer_driver::BitsetCommand;
+using freezer_driver::BitsetStep;
 using freezer_driver::DefaultDriver;
 
+/**
+ * Safely convert a string representing a number in a given base to an
+ * unsigned integer.
+ * The base is determined by the format of the string:
+ * - If the string starts with "0x" or "0X", it's interpreted as hexadecimal (base 16).
+ * - If the string starts with "0", it's interpreted as octal (base 8).
+ * - Otherwise, it's interpreted as decimal (base 10).
+ * @param str The string representing a number in a given.
+ * @param base The representation base.
+ * @return The resulting integer value.
+ */
+template <typename T>
+T safe_convert(const std::string& str)
+{
+  static_assert(std::is_same<T, uint8_t>::value || std::is_same<T, uint16_t>::value || std::is_same<T, uint32_t>::value,
+                "Type T must be uint8_t, uint16_t, or uint32_t.");
+
+  unsigned long value;
+  try
+  {
+    if (str.starts_with("0x"))  // Hexadecimal.
+    {
+      value = std::stoul(str.substr(2), nullptr, 16);
+    }
+    else if (str.starts_with("0b"))  // Binary.
+    {
+      value = std::stoul(str.substr(2), nullptr, 2);
+    }
+    else  // Decimal.
+    {
+      value = std::stoul(str, nullptr, 10);
+    }
+  }
+  catch (const std::out_of_range& e)
+  {
+    throw std::out_of_range(std::string{ "Out of range error while parsing: " } + str);
+  }
+  if (value > std::numeric_limits<T>::max())
+  {
+    throw std::overflow_error("Overflow error while parsing: " + str);
+  }
+  return static_cast<uint16_t>(value);
+}
+
+/**
+ * Convert a string containing comma separated values of bits and delays
+ * into a bitset command.
+ * @param sequence A string containing comma separated values of bits and
+ * delays.
+ * @return A bitset command.
+ */
+BitsetCommand to_bitset_command(const std::string& sequence)
+{
+  std::vector<std::uint16_t> bitsets;
+  std::vector<std::chrono::milliseconds> delays;
+
+  std::istringstream iss{ sequence };
+  std::string token;
+
+  int count = 0;
+  while (std::getline(iss, token, ','))
+  {
+    token.erase(0, token.find_first_not_of(' '));  // Remove leading spaces.
+    if (count % 2 == 0)
+    {
+      uint16_t bits = safe_convert<uint16_t>(token);
+      bitsets.push_back(bits);
+    }
+    else
+    {
+      uint32_t delay = safe_convert<uint32_t>(token);
+      delays.push_back(std::chrono::milliseconds(delay));
+    }
+    count++;
+  }
+
+  if (bitsets.size() == 0 || bitsets.size() != delays.size())
+  {
+    throw std::invalid_argument{ "The sequence is not even." };
+  }
+
+  std::vector<BitsetStep> steps;
+  for (size_t i = 0; i < bitsets.size(); i++)
+  {
+    steps.push_back(BitsetStep{ bitsets[i], delays[i] });
+  }
+  return BitsetCommand{ steps };
+}
+
+/**
+ * Using this command we can send a sequence of bits and delays to the hardware
+ * and execute them.
+ * For example, we can send any of the following sequences:
+ *
+ * 0b1111111111111010,200,0b0100001010010100,500
+ * 0xFFFA,200,0x4294,500
+ * 65530,200,0x0FFF,500
+ *
+ * Usage:
+ * execute_sequence --sequence 0b1111111111111010,200,0b0100001010010100,500
+ */
 int main(int argc, char* argv[])
 {
   CommandLineUtility cli;
@@ -109,8 +214,23 @@ int main(int argc, char* argv[])
     std::cout << "The driver is connected." << std::endl;
     std::cout << "Executing a bitset sequence..." << std::endl;
 
-    BitsetCommand command{ {} };
-    auto response = driver->execute(rclcpp::Time{}, command);
+    try
+    {
+      BitsetCommand command = to_bitset_command(sequence);
+      std::cout << "Sequence:" << std::endl;
+      for (const auto& step : command.steps())
+      {
+        std::cout << " - bits: " << step.bits() << ", "
+                  << "delay: " << step.delay().count() << std::endl;
+      }
+
+      auto response = driver->execute(rclcpp::Time{}, command);
+    }
+    catch (const std::exception& e)
+    {
+      std::cout << e.what();
+      return 1;
+    }
 
     std::cout << "Sequence executed:" << std::endl;
   }
