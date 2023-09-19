@@ -71,8 +71,6 @@ add_library(
     include/stepit_driver/fake/velocity_control.hpp
     include/stepit_driver/msgs/acknowledge_response.hpp
     include/stepit_driver/msgs/config_command.hpp
-    include/stepit_driver/msgs/echo_command.hpp
-    include/stepit_driver/msgs/echo_response.hpp
     include/stepit_driver/msgs/info_response.hpp
     include/stepit_driver/msgs/position_command.hpp
     include/stepit_driver/msgs/request.hpp
@@ -89,8 +87,6 @@ add_library(
     src/fake/velocity_control.cpp
     src/msgs/acknowledge_response.cpp
     src/msgs/config_command.cpp
-    src/msgs/echo_command.cpp
-    src/msgs/echo_response.cpp
     src/msgs/info_response.cpp
     src/msgs/position_command.cpp
     src/msgs/request.cpp

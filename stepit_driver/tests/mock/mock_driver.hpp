@@ -48,6 +48,5 @@ public:
               (override, const));
   MOCK_METHOD(StatusResponse, get_status, (const rclcpp::Time& time), (override, const));
   MOCK_METHOD(InfoResponse, get_info, (const rclcpp::Time& time), (override, const));
-  MOCK_METHOD(EchoResponse, echo, (const rclcpp::Time& time, const EchoCommand& command), (override, const));
 };
 }  // namespace stepit_driver::test

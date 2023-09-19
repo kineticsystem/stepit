@@ -61,13 +61,19 @@ int main(int argc, char* argv[])
   cli.registerHandler(
       "--timeout", [&timeout](const char* value) { timeout = std::stoi(value); }, false);
 
+  std::string sequence = "";
+  cli.registerHandler(
+      "--sequence", [&sequence](const char* value) { sequence = value; }, true);
+
   cli.registerHandler("-h", [&]() {
     std::cout << "Usage: ./set_relative_pressure [OPTIONS]\n"
               << "Options:\n"
-              << "  --port VALUE                 Set the com port (default " << kUsbPort << ")\n"
-              << "  --baudrate VALUE             Set the baudrate (default " << kBaudRate << "bps)\n"
-              << "  --timeout VALUE              Set the read/write timeout (default " << kTimeout << "s)\n"
-              << "  -h                           Show this help message\n";
+              << "  --port VALUE        Set the com port (default " << kUsbPort << ")\n"
+              << "  --baudrate VALUE    Set the baudrate (default " << kBaudRate << "bps)\n"
+              << "  --timeout VALUE     Set the read/write timeout (default " << kTimeout << "s)\n"
+              << "  --sequence VALUE    A string representing an array of bitsets and delays in ms\n"
+              << "                      Example: \"10101010, 120, 11111111, 100, 10101010, 0\"\n"
+              << "  -h                  Show this help message\n";
     exit(0);
   });
 

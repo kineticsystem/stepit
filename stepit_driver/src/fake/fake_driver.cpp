@@ -109,10 +109,4 @@ InfoResponse FakeDriver::get_info([[maybe_unused]] const rclcpp::Time& time) con
 {
   return InfoResponse(Response::Status::Success, "STEPIT");
 }
-
-EchoResponse FakeDriver::echo(const rclcpp::Time&, const EchoCommand& command) const
-{
-  const auto content = command.content();
-  return EchoResponse{ Response::Status::Success, std::vector<uint8_t>{ content.begin() + 1, content.end() } };
-}
 }  // namespace stepit_driver

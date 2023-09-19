@@ -30,8 +30,6 @@
 
 #include <stepit_driver/msgs/acknowledge_response.hpp>
 #include <stepit_driver/msgs/config_command.hpp>
-#include <stepit_driver/msgs/echo_command.hpp>
-#include <stepit_driver/msgs/echo_response.hpp>
 #include <stepit_driver/msgs/info_response.hpp>
 #include <stepit_driver/msgs/position_command.hpp>
 #include <stepit_driver/msgs/status_response.hpp>
@@ -97,13 +95,5 @@ public:
    * @return Information about the installed software.
    */
   virtual InfoResponse get_info(const rclcpp::Time& time) const = 0;
-
-  /**
-   * @brief Command asking to echo back its content.
-   * @param time The time the command is sent.
-   * @param command The command containing the information to be echoed back.
-   * @return A response with the command content.
-   */
-  virtual EchoResponse echo(const rclcpp::Time& time, const EchoCommand& command) const = 0;
 };
 }  // namespace stepit_driver

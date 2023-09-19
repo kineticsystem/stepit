@@ -229,21 +229,4 @@ InfoResponse DefaultDriver::get_info(const rclcpp::Time&) const
   InfoResponse response{ status, info };
   return response;
 }
-
-EchoResponse DefaultDriver::echo(const rclcpp::Time&, const EchoCommand& command) const
-{
-  const auto content = command.content();
-
-  std::vector<uint8_t> in;
-  in.emplace_back(kEchoCommandId);
-  in.insert(in.end(), content.begin(), content.end());
-
-  RCLCPP_DEBUG(kLogger, "Echo command: %s", to_hex(in).c_str());
-  cobs_serial_->write(in);
-  auto out = cobs_serial_->read();
-  RCLCPP_DEBUG(kLogger, "Echo response: %s", to_hex(out).c_str());
-
-  return EchoResponse{ Response::Status{ out[0] }, std::vector<uint8_t>{ out.begin() + 1, out.end() } };
-}
-
 }  // namespace stepit_driver
