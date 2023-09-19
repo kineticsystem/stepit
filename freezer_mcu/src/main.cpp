@@ -31,8 +31,7 @@
 #include "Freezer.h"
 #include "Buffer.h"
 
-#include <cstdint>
-#include <vector>
+#include <stdint.h>
 
 // Freezer pins
 
@@ -90,20 +89,10 @@ void returnCommandError()
 
 void executeCommand(DataBuffer* cmd)
 {
-  // Extract bitsets and delays.
-  std::vector<uint16_t> bitsets;
-  std::vector<uint32_t> delays;
   while (cmd->getSize() > 0)
   {
-    bitsets.push_back(cmd->removeInt(BufferPosition::Head));
-    delays.push_back(cmd->removeLong(BufferPosition::Head));
-  }
-
-  // Execute.
-  for (size_t i = 0; i < bitsets.size(); ++i)
-  {
-    freezer.write(bitsets[i]);  // Set the hardware bits.
-    delay(delays[i]);           // Wait for a given amount of time.
+    freezer.write(cmd->removeInt(BufferPosition::Head));  // Set the hardware bits.
+    delay(cmd->removeLong(BufferPosition::Head));         // Wait for a given amount of time.
   }
   returnCommandSuccess();
 }
