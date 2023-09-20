@@ -139,4 +139,12 @@ std::string to_hex(const std::vector<uint8_t>& bytes);
  * @return A string containing the sequence of hex numbers.
  */
 std::string to_hex(const std::vector<uint16_t>& bytes);
+
+/**
+ * Convert a string to lowercase.
+ * @param str The string to convert.
+ * @return The lowercase string.
+ */
+std::string to_lower(const std::string& str);
+
 }  // namespace cobs_serial::data_utils

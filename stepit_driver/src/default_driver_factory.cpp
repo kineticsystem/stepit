@@ -30,6 +30,7 @@
 #include <stepit_driver/default_driver_factory.hpp>
 #include <stepit_driver/fake/fake_driver.hpp>
 
+#include <cobs_serial/data_utils.hpp>
 #include <cobs_serial/default_cobs_serial.hpp>
 #include <cobs_serial/default_cobs_serial_factory.hpp>
 
@@ -39,11 +40,16 @@ namespace stepit_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
 
+constexpr auto kUseDummyParamName = "use_dummy";
+constexpr auto kUseDummyParamDefault = "false";
+
+using cobs_serial::data_utils::to_lower;
+
 std::unique_ptr<stepit_driver::Driver>
 stepit_driver::DefaultDriverFactory::create(const hardware_interface::HardwareInfo& info)
 {
-  if (info.hardware_parameters.find("use_dummy") != info.hardware_parameters.end() &&
-      info.hardware_parameters.at("use_dummy") == "true")
+  if (info.hardware_parameters.count(kUseDummyParamName) &&
+      to_lower(info.hardware_parameters.at(kUseDummyParamName)) != to_lower(kUseDummyParamDefault))
   {
     return std::make_unique<FakeDriver>();
   }

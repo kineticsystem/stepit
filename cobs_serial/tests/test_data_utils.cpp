@@ -86,4 +86,13 @@ TEST(TestDataUtils, to_int16)
   auto value = cobs_serial::data_utils::to_int16(bytes);
   ASSERT_EQ(value, -3937);
 }
+
+TEST(TestDataUtils, to_lower)
+{
+  const char* str1 = "HeLlO";
+  ASSERT_EQ(data_utils::to_lower(str1), "hello");
+
+  std::string str2{ "HeLlO" };
+  ASSERT_EQ(data_utils::to_lower(str2), "hello");
+}
 }  // namespace cobs_serial::test

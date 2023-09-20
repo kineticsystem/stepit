@@ -130,4 +130,11 @@ std::string to_hex(const std::vector<uint16_t>& bytes)
   return hex;
 }
 
+std::string to_lower(const std::string& str)
+{
+  std::string result = str;
+  std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) { return std::tolower(c); });
+  return result;
+}
+
 }  // namespace cobs_serial::data_utils

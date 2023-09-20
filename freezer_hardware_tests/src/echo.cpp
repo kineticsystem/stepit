@@ -31,6 +31,7 @@
 #include <type_traits>
 #include <vector>
 
+#include <cobs_serial/data_utils.hpp>
 #include <cobs_serial/default_serial.hpp>
 #include <cobs_serial/default_cobs_serial.hpp>
 
@@ -144,16 +145,14 @@ int main(int argc, char* argv[])
 
     std::vector<uint8_t> in{ 0x79 };  // Echo command.
     in.insert(in.end(), bytes.begin(), bytes.end());
+
+    std::cout << "Sequence: " << cobs_serial::data_utils::to_hex(in) << std::endl;
+
     try
     {
       cobs_serial->write(in);
       auto out = cobs_serial->read();
-
-      std::cout << "Echoed sequence: " << std::endl;
-      for (const auto& byte : out)
-      {
-        std::cout << " - " << byte << std::endl;
-      }
+      std::cout << "Echo: " << cobs_serial::data_utils::to_hex(out) << std::endl;
     }
     catch (const std::exception& e)
     {
