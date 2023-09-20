@@ -24,7 +24,7 @@ For a real application, we recommend attaching the stepper motors to a Teensy mi
 
 The Teensy is connected to a computer using a USB cable. For a portable application, we can use a [Raspberry PI 4](docs/install_ros_on_rasperry_pi/install_ros2_on_rasperry_pi.md).
 
-## StepIt microcontroller installation
+## Install StepIt on the microcontroller
 
 We developed code for the Teensy microcontroller using Visual Studio Code because it provides very good tools to format and validate the code. To achieve this goal, we must install [PlatformIO](https://platformio.org) extension which supports different microcontrollers including Arduino. Installing Arduino IDE is not required.
 
@@ -32,7 +32,9 @@ If PlatformIO cannot find the Python interpreter, install the following:
 
 `sudo apt install python3-venv`
 
-## StepIt computer installation
+## Install StepIt on the local computer
+
+### Setup a project workspace
 
 Open a terminal and run the following command to source the ROS 2 Humble installation.
 
@@ -49,6 +51,8 @@ cd ~
 mkdir stepit_ws
 cd stepit_ws
 ```
+
+### Chekout the git repository
 
 Create a source folder and check out this git repository, including all required submodules.
 
@@ -70,6 +74,16 @@ Remember to enable recursion for relevant git commands, such that regular comman
 ```
 git config --global submodule.recurse true
 ```
+
+### Pre-commit hooks
+
+Additionally, you should install git pre-commit hooks using the following command:
+
+```
+pre-commit install
+```
+
+### Build the project
 
 Move into the base `<STEPIT_WS>` folder and install all required dependencies.
 
