@@ -37,13 +37,15 @@
 #include <cobs_serial/cobs_serial.hpp>
 #include <cobs_serial/serial.hpp>
 
-namespace cobs_serial {
+namespace cobs_serial
+{
 /**
  * This class is used to pack a sequence of bytes into a frame and send it to
  * the serial port and also to parse frames coming from the serial port.
  * A frames contains the data, a 16-bits CRC and delimiters.
  */
-class DefaultCobsSerial : public CobsSerial {
+class DefaultCobsSerial : public CobsSerial
+{
 public:
   explicit DefaultCobsSerial(std::unique_ptr<Serial> serial);
 
@@ -67,7 +69,7 @@ public:
    * @param bytes The bytes to read.
    * @throw cobs_serial::SerialException
    */
-  void write(const std::vector<uint8_t> &bytes) override;
+  void write(const std::vector<uint8_t>& bytes) override;
 
   /**
    * Read a sequence of bytes from the serial port.
@@ -78,18 +80,19 @@ public:
 
 private:
   /* States used while reading and parsiong a frame. */
-  enum class ReadState {
+  enum class ReadState
+  {
     Waiting,
     ReadingMessage,
     ReadingEscapedByte
   } state_ = ReadState::Waiting;
 
   /* Circular buffer to read data from the serial port. */
-  Buffer<uint8_t> read_buffer_{100};
+  Buffer<uint8_t> read_buffer_{ 100 };
 
   /* Circular buffer to write data to the serial port. */
-  Buffer<uint8_t> write_buffer_{100};
+  Buffer<uint8_t> write_buffer_{ 100 };
 
   std::unique_ptr<Serial> serial_;
 };
-} // namespace cobs_serial
+}  // namespace cobs_serial

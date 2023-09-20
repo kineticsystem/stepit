@@ -31,8 +31,10 @@
 #include <cstdint>
 #include <vector>
 
-namespace cobs_serial {
-class CobsSerial {
+namespace cobs_serial
+{
+class CobsSerial
+{
 public:
   virtual ~CobsSerial() = default;
 
@@ -52,6 +54,6 @@ public:
    * @param bytes The bytes to read.
    * @throw cobs_serial::SerialException
    */
-  virtual void write(const std::vector<uint8_t> &bytes) = 0;
+  virtual void write(const std::vector<uint8_t>& bytes) = 0;
 };
-} // namespace cobs_serial
+}  // namespace cobs_serial
