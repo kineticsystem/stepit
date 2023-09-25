@@ -42,7 +42,8 @@
 
 constexpr auto kUsbPort = "/dev/ttyUSB0";
 constexpr auto kBaudRate = 9600;
-constexpr auto kTimeout = 0.2;
+constexpr auto kTimeout = 1;
+constexpr auto kConnectionTimeout = 5;
 
 using cobs_serial::DefaultCobsSerial;
 using cobs_serial::DefaultSerial;
@@ -124,6 +125,11 @@ int main(int argc, char* argv[])
   cli.registerHandler(
       "--timeout", [&timeout](const char* value) { timeout = std::stoi(value); }, false);
 
+  double connection_timeout = kConnectionTimeout;
+  cli.registerHandler(
+      "--connection-timeout", [&connection_timeout](const char* value) { connection_timeout = std::stoi(value); },
+      false);
+
   std::string sequence = "";
   cli.registerHandler(
       "--sequence", [&sequence](const char* value) { sequence = value; }, true);
@@ -134,6 +140,9 @@ int main(int argc, char* argv[])
               << "  --port VALUE        Set the com port (default " << kUsbPort << ")\n"
               << "  --baudrate VALUE    Set the baudrate (default " << kBaudRate << "bps)\n"
               << "  --timeout VALUE     Set the read/write timeout (default " << kTimeout << "s)\n"
+              << "  --connection-timeout VALUE      Set the max connection timeout (default " << kConnectionTimeout
+              << "s)\n"
+
               << "  --sequence VALUE    A string representing an array of bitsets and delays in ms\n"
               << "                      Example: \"10101010, 120, 11111111, 100, 10101010, 0\"\n"
               << "  -h                  Show this help message\n";
@@ -155,6 +164,7 @@ int main(int argc, char* argv[])
     auto cobs_serial = std::make_unique<DefaultCobsSerial>(std::move(serial));
 
     auto driver = std::make_unique<DefaultDriver>(std::move(cobs_serial));
+    driver->set_connection_timeout(std::chrono::duration<double>(connection_timeout));
 
     std::cout << "Using the following parameters: " << std::endl;
     std::cout << " - port: " << port << std::endl;

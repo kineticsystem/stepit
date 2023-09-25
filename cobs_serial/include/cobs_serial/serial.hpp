@@ -96,16 +96,16 @@ public:
   [[nodiscard]] virtual std::string get_port() const = 0;
 
   /**
-   * Set read timeout in milliseconds.
-   * @param timeout Read timeout in milliseconds.
+   * Set read timeout in seconds.
+   * @param timeout Read timeout in seconds.
    */
-  virtual void set_timeout(std::chrono::milliseconds timeout) = 0;
+  virtual void set_timeout(std::chrono::duration<double> timeout) = 0;
 
   /**
-   * Get read timeout in milliseconds.
-   * @return Read timeout in milliseconds.
+   * Get read timeout in seconds.
+   * @return Read timeout in seconds.
    */
-  [[nodiscard]] virtual std::chrono::milliseconds get_timeout() const = 0;
+  [[nodiscard]] virtual std::chrono::duration<double> get_timeout() const = 0;
 
   /**
    * Sets the baudrate for the serial port.

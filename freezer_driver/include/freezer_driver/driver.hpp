@@ -63,5 +63,17 @@ public:
    * be executed.
    */
   virtual AcknowledgeResponse execute(const rclcpp::Time& time, const BitsetCommand& command) = 0;
+
+  /**
+   * Set the max connection timeout in seconds.
+   * @param connection_timeout The max connection timeout in seconds.
+   */
+  virtual void set_connection_timeout(std::chrono::duration<double> connection_timeout) = 0;
+
+  /**
+   * Get the max connection timeout in seconds.
+   * @return The max connection timeout in seconds.
+   */
+  virtual std::chrono::duration<double> get_connection_timeout() const = 0;
 };
 }  // namespace freezer_driver

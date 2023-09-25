@@ -73,16 +73,17 @@ std::string DefaultSerial::get_port() const
   return serial_->getPort();
 }
 
-void DefaultSerial::set_timeout(std::chrono::milliseconds timeout)
+void DefaultSerial::set_timeout(std::chrono::duration<double> timeout)
 {
-  serial::Timeout simple_timeout = serial::Timeout::simpleTimeout(static_cast<uint32_t>(timeout.count()));
+  auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(timeout);
+  serial::Timeout simple_timeout = serial::Timeout::simpleTimeout(static_cast<uint32_t>(millis.count()));
   serial_->setTimeout(simple_timeout);
 }
 
-std::chrono::milliseconds DefaultSerial::get_timeout() const
+std::chrono::duration<double> DefaultSerial::get_timeout() const
 {
-  uint32_t timeout = serial_->getTimeout().read_timeout_constant;
-  return std::chrono::milliseconds{ timeout };
+  std::chrono::milliseconds duration(serial_->getTimeout().read_timeout_constant);
+  return duration;
 }
 
 void DefaultSerial::set_baudrate(uint32_t baudrate)

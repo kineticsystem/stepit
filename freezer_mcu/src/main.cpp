@@ -47,6 +47,8 @@ static const byte OUTPUT_ENABLED_PIN = 5;
 static const byte LATCH_PIN = 6;
 // Pin D7 in read mode.
 static const byte INPUT_PIN = 7;
+// Integrated LED.
+static const byte LED_PIN = 13;
 
 // This is the information sent by the MCU during the connection handshake.
 constexpr char NAME[] = "FREEZER\0";
@@ -57,6 +59,11 @@ constexpr char NAME[] = "FREEZER\0";
 constexpr byte EXECUTE_CMD = 0x70;  // Execute a sequence of bitsets.
 constexpr byte INFO_CMD = 0x76;     // Request controller info for connection handshaking.
 constexpr byte ECHO_CMD = 0x79;     // Return the given command, for debugging.
+
+// When a serial connection is initiated Arduino is rebooted and this takes up to 2 seconds.
+// To notify the client that Arduino is ready to receive and transmit data, a ready command
+// is sent.
+constexpr byte READY_CMD = 0x80;  // Command send by Arduino after bootstrap.
 
 // Success response code.
 constexpr byte SUCCESS_MSG = 0x11;
@@ -72,6 +79,12 @@ DataBuffer responseBuffer{ 200 };
 
 // This is the component used to control the shift register.
 Freezer freezer(OVERRIDING_CLEAR_PIN, CLOCK_PIN, DATA_PIN, OUTPUT_ENABLED_PIN, LATCH_PIN);
+
+void sendReadyCommand()
+{
+  responseBuffer.addByte(READY_CMD, BufferPosition::Tail);
+  serialPort.write(&responseBuffer);
+}
 
 /** Send a successful response. */
 void returnCommandSuccess()
@@ -150,9 +163,17 @@ void processBuffer(DataBuffer* cmd)
 
 void setup()
 {
+  // Initialize shift register controller.
+  freezer.initialize();
+  freezer.write(0u);
+
   // Initialize serial port.
   serialPort.init(9600);
   serialPort.setCallback(&processBuffer);
+
+  // Send a message to the client that Arduino is ready to read/write data.
+
+  sendReadyCommand();
 }
 
 void loop()

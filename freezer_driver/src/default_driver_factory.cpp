@@ -38,10 +38,22 @@ namespace freezer_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
 
+constexpr auto kConnectionTimeoutParamName = "connection-timeout";
+constexpr auto kConnectionTimeoutParamDefault = 5;
+
 std::unique_ptr<freezer_driver::Driver>
 freezer_driver::DefaultDriverFactory::create(const hardware_interface::HardwareInfo& info)
 {
+  RCLCPP_INFO(kLogger, "Reading connection timeout...");
+  double connection_timeout = info.hardware_parameters.count(kConnectionTimeoutParamName) ?
+                                  std::stod(info.hardware_parameters.at(kConnectionTimeoutParamName)) :
+                                  kConnectionTimeoutParamDefault;
+  RCLCPP_INFO(kLogger, "connection timeout: %fs", connection_timeout);
+
   auto cobs_serial = cobs_serial::DefaultCobsSerialFactory().create(info);
-  return std::make_unique<DefaultDriver>(std::move(cobs_serial));
+  auto driver = std::make_unique<DefaultDriver>(std::move(cobs_serial));
+  driver->set_connection_timeout(std::chrono::duration<double>{ connection_timeout });
+
+  return driver;
 }
 }  // namespace freezer_driver

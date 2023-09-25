@@ -48,8 +48,11 @@ public:
   bool connect() override;
   void disconnect() override;
   AcknowledgeResponse execute(const rclcpp::Time& time, const BitsetCommand& command) override;
+  void set_connection_timeout(std::chrono::duration<double> connection_timeout) override;
+  std::chrono::duration<double> get_connection_timeout() const override;
 
 private:
   std::unique_ptr<cobs_serial::CobsSerial> cobs_serial_;
+  std::chrono::duration<double> connection_timeout_;
 };
 }  // namespace freezer_driver

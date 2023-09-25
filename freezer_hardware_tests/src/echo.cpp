@@ -26,10 +26,11 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <chrono>
 #include <iostream>
 #include <limits>
-#include <type_traits>
 #include <vector>
+#include <thread>
 
 #include <cobs_serial/data_utils.hpp>
 #include <cobs_serial/default_serial.hpp>
@@ -40,7 +41,9 @@
 
 constexpr auto kUsbPort = "/dev/ttyUSB0";
 constexpr auto kBaudRate = 9600;
-constexpr auto kTimeout = 0.2;
+constexpr auto kTimeout = 1;
+constexpr auto kConnectionTimeout = 5;
+constexpr uint8_t kReadyMessageId = 0x80;
 
 using cobs_serial::DefaultCobsSerial;
 using cobs_serial::DefaultSerial;
@@ -95,6 +98,11 @@ int main(int argc, char* argv[])
   cli.registerHandler(
       "--timeout", [&timeout](const char* value) { timeout = std::stoi(value); }, false);
 
+  double connection_timeout = kConnectionTimeout;
+  cli.registerHandler(
+      "--connection-timeout", [&connection_timeout](const char* value) { connection_timeout = std::stoi(value); },
+      false);
+
   std::string sequence = "";
   cli.registerHandler(
       "--sequence", [&sequence](const char* value) { sequence = value; }, true);
@@ -102,12 +110,14 @@ int main(int argc, char* argv[])
   cli.registerHandler("-h", [&]() {
     std::cout << "Usage: ./set_relative_pressure [OPTIONS]\n"
               << "Options:\n"
-              << "  --port VALUE        Set the com port (default " << kUsbPort << ")\n"
-              << "  --baudrate VALUE    Set the baudrate (default " << kBaudRate << "bps)\n"
-              << "  --timeout VALUE     Set the read/write timeout (default " << kTimeout << "s)\n"
-              << "  --sequence VALUE    A string representing a sequence of bytes.\n"
-              << "                      Example: \"123,255,128,231\"\n"
-              << "  -h                  Show this help message\n";
+              << "  --port VALUE                    Set the com port (default " << kUsbPort << ")\n"
+              << "  --baudrate VALUE                Set the baudrate (default " << kBaudRate << "bps)\n"
+              << "  --timeout VALUE                 Set the read/write timeout (default " << kTimeout << "s)\n"
+              << "  --connection-timeout VALUE      Set the max connection timeout (default " << kConnectionTimeout
+              << "s)\n"
+              << "  --sequence VALUE                A string representing a sequence of bytes.\n"
+              << "                                  Example: \"123,255,128,231\"\n"
+              << "  -h                              Show this help message\n";
     exit(0);
   });
 
@@ -121,7 +131,7 @@ int main(int argc, char* argv[])
     auto serial = std::make_unique<DefaultSerial>();
     serial->set_port(port);
     serial->set_baudrate(baudrate);
-    serial->set_timeout(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(timeout)));
+    serial->set_timeout(std::chrono::duration<double>{ timeout });
 
     auto cobs_serial = std::make_unique<DefaultCobsSerial>(std::move(serial));
 
@@ -129,6 +139,14 @@ int main(int argc, char* argv[])
     std::cout << " - port: " << port << std::endl;
     std::cout << " - baudrate: " << baudrate << "bps" << std::endl;
     std::cout << " - read/write timeout: " << timeout << "s" << std::endl;
+    std::cout << " - connection timeout: " << connection_timeout << "s" << std::endl;
+
+    // Open a serial connection with Arduino.
+    // On connection Arduino resets itself and moves into a bootstrap phase
+    // that may last few seconds. When the following method returns true it
+    // means the connection has been established, but it doesn't mean Arduino
+    // is ready to communicate. When Arduino is ready it sends back a ready
+    // message that causes a "requestDataReceived" signal to be emitted.
 
     std::cout << "Checking if the serial port is open..." << std::endl;
     cobs_serial->open();
@@ -137,8 +155,33 @@ int main(int argc, char* argv[])
       std::cout << "The serial port is not open" << std::endl;
       return 1;
     }
-
     std::cout << "The serial port is open." << std::endl;
+    std::cout << "Waiting for device..." << std::endl;
+
+    bool connected = false;
+    std::chrono::duration<double> max_connection_time(kConnectionTimeout);
+    auto start_time = std::chrono::steady_clock::now();
+    while (!connected && std::chrono::steady_clock::now() - start_time < max_connection_time)
+    {
+      try
+      {
+        if (auto response = cobs_serial->read(); response.size() == 1 && response[0] == kReadyMessageId)
+        {
+          connected = true;
+        }
+      }
+      catch (const std::exception& e)
+      {
+        // Expected timeout.
+      }
+    }
+
+    if (!connected)
+    {
+      std::cout << "Device not ready" << std::endl;
+      return 1;
+    }
+
     std::cout << "Executing an echo command..." << std::endl;
 
     auto bytes = to_bytes(sequence);
@@ -160,7 +203,7 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    std::cout << "Echo command executed:" << std::endl;
+    std::cout << "Echo command executed." << std::endl;
   }
   catch (const serial::IOException& e)
   {

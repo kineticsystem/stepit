@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
     auto serial = std::make_unique<DefaultSerial>();
     serial->set_port(port);
     serial->set_baudrate(baudrate);
-    serial->set_timeout(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(timeout)));
+    serial->set_timeout(std::chrono::duration<double>{ timeout });
 
     auto cobs_serial = std::make_unique<DefaultCobsSerial>(std::move(serial));
 

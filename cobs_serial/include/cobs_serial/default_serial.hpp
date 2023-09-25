@@ -63,8 +63,8 @@ public:
   void set_port(const std::string& port) override;
   [[nodiscard]] std::string get_port() const override;
 
-  void set_timeout(std::chrono::milliseconds timeout) override;
-  [[nodiscard]] std::chrono::milliseconds get_timeout() const override;
+  void set_timeout(std::chrono::duration<double> timeout) override;
+  [[nodiscard]] std::chrono::duration<double> get_timeout() const override;
 
   void set_baudrate(uint32_t baudrate) override;
   [[nodiscard]] uint32_t get_baudrate() const override;

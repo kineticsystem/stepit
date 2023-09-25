@@ -40,6 +40,7 @@ namespace freezer_driver
 const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
 constexpr uint8_t kExecuteCommandId = 0x78;
+constexpr uint8_t kReadyMessageId = 0x80;
 
 using cobs_serial::data_utils::from_int32;
 using cobs_serial::data_utils::to_float;
@@ -53,10 +54,25 @@ DefaultDriver::DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> cobs_seria
 bool DefaultDriver::connect()
 {
   cobs_serial_->open();
-
-  // TODO(Giovanni Remigi): send an handshake command multiple times until an answer comes back.
-
-  return true;
+  if (cobs_serial_->is_open())
+  {
+    auto start_time = std::chrono::steady_clock::now();
+    while (std::chrono::steady_clock::now() - start_time < connection_timeout_)
+    {
+      try
+      {
+        if (auto response = cobs_serial_->read(); response.size() == 1 && response[0] == kReadyMessageId)
+        {
+          return true;
+        }
+      }
+      catch (const std::exception& e)
+      {
+        // Expected timeout.
+      }
+    }
+  }
+  return false;
 }
 
 void DefaultDriver::disconnect()
@@ -88,6 +104,16 @@ AcknowledgeResponse DefaultDriver::execute(const rclcpp::Time&, const BitsetComm
   Response::Status status{ out[0] };
   AcknowledgeResponse response{ status };
   return response;
+}
+
+void DefaultDriver::set_connection_timeout(std::chrono::duration<double> connection_timeout)
+{
+  connection_timeout_ = connection_timeout;
+}
+
+std::chrono::duration<double> DefaultDriver::get_connection_timeout() const
+{
+  return connection_timeout_;
 }
 
 }  // namespace freezer_driver

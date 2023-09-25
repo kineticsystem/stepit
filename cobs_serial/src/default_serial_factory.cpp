@@ -26,6 +26,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <chrono>
+
 #include <cobs_serial/default_serial_factory.hpp>
 #include <cobs_serial/default_serial.hpp>
 
@@ -68,7 +70,7 @@ std::unique_ptr<Serial> DefaultSerialFactory::create(const hardware_interface::H
   auto serial = create_objects();
   serial->set_port(usb_port);
   serial->set_baudrate(baudrate);
-  serial->set_timeout(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::duration<double>(timeout)));
+  serial->set_timeout(std::chrono::duration<double>{ timeout });
   return serial;
 }
 
