@@ -39,7 +39,7 @@ namespace freezer_driver
 {
 const auto kLogger = rclcpp::get_logger("DefaultDriver");
 
-constexpr uint8_t kExecuteCommandId = 0x78;
+constexpr uint8_t kExecuteCommandId = 0x70;
 constexpr uint8_t kReadyMessageId = 0x80;
 
 using cobs_serial::data_utils::from_int32;
