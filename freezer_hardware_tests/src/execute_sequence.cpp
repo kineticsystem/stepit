@@ -170,6 +170,7 @@ int main(int argc, char* argv[])
     std::cout << " - port: " << port << std::endl;
     std::cout << " - baudrate: " << baudrate << "bps" << std::endl;
     std::cout << " - read/write timeout: " << timeout << "s" << std::endl;
+    std::cout << " - connection timeout: " << connection_timeout << "s" << std::endl;
 
     std::cout << "Checking if the driver is connected..." << std::endl;
     bool connected = driver->connect();
