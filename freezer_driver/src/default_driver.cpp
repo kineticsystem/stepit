@@ -37,7 +37,7 @@
 
 namespace freezer_driver
 {
-const auto kLogger = rclcpp::get_logger("DefaultDriver");
+const auto kLogger = rclcpp::get_logger("freezer_default_driver");
 
 constexpr uint8_t kExecuteCommandId = 0x70;
 constexpr uint8_t kReadyMessageId = 0x80;

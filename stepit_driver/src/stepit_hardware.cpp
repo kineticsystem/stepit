@@ -48,7 +48,7 @@
 namespace stepit_driver
 {
 constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
-const auto kLogger = rclcpp::get_logger("StepitHardware");
+const auto kLogger = rclcpp::get_logger("stepit_hardware");
 
 StepitHardware::StepitHardware()
 {

@@ -26,34 +26,10 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include <freezer_driver/default_driver.hpp>
-#include <freezer_driver/default_driver_factory.hpp>
+#pragma once
 
-#include <cobs_serial/default_cobs_serial.hpp>
-#include <cobs_serial/default_cobs_serial_factory.hpp>
-
-#include <rclcpp/logging.hpp>
-
-namespace freezer_driver
-{
-const auto kLogger = rclcpp::get_logger("freezer_default_driver_factory");
-
-constexpr auto kConnectionTimeoutParamName = "connection-timeout";
-constexpr auto kConnectionTimeoutParamDefault = 5;
-
-std::unique_ptr<freezer_driver::Driver>
-freezer_driver::DefaultDriverFactory::create(const hardware_interface::HardwareInfo& info)
-{
-  RCLCPP_INFO(kLogger, "Reading connection timeout...");
-  double connection_timeout = info.hardware_parameters.count(kConnectionTimeoutParamName) ?
-                                  std::stod(info.hardware_parameters.at(kConnectionTimeoutParamName)) :
-                                  kConnectionTimeoutParamDefault;
-  RCLCPP_INFO(kLogger, "connection timeout: %fs", connection_timeout);
-
-  auto cobs_serial = cobs_serial::DefaultCobsSerialFactory().create(info);
-  auto driver = std::make_unique<DefaultDriver>(std::move(cobs_serial));
-  driver->set_connection_timeout(std::chrono::duration<double>{ connection_timeout });
-
-  return driver;
-}
-}  // namespace freezer_driver
+#define FREEZER_HARDWARE_EXPORT __attribute__((visibility("default")))
+#define FREEZER_HARDWARE_IMPORT
+#define FREEZER_HARDWARE_PUBLIC __attribute__((visibility("default")))
+#define FREEZER_HARDWARE_LOCAL __attribute__((visibility("hidden")))
+#define FREEZER_HARDWARE_PUBLIC_TYPE

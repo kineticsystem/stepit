@@ -38,7 +38,7 @@
 
 namespace stepit_driver
 {
-const auto kLogger = rclcpp::get_logger("DefaultDriverFactory");
+const auto kLogger = rclcpp::get_logger("stepit_default_driver_factory");
 
 constexpr auto kUseDummyParamName = "use_dummy";
 constexpr auto kUseDummyParamDefault = "false";

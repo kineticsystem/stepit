@@ -37,11 +37,10 @@
 
 namespace stepit_driver
 {
-const auto kLogger = rclcpp::get_logger("DefaultDriver");
+const auto kLogger = rclcpp::get_logger("stepit_default_driver");
 
 constexpr uint8_t kMotorConfigCommandId = 0x78;
 constexpr uint8_t kMotorPositionCommandId = 0x71;
-constexpr uint8_t kEchoCommandId = 0x79;
 constexpr uint8_t kInfoQueryId = 0x76;
 constexpr uint8_t kMotorStatusQueryId = 0x75;
 

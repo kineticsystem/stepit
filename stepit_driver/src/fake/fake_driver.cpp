@@ -32,7 +32,7 @@
 
 namespace stepit_driver
 {
-const auto kLogger = rclcpp::get_logger("FakeDriver");
+const auto kLogger = rclcpp::get_logger("stepit_fake_driver");
 
 bool FakeDriver::connect()
 {

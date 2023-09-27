@@ -48,6 +48,7 @@ constexpr auto kConnectionTimeout = 5;
 using cobs_serial::DefaultCobsSerial;
 using cobs_serial::DefaultSerial;
 using common_utils::safe_convert;
+using Status = freezer_driver::Response::Status;
 using freezer_driver::BitsetCommand;
 using freezer_driver::BitsetStep;
 using freezer_driver::DefaultDriver;
@@ -192,8 +193,11 @@ int main(int argc, char* argv[])
         std::cout << " - bits: " << step.bits() << ", "
                   << "delay: " << step.delay().count() << std::endl;
       }
-
-      auto response = driver->execute(rclcpp::Time{}, command);
+      if (driver->execute(rclcpp::Time{}, command).status() == Status::Failure)
+      {
+        std::cout << "Execution failed." << std::endl;
+        return 1;
+      }
     }
     catch (const std::exception& e)
     {
