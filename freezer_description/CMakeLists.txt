@@ -11,7 +11,6 @@ find_package(xacro REQUIRED)
 find_package(urdf REQUIRED)
 find_package(ros2_control REQUIRED)
 find_package(ros2_controllers REQUIRED)
-find_package(freezer_controller REQUIRED)
 
 ###############################################################################
 # INSTALL
@@ -19,6 +18,8 @@ find_package(freezer_controller REQUIRED)
 install(DIRECTORY
   config
   launch
+  meshes
+  urdf
   DESTINATION share/${PROJECT_NAME}
 )
 

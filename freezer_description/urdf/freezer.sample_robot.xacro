@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:macro name="stepit">
+  <xacro:macro name="freezer_sample_robot">
 
     <material name="base_link_material">
       <color rgba="0 0 1 1" />

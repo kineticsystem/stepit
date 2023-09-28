@@ -14,8 +14,6 @@
   <depend>launch</depend>
   <depend>launch_ros</depend>
   <depend>ros2_control</depend>
-  <depend>ros2_controllers</depend>
-  <depend>freezer_controller</depend>
 
   <!-- Check code against style conventions using clang-format. -->
   <test_depend>ament_clang_format</test_depend>

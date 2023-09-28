@@ -62,8 +62,8 @@ TEST(TestFreezerHardware, load_urdf)
             <plugin>freezer_driver/FreezerHardware</plugin>
             <param name="usb_port">/dev/ttyUSB0</param>
             <param name="baud_rate">9600</param>
-            <param name="timeout">1.0</param>
-            <param name="connection_timeout">1.0</param>
+            <param name="timeout">1</param>
+            <param name="connection_timeout">5</param>
           </hardware>
         </ros2_control>
       )";

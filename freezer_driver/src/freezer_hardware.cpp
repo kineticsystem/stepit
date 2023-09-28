@@ -58,10 +58,24 @@ FreezerHardware::FreezerHardware(std::unique_ptr<DriverFactory> driver_factory)
 {
 }
 
-hardware_interface::CallbackReturn FreezerHardware::on_init(const hardware_interface::HardwareInfo&)
+hardware_interface::CallbackReturn FreezerHardware::on_init(const hardware_interface::HardwareInfo& info)
 {
   RCLCPP_DEBUG(kLogger, "on_init");
-  return CallbackReturn::SUCCESS;
+  try
+  {
+    // Store hardware info for later use.
+    if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
+    {
+      return CallbackReturn::ERROR;
+    }
+
+    driver_ = driver_factory_->create(info);
+    return CallbackReturn::SUCCESS;
+  }
+  catch (const std::exception& ex)
+  {
+    return CallbackReturn::ERROR;
+  }
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn

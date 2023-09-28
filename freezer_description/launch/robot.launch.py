@@ -94,16 +94,16 @@ def launch_setup(context, *args, **kwargs):
         output="screen",
     )
 
-    freezer_controller_spawner = Node(
-        package="freezer_controller",
-        executable="spawner",
-        arguments=["freezer_controller", "-c", "/controller_manager"],
-    )
+    # freezer_controller_spawner = Node(
+    #    package="freezer_controller",
+    #    executable="spawner",
+    #    arguments=["freezer_controller", "-c", "/controller_manager"],
+    # )
 
     nodes_to_start = [
         ros2_control_node,
         robot_state_publisher_node,
-        freezer_controller_spawner,
+        # freezer_controller_spawner,
     ]
     return nodes_to_start
 
@@ -121,12 +121,12 @@ def generate_launch_description():
     declared_arguments = [
         DeclareLaunchArgument(
             "description_package",
-            default_value="stepit_description",
+            default_value="freezer_description",
             description="Package containing all robot configuration files.",
         ),
         DeclareLaunchArgument(
             "description_file",
-            default_value="stepit.urdf.xacro",
+            default_value="freezer.urdf.xacro",
             description="URDF/XACRO description file for the robot.",
         ),
         DeclareLaunchArgument(

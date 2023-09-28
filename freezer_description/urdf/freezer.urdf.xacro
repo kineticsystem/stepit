@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <robot name="freezer" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find freezer_description)/urdf/freezer.xacro" />
+  <xacro:include filename="$(find freezer_description)/urdf/freezer.sample_robot.xacro" />
   <xacro:include filename="$(find freezer_description)/urdf/freezer.ros2_control.xacro" />
 
-  <xacro:freezer />
+  <xacro:freezer_sample_robot />
   <xacro:freezer_ros2_control name="freezer_ros2_control" />
 
 </robot>

@@ -67,14 +67,12 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
   try
   {
     // Store hardware info for later use.
-
     if (hardware_interface::SystemInterface::on_init(info) != CallbackReturn::SUCCESS)
     {
       return CallbackReturn::ERROR;
     }
 
     // Initialize all joints.
-
     joints_.resize(info_.joints.size(), Joint{});
 
     for (uint i = 0; i < info_.joints.size(); i++)
@@ -94,8 +92,6 @@ hardware_interface::CallbackReturn StepitHardware::on_init(const hardware_interf
   }
   catch (const std::exception& ex)
   {
-    set_state(rclcpp_lifecycle::State(lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
-                                      hardware_interface::lifecycle_state_names::UNCONFIGURED));
     return CallbackReturn::ERROR;
   }
 }

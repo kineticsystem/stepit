@@ -53,7 +53,16 @@ DefaultDriver::DefaultDriver(std::unique_ptr<cobs_serial::CobsSerial> cobs_seria
 
 bool DefaultDriver::connect()
 {
-  cobs_serial_->open();
+  try
+  {
+    cobs_serial_->open();
+  }
+  catch (const std::exception& e)
+  {
+    RCLCPP_ERROR(kLogger, "Serial connection error: %s", e.what());
+    return false;
+  }
+
   if (cobs_serial_->is_open())
   {
     auto start_time = std::chrono::steady_clock::now();
@@ -72,6 +81,7 @@ bool DefaultDriver::connect()
       }
     }
   }
+  RCLCPP_ERROR(kLogger, "Connection timeout");
   return false;
 }
 
