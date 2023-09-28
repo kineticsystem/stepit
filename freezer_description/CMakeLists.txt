@@ -18,7 +18,6 @@ find_package(ros2_controllers REQUIRED)
 install(DIRECTORY
   config
   launch
-  meshes
   urdf
   DESTINATION share/${PROJECT_NAME}
 )
