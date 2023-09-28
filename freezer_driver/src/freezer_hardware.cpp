@@ -65,10 +65,28 @@ hardware_interface::CallbackReturn FreezerHardware::on_init(const hardware_inter
 }
 
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
-FreezerHardware::on_configure(const rclcpp_lifecycle::State&)
+FreezerHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
 {
   RCLCPP_DEBUG(kLogger, "on_configure");
+  try
+  {
+    if (hardware_interface::SystemInterface::on_configure(previous_state) != CallbackReturn::SUCCESS)
+    {
+      return CallbackReturn::ERROR;
+    }
 
+    if (!driver_->connect())
+    {
+      RCLCPP_ERROR(kLogger, "Cannot connect to the device.");
+      return CallbackReturn::FAILURE;
+    }
+    return CallbackReturn::SUCCESS;
+  }
+  catch (const std::exception& e)
+  {
+    RCLCPP_ERROR(kLogger, "Cannot connect to the device: %s", e.what());
+    return CallbackReturn::ERROR;
+  }
   return CallbackReturn::SUCCESS;
 }
 

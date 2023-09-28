@@ -151,7 +151,7 @@ install(
 # whether to enable testing support (ON by default).
 include(CTest)
 if(BUILD_TESTING)
-    #add_subdirectory(tests)
+    add_subdirectory(tests)
 endif()
 
 ament_package()

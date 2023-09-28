@@ -1,4 +1,4 @@
-// Copyright 2023 Giovanni Remigi
+// Copyright (c) 2022 PickNik, Inc.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -10,7 +10,7 @@
 //      notice, this list of conditions and the following disclaimer in the
 //      documentation and/or other materials provided with the distribution.
 //
-//    * Neither the name of the Giovanni Remigi nor the names of its
+//    * Neither the name of the {copyright_holder} nor the names of its
 //      contributors may be used to endorse or promote products derived from
 //      this software without specific prior written permission.
 //
@@ -28,32 +28,21 @@
 
 #pragma once
 
-#include <memory>
+#include <gmock/gmock.h>
 
-#include <freezer_driver/driver_factory.hpp>
-#include <freezer_driver/default_driver_factory.hpp>
-#include <hardware_interface/hardware_info.hpp>
+#include <freezer_driver/driver.hpp>
 
-namespace freezer_driver
+#include <rclcpp/rclcpp.hpp>
+
+namespace freezer_driver::test
 {
-/**
- * @brief This class class is used to create a default
- * driver with the data from the given hardware information.
- */
-class DefaultDriverFactory : public DriverFactory
+class MockDriver : public freezer_driver::Driver
 {
 public:
-  DefaultDriverFactory() = default;
-
-  /**
-   * @brief Create a default driver.
-   * @param info The hardware information.
-   * @return A driver created using the given hardware information.
-   */
-  std::unique_ptr<Driver> create(const hardware_interface::HardwareInfo& info);
-
-protected:
-  // Seam for testing.
-  virtual std::unique_ptr<Driver> create_driver(const hardware_interface::HardwareInfo& info) const;
+  MOCK_METHOD(bool, connect, (), (override));
+  MOCK_METHOD(void, disconnect, (), (override));
+  MOCK_METHOD(AcknowledgeResponse, execute, (const rclcpp::Time& time, const BitsetCommand& command), (override));
+  MOCK_METHOD(void, set_connection_timeout, (std::chrono::duration<double> connection_timeout), (override));
+  MOCK_METHOD(std::chrono::duration<double>, get_connection_timeout, (), (override, const));
 };
-}  // namespace freezer_driver
+}  // namespace freezer_driver::test
