@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 # Copyright 2023 Giovanni Remigi
 #
 # Redistribution and use in source and binary forms, with or without
@@ -26,6 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+import launch
 from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
@@ -217,3 +220,19 @@ def generate_launch_description():
     ]
 
     return LaunchDescription(declared_arguments)
+
+
+def main():
+    """
+    This is used to execute the launch file as a normal python script.
+    Simply type the following in a terminal window:
+    ./robot.launch.py
+    """
+    ls = launch.LaunchService()
+    ld = generate_launch_description()
+    ls.include_launch_description(ld)
+    return ls.run()
+
+
+if __name__ == "__main__":
+    main()
