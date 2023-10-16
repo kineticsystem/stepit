@@ -25,4 +25,3 @@ docker-compose exec app /home/developer/repo/stepit/src/stepit/bin/build.sh
 
 # To connect to a running container use:
 docker-compose exec app bash
-
