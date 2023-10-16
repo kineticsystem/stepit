@@ -26,7 +26,7 @@ export STEPIT_PATH=$HOME/repo/stepit
 Run the script located in this same folder:
 
 ```bash
-./run.sh
+./start.sh
 ```
 
 This script will build the image and start the container with an interactive shell.
@@ -36,6 +36,7 @@ This script will build the image and start the container with an interactive she
 Using the terminal, move to the root of your project and run the following commands:
 
 ```bash
+rosdep update
 rosdep install --ignore-src --from-paths . -y -r
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --symlink-install --event-handlers log-
 ```

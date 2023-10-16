@@ -19,5 +19,10 @@ docker-compose build
 # Create a container and start it in background.
 docker-compose up -d
 
-# Attach a terminal to the running container.
+# Install missing packages and build.
+docker-compose exec app /home/developer/repo/stepit/src/stepit/bin/update.sh
+docker-compose exec app /home/developer/repo/stepit/src/stepit/bin/build.sh
+
+# To connect to a running container use:
 docker-compose exec app bash
+

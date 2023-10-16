@@ -16,9 +16,12 @@ RUN usermod -aG sudo developer                         # Add user developer to s
 RUN apt-get -y upgrade
 RUN apt-get -y install vim wget unzip python3
 
-USER developer
-WORKDIR /home/developer
-ENV HOME /home/developer
-COPY entrypoint.sh /home/developer/entrypoint.sh
+CMD ["bash"]
 
 USER developer
+
+ENV HOME /home/developer
+RUN echo "source /opt/ros/humble/setup.bash" >> /home/developer/.bashrc
+RUN rosdep update
+
+WORKDIR /home/developer/repo/stepit
