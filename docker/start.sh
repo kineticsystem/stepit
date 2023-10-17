@@ -8,20 +8,20 @@
 xhost +local:
 
 # Stop the current container.
-docker-compose down
+docker compose down
 
 # Remove the image.
 docker rmi stepit:latest 2>/dev/null || true
 
 # Build the image.
-docker-compose build
+docker compose build
 
 # Create a container and start it in background.
-docker-compose up -d
+docker compose up -d
 
 # Install missing packages and build.
-docker-compose exec app /home/developer/repo/stepit/src/stepit/bin/update.sh
-docker-compose exec app /home/developer/repo/stepit/src/stepit/bin/build.sh
+docker compose exec app /home/developer/repo/stepit/src/stepit/bin/update.sh
+docker compose exec app /home/developer/repo/stepit/src/stepit/bin/build.sh
 
 # To connect to a running container use:
-docker-compose exec app bash
+docker compose exec app bash

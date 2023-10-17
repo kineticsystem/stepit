@@ -50,23 +50,21 @@ import xacro
 
 def launch_setup(context, *args, **kwargs):
     # Declare all parameters.
-    description_package_param = LaunchConfiguration("description_package")
-    description_file_param = LaunchConfiguration("description_file")
-    controllers_config_file_param = LaunchConfiguration("controllers_file")
     launch_rviz = LaunchConfiguration("launch_rviz")
 
     # Extract all parameters' values.
+    description_pkg = FindPackageShare("stepit_description")
     description_file = PathJoinSubstitution(
-        [FindPackageShare(description_package_param), "urdf", description_file_param]
+        [description_pkg, "urdf", "stepit.urdf.xacro"]
     ).perform(context)
     rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare(description_package_param), "rviz", "stepit.rviz"]
+        [description_pkg, "rviz", "stepit.rviz"]
     ).perform(context)
     controllers_config_file = PathJoinSubstitution(
         [
-            FindPackageShare(description_package_param),
+            description_pkg,
             "config",
-            controllers_config_file_param,
+            "controllers.yaml",
         ]
     ).perform(context)
 
@@ -198,21 +196,6 @@ def generate_launch_description():
     https://github.com/Serafadam/interbotix_ros_manipulators/blob/xsarm_control_galactic/interbotix_ros_xsarms/interbotix_xsarm_control/launch/xsarm_control.launch.py
     """
     declared_arguments = [
-        DeclareLaunchArgument(
-            "description_package",
-            default_value="stepit_description",
-            description="Package containing all robot configuration files.",
-        ),
-        DeclareLaunchArgument(
-            "description_file",
-            default_value="stepit.urdf.xacro",
-            description="URDF/XACRO description file for the robot.",
-        ),
-        DeclareLaunchArgument(
-            "controllers_file",
-            default_value="controllers.yaml",
-            description="YAML file with the controllers configuration.",
-        ),
         DeclareLaunchArgument(
             "launch_rviz", default_value="true", description="Launch RViz?"
         ),
