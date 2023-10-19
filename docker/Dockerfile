@@ -7,13 +7,16 @@ LABEL name="develop:ros"
 RUN apt-get update
 RUN apt-get -y install sudo
 RUN echo 'root:docker' | chpasswd                      # Update user root password.
+
+RUN groupadd -g 107 input                              # Create the group 'input' (id 107) to access devices.
+
 RUN useradd --create-home --shell /bin/bash developer  # Create the user developer.
 RUN echo 'developer:developer' | chpasswd              # Update user developer password.
-RUN usermod -aG sudo developer                         # Add user developer to sudoers.
+RUN usermod -aG sudo,input developer                   # Add user to sudoers and input devices.
 
 RUN apt-get -y upgrade
 RUN apt-get -y install vim wget unzip python3
-RUN apt-get -y install jstest-gtk # Test connected joysticks.
+RUN apt-get -y install jstest-gtk                      # Test connected joysticks.
 RUN apt-get install -y --no-install-recommends ros-humble-rmw-cyclonedds-cpp
 
 CMD ["bash"]
