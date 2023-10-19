@@ -12,7 +12,7 @@ sudo sh get-docker.sh
 ```
 
 ```bash
-sudo apt install docker-compose-v2
+sudo apt install docker-compose
 ```
 
 Additionally, you must export the environment variable `STEPIT_PATH` to point to the root of your repository, for example:
