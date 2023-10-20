@@ -4,32 +4,38 @@ In this tutorial, we explain how to develop, build and run this project inside a
 
 ## Prerequisites
 
-First, you must install `docker` and `docker-compose`.
+First, you must install `docker`.
 
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
 ```
 
-```bash
-sudo apt install docker-compose
-```
-
-Additionally, you must export the environment variable `STEPIT_PATH` to point to the root of your repository, for example:
-
-```bash
-export STEPIT_PATH=$HOME/repo/stepit
-```
-
 ## Build and start up a container
 
-Run the script located in this same folder:
+Run this script to create an image and a container:
 
 ```bash
-./start.sh
+./stepit.sh docker build --repo=absolute-repo-path
 ```
 
-This script will build the image and start the container with an interactive shell.
+Run this to start the container with an interactive shell:
+
+```bash
+./stepit.sh docker start
+```
+
+Run this to stop the container:
+
+```bash
+./stepit.sh docker stop
+```
+
+Finally, run this to remove container an image:
+
+```bash
+./stepit.sh docker clean
+```
 
 ## Working with the code
 
