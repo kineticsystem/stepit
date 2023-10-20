@@ -51,7 +51,7 @@ function create_container() {
     docker create \
       --name $name \
       --privileged \
-      -v ${repo_path}:/home/developer/dock \
+      -v ${repo_path}:/home/developer/ws \
       -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
       -e DISPLAY=${DISPLAY} \
       -e QT_X11_NO_MITSHM=1 \
