@@ -32,4 +32,4 @@ RUN echo "export CYCLONEDDS_URI=~/.ros/cyclonedds.xml" >> ~/.bashrc
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN rosdep update
 
-WORKDIR /home/developer/repo/stepit
+WORKDIR /home/developer/dock

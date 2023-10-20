@@ -16,25 +16,25 @@ sudo sh get-docker.sh
 Run this script to create an image and a container:
 
 ```bash
-./stepit.sh docker build --repo=absolute-repo-path
+./dock.sh [container-name] build [absolute-repo-path]
 ```
 
 Run this to start the container with an interactive shell:
 
 ```bash
-./stepit.sh docker start
+./dock.sh [container-name] start
 ```
 
 Run this to stop the container:
 
 ```bash
-./stepit.sh docker stop
+./dock.sh [container-name] stop
 ```
 
 Finally, run this to remove container an image:
 
 ```bash
-./stepit.sh docker clean
+./dock.sh [container-name] clean
 ```
 
 ## Working with the code
