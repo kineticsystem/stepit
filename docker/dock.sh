@@ -32,7 +32,7 @@ function remove_container() {
     if container_exists $name; then
         echo "Removing container: $name"
         docker rm $name > /dev/null 2>&1
-        else
+    else
         echo "Warning: Container '$name' does not exist." >&2
     fi
 }
