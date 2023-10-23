@@ -123,9 +123,11 @@ case "$command" in
             exit 1
         fi
         repo_path="$1"
-        stop_container $name   # If running.
-        remove_container $name # If one exists.
-        build_image $name      # If not already built.
+        shift
+        stop_container $name
+        remove_container $name
+        remove_image $name
+        build_image $name
         create_container $name $repo_path
         ;;
     start)
@@ -138,9 +140,9 @@ case "$command" in
         stop_container $name
         ;;
     clean)
-        stop_container $name   # If running.
-        remove_container $name # If one exists.
-        remove_image $name     # If one exists.
+        stop_container $name
+        remove_container $name
+        remove_image $name
         ;;
     *)
         echo "Unknown parameter: $1"
