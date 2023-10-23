@@ -4,41 +4,52 @@
 # build your local ROS2 project.
 # It is also used to build your code inside the docker container.
 
+function container_exists() {
+    local name="$1"
+    [[ $(docker ps -aq --filter name=^/${name}$) ]]
+}
+
+function image_exists() {
+    local name="$1"
+    [[ $(docker images -q $name) ]]
+}
+
+function is_container_running() {
+    local name="$1"
+    docker ps --filter name=^/${name}$ --format '{{.Names}}' | grep -q "^${name}$"
+}
+
 function stop_container() {
     local name="$1"
-    # Check if the container is running.
-    if docker ps -a | grep -q $name; then
-        # Stop the container
+    if container_exists $name; then
         echo "Stopping container: $name"
-        docker stop $name > /dev/null
+        docker stop $name > /dev/null 2>&1
     fi
 }
 
 function remove_container() {
     local name="$1"
-    # Check if the container is running.
-    if docker ps -a | grep -q $name; then
-        # Check if the container exists
+    if container_exists $name; then
         echo "Removing container: $name"
-        docker rm $name > /dev/null
+        docker rm $name > /dev/null 2>&1
+        else
+        echo "Warning: Container '$name' does not exist." >&2
     fi
 }
 
 function remove_image() {
     local name="$1"
-    # Check if the image exists.
-    if [[ $(docker images -q $name:latest) ]]; then
-        # Remove the image
+    if image_exists $name:latest; then
         echo "Removing image: $name:latest"
-        docker rmi $name:latest > /dev/null
+        docker rmi $name:latest > /dev/null 2>&1
+    else
+        echo "Warning: Image '$name:latest' does not exist." >&2
     fi
 }
 
 function build_image() {
     local name="$1"
-    # Check if the image exists.
-    if ! docker images | grep -q $name:latest; then
-        # Build the image
+    if ! image_exists $name:latest; then
         echo "Building image: $name:latest"
         docker build -t $name:latest .
     fi
@@ -74,34 +85,8 @@ function attach_container() {
     docker exec -it $name bash
 }
 
-parse_options() {
-    while [ "$#" -gt 0 ]; do
-        case "$1" in
-            --repo=*)
-                repo="${1#*=}"
-                shift
-                ;;
-            *)
-                echo "Unknown option: $1"
-                return 1
-                ;;
-        esac
-    done
-    return 0
-}
-
-function is_container_running() {
-    local name="$1"
-    # Check if the container is running.
-    if docker ps | grep -q $name; then
-        echo "true"
-    else
-        echo "false"
-    fi
-}
-
 function print_help() {
-    echo -e "Usage: ./dock.sh <container-name> <command> [options]\n
+    echo -e "\nUsage: ./dock.sh <container-name> <command> [options]\n
     Commands:
     build   Build a container without starting it
             Usage: ./dock.sh container-name build path-to-repo
@@ -118,45 +103,35 @@ cd "$(dirname "$0")"
 # Allows any local user to connect to your X server, including the Docker container.
 xhost +local: &>/dev/null
 
+# Check for at least two arguments (container name and command)
+if [ "$#" -lt 2 ]; then
+    echo "Missing required arguments."
+    print_help
+    exit 1
+fi
+
+# Assign the first two arguments to descriptive variables
 name="$1"
-if [[ -z "$name" ]]; then
-    echo -e "Please provide a container name.\n"
-    print_help
-    exit 1
-fi
-shift # Remove the container name from the arguments.
+command="$2"
+shift 2  # Shift off the first two arguments
 
-command="$1"
-if [[ -z "$command" ]]; then
-    echo -e "Please provide a command.\n"
-    print_help
-    exit 1
-fi
-shift # Remove the container name from the arguments.
-
-case $command in
+case "$command" in
     build)
-        repo="$1"
-        if [[ -n "$repo" ]]; then
-            echo "Repository path: $repo"
-        else
-            echo -e "Please provide a repository path.\n"
+        if [ "$#" -lt 1 ]; then
+            echo "Missing repository path for the build command."
             print_help
             exit 1
         fi
-        shift # Remove the container name from the arguments.
-
+        repo_path="$1"
         stop_container $name   # If running.
         remove_container $name # If one exists.
         build_image $name      # If not already built.
-        create_container $name $repo
+        create_container $name $repo_path
         ;;
     start)
-        # Check if a container is already running.
-        if [ "$(is_container_running $name)" = "false" ]; then
+        if ! is_container_running $name; then
             start_container $name
         fi
-
         attach_container $name
         ;;
     stop)
@@ -169,7 +144,13 @@ case $command in
         ;;
     *)
         echo "Unknown parameter: $1"
-        echo
         print_help
         ;;
 esac
+
+# Check for any extra unexpected arguments
+if [ "$#" -gt 0 ]; then
+    echo "Unexpected arguments: $@"
+    print_help
+    exit 1
+fi
