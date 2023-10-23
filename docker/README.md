@@ -31,7 +31,7 @@ Run this to stop the container:
 ./dock.sh [container-name] stop
 ```
 
-Finally, run this to remove container an image:
+Finally, run this to remove container and image:
 
 ```bash
 ./dock.sh [container-name] clean
