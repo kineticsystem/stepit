@@ -85,7 +85,7 @@ function attach_container() {
     docker exec -it $name bash
 }
 
-function print_help() {
+function display_usage() {
     echo -e "\nUsage: ./dock.sh <container-name> <command> [options]\n
     Commands:
     build   Build a container without starting it
@@ -106,7 +106,7 @@ xhost +local: &>/dev/null
 # Check for at least two arguments (container name and command)
 if [ "$#" -lt 2 ]; then
     echo "Missing required arguments."
-    print_help
+    display_usage
     exit 1
 fi
 
@@ -119,7 +119,7 @@ case "$command" in
     build)
         if [ "$#" -lt 1 ]; then
             echo "Missing repository path for the build command."
-            print_help
+            display_usage
             exit 1
         fi
         repo_path="$1"
@@ -146,13 +146,13 @@ case "$command" in
         ;;
     *)
         echo "Unknown parameter: $1"
-        print_help
+        display_usage
         ;;
 esac
 
 # Check for any extra unexpected arguments
 if [ "$#" -gt 0 ]; then
     echo "Unexpected arguments: $@"
-    print_help
+    display_usage
     exit 1
 fi
