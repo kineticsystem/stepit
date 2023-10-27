@@ -5,7 +5,7 @@
 # A fix has been already applied on the next release of Humble.
 
 cmake_minimum_required(VERSION 3.22.1)
-project(freezer_controller VERSION 0.1.0 LANGUAGES CXX)
+project(freezer_controller LANGUAGES CXX)
 
 # This module provides installation directories as per the GNU coding standards.
 include(GNUInstallDirs)

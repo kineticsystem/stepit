@@ -5,7 +5,7 @@
 # A fix has already been applied to the next release of Humble.
 
 cmake_minimum_required(VERSION 3.22.1)
-project(stepit_driver VERSION 0.1.0 LANGUAGES CXX)
+project(stepit_driver LANGUAGES CXX)
 
 # This module provides installation directories as per the GNU coding standards.
 include(GNUInstallDirs)

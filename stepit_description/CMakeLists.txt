@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22.1)
-project(stepit_description VERSION 0.1.0 LANGUAGES CXX)
+project(stepit_description LANGUAGES CXX)
 
 # This module provides installation directories as per the GNU coding standards.
 include(GNUInstallDirs)

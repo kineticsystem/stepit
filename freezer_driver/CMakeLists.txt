@@ -1,7 +1,7 @@
 # See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html
 
 cmake_minimum_required(VERSION 3.22.1)
-project(freezer_driver VERSION 0.1.0 LANGUAGES CXX)
+project(freezer_driver LANGUAGES CXX)
 
 # This module provides installation directories as per the GNU coding standards.
 include(GNUInstallDirs)
