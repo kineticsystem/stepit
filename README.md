@@ -4,6 +4,22 @@
 [![Format](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml)
 [![Linters](https://github.com/kineticsystem/stepit/actions/workflows/ci-ros-lint.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-ros-lint.yml)
 
+
+## Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites)
+- [Install StepIt on the Microcontroller](#install-stepit-on-the-microcontroller)
+- [Install StepIt on the Local Computer](#install-stepit-on-the-local-computer)
+  - [Setup a Project Workspace](#setup-a-project-workspace)
+  - [Chekout the Git Repository](#chekout-the-git-repository)
+  - [Pre-Commit Hooks](#pre-commit-hooks)
+  - [Build the Project](#build-the-project)
+- [Running the Application](#running-the-application)
+- [How to run GitHub Actions locally](#how-to-run-github-actions-locally)
+
+
 ## Introduction
 
 StepIt is a project to control stepper motors with a Teensy microcontroller and ROS2.
@@ -24,7 +40,7 @@ For a real application, we recommend attaching the stepper motors to a Teensy mi
 
 The Teensy is connected to a computer using a USB cable. For a portable application, we can use a [Raspberry PI 4](docs/install_ros_on_rasperry_pi/install_ros2_on_rasperry_pi.md).
 
-## Install StepIt on the microcontroller
+## Install StepIt on the Microcontroller
 
 We developed code for the Teensy microcontroller using Visual Studio Code because it provides very good tools to format and validate the code. To achieve this goal, we must install [PlatformIO](https://platformio.org) extension which supports different microcontrollers including Arduino. Installing Arduino IDE is not required.
 
@@ -32,9 +48,9 @@ If PlatformIO cannot find the Python interpreter, install the following:
 
 `sudo apt install python3-venv`
 
-## Install StepIt on the local computer
+## Install StepIt on the Local Computer
 
-### Setup a project workspace
+### Setup a Project Workspace
 
 Open a terminal and run the following command to source the ROS 2 Humble installation.
 
@@ -52,7 +68,7 @@ mkdir stepit_ws
 cd stepit_ws
 ```
 
-### Chekout the git repository
+### Chekout the Git Repository
 
 Create a source folder and check out this git repository, including all required submodules.
 
@@ -75,7 +91,7 @@ Remember to enable recursion for relevant git commands, such that regular comman
 git config --global submodule.recurse true
 ```
 
-### Pre-commit hooks
+### Pre-Commit Hooks
 
 Additionally, you should install git pre-commit hooks using the following command:
 
@@ -83,7 +99,7 @@ Additionally, you should install git pre-commit hooks using the following comman
 pre-commit install
 ```
 
-### Build the project
+### Build the Project
 
 Move into the base `<STEPIT_WS>` folder and install all required dependencies.
 
@@ -104,7 +120,7 @@ Execute all tests.
 colcon test
 ```
 
-## Running the application
+## Running the Application
 
 By default, the application runs with fake motors. Run the following commands on a terminal to start it up. This will also start up RViz.
 
@@ -185,7 +201,7 @@ ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/
 
 The trajectory is a list of waypoints, each of them containing the desired position and velocity of each joint at a given time.
 
-## How to run GitHub actions locally
+## How to run GitHub Actions locally
 
 At each commit, the GitHub repository runs all available tests using [GitHub actions](https://docs.github.com/en/actions) and [Industrial CI](https://github.com/ros-industrial/industrial_ci).
 
