@@ -100,26 +100,14 @@ colcon test
 
 ## Running the Application
 
-By default, the application runs with fake motors. Run the following commands on a terminal to start it up. This will also start up RViz.
+By default, the application runs with fake motors and a velocity controller. Thye position controller is disabled. Run the following commands on a terminal to start it up. This will also start up RViz.
 
 ```
 source install/setup.bash
 ros2 launch stepit_description robot.launch.py
 ```
 
-We can control the motors with a velocity controller or a position controller. Open a different terminal and run any of the following commands to spin up the fake motors.
-
-```
-source install/setup.bash
-```
-
-To control the position run
-
-```
-ros2 topic pub -1 /position_controller/commands std_msgs/msg/Float64MultiArray "data: [0, 0]"
-```
-
-To control the velocity run
+Open a different terminal and run any of the following commands to spin up the fake motors.
 
 ```
 ros2 topic pub -1 /velocity_controller/commands std_msgs/msg/Float64MultiArray "data: [6,-6]"
@@ -176,6 +164,12 @@ ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/
 ```
 
 The trajectory is a list of waypoints, each of them containing the desired position and velocity of each joint at a given time.
+
+If you change the `robot.launch.py` file and run the application with a position controller, you can use the following command instead:
+
+```
+ros2 topic pub -1 /position_controller/commands std_msgs/msg/Float64MultiArray "data: [0, 0]"
+```
 
 ## How to run GitHub Actions locally
 
