@@ -46,7 +46,6 @@ Finally, run this to remove container and image:
 Using the terminal, move to the root of your project and run the following commands:
 
 ```bash
-rosdep update
-rosdep install --ignore-src --from-paths . -y -r
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --symlink-install --event-handlers log-
+./bin/update.sh
+./bin/build.sh
 ```
