@@ -24,7 +24,7 @@ repos:
       - id: check-merge-conflict
       - id: check-symlinks
       - id: check-yaml
-        args: ['--unsafe']  # Fixes errors parsing custom YAML constructors like ur_description's !degrees
+        args: ["--unsafe"] # Fixes errors parsing custom YAML constructors like ur_description's !degrees
       - id: debug-statements
       - id: end-of-file-fixer
       - id: mixed-line-ending
@@ -40,7 +40,7 @@ repos:
     rev: v2.1.0
     hooks:
       - id: codespell
-        args: ['--write-changes', '-L', 'atleast']  # Provide a comma-separated list of misspelled words that codespell should ignore (for example: '-L', 'word1,word2,word3').
+        args: ["--write-changes", "-L", "atleast"] # Provide a comma-separated list of misspelled words that codespell should ignore (for example: '-L', 'word1,word2,word3').
         exclude: \.(svg|pyc|stl|dae|lock)$
 
   - repo: local
@@ -48,7 +48,7 @@ repos:
       - id: clang-format
         name: clang-format
         description: Format files with ClangFormat.
-        entry: clang-format-14
+        entry: clang-format
         language: system
         files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|m|proto|vert)$
-        args: ['-fallback-style=none', '-i']
+        args: ["-fallback-style=none", "-i"]
