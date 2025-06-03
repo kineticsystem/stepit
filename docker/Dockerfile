@@ -1,6 +1,6 @@
 # Install Ubuntu 20.04 with user "developer".
 
-FROM osrf/ros:humble-desktop-full-jammy as ros
+FROM osrf/ros:humble-desktop-full-jammy AS ros
 
 LABEL name="develop:ros"
 
@@ -33,7 +33,7 @@ USER developer
 RUN mkdir -p /home/developer/.ros
 COPY --chown=developer:developer cyclonedds.xml /home/developer/.ros
 
-ENV HOME /home/developer
+ENV HOME=/home/developer
 RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc
 RUN echo "export CYCLONEDDS_URI=~/.ros/cyclonedds.xml" >> ~/.bashrc
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
