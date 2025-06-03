@@ -2,6 +2,10 @@
 
 In this tutorial, we explain how to develop, build and run this project inside a docker container.
 
+The container user and password are:
+
+**developer:developer**
+
 ## Prerequisites
 
 First, you must install `docker`.
@@ -13,28 +17,28 @@ sudo sh get-docker.sh
 
 ## Build and start up a container
 
-Run this script to create an image and a container:
+From the root of the repo, run this script to create an image and a container:
 
 ```bash
-./dock.sh [container-name] build [absolute-repo-path]
+./docker/dock.sh [container-name] build
 ```
 
 Run this to start the container with an interactive shell:
 
 ```bash
-./dock.sh [container-name] start
+./docker/dock.sh [container-name] start
 ```
 
 Run this to stop the container:
 
 ```bash
-./dock.sh [container-name] stop
+./docker/dock.sh [container-name] stop
 ```
 
 Finally, run this to remove container and image:
 
 ```bash
-./dock.sh [container-name] clean
+./docker/dock.sh [container-name] clean
 ```
 
 ## Working with the code
