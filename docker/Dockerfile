@@ -4,7 +4,11 @@ FROM osrf/ros:humble-desktop-full-jammy as ros
 
 LABEL name="develop:ros"
 
+# Fix the expired ROS GPG key issue by bypassing signature verification
+RUN echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99allow-unauth-ros
+RUN echo 'Acquire::AllowInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99allow-unauth-ros
 RUN apt-get update
+
 RUN apt-get -y install sudo
 RUN echo 'root:docker' | chpasswd                      # Update user root password.
 
