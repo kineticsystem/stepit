@@ -49,3 +49,10 @@ Using the terminal, move to the root of your project and run the following comma
 ./bin/update.sh
 ./bin/build.sh
 ```
+
+Alternatively, you can run these scripts:
+
+```bash
+./bin/update.sh
+./bin/build.sh
+```
