@@ -1,7 +1,0 @@
-<library path="freezer_driver">
-  <class name="freezer_driver/FreezerHardware" type="freezer_driver::FreezerHardware" base_class_type="hardware_interface::SystemInterface">
-    <description>
-      The Freezer system interface.
-    </description>
-  </class>
-</library>

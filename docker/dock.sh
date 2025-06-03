@@ -58,6 +58,8 @@ function build_image() {
 function create_container() {
     local name="$1"
     local repo_path="$2"
+    # Convert repo_path to absolute path if it's relative
+    repo_path=$(realpath "$repo_path")
     # Start the container and keep it running.
     docker create \
       --name $name \
@@ -89,7 +91,8 @@ function display_usage() {
     echo -e "\nUsage: ./dock.sh <container-name> <command> [options]\n
     Commands:
     build   Build a container without starting it
-            Usage: ./dock.sh container-name build path-to-repo
+            Usage: ./dock.sh container-name build [path-to-repo]
+            Note: If path-to-repo is omitted, current working directory is used
     start   Start the container and open an interactive terminal
             Usage: ./dock.sh container-name start
     stop    Stop the container
@@ -97,6 +100,9 @@ function display_usage() {
     clean   Stop the container and clean everything including images
             Usage: ./dock.sh container-name clean\n"
 }
+
+# Capture the user's current working directory before changing directories
+USER_PWD="$PWD"
 
 cd "$(dirname "$0")"
 
@@ -113,17 +119,22 @@ fi
 # Assign the first two arguments to descriptive variables
 name="$1"
 command="$2"
-shift 2  # Shift off the first two arguments
 
 case "$command" in
     build)
-        if [ "$#" -lt 1 ]; then
-            echo "Missing repository path for the build command."
-            display_usage
-            exit 1
+        # If a third argument exists, use it as repo_path, otherwise use user's working directory
+        if [ "$#" -ge 3 ]; then
+            repo_path="$3"
+            # Handle special case of "." to mean user's current directory
+            if [ "$repo_path" = "." ]; then
+                repo_path="$USER_PWD"
+            # If the path is relative, make it relative to the user's original directory
+            elif [[ "$repo_path" != /* ]]; then
+                repo_path="$USER_PWD/$repo_path"
+            fi
+        else
+            repo_path="$USER_PWD"
         fi
-        repo_path="$1"
-        shift
         stop_container $name
         remove_container $name
         remove_image $name
@@ -145,14 +156,7 @@ case "$command" in
         remove_image $name
         ;;
     *)
-        echo "Unknown parameter: $1"
+        echo "Unknown parameter: $command"
         display_usage
         ;;
 esac
-
-# Check for any extra unexpected arguments
-if [ "$#" -gt 0 ]; then
-    echo "Unexpected arguments: $@"
-    display_usage
-    exit 1
-fi

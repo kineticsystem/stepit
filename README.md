@@ -4,21 +4,19 @@
 [![Format](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml)
 [![Linters](https://github.com/kineticsystem/stepit/actions/workflows/ci-ros-lint.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-ros-lint.yml)
 
-
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
-- [Introduction](#introduction)
-- [Prerequisites](#prerequisites)
-- [Install StepIt on the Microcontroller](#install-stepit-on-the-microcontroller)
-- [Install StepIt on the Local Computer](#install-stepit-on-the-local-computer)
-  - [Setup a Project Workspace](#setup-a-project-workspace)
-  - [Chekout the Git Repository](#chekout-the-git-repository)
-  - [Pre-Commit Hooks](#pre-commit-hooks)
-  - [Build the Project](#build-the-project)
-- [Running the Application](#running-the-application)
-- [How to run GitHub Actions locally](#how-to-run-github-actions-locally)
-
+- [StepIt](#stepit)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Prerequisites](#prerequisites)
+  - [Install StepIt on the Microcontroller](#install-stepit-on-the-microcontroller)
+  - [Install StepIt on the Local Computer](#install-stepit-on-the-local-computer)
+    - [Chekout the Git Repository](#chekout-the-git-repository)
+    - [Pre-Commit Hooks](#pre-commit-hooks)
+    - [Build the Project](#build-the-project)
+  - [Running the Application](#running-the-application)
+  - [How to run GitHub Actions locally](#how-to-run-github-actions-locally)
 
 ## Introduction
 
@@ -50,31 +48,11 @@ If PlatformIO cannot find the Python interpreter, install the following:
 
 ## Install StepIt on the Local Computer
 
-### Setup a Project Workspace
-
-Open a terminal and run the following command to source the ROS 2 Humble installation.
-
-`source /opt/ros/humble/setup.bash`
-
-Create a project folder anywhere inside the home directory, for example
-
-`<HOME_DIR>/stepit_ws`
-
-Through the document, we will use `<STEPIT_WS>` to refer to this folder.
-
-```
-cd ~
-mkdir stepit_ws
-cd stepit_ws
-```
-
 ### Chekout the Git Repository
 
-Create a source folder and check out this git repository, including all required submodules.
+Check out this git repository, including all required submodules.
 
 ```
-mkdir src
-cd src
 git clone --recurse-submodules git@github.com:kineticsystem/stepit.git
 ```
 
@@ -101,7 +79,7 @@ pre-commit install
 
 ### Build the Project
 
-Move into the base `<STEPIT_WS>` folder and install all required dependencies.
+Move into the repo and install all required dependencies.
 
 ```
 rosdep install --ignore-src --from-paths . -y -r
@@ -125,7 +103,6 @@ colcon test
 By default, the application runs with fake motors. Run the following commands on a terminal to start it up. This will also start up RViz.
 
 ```
-cd <STEPIT_WS>
 source install/setup.bash
 ros2 launch stepit_description robot.launch.py
 ```
@@ -133,7 +110,6 @@ ros2 launch stepit_description robot.launch.py
 We can control the motors with a velocity controller or a position controller. Open a different terminal and run any of the following commands to spin up the fake motors.
 
 ```
-cd <STEPIT_WS>
 source install/setup.bash
 ```
 

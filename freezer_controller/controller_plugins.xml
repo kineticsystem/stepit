@@ -1,7 +1,0 @@
-<library path="freezer_controllers">
-    <class name="freezer_controllers/FreezerController" type="freezer_controllers::SpeedScalingStateBroadcaster" base_class_type="controller_interface::ControllerInterface">
-        <description>
-        This controller send commands to a Freezer motherboard.
-      </description>
-    </class>
-</library>
