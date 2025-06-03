@@ -49,14 +49,16 @@ int main(int argc, char* argv[])
   CommandLineUtility cli;
 
   std::string port = kUsbPort;
-  cli.registerHandler("--port", [&port](const char* value) { port = value; }, false);
+  cli.registerHandler(
+      "--port", [&port](const char* value) { port = value; }, false);
 
   uint32_t baudrate = kBaudRate;
   cli.registerHandler(
       "--baudrate", [&baudrate](const char* value) { baudrate = static_cast<uint32_t>(std::stoul(value)); }, false);
 
   double timeout = kTimeout;
-  cli.registerHandler("--timeout", [&timeout](const char* value) { timeout = std::stoi(value); }, false);
+  cli.registerHandler(
+      "--timeout", [&timeout](const char* value) { timeout = std::stoi(value); }, false);
 
   cli.registerHandler("-h", [&]() {
     std::cout << "Usage: ./set_relative_pressure [OPTIONS]\n"
