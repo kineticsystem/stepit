@@ -1,3 +1,4 @@
 #!/bin/bash -e
 
-colcon test
+colcon test --return-code-on-test-failure
+colcon test-result --all --verbose
