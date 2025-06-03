@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch StepIt",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "source install/setup.bash && ros2 launch stepit_bringup stepit.launch.py",
+      "cwd": "${workspaceFolder}",
+      "preLaunchTask": "Build StepIt"
+    }
+  ]
+}

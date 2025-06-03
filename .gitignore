@@ -1,10 +1,9 @@
-# VSCode
-.vscode
-
 # ROS
 build
 install
 log
+.cache
+.mypy_cache
 
 # QtCreator
 *.user
