@@ -12,6 +12,12 @@ jobs:
         linter: [copyright, lint_cmake]
     steps:
       - uses: actions/checkout@v3
+      - name: Fix GPG signature issues
+        run: |
+          sudo apt-get update --allow-unauthenticated || true
+          echo 'APT::Get::AllowUnauthenticated "true";' | sudo tee /etc/apt/apt.conf.d/99allow-unauth
+          echo 'Acquire::AllowInsecureRepositories "true";' | sudo tee -a /etc/apt/apt.conf.d/99allow-unauth
+          sudo apt-get update
       - uses: ros-tooling/setup-ros@0.6.2
       - uses: ros-tooling/action-ros-lint@v0.1
         with:
@@ -37,6 +43,12 @@ jobs:
         linter: [cpplint]
     steps:
       - uses: actions/checkout@v3
+      - name: Fix GPG signature issues
+        run: |
+          sudo apt-get update --allow-unauthenticated || true
+          echo 'APT::Get::AllowUnauthenticated "true";' | sudo tee /etc/apt/apt.conf.d/99allow-unauth
+          echo 'Acquire::AllowInsecureRepositories "true";' | sudo tee -a /etc/apt/apt.conf.d/99allow-unauth
+          sudo apt-get update
       - uses: ros-tooling/setup-ros@0.6.2
       - uses: ros-tooling/action-ros-lint@v0.1
         with:
