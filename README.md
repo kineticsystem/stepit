@@ -82,20 +82,19 @@ pre-commit install
 Move into the repo and install all required dependencies.
 
 ```
-rosdep install --ignore-src --from-paths . -y -r
+./bin/update.sh
 ```
 
 Run Colcon to build the project.
 
 ```
-sudo apt install python3-colcon-common-extensions
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --symlink-install --event-handlers log-
+./bin/build.sh
 ```
 
 Execute all tests.
 
 ```
-colcon test
+./bin/test.sh
 ```
 
 ## Running the Application

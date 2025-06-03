@@ -25,6 +25,7 @@ RUN apt-get -y install python3
 RUN apt-get -y install python-is-python3
 RUN apt-get -y install jstest-gtk                      # Test connected joysticks.
 RUN apt-get install -y --no-install-recommends ros-humble-rmw-cyclonedds-cpp
+RUN apt-get install -y python3-colcon-common-extensions
 
 CMD ["bash"]
 

@@ -50,3 +50,10 @@ rosdep update
 rosdep install --ignore-src --from-paths . -y -r
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=RelWithDebInfo --symlink-install --event-handlers log-
 ```
+
+Alternatively, you can run these scripts:
+
+```bash
+./bin/update.sh
+./bin/build.sh
+```
