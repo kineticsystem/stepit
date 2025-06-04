@@ -1,4 +1,4 @@
-# COBS Serial
+# COBS Serial Communication Library
 
 This package provides a C++ library for serial communication that uses COBS (Consistent Overhead Byte Stuffing) encoding. It is designed to simplify and improve the reliability of data transmission over serial connections in embedded systems or microcontroller applications.
 
