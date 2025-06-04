@@ -44,6 +44,17 @@ using cobs_serial::DefaultSerial;
 using stepit_driver::DefaultDriver;
 using stepit_driver::MotorState;
 
+/**
+ * Main entry point for a command-line utility to interface and control
+ * stepper motors driver via UART. This utility reads configuration parameters
+ * such as the COM port, baud rate, and timeout from command-line arguments,
+ * establishes a connection to the hardware, and retrieves the current status of
+ * the motors.
+ *
+ * The primary purpose of this program is to serve as a diagnostic tool for testing
+ * the hardware's response to status requests. It ensures that the hardware is
+ * connected correctly and can be communicated with without issues.
+ */
 int main(int argc, char* argv[])
 {
   CommandLineUtility cli;
