@@ -1,4 +1,8 @@
 {
+  // This requires TestMate extension
+  "testMate.cpp.discovery.loadOnStartup": true,
+  "testMate.cpp.test.executables": "${workspaceFolder}/build/**/*{test,Test,TEST}*",
+  // Keep your Python paths for general development
   "python.autoComplete.extraPaths": [
     "/opt/ros/humble/lib/python3.10/site-packages",
     "/opt/ros/humble/local/lib/python3.10/dist-packages"
@@ -8,4 +12,3 @@
     "/opt/ros/humble/local/lib/python3.10/dist-packages"
   ]
 }
-W
