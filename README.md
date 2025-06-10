@@ -1,22 +1,20 @@
-# StepIt
+# StepIt <!-- omit in toc -->
 
 [![CI](https://github.com/kineticsystem/stepit/actions/workflows/industrial_ci.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/industrial_ci.yml)
 [![Format](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml)
 [![Linters](https://github.com/kineticsystem/stepit/actions/workflows/ci-ros-lint.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-ros-lint.yml)
 
-## Table of Contents
+## Table of Contents <!-- omit in toc -->
 
-- [StepIt](#stepit)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [Prerequisites](#prerequisites)
-  - [Install StepIt on the Microcontroller](#install-stepit-on-the-microcontroller)
-  - [Install StepIt on the Local Computer](#install-stepit-on-the-local-computer)
-    - [Chekout the Git Repository](#chekout-the-git-repository)
-    - [Pre-Commit Hooks](#pre-commit-hooks)
-    - [Build the Project](#build-the-project)
-  - [Running the Application](#running-the-application)
-  - [How to run GitHub Actions locally](#how-to-run-github-actions-locally)
+- [Introduction](#introduction)
+- [Prerequisites](#prerequisites)
+- [Install StepIt on the Microcontroller](#install-stepit-on-the-microcontroller)
+- [Install StepIt on the Local Computer](#install-stepit-on-the-local-computer)
+  - [Chekout the Git Repository](#chekout-the-git-repository)
+  - [Pre-Commit Hooks](#pre-commit-hooks)
+  - [Build the Project](#build-the-project)
+- [Running the Application](#running-the-application)
+- [How to run GitHub Actions locally](#how-to-run-github-actions-locally)
 
 ## Introduction
 
