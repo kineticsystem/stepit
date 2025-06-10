@@ -1,8 +1,8 @@
-# StepIt <!-- omit in toc -->
-
 [![CI](https://github.com/kineticsystem/stepit/actions/workflows/industrial_ci.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/industrial_ci.yml)
 [![Format](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-format.yml)
 [![Linters](https://github.com/kineticsystem/stepit/actions/workflows/ci-ros-lint.yml/badge.svg)](https://github.com/kineticsystem/stepit/actions/workflows/ci-ros-lint.yml)
+
+<img src="docs/logo.png" width="50%">
 
 ## Table of Contents <!-- omit in toc -->
 
