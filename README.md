@@ -20,6 +20,8 @@
 
 StepIt is a project to control stepper motors with a Teensy microcontroller and ROS2.
 
+https://github.com/user-attachments/assets/e67d46ce-e133-4e34-bab8-7d924be3dee4
+
 ## Prerequisites
 
 We need a computer with Ubuntu 22.04 and ROS 2 Humble.
