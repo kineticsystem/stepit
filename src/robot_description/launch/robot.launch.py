@@ -195,6 +195,25 @@ def launch_setup(context, *_args, **_kwargs):
     #    name="joint_state_publisher_gui",
     # )
 
+    # foxglove_bridge provides a WebSocket server (default port 8765) so that
+    # remote clients (Qt, Foxglove Studio, web browsers, etc.) can
+    # publish/subscribe to ROS topics and call actions without having ROS
+    # installed.  Compared to rosbridge it supports binary (MessagePack + CDR)
+    # encoding for lower overhead, and advertises message schemas automatically.
+    # Useful interfaces for a remote UI are:
+    #   /velocity_controller/commands      std_msgs/Float64MultiArray
+    #   /position_controller/commands      std_msgs/Float64MultiArray
+    #   /joint_trajectory_controller/
+    #     follow_joint_trajectory          control_msgs/FollowJointTrajectory
+    #   /joint_states                      sensor_msgs/JointState  (feedback)
+    foxglove_bridge_node = Node(
+        package="foxglove_bridge",
+        executable="foxglove_bridge",
+        name="foxglove_bridge",
+        parameters=[{"port": 8765}],
+        output="screen",
+    )
+
     # Starts up the RViz2 application.
     rviz_node = Node(
         package="rviz2",
@@ -220,6 +239,7 @@ def launch_setup(context, *_args, **_kwargs):
         # position_controller_spawner,
         joint_trajectory_controller_spawner,
         robot_state_publisher_node,
+        foxglove_bridge_node,
     ]
     return nodes_to_start
 
