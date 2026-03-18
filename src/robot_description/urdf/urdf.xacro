@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<robot name="stepit" xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:include filename="$(find robot_description)/urdf/robot.xacro" />
+  <xacro:include filename="$(find robot_description)/urdf/ros2_control.xacro" />
+
+  <xacro:stepit_sample_robot />
+  <xacro:stepit_ros2_control name="stepit_ros2_control" />
+
+</robot>

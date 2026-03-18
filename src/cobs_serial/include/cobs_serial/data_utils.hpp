@@ -29,9 +29,10 @@
 #pragma once
 
 #include <array>
-#include <vector>
+#include <cstdint>
 #include <sstream>
 #include <string>
+#include <vector>
 
 /**
  * Utility class to convert standard types into sequence of bytes and back.

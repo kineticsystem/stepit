@@ -39,6 +39,7 @@ namespace stepit_driver
 class DriverFactory
 {
 public:
+  virtual ~DriverFactory() = default;
   virtual std::unique_ptr<Driver> create(const hardware_interface::HardwareInfo& info) = 0;
 };
 }  // namespace stepit_driver

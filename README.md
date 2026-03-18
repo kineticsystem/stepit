@@ -24,9 +24,9 @@ https://github.com/user-attachments/assets/e67d46ce-e133-4e34-bab8-7d924be3dee4
 
 ## Prerequisites
 
-We need a computer with Ubuntu 22.04 and ROS 2 Humble.
+We need a computer with Ubuntu 24.04 and ROS 2 Jazzy.
 
-To install ROS 2, please refer to the document [Install ROS2 Humble on Ubuntu](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html).
+To install ROS 2, please refer to the document [Install ROS2 Jazzy on Ubuntu](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html).
 
 By default, StepIt runs in simulation mode and we do not need actual hardware to play around with it.
 
@@ -99,7 +99,7 @@ Execute all tests.
 
 ## Running the Application
 
-By default, the application runs with fake motors and a velocity controller. Thye position controller is disabled. Run the following commands on a terminal to start it up. This will also start up RViz.
+By default, the application runs with fake motors and a velocity controller. The position controller is disabled. Run the following commands on a terminal to start it up. This will also start up RViz.
 
 ```
 source install/setup.bash

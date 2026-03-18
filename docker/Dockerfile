@@ -1,6 +1,6 @@
-# Install Ubuntu 20.04 with user "developer".
+# Install Ubuntu 24.04 with user "developer".
 
-FROM osrf/ros:humble-desktop-full-jammy AS ros
+FROM osrf/ros:jazzy-desktop-full AS ros
 
 LABEL name="develop:ros"
 
@@ -24,7 +24,7 @@ RUN apt-get -y install unzip
 RUN apt-get -y install python3
 RUN apt-get -y install python-is-python3
 RUN apt-get -y install jstest-gtk                      # Test connected joysticks.
-RUN apt-get install -y --no-install-recommends ros-humble-rmw-cyclonedds-cpp
+RUN apt-get install -y --no-install-recommends ros-jazzy-rmw-cyclonedds-cpp
 RUN apt-get install -y python3-colcon-common-extensions
 
 CMD ["bash"]
@@ -37,7 +37,7 @@ COPY --chown=developer:developer cyclonedds.xml /home/developer/.ros
 ENV HOME=/home/developer
 RUN echo "export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp" >> ~/.bashrc
 RUN echo "export CYCLONEDDS_URI=~/.ros/cyclonedds.xml" >> ~/.bashrc
-RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 RUN rosdep update
 
 WORKDIR /home/developer/ws

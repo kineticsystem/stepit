@@ -28,6 +28,9 @@
 
 #include <cobs_serial/data_utils.hpp>
 
+#include <algorithm>
+#include <cctype>
+
 namespace cobs_serial::data_utils
 {
 constexpr std::array<char, 16> vChars = {

@@ -15,7 +15,6 @@
   <depend>rclcpp_lifecycle</depend>
   <depend>lifecycle_msgs</depend>
   <depend>hardware_interface</depend>
-  <depend>pluginlib</depend>
 
   <!--
   When you include the following linter dependencies and run tests on your ROS2

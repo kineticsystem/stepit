@@ -8,20 +8,14 @@ on: [push, pull_request]
 jobs:
   pre-commit:
     name: Format
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4.4.0
         with:
-          python-version: "3.10"
-      - name: Fix GPG signature issues
-        run: |
-          sudo apt-get update --allow-unauthenticated || true
-          echo 'APT::Get::AllowUnauthenticated "true";' | sudo tee /etc/apt/apt.conf.d/99allow-unauth
-          echo 'Acquire::AllowInsecureRepositories "true";' | sudo tee -a /etc/apt/apt.conf.d/99allow-unauth
-          sudo apt-get update
+          python-version: "3.12"
       - name: Install system hooks
-        run: sudo apt install -qq clang-format-14 cppcheck
+        run: sudo apt install -qq clang-format-17 cppcheck
       - uses: pre-commit/action@v3.0.0
         with:
           extra_args: --all-files --hook-stage manual

@@ -1,9 +1,5 @@
 # See https://docs.ros.org/en/foxy/How-To-Guides/Ament-CMake-Documentation.html
 
-# IMPORTANT: The code does not compile with C++20.
-# See https://bytemeta.vip/repo/ros2/rclcpp/issues/1936
-# A fix has already been applied to the next release of Humble.
-
 cmake_minimum_required(VERSION 3.22.1)
 project(stepit_driver LANGUAGES CXX)
 
@@ -23,11 +19,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
         -Wconversion
         -Wsign-conversion
         -Wold-style-cast
-        -Wno-gnu-zero-variadic-macro-arguments
     )
 endif()
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -37,7 +32,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(THIS_PACKAGE_INCLUDE_DEPENDS
     hardware_interface
     cobs_serial
-    pluginlib
     rclcpp
     rclcpp_lifecycle
 )
@@ -45,7 +39,6 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
 find_package(ament_cmake REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(cobs_serial REQUIRED)
-find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 
@@ -67,8 +60,8 @@ add_library(
     include/stepit_driver/driver_factory.hpp
     include/stepit_driver/fake/fake_driver.hpp
     include/stepit_driver/fake/fake_motor.hpp
-    include/stepit_driver/fake/position_control.hpp
-    include/stepit_driver/fake/velocity_control.hpp
+    include/stepit_driver/fake/position_kinematics.hpp
+    include/stepit_driver/fake/velocity_kinematics.hpp
     include/stepit_driver/msgs/acknowledge_response.hpp
     include/stepit_driver/msgs/config_command.hpp
     include/stepit_driver/msgs/info_response.hpp
@@ -77,14 +70,12 @@ add_library(
     include/stepit_driver/msgs/response.hpp
     include/stepit_driver/msgs/status_response.hpp
     include/stepit_driver/msgs/velocity_command.hpp
-    include/stepit_driver/stepit_hardware.hpp
-    include/stepit_driver/visibility_control.hpp
     src/default_driver.cpp
     src/default_driver_factory.cpp
     src/fake/fake_driver.cpp
     src/fake/fake_motor.cpp
-    src/fake/position_control.cpp
-    src/fake/velocity_control.cpp
+    src/fake/position_kinematics.cpp
+    src/fake/velocity_kinematics.cpp
     src/msgs/acknowledge_response.cpp
     src/msgs/config_command.cpp
     src/msgs/info_response.cpp
@@ -93,7 +84,6 @@ add_library(
     src/msgs/response.cpp
     src/msgs/status_response.cpp
     src/msgs/velocity_command.cpp
-    src/stepit_hardware.cpp
 )
 target_include_directories(
     stepit_driver
@@ -105,11 +95,6 @@ ament_target_dependencies(
     stepit_driver
     ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-
-###############################################################################
-# PLUGINS
-
-pluginlib_export_plugin_description_file(hardware_interface hardware_interface.xml)
 
 ###############################################################################
 # EXPORTS

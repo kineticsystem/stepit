@@ -27,8 +27,8 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include <stepit_driver/fake/fake_motor.hpp>
-#include <stepit_driver/fake/position_control.hpp>
-#include <stepit_driver/fake/velocity_control.hpp>
+#include <stepit_driver/fake/position_kinematics.hpp>
+#include <stepit_driver/fake/velocity_kinematics.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -54,13 +54,13 @@ double FakeMotor::get_position(const rclcpp::Time& time) const
   double t = time.seconds() - time_.seconds();
   if (control_type == ControlType::Position)
   {
-    return position_control::position(max_velocity_, acceleration_, initial_velocity_, initial_position_,
-                                      target_position_, t);
+    return position_kinematics::position(max_velocity_, acceleration_, initial_velocity_, initial_position_,
+                                         target_position_, t);
   }
   else
   {
-    return velocity_control::position(max_velocity_, acceleration_, initial_position_, initial_velocity_,
-                                      target_velocity_, t);
+    return velocity_kinematics::position(max_velocity_, acceleration_, initial_position_, initial_velocity_,
+                                         target_velocity_, t);
   }
 }
 
@@ -78,12 +78,12 @@ double FakeMotor::get_velocity(const rclcpp::Time& time) const
   double t = time.seconds() - time_.seconds();
   if (control_type == ControlType::Position)
   {
-    return position_control::velocity(max_velocity_, acceleration_, initial_velocity_, initial_position_,
-                                      target_position_, t);
+    return position_kinematics::velocity(max_velocity_, acceleration_, initial_velocity_, initial_position_,
+                                         target_position_, t);
   }
   else
   {
-    return velocity_control::velocity(max_velocity_, acceleration_, initial_velocity_, target_velocity_, t);
+    return velocity_kinematics::velocity(max_velocity_, acceleration_, initial_velocity_, target_velocity_, t);
   }
 }
 

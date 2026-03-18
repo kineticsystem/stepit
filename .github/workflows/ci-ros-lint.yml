@@ -5,54 +5,42 @@ on: [push, pull_request]
 jobs:
   ament_lint:
     name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         linter: [copyright, lint_cmake]
     steps:
       - uses: actions/checkout@v3
-      - name: Fix GPG signature issues
-        run: |
-          sudo apt-get update --allow-unauthenticated || true
-          echo 'APT::Get::AllowUnauthenticated "true";' | sudo tee /etc/apt/apt.conf.d/99allow-unauth
-          echo 'Acquire::AllowInsecureRepositories "true";' | sudo tee -a /etc/apt/apt.conf.d/99allow-unauth
-          sudo apt-get update
-      - uses: ros-tooling/setup-ros@0.6.2
+      - uses: ros-tooling/setup-ros@0.7
       - uses: ros-tooling/action-ros-lint@v0.1
         with:
-          distribution: humble
+          distribution: jazzy
           linter: ${{ matrix.linter }}
           package-name: cobs_serial
             freezer_controller
             freezer_description
             freezer_driver
             freezer_msgs
-            stepit_bringup
-            stepit_description
+            robot_bringup
+            robot_description
             stepit_driver
             stepit_hardware_tests
-            stepit_teleop
+            robot_teleop
 
   ament_lint_121:
     name: ament_${{ matrix.linter }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         linter: [cpplint]
     steps:
       - uses: actions/checkout@v3
-      - name: Fix GPG signature issues
-        run: |
-          sudo apt-get update --allow-unauthenticated || true
-          echo 'APT::Get::AllowUnauthenticated "true";' | sudo tee /etc/apt/apt.conf.d/99allow-unauth
-          echo 'Acquire::AllowInsecureRepositories "true";' | sudo tee -a /etc/apt/apt.conf.d/99allow-unauth
-          sudo apt-get update
-      - uses: ros-tooling/setup-ros@0.6.2
+      - uses: ros-tooling/setup-ros@0.7
       - uses: ros-tooling/action-ros-lint@v0.1
         with:
-          distribution: humble
+          distribution: jazzy
           linter: cpplint
           arguments: "--linelength=121 --filter=-whitespace/newline"
           package-name: cobs_serial
@@ -60,8 +48,8 @@ jobs:
             freezer_description
             freezer_driver
             freezer_msgs
-            stepit_bringup
-            stepit_description
+            robot_bringup
+            robot_description
             stepit_driver
             stepit_hardware_tests
-            stepit_teleop
+            robot_teleop
