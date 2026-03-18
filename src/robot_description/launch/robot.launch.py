@@ -55,7 +55,7 @@ def launch_setup(context, *_args, **_kwargs):
     # Extract all parameters' values.
     description_pkg = FindPackageShare("robot_description")
     description_file = PathJoinSubstitution(
-        [description_pkg, "urdf", "urdf.xacro"]
+        [description_pkg, "urdf", "stepit.urdf.xacro"]
     ).perform(context)
     rviz_config_file = PathJoinSubstitution(
         [description_pkg, "rviz", "robot.rviz"]
