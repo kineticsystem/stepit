@@ -45,6 +45,7 @@ from launch.substitutions import (
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
+import yaml
 import xacro
 
 
@@ -70,7 +71,26 @@ def launch_setup(context, *_args, **_kwargs):
 
     robot_description_content = xacro.process_file(description_file).toxml()
 
-    # The Controller Manager (CM) connects the controllers’ and
+    with open(controllers_config_file, "r") as f:
+        controllers_config = yaml.safe_load(f)
+
+    # NOTE: ros2_control 4.42.2 bug workaround.
+    # When ros2_control_node spawns a controller it passes its own --params-file
+    # arguments down to the controller sub-node. File paths are silently lost in
+    # that propagation (the path becomes empty), which causes every controller to
+    # crash on load:
+    #   "Couldn't parse trailing --params-file flag. No file path provided."
+    # Only parameters passed as Python dicts (written to a temp file by the
+    # launch system) survive the propagation correctly.
+    # Fix: pass the controller_manager section of the YAML as a dict, and
+    # supply the controller-specific parameters (joints, etc.) to each spawner
+    # via --param-file, which uses the parameter service and is unaffected.
+    # TODO: revert to passing controllers_config_file directly once fixed.
+    controller_manager_params = controllers_config.get("controller_manager", {}).get(
+        "ros__parameters", {}
+    )
+
+    # The Controller Manager (CM) connects the controllers' and
     # hardware-abstraction sides of the ros2_control framework. It also serves
     # as the entry-point for users through ROS services.
     # https://control.ros.org/master/doc/getting_started/getting_started.html#architecture
@@ -79,7 +99,7 @@ def launch_setup(context, *_args, **_kwargs):
         executable="ros2_control_node",
         parameters=[
             {"robot_description": robot_description_content},
-            controllers_config_file,
+            controller_manager_params,
         ],
         output={
             "stdout": "screen",
@@ -97,25 +117,39 @@ def launch_setup(context, *_args, **_kwargs):
             "joint_state_broadcaster",
             "--controller-manager",
             "/controller_manager",
+            "--param-file",
+            controllers_config_file,
         ],
     )
 
-    # This is a controller that work using the “velocity” joint command
+    # This is a controller that work using the "velocity" joint command
     # interface.
     # https://control.ros.org/master/doc/ros2_controllers/velocity_controllers/doc/userdoc.html
     velocity_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["velocity_controller", "-c", "/controller_manager"],
+        arguments=[
+            "velocity_controller",
+            "-c",
+            "/controller_manager",
+            "--param-file",
+            controllers_config_file,
+        ],
     )
 
-    # This is a controller that work using the “position” joint command
+    # This is a controller that work using the "position" joint command
     # interface.
     # https://control.ros.org/master/doc/ros2_controllers/position_controllers/doc/userdoc.html
     position_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["position_controller", "-c", "/controller_manager"],
+        arguments=[
+            "position_controller",
+            "-c",
+            "/controller_manager",
+            "--param-file",
+            controllers_config_file,
+        ],
     )
 
     # Controller for executing joint-space trajectories on a group of joints.
@@ -127,7 +161,13 @@ def launch_setup(context, *_args, **_kwargs):
     joint_trajectory_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_trajectory_controller", "-c", "/controller_manager"],
+        arguments=[
+            "joint_trajectory_controller",
+            "-c",
+            "/controller_manager",
+            "--param-file",
+            controllers_config_file,
+        ],
     )
 
     # robot_state_publisher uses the URDF specified by the parameter robot
