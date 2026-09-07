@@ -69,6 +69,7 @@ function create_container() {
       --privileged \
       -v ${repo_path}:/home/developer/ws \
       -v /tmp/.X11-unix:/tmp/.X11-unix:ro \
+      -v /dev:/dev \
       -e DISPLAY=${DISPLAY} \
       -e QT_X11_NO_MITSHM=1 \
       --network host \

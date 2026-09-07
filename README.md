@@ -46,6 +46,36 @@ If PlatformIO cannot find the Python interpreter, install the following:
 
 `sudo apt install python3-venv`
 
+To connect StepIt to a Teensy, you must install a udev rule on your host first. Without this rule, non-root users generally can't access the Teensy's HID interface that the loader/programmer needs.
+
+```bash
+cd /tmp
+wget https://www.pjrc.com/teensy/00-teensy.rules
+sudo cp /tmp/00-teensy.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+If necessary, unplug/replug the Teensy.
+
+To flash the microcontroller code into the Teensy:
+
+- Open VSCode
+- Install the extension PlarformIO
+- Open the subfolder `stepit_mcu` in VSCode
+- Select the correct device and flash it
+
+The microcontroller is usually shown as `/dev/ttyACM0`. Remember to update your ROS2 control configuration in `stepit.ros2_control.xacro` and disable `use_dummy`.
+
+```xml
+<hardware>
+  <plugin>stepit_driver/StepitHardware</plugin>
+  <param name="use_dummy">false</param>
+  <param name="usb_port">/dev/ttyACM0</param>
+  <param name="baud_rate">9600</param>
+  <param name="timeout">0.2</param>
+</hardware>
+```
+
 ## Install StepIt on the Local Computer
 
 ### Chekout the Git Repository
