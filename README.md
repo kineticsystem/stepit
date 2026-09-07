@@ -82,7 +82,7 @@ pre-commit install
 The preferred way to build and run StepIt is to use a Docker container with the scripts in the [`docker`](docker) folder. See [docker/README.md](docker/README.md) for more details.
 
 > [!IMPORTANT]
-> The docker container provides a default use `developer` with passowrd `developer`.
+> The docker container provides a default use `developer` with password `developer`.
 
 From the root of the repo, build the image and create the container:
 
@@ -149,7 +149,7 @@ To move a single joint without specifying a value for every joint, use the `join
 
 ```
 ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "{
-  joint_names: [joint1], 
+  joint_names: [joint1],
   points: [
     {
       positions: [-6.28],
