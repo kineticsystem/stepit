@@ -17,5 +17,10 @@ jobs:
       - name: Install system hooks
         run: sudo apt install -qq clang-format-17 cppcheck
       - uses: pre-commit/action@v3.0.0
+        env:
+          # ament_copyright/ament_lint_cmake/ament_cpplint need a sourced ROS
+          # workspace, which this job doesn't set up. They're already run
+          # (with ROS properly sourced) by ci-ros-lint.yml.
+          SKIP: ament_copyright,ament_lint_cmake,ament_cpplint
         with:
           extra_args: --all-files --hook-stage manual
