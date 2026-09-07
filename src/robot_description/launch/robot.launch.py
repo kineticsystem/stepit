@@ -168,7 +168,7 @@ def launch_setup(context, *_args, **_kwargs):
             "-c",
             "/controller_manager",
             "--param-file",
-            controllers_config_file
+            controllers_config_file,
         ],
     )
 
