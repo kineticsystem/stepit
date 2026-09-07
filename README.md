@@ -118,34 +118,14 @@ Execute all tests.
 
 ## Running the Application
 
-By default, the application runs with fake motors and a default active velocity controller. Run the following commands to start StepIt. This will also start up RViz.
+By default, the application runs with fake motors and a default active trajectory controller. Run the following commands to start StepIt. This will also start up RViz.
 
 ```
 source install/setup.bash
 ros2 launch robot_bringup launch.py
 ```
 
-Open a different terminal (if using Docker, attach to the same running container with `./docker/dock.sh stepit start`) and run the following commands to spin up the fake motors.
-
-```
-ros2 topic pub -1 /velocity_controller/commands std_msgs/msg/Float64MultiArray "data: [6.28,-6.28,0,0,0]"
-```
-
-In RViz, you will see motor 1 and 2 spinning.
-
-Each value is the target velocity, in rad/s, for the corresponding joint listed under `velocity_controller.joints` in `controllers.yaml` (currently `joint1` through `joint5`), so the array must have exactly one value per joint.
-
-> [!IMPORTANT]
-> Only one controller must be active at a time: `velocity_controller`, `position_controller`, or `joint_trajectory_controller`.
-
-To use the trajectory controller, deactivate the current controller before activating another one:
-
-```
-ros2 control set_controller_state velocity_controller inactive -c /controller_manager
-ros2 control set_controller_state joint_trajectory_controller active -c /controller_manager
-```
-
-To move a single joint without specifying a value for every joint, use the `joint_trajectory_controller`. For example, to rotate `joint1` by 6.28 rad clockwise:
+Open a different terminal (if using Docker, attach to the same running container with `./docker/dock.sh stepit start`) and run the following command to rotate `joint1` by 6.28 rad clockwise:
 
 ```
 ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "{
@@ -210,13 +190,30 @@ ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/
   ]
 }"
 ```
-
 The trajectory is a list of waypoints, each of them containing the desired position and velocity of each joint at a given time.
 
-The controller `position_controller` is loaded but inactive. Deactivate any previous controller as per previous note.
+> [!IMPORTANT]
+> Only one controller must be active at a time: `velocity_controller`, `position_controller`, or `joint_trajectory_controller`.
+
+To use the velocity controller, deactivate the current controller before activating another one:
 
 ```
 ros2 control set_controller_state joint_trajectory_controller inactive -c /controller_manager
+ros2 control set_controller_state velocity_controller active -c /controller_manager
+```
+
+Then run the following commands:
+
+```
+ros2 topic pub -1 /velocity_controller/commands std_msgs/msg/Float64MultiArray "data: [6.28,-6.28,0,0,0]"
+```
+
+Each value is the target velocity, in rad/s, for the corresponding joint listed under `velocity_controller.joints` in `controllers.yaml` (currently `joint1` through `joint5`), so the array must have exactly one value per joint.
+
+The controller `position_controller` is also loaded but inactive. Deactivate any previous controller as per previous note.
+
+```
+ros2 control set_controller_state velocity_controller inactive -c /controller_manager
 ros2 control set_controller_state position_controller active -c /controller_manager
 ```
 
