@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <string>
+
 #include <hardware_interface/hardware_info.hpp>
 
 namespace stepit_driver::test

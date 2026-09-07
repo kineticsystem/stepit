@@ -29,6 +29,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <stepit_driver/driver.hpp>
