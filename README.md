@@ -18,17 +18,15 @@
 
 ## Introduction
 
-StepIt is a project to control stepper motors with a Teensy microcontroller and ROS2.
-
-https://github.com/user-attachments/assets/e67d46ce-e133-4e34-bab8-7d924be3dee4
+StepIt is a project to control stepper motors with a Teensy microcontroller and ROS2. Watch [this video](https://github.com/user-attachments/assets/e67d46ce-e133-4e34-bab8-7d924be3dee4)
 
 ## Prerequisites
 
-We need a computer with Ubuntu 24.04 and ROS 2 Jazzy.
+To run StepIt, we need a computer with Ubuntu 24.04. The preferred way to run it is inside a Docker container.
 
-To install ROS 2, please refer to the document [Install ROS2 Jazzy on Ubuntu](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html).
+If you want to run StepIt on your host machine, you must install ROS2. Please refer to the document [Install ROS2 Jazzy on Ubuntu](https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-Debs.html).
 
-By default, StepIt runs in simulation mode and we do not need actual hardware to play around with it.
+By default, StepIt runs in simulation mode so we do not an need actual hardware to play around with it.
 
 For a real application, we recommend attaching the stepper motors to a Teensy microcontroller 4.0 or 4.1. We can hook the motors in many different ways but we suggest the following hardware configuration.
 
@@ -39,6 +37,8 @@ For a real application, we recommend attaching the stepper motors to a Teensy mi
 The Teensy is connected to a computer using a USB cable. For a portable application, we can use a [Raspberry PI 4](docs/install_ros_on_rasperry_pi/install_ros2_on_rasperry_pi.md).
 
 ## Install StepIt on the Microcontroller
+
+This step is only required if you use a real hardware, otherwise skip to the following section.
 
 We developed code for the Teensy microcontroller using Visual Studio Code because it provides very good tools to format and validate the code. To achieve this goal, we must install [PlatformIO](https://platformio.org) extension which supports different microcontrollers including Arduino. Installing Arduino IDE is not required.
 
@@ -79,6 +79,25 @@ pre-commit install
 
 ### Build the Project
 
+The preferred way to build and run StepIt is to use a Docker container with the scripts in the [`docker`](docker) folder. See [docker/README.md](docker/README.md) for more details.
+
+> [!IMPORTANT]
+> The docker container provides a default use `developer` with passowrd `developer`.
+
+From the root of the repo, build the image and create the container:
+
+```
+./docker/dock.sh stepit build
+```
+
+Start the container with an interactive shell:
+
+```
+./docker/dock.sh stepit start
+```
+
+The commands below assume you are inside the container (or, if you prefer not to use Docker, directly on a host machine with Ubuntu 24.04 and ROS 2 Jazzy installed).
+
 Move into the repo and install all required dependencies.
 
 ```
@@ -99,17 +118,47 @@ Execute all tests.
 
 ## Running the Application
 
-By default, the application runs with fake motors and a velocity controller. The position controller is disabled. Run the following commands on a terminal to start it up. This will also start up RViz.
+By default, the application runs with fake motors and a default active velocity controller. Run the following commands to start StepIt. This will also start up RViz.
 
 ```
 source install/setup.bash
-ros2 launch stepit_description robot.launch.py
+ros2 launch robot_bringup launch.py
 ```
 
-Open a different terminal and run any of the following commands to spin up the fake motors.
+Open a different terminal (if using Docker, attach to the same running container with `./docker/dock.sh stepit start`) and run the following commands to spin up the fake motors.
 
 ```
-ros2 topic pub -1 /velocity_controller/commands std_msgs/msg/Float64MultiArray "data: [6,-6]"
+ros2 topic pub -1 /velocity_controller/commands std_msgs/msg/Float64MultiArray "data: [6.28,-6.28,0,0,0]"
+```
+
+In RViz, you will see motor 1 and 2 spinning.
+
+Each value is the target velocity, in rad/s, for the corresponding joint listed under `velocity_controller.joints` in `controllers.yaml` (currently `joint1` through `joint5`), so the array must have exactly one value per joint.
+
+> [!IMPORTANT]
+> Only one controller must be active at a time: `velocity_controller`, `position_controller`, or `joint_trajectory_controller`.
+
+To use the trajectory controller, deactivate the current controller before activating another one:
+
+```
+ros2 control set_controller_state velocity_controller inactive -c /controller_manager
+ros2 control set_controller_state joint_trajectory_controller active -c /controller_manager
+```
+
+To move a single joint without specifying a value for every joint, use the `joint_trajectory_controller`. For example, to rotate `joint1` by 6.28 rad clockwise:
+
+```
+ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/msg/JointTrajectory "{
+  joint_names: [joint1], 
+  points: [
+    {
+      positions: [-6.28],
+      time_from_start: {
+        sec: 2
+      }
+    }
+  ]
+}"
 ```
 
 To control a trajectory with a sequence of positions and velocities run
@@ -164,21 +213,26 @@ ros2 topic pub -1 /joint_trajectory_controller/joint_trajectory trajectory_msgs/
 
 The trajectory is a list of waypoints, each of them containing the desired position and velocity of each joint at a given time.
 
-If you change the `robot.launch.py` file and run the application with a position controller, you can use the following command instead:
+The controller `position_controller` is loaded but inactive. Deactivate any previous controller as per previous note.
 
 ```
-ros2 topic pub -1 /position_controller/commands std_msgs/msg/Float64MultiArray "data: [0, 0]"
+ros2 control set_controller_state joint_trajectory_controller inactive -c /controller_manager
+ros2 control set_controller_state position_controller active -c /controller_manager
+```
+
+```
+ros2 topic pub -1 /position_controller/commands std_msgs/msg/Float64MultiArray "data: [6.28, 6.28, 6.28, 6.28, 6.28]"
 ```
 
 ## How to run GitHub Actions locally
 
 At each commit, the GitHub repository runs all available tests using [GitHub actions](https://docs.github.com/en/actions) and [Industrial CI](https://github.com/ros-industrial/industrial_ci).
 
-A GitHub action fires up a docker container with Ubuntu 22.04 and ROS2 Humble, checks out and builds the code inside the docker container and runs all tests.
+A GitHub action fires up a docker container with Ubuntu 24.04 and ROS2 Jazzy, checks out and builds the code inside the docker container and runs all tests.
 
 Sometimes, it may be desirable to execute the Continuous Integration pipeline locally. This is possible by using [Nektos](https://github.com/nektos/act).
 
 First of all, we must create a GitHub token to access the repository. Then, we
 must install Nektos `act` command in the user folder `~/bin` as explained in Nektos README.md file. We need an `.env` file at the root of the repository to define a few global variables required by Industrial CI. Finally, we can run the following command from the same folder:
 
-`~/bin/act pull_request --workflows ./.github/workflows/industrial_ci_action.yml -s GITHUB_TOKEN`
+`~/bin/act pull_request --workflows ./.github/workflows/industrial_ci.yml -s GITHUB_TOKEN`

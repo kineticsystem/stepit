@@ -12,9 +12,22 @@ RUN apt-get update
 RUN apt-get -y install sudo
 RUN echo 'root:docker' | chpasswd                      # Update user root password.
 
+# Ubuntu 24.04 base images ship a default 'ubuntu' user at uid/gid 1000. Remove
+# it so 'developer' can be created with a matching uid/gid to the host user
+# (passed in via build args), which keeps the bind-mounted workspace writable.
+RUN if id -u ubuntu >/dev/null 2>&1; then userdel -r ubuntu; fi
+RUN if getent group ubuntu >/dev/null 2>&1; then groupdel ubuntu; fi
+
 RUN groupadd -g 107 input                              # Create the group 'input' (id 107) to access devices.
 
-RUN useradd --create-home --shell /bin/bash developer  # Create the user developer.
+ARG USER_UID=1000
+ARG USER_GID=1000
+
+# Create the user developer with a uid/gid matching the host user so files
+# created in the bind-mounted workspace (e.g. colcon's build/install/log
+# directories) are writable and owned correctly on the host.
+RUN groupadd -g ${USER_GID} developer
+RUN useradd --create-home --shell /bin/bash --uid ${USER_UID} --gid ${USER_GID} developer
 RUN echo 'developer:developer' | chpasswd              # Update user developer password.
 RUN usermod -aG sudo,input developer                   # Add user to sudoers and input devices.
 

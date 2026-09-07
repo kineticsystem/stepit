@@ -35,7 +35,13 @@
 namespace stepit_driver
 {
 
-FakeMotor::FakeMotor() : acceleration_{ 0.0 }, max_velocity_{ 0.0 }, initial_position_{ 0.0 }, initial_velocity_{ 0.0 }
+FakeMotor::FakeMotor()
+  : acceleration_{ 0.0 }
+  , max_velocity_{ 0.0 }
+  , initial_position_{ 0.0 }
+  , initial_velocity_{ 0.0 }
+  , target_position_{ 0.0 }
+  , target_velocity_{ 0.0 }
 {
 }
 

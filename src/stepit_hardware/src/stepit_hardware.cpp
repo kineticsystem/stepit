@@ -212,14 +212,22 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
 {
   try
   {
-    if (std::any_of(joints_.cbegin(), joints_.cend(), [](auto joint) { return !std::isnan(joint.command.velocity); }))
+    // A joint is only ever included below if its command interface is both
+    // currently claimed by an active controller (velocity_claimed/
+    // position_claimed, tracked by perform_command_mode_switch) AND holds a
+    // real value. Requiring both, rather than just the claim, avoids ever
+    // forwarding a transient NaN (e.g. the moment a controller activates but
+    // hasn't written its first real command yet) down to the driver, since
+    // the fake motor's kinematics latch onto whatever value they last saw.
+    if (std::any_of(joints_.cbegin(), joints_.cend(),
+                    [](auto joint) { return joint.velocity_claimed && !std::isnan(joint.command.velocity); }))
     {
       // Set velocities.
 
       std::vector<VelocityGoal> velocities;
       for (const auto& joint : joints_)
       {
-        if (!std::isnan(joint.command.velocity))
+        if (joint.velocity_claimed && !std::isnan(joint.command.velocity))
         {
           VelocityGoal velocity{ joint.id, joint.command.velocity };
           velocities.push_back(velocity);
@@ -229,14 +237,14 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
       AcknowledgeResponse response = driver_->set_velocity(time, command);
     }
     else if (std::any_of(joints_.cbegin(), joints_.cend(),
-                         [](auto joint) { return !std::isnan(joint.command.position); }))
+                         [](auto joint) { return joint.position_claimed && !std::isnan(joint.command.position); }))
     {
       // Set positions.
 
       std::vector<PositionGoal> positions;
       for (const auto& joint : joints_)
       {
-        if (!std::isnan(joint.command.position))
+        if (joint.position_claimed && !std::isnan(joint.command.position))
         {
           PositionGoal position{ joint.id, joint.command.position };
           positions.push_back(position);
@@ -253,6 +261,43 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
                                                 hardware_interface::lifecycle_state_names::UNCONFIGURED));
     return hardware_interface::return_type::ERROR;
   }
+}
+
+hardware_interface::return_type
+StepitHardware::perform_command_mode_switch(const std::vector<std::string>& start_interfaces,
+                                            const std::vector<std::string>& stop_interfaces)
+{
+  auto set_claim = [this](const std::vector<std::string>& interface_names, bool claimed) {
+    for (const auto& interface_name : interface_names)
+    {
+      auto slash = interface_name.find('/');
+      std::string joint_name = interface_name.substr(0, slash);
+      std::string interface_type = interface_name.substr(slash + 1);
+
+      for (std::size_t i = 0; i < info_.joints.size(); ++i)
+      {
+        if (info_.joints[i].name == joint_name)
+        {
+          if (interface_type == hardware_interface::HW_IF_POSITION)
+          {
+            joints_[i].position_claimed = claimed;
+          }
+          else if (interface_type == hardware_interface::HW_IF_VELOCITY)
+          {
+            joints_[i].velocity_claimed = claimed;
+          }
+          break;
+        }
+      }
+    }
+  };
+
+  // Order matters if the same interface ever appeared in both lists: a
+  // controller switch always releases before it claims, so stop_interfaces
+  // is applied first.
+  set_claim(stop_interfaces, false);
+  set_claim(start_interfaces, true);
+  return hardware_interface::return_type::OK;
 }
 
 }  // namespace stepit_driver

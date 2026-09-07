@@ -54,8 +54,8 @@ public:
       hardware_interface::ComponentInfo joint;
       joint.name = joint_name;
       joint.type = "joint";
-      hardware_interface::InterfaceInfo pos{ .name = "position", .size = 0, .enable_limits = false, .parameters = {} };
-      hardware_interface::InterfaceInfo vel{ .name = "velocity", .size = 0, .enable_limits = false, .parameters = {} };
+      hardware_interface::InterfaceInfo pos{ .name = "position", .size = 0, .parameters = {}, .enable_limits = false };
+      hardware_interface::InterfaceInfo vel{ .name = "velocity", .size = 0, .parameters = {}, .enable_limits = false };
       joint.command_interfaces = { pos, vel };
       joint.state_interfaces = { pos, vel };
       joint.parameters = { { "id", id }, { "acceleration", "3.14159" }, { "max_velocity", "6.28319" } };

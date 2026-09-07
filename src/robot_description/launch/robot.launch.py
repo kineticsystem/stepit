@@ -149,6 +149,7 @@ def launch_setup(context, *_args, **_kwargs):
             "/controller_manager",
             "--param-file",
             controllers_config_file,
+            "--inactive",
         ],
     )
 
@@ -167,6 +168,7 @@ def launch_setup(context, *_args, **_kwargs):
             "/controller_manager",
             "--param-file",
             controllers_config_file,
+            "--inactive",
         ],
     )
 
@@ -236,7 +238,7 @@ def launch_setup(context, *_args, **_kwargs):
         joint_state_broadcaster_spawner,
         delay_rviz_after_joint_state_broadcaster_spawner,
         velocity_controller_spawner,
-        # position_controller_spawner,
+        position_controller_spawner,
         joint_trajectory_controller_spawner,
         robot_state_publisher_node,
         foxglove_bridge_node,

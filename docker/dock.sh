@@ -51,7 +51,10 @@ function build_image() {
     local name="$1"
     if ! image_exists $name:latest; then
         echo "Building image: $name:latest"
-        docker build -t $name:latest .
+        docker build \
+          --build-arg USER_UID=$(id -u) \
+          --build-arg USER_GID=$(id -g) \
+          -t $name:latest .
     fi
 }
 

@@ -300,6 +300,12 @@ TEST(TestStepitHardware, write_velocities)
                                     hardware_interface::lifecycle_state_names::INACTIVE };
   ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_activate(inactive));
 
+  // Simulate a controller claiming the velocity command interfaces, as the
+  // resource manager would do when activating a real velocity controller.
+  ASSERT_EQ(hardware_interface::return_type::OK,
+            stepit_hardware->perform_command_mode_switch(
+                { "joint1/velocity", "joint2/velocity", "joint3/velocity", "joint4/velocity", "joint5/velocity" }, {}));
+
   // Write velocity values (velocity index: 1, 3, 5, 7, 9).
   std::ignore = command_interfaces[1]->set_value(0.5);
   std::ignore = command_interfaces[3]->set_value(0.75);
@@ -376,6 +382,12 @@ TEST(TestStepitHardware, write_positions)
   rclcpp_lifecycle::State inactive{ lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
                                     hardware_interface::lifecycle_state_names::INACTIVE };
   ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_activate(inactive));
+
+  // Simulate a controller claiming the position command interfaces, as the
+  // resource manager would do when activating a real position controller.
+  ASSERT_EQ(hardware_interface::return_type::OK,
+            stepit_hardware->perform_command_mode_switch(
+                { "joint1/position", "joint2/position", "joint3/position", "joint4/position", "joint5/position" }, {}));
 
   // Write position values (position index: 0, 2, 4, 6, 8).
   std::ignore = command_interfaces[0]->set_value(0.5);

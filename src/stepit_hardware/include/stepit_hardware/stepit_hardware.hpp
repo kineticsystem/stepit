@@ -127,6 +127,22 @@ public:
   STEPIT_HARDWARE_PUBLIC hardware_interface::return_type write(const rclcpp::Time& time,
                                                                const rclcpp::Duration& period) override;
 
+  /**
+   * Called when the set of claimed command interfaces changes (e.g. a
+   * controller activates, deactivates, or is switched out for another).
+   * Updates each joint's position_claimed/velocity_claimed flags so write()
+   * knows which command interfaces are currently owned by an active
+   * controller. This is what lets write() stop honoring a joint's command
+   * once its owning controller has released the interface, even though the
+   * stale value is left sitting in joint.command (nothing resets it).
+   * @param start_interfaces Names of the command interfaces newly claimed.
+   * @param stop_interfaces Names of the command interfaces being released.
+   * @returns hardware_interface::return_type::OK.
+   */
+  STEPIT_HARDWARE_PUBLIC hardware_interface::return_type
+  perform_command_mode_switch(const std::vector<std::string>& start_interfaces,
+                              const std::vector<std::string>& stop_interfaces) override;
+
 private:
   // Internal structure to store joint states or targets.
   struct JointValue
@@ -143,6 +159,15 @@ private:
     double max_velocity = 0.0;
     JointValue state{};
     JointValue command{};
+
+    // Whether the position/velocity command interface is currently claimed
+    // by an active controller, set only by perform_command_mode_switch.
+    // write() requires this (in addition to the command value not being
+    // NaN) before honoring a joint's command, so a controller that has
+    // released an interface is ignored even though its last written value is
+    // still sitting in `command` unchanged.
+    bool position_claimed = false;
+    bool velocity_claimed = false;
   };
 
   // Store information about current joint states and targets.
