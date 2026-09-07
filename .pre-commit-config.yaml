@@ -1,4 +1,4 @@
-exclude: \.uxf$
+exclude: \.uxf$|^(build|install|log)/
 
 # To use:
 #
@@ -52,5 +52,35 @@ repos:
         description: Format files with ClangFormat.
         entry: clang-format
         language: system
-        files: \.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|m|proto|vert)$
+        files: ^src/.*\.(c|cc|cxx|cpp|frag|glsl|h|hpp|hxx|ih|ispc|ipp|java|m|proto|vert)$
         args: ["-fallback-style=none", "-i"]
+
+      # Mirrors the ament_${linter} matrix in ci-ros-lint.yml, both in which
+      # linters run and which packages they run on (the package-name list
+      # there). Requires the ROS workspace to be sourced
+      # (ament_copyright/ament_lint_cmake/ament_cpplint come from each
+      # package's ament_lint test_depends). stepit_mcu is intentionally not
+      # in the package list below: it's PlatformIO/Arduino firmware, not a
+      # colcon/ament package (no package.xml or CMakeLists.txt), and CI
+      # doesn't lint it either.
+      - id: ament_copyright
+        name: ament_copyright
+        description: Check source files for copyright headers.
+        entry: ament_copyright
+        language: system
+        files: ^src/(cobs_serial|robot_bringup|robot_description|robot_teleop|stepit_driver|stepit_hardware|stepit_hardware_tests)/.*\.(c|cc|cxx|cpp|h|hpp|hxx|py)$
+
+      - id: ament_lint_cmake
+        name: ament_lint_cmake
+        description: Lint CMakeLists.txt files.
+        entry: ament_lint_cmake
+        language: system
+        files: ^src/(cobs_serial|robot_bringup|robot_description|robot_teleop|stepit_driver|stepit_hardware|stepit_hardware_tests)/.*CMakeLists\.txt$
+
+      - id: ament_cpplint
+        name: ament_cpplint
+        description: Lint C++ files with cpplint.
+        entry: ament_cpplint
+        language: system
+        args: ["--linelength=121", "--filter=-whitespace/newline"]
+        files: ^src/(cobs_serial|robot_bringup|robot_description|robot_teleop|stepit_driver|stepit_hardware|stepit_hardware_tests)/.*\.(c|cc|cxx|cpp|h|hpp|hxx)$
