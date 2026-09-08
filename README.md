@@ -112,9 +112,7 @@ pre-commit install
 The preferred way to build and run StepIt is to use a Docker container. It is defined in [`docker/docker-compose.yml`](docker/docker-compose.yml) and driven by the [`docker/dock.sh`](docker/dock.sh) script. See [docker/README.md](docker/README.md) for more details.
 
 > [!IMPORTANT]
-> The docker container provides a default user `developer` with password
-> `developer`. That user may run `sudo` without being asked for it, so that the
-> scripts in `bin` also work from a non-interactive shell, e.g.
+> The docker container provides a default user `developer` with password `developer`. That user may run `sudo` without being asked for it, so that the scripts in `bin` also work from a non-interactive shell, e.g.
 > `docker exec stepit update.sh`.
 
 Build the image and create the container. The script always mounts the repo it belongs to, so it can be called from anywhere:
