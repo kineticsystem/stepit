@@ -1,0 +1,16 @@
+# Interactive shell setup for the developer user, sourced from ~/.bashrc.
+#
+# Only what genuinely needs a shell belongs here. Variables are set with ENV in
+# the Dockerfile instead, so that they apply to non-interactive commands too,
+# such as `docker exec <container-name> build.sh`.
+
+# Make the ROS2 command line tools and message definitions available. This
+# cannot be an ENV: it is a script that sets many variables at once.
+source /opt/ros/jazzy/setup.bash
+
+# Short names for the scripts in ./bin, which are on the PATH. These have to be
+# aliases rather than symlinks: `test` is a bash builtin, and builtins win over
+# a PATH lookup, whereas aliases are expanded before either.
+alias build='build.sh'
+alias test='test.sh'
+alias update='update.sh'

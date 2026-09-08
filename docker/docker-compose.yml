@@ -1,0 +1,35 @@
+# Definition of the development container. Driven by ./dock.sh, which supplies
+# CONTAINER_NAME and USER_UID/USER_GID.
+#
+# The container runs the robot, so it needs the host's devices: the serial port
+# to the microcontroller and the joystick. Its network settings are mirrored by
+# the commander's container so the two can discover each other's ROS2 graph over
+# DDS (see cyclonedds.xml).
+
+services:
+  dev:
+    build:
+      context: .
+      args:
+        # A uid/gid matching the host user keeps the bind-mounted workspace
+        # writable and correctly owned on the host.
+        USER_UID: ${USER_UID:-1000}
+        USER_GID: ${USER_GID:-1000}
+    image: ${CONTAINER_NAME:-stepit}:latest
+    container_name: ${CONTAINER_NAME:-stepit}
+    hostname: ${CONTAINER_NAME:-stepit}
+    privileged: true
+    # Required for DDS discovery between this container and the commander's.
+    network_mode: host
+    volumes:
+      # Relative paths resolve against this file's directory, so this is the
+      # repo root whatever machine it is checked out on.
+      - ..:/home/developer/ws
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      # The serial port to the microcontroller, and the joystick.
+      - /dev:/dev
+    environment:
+      DISPLAY: ${DISPLAY:-}
+      QT_X11_NO_MITSHM: 1
+    # Keep the container alive so shells can be attached to it on demand.
+    command: sleep infinity

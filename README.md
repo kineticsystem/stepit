@@ -16,7 +16,7 @@
 - [Running the Application](#running-the-application)
 - [How to run GitHub Actions locally](#how-to-run-github-actions-locally)
 
-## Introduction
+## Introduction 
 
 StepIt is a project to control stepper motors with a Teensy microcontroller and ROS2. Watch [this video](https://github.com/user-attachments/assets/e67d46ce-e133-4e34-bab8-7d924be3dee4)
 
@@ -109,16 +109,21 @@ pre-commit install
 
 ### Build the Project
 
-The preferred way to build and run StepIt is to use a Docker container with the scripts in the [`docker`](docker) folder. See [docker/README.md](docker/README.md) for more details.
+The preferred way to build and run StepIt is to use a Docker container. It is defined in [`docker/docker-compose.yml`](docker/docker-compose.yml) and driven by the [`docker/dock.sh`](docker/dock.sh) script. See [docker/README.md](docker/README.md) for more details.
 
 > [!IMPORTANT]
-> The docker container provides a default use `developer` with password `developer`.
+> The docker container provides a default user `developer` with password
+> `developer`. That user may run `sudo` without being asked for it, so that the
+> scripts in `bin` also work from a non-interactive shell, e.g.
+> `docker exec stepit update.sh`.
 
-From the root of the repo, build the image and create the container:
+Build the image and create the container. The script always mounts the repo it belongs to, so it can be called from anywhere:
 
 ```
 ./docker/dock.sh stepit build
 ```
+
+This is also how you pick up a change to the `Dockerfile`: it rebuilds only the layers that changed, so there is no need to clean first.
 
 Start the container with an interactive shell:
 
@@ -128,22 +133,24 @@ Start the container with an interactive shell:
 
 The commands below assume you are inside the container (or, if you prefer not to use Docker, directly on a host machine with Ubuntu 24.04 and ROS 2 Jazzy installed).
 
-Move into the repo and install all required dependencies.
+Inside the container the scripts in [`bin`](bin) are on the `PATH` and aliased, so they can be called from any directory: they always act on the workspace root. Outside the container, call them by their path instead, e.g. `./bin/update.sh`.
+
+Install all required dependencies.
 
 ```
-./bin/update.sh
+update
 ```
 
 Run Colcon to build the project.
 
 ```
-./bin/build.sh
+build
 ```
 
 Execute all tests.
 
 ```
-./bin/test.sh
+test
 ```
 
 ## Running the Application
@@ -151,7 +158,7 @@ Execute all tests.
 By default, the application runs with fake motors and a default active trajectory controller. Run the following commands to start StepIt. This will also start up RViz.
 
 ```
-source install/setup.bash
+source ~/ws/install/setup.bash
 ros2 launch robot_bringup launch.py
 ```
 
