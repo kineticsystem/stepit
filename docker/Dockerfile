@@ -39,6 +39,7 @@ RUN apt-get -y install python-is-python3
 RUN apt-get -y install jstest-gtk                      # Test connected joysticks.
 RUN apt-get install -y --no-install-recommends ros-jazzy-rmw-cyclonedds-cpp
 RUN apt-get install -y python3-colcon-common-extensions
+RUN apt-get install -y pre-commit
 
 # The container user is in the sudo group, but a password prompt makes the
 # scripts in ./bin unusable from a non-interactive shell: rosdep shells out to
