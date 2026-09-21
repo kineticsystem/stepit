@@ -26,6 +26,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <stdexcept>
 #include <thread>
 
 #include <stepit_driver/default_driver.hpp>
@@ -46,6 +47,9 @@ constexpr uint8_t kMotorStatusQueryId = 0x75;
 
 constexpr uint8_t kMaxConnectionTrials = 5;
 
+// Name reported by the firmware in response to an info query.
+constexpr auto kExpectedControllerName = "STEPIT";
+
 using cobs_serial::data_utils::from_float;
 using cobs_serial::data_utils::to_float;
 using cobs_serial::data_utils::to_hex;
@@ -59,7 +63,9 @@ bool DefaultDriver::connect()
 {
   cobs_serial_->open();
 
-  // Send a status command multiple times until an answer comes back.
+  // Send an info query multiple times until an answer comes back, then
+  // verify that the device on the other end identifies itself as a StepIt
+  // controller: the serial port path alone does not tell us what is attached.
 
   int trial = 0;
   bool connected = false;
@@ -69,14 +75,24 @@ bool DefaultDriver::connect()
     {
       RCLCPP_INFO(kLogger, "Connecting (%d of %d)...", trial + 1, kMaxConnectionTrials);
 
-      StatusResponse response = get_status(rclcpp::Time{});
-      connected = response.status() == Response::Status::Success;
+      InfoResponse response = get_info(rclcpp::Time{});
+      if (response.status() != Response::Status::Success)
+      {
+        throw std::runtime_error("Info query failed.");
+      }
+      if (response.info() != kExpectedControllerName)
+      {
+        RCLCPP_ERROR(kLogger, "Unexpected device on serial port: expected \"%s\", got \"%s\".", kExpectedControllerName,
+                     response.info().c_str());
+        break;
+      }
 
-      RCLCPP_INFO(kLogger, "Connection established.");
+      connected = true;
+      RCLCPP_INFO(kLogger, "Connection established with %s controller.", response.info().c_str());
     }
     catch (const std::exception& ex)
     {
-      RCLCPP_WARN(kLogger, "Connection failed.");
+      RCLCPP_WARN(kLogger, "Connection failed: %s", ex.what());
       trial++;
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));

@@ -28,6 +28,8 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 #include <mock/mock_cobs_serial.hpp>
 #include <stepit_driver/default_driver.hpp>
 
@@ -38,6 +40,7 @@ namespace stepit_driver::test
 using ::testing::_;
 using ::testing::Return;
 using ::testing::SaveArg;
+using ::testing::Throw;
 
 using cobs_serial::data_utils::to_hex;
 
@@ -216,6 +219,71 @@ TEST(TestDefaultDriver, send_configure_command)
 
   ASSERT_THAT(to_hex(actual_request), to_hex(expected_request));
   ASSERT_EQ(Response::Status::Success, response.status());
+}
+
+/**
+ * In this test we connect to a device that identifies itself as a StepIt
+ * controller and we check that the connection succeeds.
+ */
+TEST(TestDefaultDriver, connect_to_stepit_controller)
+{
+  const std::vector<uint8_t> expected_request{
+    0x76,  // info query ID
+  };
+
+  const std::vector<uint8_t> mocked_response{
+    0x11,                          // status success
+    'S',  'T', 'E', 'P', 'I', 'T'  // controller name
+  };
+
+  std::vector<uint8_t> actual_request;
+  auto serial = std::make_unique<MockCobsSerial>();
+  EXPECT_CALL(*serial, open());
+  EXPECT_CALL(*serial, write(_)).WillOnce(SaveArg<0>(&actual_request));
+  EXPECT_CALL(*serial, read()).WillOnce(Return(mocked_response));
+
+  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
+
+  ASSERT_TRUE(driver->connect());
+  ASSERT_THAT(to_hex(actual_request), to_hex(expected_request));
+}
+
+/**
+ * In this test we connect to a device that answers the info query but does
+ * not identify itself as a StepIt controller: the connection must be refused
+ * without further retries.
+ */
+TEST(TestDefaultDriver, connect_to_unknown_device)
+{
+  const std::vector<uint8_t> mocked_response{
+    0x11,                     // status success
+    'O',  'T', 'H', 'E', 'R'  // some other controller name
+  };
+
+  auto serial = std::make_unique<MockCobsSerial>();
+  EXPECT_CALL(*serial, open());
+  EXPECT_CALL(*serial, write(_)).Times(1);
+  EXPECT_CALL(*serial, read()).WillOnce(Return(mocked_response));
+
+  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
+
+  ASSERT_FALSE(driver->connect());
+}
+
+/**
+ * In this test the device never answers: the driver must retry a bounded
+ * number of times and then give up.
+ */
+TEST(TestDefaultDriver, connect_to_unresponsive_device)
+{
+  auto serial = std::make_unique<MockCobsSerial>();
+  EXPECT_CALL(*serial, open());
+  EXPECT_CALL(*serial, write(_)).Times(5);
+  EXPECT_CALL(*serial, read()).Times(5).WillRepeatedly(Throw(std::runtime_error("timeout")));
+
+  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
+
+  ASSERT_FALSE(driver->connect());
 }
 
 }  // namespace stepit_driver::test

@@ -108,8 +108,13 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
       return CallbackReturn::ERROR;
     }
 
-    // Open the serial port and handshake.
-    driver_->connect();
+    // Open the serial port and handshake: the driver verifies that the device
+    // on the other end identifies itself as a StepIt controller.
+    if (!driver_->connect())
+    {
+      RCLCPP_ERROR(kLogger, "Cannot connect to the StepIt controller.");
+      return CallbackReturn::FAILURE;
+    }
 
     // Send configuration parameters to the hardware.
     std::vector<ConfigParam> params;
@@ -120,6 +125,23 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
     const AcknowledgeResponse response = driver_->configure(ConfigCommand{ params });
     if (response.status() == Response::Status::Failure)
     {
+      return CallbackReturn::FAILURE;
+    }
+
+    // Verify that the controller drives as many motors as the joints declared
+    // in the URDF, so that a mismatch is reported here rather than on every
+    // read cycle. This has to happen after configure: the fake driver only
+    // creates its motors once it has received the configuration.
+    const StatusResponse status = driver_->get_status(rclcpp::Time{});
+    if (status.status() != Response::Status::Success)
+    {
+      RCLCPP_ERROR(kLogger, "The StepIt controller did not report its motors status.");
+      return CallbackReturn::FAILURE;
+    }
+    if (status.motor_states().size() != joints_.size())
+    {
+      RCLCPP_ERROR(kLogger, "The StepIt controller drives %zu motors but the URDF declares %zu joints.",
+                   status.motor_states().size(), joints_.size());
       return CallbackReturn::FAILURE;
     }
     return CallbackReturn::SUCCESS;

@@ -58,6 +58,26 @@ using ::testing::Return;
 using ::testing::SaveArg;
 
 /**
+ * A successful status response with as many motors as the joints declared
+ * in FakeHardwareInfo, as returned by the controller during the handshake.
+ */
+StatusResponse handshake_status()
+{
+  // clang-format off
+  return StatusResponse{
+      Response::Status::Success,
+      {
+          MotorState{ 0, 0, 0, 0 },  // Motor 0 status
+          MotorState{ 1, 0, 0, 0 },  // Motor 1 status
+          MotorState{ 2, 0, 0, 0 },  // Motor 2 status
+          MotorState{ 3, 0, 0, 0 },  // Motor 3 status
+          MotorState{ 4, 0, 0, 0 }   // Motor 4 status
+      }
+  };
+  // clang-format on
+}
+
+/**
  * This test generates a minimal xacro robot configuration and loads the
  * hardware interface plugin.
  */
@@ -211,7 +231,7 @@ TEST(TestStepitHardware, read_status)
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
-  EXPECT_CALL(*mock_driver, get_status(_)).WillOnce(Return(mocked_response));
+  EXPECT_CALL(*mock_driver, get_status(_)).Times(2).WillRepeatedly(Return(mocked_response));
   auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
 
   auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
@@ -276,6 +296,7 @@ TEST(TestStepitHardware, write_velocities)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_driver, set_velocity(_, Matcher<const VelocityCommand&>(_)))
@@ -359,6 +380,7 @@ TEST(TestStepitHardware, write_positions)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_driver, set_position(_, Matcher<const PositionCommand&>(_)))
@@ -444,6 +466,7 @@ TEST(TestStepitHardware, configuration)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
   EXPECT_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
   auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
@@ -482,4 +505,89 @@ TEST(TestStepitHardware, configuration)
   ASSERT_EQ(expected_request.params()[4].acceleration(), actual_request.params()[4].acceleration());
   ASSERT_EQ(expected_request.params()[4].max_velocity(), actual_request.params()[4].max_velocity());
 }
+
+/**
+ * In this test the driver cannot identify a StepIt controller on the serial
+ * port: configuration must fail before anything is sent to the hardware.
+ */
+TEST(TestStepitHardware, configure_fails_when_not_connected)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  EXPECT_CALL(*mock_driver, connect()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_driver, get_status(_)).Times(0);
+  EXPECT_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_))).Times(0);
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::FAILURE, stepit_hardware->on_configure(unconfigured));
+}
+
+/**
+ * In this test the controller answers the handshake and accepts the
+ * configuration, but then reports a failure on the status query:
+ * configuration must fail.
+ */
+TEST(TestStepitHardware, configure_fails_when_status_fails)
+{
+  const StatusResponse mocked_response{ Response::Status::Failure, {} };
+
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
+  EXPECT_CALL(*mock_driver, get_status(_)).WillOnce(Return(mocked_response));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::FAILURE, stepit_hardware->on_configure(unconfigured));
+}
+
+/**
+ * In this test the controller accepts the configuration but drives fewer
+ * motors than the joints declared in the URDF: configuration must fail.
+ */
+TEST(TestStepitHardware, configure_fails_on_motor_count_mismatch)
+{
+  // clang-format off
+  const StatusResponse mocked_response{
+      Response::Status::Success,
+      {
+          MotorState{ 0, 0, 0, 0 },  // Motor 0 status
+          MotorState{ 1, 0, 0, 0 }   // Motor 1 status
+      }
+  };
+  // clang-format on
+
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
+  EXPECT_CALL(*mock_driver, get_status(_)).WillOnce(Return(mocked_response));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::FAILURE, stepit_hardware->on_configure(unconfigured));
+}
+
 }  // namespace stepit_driver::test
