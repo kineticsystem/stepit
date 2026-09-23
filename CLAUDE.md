@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-StepIt is a ROS 2 (Humble) project for controlling stepper motors via a Teensy 4.x microcontroller. It uses `ros2_control` as the hardware abstraction layer. The robot can run in simulation (fake motors) without any physical hardware.
+StepIt is a ROS 2 (Jazzy) project for controlling stepper motors via a Teensy 4.x microcontroller. It uses `ros2_control` as the hardware abstraction layer. The robot can run in simulation (fake motors) without any physical hardware.
 
 ## Build & Development Commands
 
@@ -37,7 +37,7 @@ colcon test-result --all --verbose
 **Lint/format:**
 ```bash
 pre-commit run -a                          # run all pre-commit hooks manually
-clang-format-14 -i <file>                 # format a single C++ file
+clang-format -i <file>                    # format a single C++ file
 ```
 
 **Launch the simulation:**
@@ -97,7 +97,10 @@ Tests use **GMock** (`ament_add_gmock`). Mocks live alongside tests:
 ## Code Standards
 
 - C++20, compiled with `-Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wold-style-cast`
-- Formatting: `clang-format-14` (pre-commit hook, style defined in `.clang-format` if present)
+- Formatting: `clang-format` (pre-commit hook, style in `.clang-format`). The hook calls the
+  **unversioned** binary, so the version is whatever the environment provides: Ubuntu 24.04,
+  the dev container and CI all give 18. Do not pin a version in the hook without also pinning
+  it in `ci-format.yml`, or CI and local will format differently.
 - Python formatting: `black`
 - Spell check: `codespell` (pre-commit)
 - Pre-commit hooks run automatically on commit; run `pre-commit run -a` to check all files manually
@@ -105,8 +108,10 @@ Tests use **GMock** (`ament_add_gmock`). Mocks live alongside tests:
 ## CI
 
 Three GitHub Actions workflows:
-- `industrial_ci.yml` — builds and tests in Docker (Ubuntu 22.04 + ROS Humble) via ros-industrial/industrial_ci
-- `ci-format.yml` — pre-commit hooks (clang-format-14, black, codespell)
+- `industrial_ci.yml` — builds and tests in Docker (Ubuntu 24.04 + ROS Jazzy) via ros-industrial/industrial_ci
+- `ci-format.yml` — pre-commit hooks (clang-format, black, codespell)
 - `ci-ros-lint.yml` — ROS-specific linters
 
-Local CI can be run with [Nektos `act`](https://github.com/nektos/act).
+Local CI can be run with [Nektos `act`](https://github.com/nektos/act); see "How to run GitHub
+Actions locally" in `README.md` for the setup it needs (runner image mapping, and moving
+`build/`, `install/` and `log/` aside before running `industrial_ci`).

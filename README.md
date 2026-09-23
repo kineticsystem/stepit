@@ -264,7 +264,31 @@ A GitHub action fires up a docker container with Ubuntu 24.04 and ROS2 Jazzy, ch
 
 Sometimes, it may be desirable to execute the Continuous Integration pipeline locally. This is possible by using [Nektos](https://github.com/nektos/act).
 
-First of all, we must create a GitHub token to access the repository. Then, we
-must install Nektos `act` command in the user folder `~/bin` as explained in Nektos README.md file. We need an `.env` file at the root of the repository to define a few global variables required by Industrial CI. Finally, we can run the following command from the same folder:
+Install the `act` command in the user folder `~/bin` as explained in the Nektos README.md file. The `.env` file at the root of the repository defines the global variables required by Industrial CI.
 
-`~/bin/act pull_request --workflows ./.github/workflows/industrial_ci.yml -s GITHUB_TOKEN`
+On its first run `act` asks interactively which runner image to use and aborts if it cannot
+prompt, so choose the image up front. All three workflows run on `ubuntu-24.04`. Create
+`~/.config/act/actrc` with:
+
+```
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P ubuntu-24.04=catthehacker/ubuntu:act-24.04
+-P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+```
+
+Then run any of the three workflows from the root of the repository:
+
+```
+~/bin/act pull_request --workflows ./.github/workflows/ci-format.yml    -s GITHUB_TOKEN=""
+~/bin/act pull_request --workflows ./.github/workflows/ci-ros-lint.yml  -s GITHUB_TOKEN=""
+~/bin/act pull_request --workflows ./.github/workflows/industrial_ci.yml -s GITHUB_TOKEN=""
+```
+
+The repository is public and `act` runs against the working tree rather than checking the
+code out, so no GitHub token is needed; the empty secret above simply stops `act` from
+prompting for one.
+
+`industrial_ci` runs as a Docker action that mounts the workspace, so it does not honour
+`.gitignore` and `rosdep` ends up scanning `build/` and `install/` too, and fails.
+
+The `build` script prevents this by dropping a `CATKIN_IGNORE` file into each of those directories, which is the marker `rosdep` looks for.
