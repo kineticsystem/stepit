@@ -936,4 +936,87 @@ TEST(TestStepitHardware, init_fails_beyond_the_supported_joint_count)
   EXPECT_EQ(hardware_interface::CallbackReturn::ERROR, stepit_hardware->on_init(init_params));
 }
 
+/**
+ * In this test the controller rejects a velocity command. write() has to
+ * report the failure so that ros2_control deactivates the component: the
+ * acknowledgement used to be discarded, leaving the control loop running as
+ * though the goal had been accepted.
+ */
+TEST(TestStepitHardware, write_reports_a_rejected_velocity_command)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
+  ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
+  EXPECT_CALL(*mock_driver, set_velocity(_, Matcher<const VelocityCommand&>(_)))
+      .WillOnce(Return(AcknowledgeResponse{ Response::Status::Failure }));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+  auto command_interfaces = stepit_hardware->on_export_command_interfaces();
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_configure(unconfigured));
+  rclcpp_lifecycle::State inactive{ lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+                                    hardware_interface::lifecycle_state_names::INACTIVE };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_activate(inactive));
+
+  ASSERT_EQ(hardware_interface::return_type::OK,
+            stepit_hardware->perform_command_mode_switch(
+                { "joint1/velocity", "joint2/velocity", "joint3/velocity", "joint4/velocity", "joint5/velocity" }, {}));
+
+  std::ignore = command_interfaces[1]->set_value(0.5);
+
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  EXPECT_EQ(hardware_interface::return_type::ERROR, stepit_hardware->write(time, period));
+}
+
+/**
+ * The same for a position command.
+ */
+TEST(TestStepitHardware, write_reports_a_rejected_position_command)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
+  ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
+  EXPECT_CALL(*mock_driver, set_position(_, Matcher<const PositionCommand&>(_)))
+      .WillOnce(Return(AcknowledgeResponse{ Response::Status::Failure }));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+  auto command_interfaces = stepit_hardware->on_export_command_interfaces();
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_configure(unconfigured));
+  rclcpp_lifecycle::State inactive{ lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+                                    hardware_interface::lifecycle_state_names::INACTIVE };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_activate(inactive));
+
+  ASSERT_EQ(hardware_interface::return_type::OK,
+            stepit_hardware->perform_command_mode_switch(
+                { "joint1/position", "joint2/position", "joint3/position", "joint4/position", "joint5/position" }, {}));
+
+  std::ignore = command_interfaces[0]->set_value(1.0);
+
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  EXPECT_EQ(hardware_interface::return_type::ERROR, stepit_hardware->write(time, period));
+}
+
 }  // namespace stepit_driver::test

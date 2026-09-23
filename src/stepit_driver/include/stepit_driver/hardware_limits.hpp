@@ -63,6 +63,6 @@ constexpr double kTolerance = 1.001;
 // The firmware version the simulated controller reports. Its major number is
 // the protocol version this workspace speaks: see VERSION_MAJOR in
 // src/stepit_mcu/src/main.cpp.
-const Version kFirmwareVersion{ 1, 0, 0 };
+const Version kFirmwareVersion{ 1, 1, 0 };
 
 }  // namespace stepit_driver::hardware_limits
