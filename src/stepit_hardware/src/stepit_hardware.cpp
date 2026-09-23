@@ -85,7 +85,8 @@ StepitHardware::on_init(const hardware_interface::HardwareComponentInterfacePara
     // Initialize all joints. Reset the derived state too: on a second call
     // stale entries would make every configured id look like a duplicate.
     const std::size_t num_joints = info_.joints.size();
-    joints_.assign(num_joints, Joint{});
+    // Joint holds atomics, so the vector is rebuilt rather than assigned.
+    joints_ = std::vector<Joint>(num_joints);
     joint_index_by_id_.clear();
 
     // motor_states_are_valid() tracks the joints it has seen in a bitmask, so
@@ -176,7 +177,7 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
 
     // Send configuration parameters to the hardware.
     std::vector<ConfigParam> params;
-    for (const auto joint : joints_)
+    for (const auto& joint : joints_)
     {
       params.emplace_back(ConfigParam{ joint.id, joint.acceleration, joint.max_velocity });
     }
@@ -400,8 +401,12 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
 
     std::vector<VelocityGoal> velocities;
     std::vector<PositionGoal> positions;
-    for (const auto& joint : joints_)
+    for (auto& joint : joints_)
     {
+      // Take the flag before reading the claims: a release clears the claim
+      // before raising the flag, so seeing the flag guarantees seeing the
+      // release. A release that lands later stays pending for the next cycle.
+      const bool stop_pending = joint.stop_pending.exchange(false);
       if (velocity_commanded(joint))
       {
         velocities.emplace_back(VelocityGoal{ joint.id, joint.command.velocity });
@@ -410,7 +415,7 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
       {
         positions.emplace_back(PositionGoal{ joint.id, joint.command.position });
       }
-      else if (joint.stop_pending)
+      else if (stop_pending)
       {
         // A controller released this joint and nothing commands it now. The
         // firmware would otherwise carry on with the last goal, so bring the
@@ -440,13 +445,6 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
         return hardware_interface::return_type::ERROR;
       }
     }
-
-    // Every joint marked for a stop has now either been stopped or received
-    // a goal from the controller that owns it.
-    for (auto& joint : joints_)
-    {
-      joint.stop_pending = false;
-    }
     return hardware_interface::return_type::OK;
   }
   catch (const std::exception& ex)
@@ -472,12 +470,29 @@ StepitHardware::perform_command_mode_switch(const std::vector<std::string>& star
       {
         if (info_.joints[i].name == joint_name)
         {
+          // A newly claimed interface starts with no command. Controllers do
+          // not clear it on activation: a forward controller writes nothing
+          // until its first message, so write() would resend the value left
+          // by a previous controller, and the trajectory controller reads it
+          // as the current state and would drive the motor back to it. The
+          // controller manager calls this before activating any controller.
+          // The value is reset before the claim is raised, so that write(),
+          // which may be running concurrently, never sees the claim together
+          // with the old value.
           if (interface_type == hardware_interface::HW_IF_POSITION)
           {
+            if (claimed)
+            {
+              joints_[i].command.position = kNaN;
+            }
             joints_[i].position_claimed = claimed;
           }
           else if (interface_type == hardware_interface::HW_IF_VELOCITY)
           {
+            if (claimed)
+            {
+              joints_[i].command.velocity = kNaN;
+            }
             joints_[i].velocity_claimed = claimed;
           }
           else
@@ -486,7 +501,8 @@ StepitHardware::perform_command_mode_switch(const std::vector<std::string>& star
           }
           // The released controller's last goal is still running on the
           // controller: have write() stop the motor unless another
-          // controller takes the joint over in the same cycle.
+          // controller takes the joint over in the same cycle. Raised after
+          // the claim is cleared, which write() relies on.
           if (!claimed)
           {
             joints_[i].stop_pending = true;
