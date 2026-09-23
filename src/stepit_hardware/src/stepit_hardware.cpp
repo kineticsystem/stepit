@@ -378,7 +378,15 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
         }
       }
       VelocityCommand command{ velocities };
-      AcknowledgeResponse response = driver_->set_velocity(time, command);
+      const AcknowledgeResponse response = driver_->set_velocity(time, command);
+      if (response.status() != Response::Status::Success)
+      {
+        // The controller refused the command. It stops the motors itself, but
+        // report the failure so that ros2_control deactivates the component
+        // instead of the loop carrying on as though the goal had been taken.
+        RCLCPP_ERROR(kLogger, "The StepIt controller rejected a velocity command.");
+        return hardware_interface::return_type::ERROR;
+      }
     }
     else if (std::any_of(joints_.cbegin(), joints_.cend(),
                          [](auto joint) { return joint.position_claimed && !std::isnan(joint.command.position); }))
@@ -395,7 +403,12 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
         }
       }
       PositionCommand command{ positions };
-      AcknowledgeResponse response = driver_->set_position(time, command);
+      const AcknowledgeResponse response = driver_->set_position(time, command);
+      if (response.status() != Response::Status::Success)
+      {
+        RCLCPP_ERROR(kLogger, "The StepIt controller rejected a position command.");
+        return hardware_interface::return_type::ERROR;
+      }
     }
     return hardware_interface::return_type::OK;
   }

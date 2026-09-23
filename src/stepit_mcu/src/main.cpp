@@ -58,7 +58,7 @@ constexpr char NAME[] = "STEPIT\0";
 // a controller it cannot understand says so instead of misreading the bytes.
 // Bump the minor and the patch number for anything else.
 constexpr byte VERSION_MAJOR = 1;
-constexpr byte VERSION_MINOR = 0;
+constexpr byte VERSION_MINOR = 1;
 constexpr byte VERSION_PATCH = 0;
 
 // The time between each execution of the run method.
@@ -255,6 +255,21 @@ void returnCommandError()
 }
 
 /**
+ * Bring every motor to rest by asking for a speed of zero. The ISR then
+ * decelerates them at their configured acceleration, which matters on an open
+ * loop stepper: cutting the motion dead would lose steps and the position
+ * reported afterwards would no longer be the real one.
+ */
+void stopAllMotors()
+{
+  Guard goalGuard{ writingMotorGoals };
+  for (byte i = 0; i < NUMBER_OF_MOTORS; i++)
+  {
+    motorGoal[i].setSpeed(0);
+  }
+}
+
+/**
  * When a Status command is received, send back the position of the motor (rad) and
  * its speed (rad/s).
  */
@@ -410,42 +425,60 @@ void configureCommand(DataBuffer* cmd)
  */
 void speedCommand(DataBuffer* cmd)
 {
-  // We expect at least 5 bytes (motorId, speed) or a multiple of 5.
-  if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
+  // We expect at least 5 bytes (motorId, speed) or a multiple of 5, and no
+  // more entries than there are motors to command.
+  const int size = cmd->getSize();
+  if (size < 5 || size % 5 != 0 || size / 5 > NUMBER_OF_MOTORS)
   {
+    stopAllMotors();
     returnCommandError();
     return;
   }
 
-  while (cmd->getSize() > 0)
+  const int count = size / 5;
+  byte ids[NUMBER_OF_MOTORS];
+  float speeds[NUMBER_OF_MOTORS];
+
+  // First pass: parse and validate every entry before touching a motor. A
+  // rejected packet must leave nothing half applied, and it stops the motors:
+  // the host is either confused about this machine or the link is corrupting
+  // bytes, and with no encoders a wrong goal is not detectable downstream.
+  for (int i = 0; i < count; i++)
   {
-    byte motorId = cmd->removeByte(BufferPosition::Head);
+    ids[i] = cmd->removeByte(BufferPosition::Head);
+    speeds[i] = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
+
     // Reject an id that does not name a physical motor: indexing the motor
     // arrays with it would run past the end.
-    if (motorId >= NUMBER_OF_MOTORS)
+    if (ids[i] >= NUMBER_OF_MOTORS)
     {
+      stopAllMotors();
       returnCommandError();
       return;
     }
-    float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
-    float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
+  }
 
-    // We move the stepper at a constant speed to the maximum or the minimum
-    // possible positions.
-    // LONG_MAX (0x7FFFFFFF) and LONG_MIN (-80000000) do not work, probably
-    // because of inner logic in the AccelStepper library, so we chose close
-    // enough values.
-
+  // Second pass: apply. We move the stepper at a constant speed to the
+  // maximum or the minimum possible positions.
+  // LONG_MAX (0x7FFFFFFF) and LONG_MIN (-80000000) do not work, probably
+  // because of inner logic in the AccelStepper library, so we chose close
+  // enough values.
+  {
     Guard writeGuard{ writingMotorGoals };
-    if (speed >= 0)
+    for (int i = 0; i < count; i++)
     {
-      motorGoal[motorId].setPosition(0x7F000000);  // Move to +infinity.
+      const byte motorId = ids[i];
+      const float speed = speeds[i];
+      if (speed >= 0)
+      {
+        motorGoal[motorId].setPosition(0x7F000000);  // Move to +infinity.
+      }
+      else
+      {
+        motorGoal[motorId].setPosition(-0x7F000000);  // Move to -infinity.
+      }
+      motorGoal[motorId].setSpeed(min(abs(speed), motorConfig[motorId].getMaxSpeed()));
     }
-    else
-    {
-      motorGoal[motorId].setPosition(-0x7F000000);  // Move to -infinity.
-    }
-    motorGoal[motorId].setSpeed(absSpeed);
   }
 
   returnCommandSuccess();
@@ -457,29 +490,46 @@ void speedCommand(DataBuffer* cmd)
  */
 void moveCommand(DataBuffer* cmd)
 {
-  // We expect at least 5 bytes (motorId, position) or a multiple of 5.
-  if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
+  // We expect at least 5 bytes (motorId, position) or a multiple of 5, and no
+  // more entries than there are motors to command.
+  const int size = cmd->getSize();
+  if (size < 5 || size % 5 != 0 || size / 5 > NUMBER_OF_MOTORS)
   {
+    stopAllMotors();
     returnCommandError();
     return;
   }
 
-  while (cmd->getSize() > 0)
+  const int count = size / 5;
+  byte ids[NUMBER_OF_MOTORS];
+  long positions[NUMBER_OF_MOTORS];
+
+  // First pass: parse and validate every entry before touching a motor, and
+  // stop the motors if anything is wrong. See speedCommand.
+  for (int i = 0; i < count; i++)
   {
-    byte motorId = cmd->removeByte(BufferPosition::Head);
+    ids[i] = cmd->removeByte(BufferPosition::Head);
+    positions[i] = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
+
     // Reject an id that does not name a physical motor: indexing the motor
     // arrays with it would run past the end.
-    if (motorId >= NUMBER_OF_MOTORS)
+    if (ids[i] >= NUMBER_OF_MOTORS)
     {
+      stopAllMotors();
       returnCommandError();
       return;
     }
-    long position = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
-    float speed = motorConfig[motorId].getMaxSpeed();
+  }
 
+  // Second pass: apply.
+  {
     Guard goalGuard{ writingMotorGoals };
-    motorGoal[motorId].setPosition(position);
-    motorGoal[motorId].setSpeed(speed);
+    for (int i = 0; i < count; i++)
+    {
+      const byte motorId = ids[i];
+      motorGoal[motorId].setPosition(positions[i]);
+      motorGoal[motorId].setSpeed(motorConfig[motorId].getMaxSpeed());
+    }
   }
   returnCommandSuccess();
 }
@@ -581,10 +631,6 @@ void loop()
     // serialPort.reset();
 
     // Stop all motors.
-    Guard goalGuard{ writingMotorGoals };
-    for (byte i = 0; i < NUMBER_OF_MOTORS; i++)
-    {
-      motorGoal[i].setSpeed(0);
-    }
+    stopAllMotors();
   }
 }
