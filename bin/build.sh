@@ -12,3 +12,15 @@ source /opt/ros/jazzy/setup.bash
 cd "$(dirname "$(readlink -f "$0")")/.."
 
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON --symlink-install --event-handlers log-
+
+# Hide the build artifacts from rosdep. colcon already writes a COLCON_IGNORE
+# into build/, but rosdep scans with rospkg, which only knows CATKIN_IGNORE:
+# without it, running the CI locally with Nektos act fails, because rosdep
+# walks into install/ and follows the dangling symbolic links that
+# --symlink-install leaves behind. See "How to run GitHub Actions locally" in
+# README.md.
+for directory in build install log; do
+    if [ -d "${directory}" ]; then
+        touch "${directory}/CATKIN_IGNORE"
+    fi
+done
