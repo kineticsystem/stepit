@@ -253,7 +253,31 @@ hardware_interface::CallbackReturn
 StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& previous_state)
 {
   RCLCPP_DEBUG(kLogger, "on_deactivate");
-  return hardware_interface::CallbackReturn::SUCCESS;
+  try
+  {
+    // Bring every motor to rest. The firmware keeps executing the last goal
+    // it received, and its watchdog does not fire while anything, the status
+    // queries included, keeps talking to it. A zero velocity decelerates at
+    // the configured acceleration rather than cutting the motion dead.
+    std::vector<VelocityGoal> stops;
+    for (auto& joint : joints_)
+    {
+      stops.emplace_back(VelocityGoal{ joint.id, 0.0 });
+      joint.stop_pending = false;
+    }
+    const AcknowledgeResponse response = driver_->set_velocity(rclcpp::Time{}, VelocityCommand{ stops });
+    if (response.status() != Response::Status::Success)
+    {
+      RCLCPP_ERROR(kLogger, "The StepIt controller rejected the command to stop the motors.");
+      return CallbackReturn::ERROR;
+    }
+    return CallbackReturn::SUCCESS;
+  }
+  catch (const std::exception& ex)
+  {
+    RCLCPP_ERROR(kLogger, "Cannot stop the motors: %s", ex.what());
+    return CallbackReturn::ERROR;
+  }
 }
 
 bool StepitHardware::joints_are_within_limits(const std::vector<MotorLimits>& limits) const
@@ -356,29 +380,48 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
 {
   try
   {
-    // A joint is only ever included below if its command interface is both
+    // A joint is only ever commanded below if its command interface is both
     // currently claimed by an active controller (velocity_claimed/
     // position_claimed, tracked by perform_command_mode_switch) AND holds a
     // real value. Requiring both, rather than just the claim, avoids ever
     // forwarding a transient NaN (e.g. the moment a controller activates but
     // hasn't written its first real command yet) down to the driver, since
     // the fake motor's kinematics latch onto whatever value they last saw.
-    if (std::any_of(joints_.cbegin(), joints_.cend(),
-                    [](auto joint) { return joint.velocity_claimed && !std::isnan(joint.command.velocity); }))
-    {
-      // Set velocities.
+    auto velocity_commanded = [](const Joint& joint) {
+      return joint.velocity_claimed && !std::isnan(joint.command.velocity);
+    };
+    auto position_commanded = [](const Joint& joint) {
+      return joint.position_claimed && !std::isnan(joint.command.position);
+    };
 
-      std::vector<VelocityGoal> velocities;
-      for (const auto& joint : joints_)
+    // Velocity commands take precedence: position goals are only sent when no
+    // joint is velocity controlled.
+    const bool velocity_mode = std::any_of(joints_.cbegin(), joints_.cend(), velocity_commanded);
+
+    std::vector<VelocityGoal> velocities;
+    std::vector<PositionGoal> positions;
+    for (const auto& joint : joints_)
+    {
+      if (velocity_commanded(joint))
       {
-        if (joint.velocity_claimed && !std::isnan(joint.command.velocity))
-        {
-          VelocityGoal velocity{ joint.id, joint.command.velocity };
-          velocities.push_back(velocity);
-        }
+        velocities.emplace_back(VelocityGoal{ joint.id, joint.command.velocity });
       }
-      VelocityCommand command{ velocities };
-      const AcknowledgeResponse response = driver_->set_velocity(time, command);
+      else if (!velocity_mode && position_commanded(joint))
+      {
+        positions.emplace_back(PositionGoal{ joint.id, joint.command.position });
+      }
+      else if (joint.stop_pending)
+      {
+        // A controller released this joint and nothing commands it now. The
+        // firmware would otherwise carry on with the last goal, so bring the
+        // motor to rest.
+        velocities.emplace_back(VelocityGoal{ joint.id, 0.0 });
+      }
+    }
+
+    if (!velocities.empty())
+    {
+      const AcknowledgeResponse response = driver_->set_velocity(time, VelocityCommand{ velocities });
       if (response.status() != Response::Status::Success)
       {
         // The controller refused the command. It stops the motors itself, but
@@ -388,27 +431,21 @@ hardware_interface::return_type StepitHardware::write(const rclcpp::Time& time,
         return hardware_interface::return_type::ERROR;
       }
     }
-    else if (std::any_of(joints_.cbegin(), joints_.cend(),
-                         [](auto joint) { return joint.position_claimed && !std::isnan(joint.command.position); }))
+    if (!positions.empty())
     {
-      // Set positions.
-
-      std::vector<PositionGoal> positions;
-      for (const auto& joint : joints_)
-      {
-        if (joint.position_claimed && !std::isnan(joint.command.position))
-        {
-          PositionGoal position{ joint.id, joint.command.position };
-          positions.push_back(position);
-        }
-      }
-      PositionCommand command{ positions };
-      const AcknowledgeResponse response = driver_->set_position(time, command);
+      const AcknowledgeResponse response = driver_->set_position(time, PositionCommand{ positions });
       if (response.status() != Response::Status::Success)
       {
         RCLCPP_ERROR(kLogger, "The StepIt controller rejected a position command.");
         return hardware_interface::return_type::ERROR;
       }
+    }
+
+    // Every joint marked for a stop has now either been stopped or received
+    // a goal from the controller that owns it.
+    for (auto& joint : joints_)
+    {
+      joint.stop_pending = false;
     }
     return hardware_interface::return_type::OK;
   }
@@ -442,6 +479,17 @@ StepitHardware::perform_command_mode_switch(const std::vector<std::string>& star
           else if (interface_type == hardware_interface::HW_IF_VELOCITY)
           {
             joints_[i].velocity_claimed = claimed;
+          }
+          else
+          {
+            break;
+          }
+          // The released controller's last goal is still running on the
+          // controller: have write() stop the motor unless another
+          // controller takes the joint over in the same cycle.
+          if (!claimed)
+          {
+            joints_[i].stop_pending = true;
           }
           break;
         }
