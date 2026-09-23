@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -138,10 +139,12 @@ public:
    * Updates each joint's position_claimed/velocity_claimed flags so write()
    * knows which command interfaces are currently owned by an active
    * controller. This is what lets write() stop honoring a joint's command
-   * once its owning controller has released the interface, even though the
-   * stale value is left sitting in joint.command (nothing resets it).
+   * once its owning controller has released the interface, even though its
+   * last value is left sitting in joint.command.
    * A joint whose interface is released is also marked for a stop, which
    * the next write() sends unless another controller is commanding it.
+   * A newly claimed interface has its command reset to NaN, so a controller
+   * never starts from the value a previous one left behind.
    * @param start_interfaces Names of the command interfaces newly claimed.
    * @param stop_interfaces Names of the command interfaces being released.
    * @returns hardware_interface::return_type::OK.
@@ -173,14 +176,20 @@ private:
     // NaN) before honoring a joint's command, so a controller that has
     // released an interface is ignored even though its last written value is
     // still sitting in `command` unchanged.
-    bool position_claimed = false;
-    bool velocity_claimed = false;
+    //
+    // These flags are atomic because the controller manager runs a switch
+    // requested from a service on that service's thread, while the realtime
+    // loop may be inside write().
+    std::atomic<bool> position_claimed{ false };
+    std::atomic<bool> velocity_claimed{ false };
 
     // Set by perform_command_mode_switch when a controller releases one of
     // this joint's command interfaces. The firmware keeps executing the last
     // goal it received, so write() sends a zero velocity for the joint unless
-    // another controller is already commanding it, then clears the flag.
-    bool stop_pending = false;
+    // another controller is already commanding it. write() takes the flag
+    // with an exchange, so a release arriving while it runs is kept for the
+    // next cycle rather than cleared unseen.
+    std::atomic<bool> stop_pending{ false };
   };
 
   // Store information about current joint states and targets.
