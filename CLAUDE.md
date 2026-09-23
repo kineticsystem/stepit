@@ -43,8 +43,11 @@ clang-format -i <file>                    # format a single C++ file
 **Launch the simulation:**
 ```bash
 source install/setup.bash
-ros2 launch stepit_description robot.launch.py
+ros2 launch robot_description robot.launch.py   # add launch_rviz:=false for headless
 ```
+
+Whether the fake or the real driver is used is set by `use_dummy` in
+`src/robot_description/urdf/stepit.ros2_control.xacro` (checked in as `true`, i.e. simulation).
 
 ## Architecture
 
@@ -57,10 +60,11 @@ The project is a ROS 2 workspace with two top-level directories:
 
 | Package | Role |
 |---|---|
-| `stepit_driver` | Core `ros2_control` hardware interface plugin (`StepitHardware`) |
-| `stepit_description` | URDF/xacro robot model, RViz config, controllers config, launch files |
-| `stepit_bringup` | Alternative bringup launch (hardware mode) |
-| `stepit_teleop` | Teleoperation node |
+| `stepit_hardware` | `ros2_control` hardware interface plugin (`StepitHardware`, exported as `stepit_driver/StepitHardware`) |
+| `stepit_driver` | `Driver` interface and implementations (`DefaultDriver`, `FakeDriver`) used by `StepitHardware` |
+| `robot_description` | URDF/xacro robot model, RViz config, controllers config, `robot.launch.py` |
+| `robot_bringup` | Top-level launch: includes `robot_description` and `robot_teleop` |
+| `robot_teleop` | Teleoperation node (joystick → `/velocity_controller/commands`) |
 | `stepit_hardware_tests` | Integration tests requiring real hardware |
 | `cobs_serial` | COBS-encoded serial communication library (ROS 2 package) |
 | `stepit_mcu` | PlatformIO project for Teensy firmware (not built by colcon) |
@@ -69,7 +73,7 @@ The project is a ROS 2 workspace with two top-level directories:
 
 - **`serial`** — Low-level cross-platform serial port C++ library (wjwwood/serial)
 
-### Key Design Pattern: `stepit_driver`
+### Key Design Pattern: `stepit_hardware` / `stepit_driver`
 
 `StepitHardware` (a `hardware_interface::SystemInterface` plugin) delegates all hardware communication to a `Driver` interface:
 
@@ -90,9 +94,9 @@ COBS encoding uses zero bytes as packet delimiters. The protocol carries typed r
 ### Testing Approach
 
 Tests use **GMock** (`ament_add_gmock`). Mocks live alongside tests:
-- `tests/mock/mock_cobs_serial.hpp` — mocks the serial layer for `test_default_driver`
-- `tests/mock/mock_driver.hpp` / `mock_driver_factory.hpp` — mock the driver for `test_stepit_hardware`
-- `tests/fake/fake_hardware_info.hpp` — constructs `HardwareInfo` for unit tests without a URDF
+- `src/stepit_driver/tests/mock/mock_cobs_serial.hpp` — mocks the serial layer for `test_default_driver`
+- `src/stepit_hardware/tests/mock/mock_driver.hpp` / `mock_driver_factory.hpp` — mock the driver for `test_stepit_hardware`
+- `src/stepit_hardware/tests/fake/fake_hardware_info.hpp` — constructs `HardwareInfo` for unit tests without a URDF
 
 ## Code Standards
 
