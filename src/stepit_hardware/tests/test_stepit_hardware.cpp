@@ -29,6 +29,8 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <map>
+#include <memory>
 #include <numeric>
 #include <string>
 #include <tuple>
@@ -1017,6 +1019,238 @@ TEST(TestStepitHardware, write_reports_a_rejected_position_command)
   const rclcpp::Time time;
   const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
   EXPECT_EQ(hardware_interface::return_type::ERROR, stepit_hardware->write(time, period));
+}
+
+/**
+ * Motion commands received by the driver of make_active_hardware().
+ */
+struct SentCommands
+{
+  std::vector<VelocityCommand> velocities;
+  std::vector<PositionCommand> positions;
+};
+
+/**
+ * Build, configure and activate a StepitHardware on FakeHardwareInfo, with a
+ * driver that records every motion command in sent and acknowledges it with
+ * the given status.
+ */
+std::unique_ptr<StepitHardware> make_active_hardware(SentCommands& sent,
+                                                     Response::Status ack = Response::Status::Success)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
+  ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
+  ON_CALL(*mock_driver, set_velocity(_, Matcher<const VelocityCommand&>(_)))
+      .WillByDefault([&sent, ack](const rclcpp::Time&, const VelocityCommand& command) {
+        sent.velocities.push_back(command);
+        return AcknowledgeResponse{ ack };
+      });
+  ON_CALL(*mock_driver, set_position(_, Matcher<const PositionCommand&>(_)))
+      .WillByDefault([&sent, ack](const rclcpp::Time&, const PositionCommand& command) {
+        sent.positions.push_back(command);
+        return AcknowledgeResponse{ ack };
+      });
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  EXPECT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  EXPECT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_configure(unconfigured));
+  rclcpp_lifecycle::State inactive{ lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+                                    hardware_interface::lifecycle_state_names::INACTIVE };
+  EXPECT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_activate(inactive));
+  return stepit_hardware;
+}
+
+/**
+ * The goals of a velocity command, by motor id.
+ */
+std::map<uint8_t, double> goals_of(const VelocityCommand& command)
+{
+  std::map<uint8_t, double> goals;
+  for (const auto& goal : command.goals())
+  {
+    goals[goal.motor_id()] = goal.velocity();
+  }
+  return goals;
+}
+
+const std::vector<std::string> kVelocityInterfaces = { "joint1/velocity", "joint2/velocity", "joint3/velocity",
+                                                       "joint4/velocity", "joint5/velocity" };
+const std::vector<std::string> kPositionInterfaces = { "joint1/position", "joint2/position", "joint3/position",
+                                                       "joint4/position", "joint5/position" };
+const std::map<uint8_t, double> kAllStopped = { { 0, 0.0 }, { 1, 0.0 }, { 2, 0.0 }, { 3, 0.0 }, { 4, 0.0 } };
+
+/**
+ * Deactivating the hardware must bring every motor to rest: the firmware
+ * keeps executing the last goal it received, and its watchdog does not fire
+ * while the status is being polled.
+ */
+TEST(TestStepitHardware, deactivate_stops_every_motor)
+{
+  SentCommands sent;
+  auto stepit_hardware = make_active_hardware(sent);
+  auto command_interfaces = stepit_hardware->on_export_command_interfaces();
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->perform_command_mode_switch(kVelocityInterfaces, {}));
+  std::ignore = command_interfaces[1]->set_value(0.5);
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  sent.velocities.clear();
+
+  rclcpp_lifecycle::State active{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                  hardware_interface::lifecycle_state_names::ACTIVE };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_deactivate(active));
+
+  ASSERT_EQ(1u, sent.velocities.size());
+  EXPECT_EQ(kAllStopped, goals_of(sent.velocities[0]));
+}
+
+/**
+ * A stop the controller refuses leaves the motors in an unknown state, so
+ * deactivation reports it.
+ */
+TEST(TestStepitHardware, deactivate_reports_a_rejected_stop)
+{
+  SentCommands sent;
+  auto stepit_hardware = make_active_hardware(sent, Response::Status::Failure);
+
+  rclcpp_lifecycle::State active{ lifecycle_msgs::msg::State::PRIMARY_STATE_ACTIVE,
+                                  hardware_interface::lifecycle_state_names::ACTIVE };
+  EXPECT_EQ(hardware_interface::CallbackReturn::ERROR, stepit_hardware->on_deactivate(active));
+}
+
+/**
+ * When a controller releases one joint, the next write stops that motor once
+ * and leaves the joints still under control alone.
+ */
+TEST(TestStepitHardware, releasing_a_velocity_interface_stops_the_motor)
+{
+  SentCommands sent;
+  auto stepit_hardware = make_active_hardware(sent);
+  auto command_interfaces = stepit_hardware->on_export_command_interfaces();
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->perform_command_mode_switch(kVelocityInterfaces, {}));
+  std::ignore = command_interfaces[1]->set_value(0.5);
+  std::ignore = command_interfaces[3]->set_value(0.75);
+  std::ignore = command_interfaces[5]->set_value(0.75);
+  std::ignore = command_interfaces[7]->set_value(0.75);
+  std::ignore = command_interfaces[9]->set_value(0.75);
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  sent.velocities.clear();
+
+  // Release joint1 only. Its last command, 0.5, stays in the interface.
+  ASSERT_EQ(hardware_interface::return_type::OK,
+            stepit_hardware->perform_command_mode_switch({}, { "joint1/velocity" }));
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  ASSERT_EQ(1u, sent.velocities.size());
+  const std::map<uint8_t, double> expected = { { 0, 0.0 }, { 1, 0.75 }, { 2, 0.75 }, { 3, 0.75 }, { 4, 0.75 } };
+  EXPECT_EQ(expected, goals_of(sent.velocities[0]));
+
+  // The stop is sent once: afterwards joint1 is left out.
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  ASSERT_EQ(2u, sent.velocities.size());
+  EXPECT_EQ(0u, goals_of(sent.velocities[1]).count(0));
+  EXPECT_EQ(4u, sent.velocities[1].goals().size());
+}
+
+/**
+ * When the only controller is deactivated, every motor is stopped even though
+ * no joint is commanded any more.
+ */
+TEST(TestStepitHardware, releasing_every_interface_stops_the_motors)
+{
+  SentCommands sent;
+  auto stepit_hardware = make_active_hardware(sent);
+  auto command_interfaces = stepit_hardware->on_export_command_interfaces();
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->perform_command_mode_switch(kVelocityInterfaces, {}));
+  std::ignore = command_interfaces[1]->set_value(0.5);
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  sent.velocities.clear();
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->perform_command_mode_switch({}, kVelocityInterfaces));
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  ASSERT_EQ(1u, sent.velocities.size());
+  EXPECT_EQ(kAllStopped, goals_of(sent.velocities[0]));
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  EXPECT_EQ(1u, sent.velocities.size());
+  EXPECT_TRUE(sent.positions.empty());
+}
+
+/**
+ * Switching from a velocity to a position controller that already commands
+ * the joints hands them over without stopping them first.
+ */
+TEST(TestStepitHardware, switching_to_a_commanding_controller_does_not_stop_the_motors)
+{
+  SentCommands sent;
+  auto stepit_hardware = make_active_hardware(sent);
+  auto command_interfaces = stepit_hardware->on_export_command_interfaces();
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->perform_command_mode_switch(kVelocityInterfaces, {}));
+  std::ignore = command_interfaces[1]->set_value(0.5);
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  sent.velocities.clear();
+
+  ASSERT_EQ(hardware_interface::return_type::OK,
+            stepit_hardware->perform_command_mode_switch(kPositionInterfaces, kVelocityInterfaces));
+  for (std::size_t i = 0; i < 10; i += 2)
+  {
+    std::ignore = command_interfaces[i]->set_value(1.0);
+  }
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  EXPECT_TRUE(sent.velocities.empty());
+  ASSERT_EQ(1u, sent.positions.size());
+  EXPECT_EQ(5u, sent.positions[0].goals().size());
+}
+
+/**
+ * A controller that claims the joints but has not written a goal yet leaves
+ * them uncommanded, so the motors are stopped rather than left running the
+ * released controller's last goal.
+ */
+TEST(TestStepitHardware, switching_to_a_silent_controller_stops_the_motors)
+{
+  SentCommands sent;
+  auto stepit_hardware = make_active_hardware(sent);
+  auto command_interfaces = stepit_hardware->on_export_command_interfaces();
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->perform_command_mode_switch(kVelocityInterfaces, {}));
+  std::ignore = command_interfaces[1]->set_value(0.5);
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  sent.velocities.clear();
+
+  // The position interfaces were never written, so they still hold NaN.
+  ASSERT_EQ(hardware_interface::return_type::OK,
+            stepit_hardware->perform_command_mode_switch(kPositionInterfaces, kVelocityInterfaces));
+
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->write(time, period));
+  ASSERT_EQ(1u, sent.velocities.size());
+  EXPECT_EQ(kAllStopped, goals_of(sent.velocities[0]));
+  EXPECT_TRUE(sent.positions.empty());
 }
 
 }  // namespace stepit_driver::test

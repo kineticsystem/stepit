@@ -112,7 +112,9 @@ public:
   STEPIT_HARDWARE_PUBLIC CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
   /**
-   * This method is invoked when the hardware is disconnected.
+   * This method is invoked when the hardware is deactivated. It brings every
+   * motor to rest: the firmware keeps executing the last goal it received,
+   * and its watchdog does not fire while read() keeps polling the status.
    * @param previous_state Unconfigured, Inactive, Active or Finalized.
    * @returns CallbackReturn::SUCCESS or CallbackReturn::ERROR.
    */
@@ -138,6 +140,8 @@ public:
    * controller. This is what lets write() stop honoring a joint's command
    * once its owning controller has released the interface, even though the
    * stale value is left sitting in joint.command (nothing resets it).
+   * A joint whose interface is released is also marked for a stop, which
+   * the next write() sends unless another controller is commanding it.
    * @param start_interfaces Names of the command interfaces newly claimed.
    * @param stop_interfaces Names of the command interfaces being released.
    * @returns hardware_interface::return_type::OK.
@@ -171,6 +175,12 @@ private:
     // still sitting in `command` unchanged.
     bool position_claimed = false;
     bool velocity_claimed = false;
+
+    // Set by perform_command_mode_switch when a controller releases one of
+    // this joint's command interfaces. The firmware keeps executing the last
+    // goal it received, so write() sends a zero velocity for the joint unless
+    // another controller is already commanding it, then clears the flag.
+    bool stop_pending = false;
   };
 
   // Store information about current joint states and targets.
