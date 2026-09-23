@@ -26,13 +26,18 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
+
 #include <stepit_driver/fake/fake_driver.hpp>
+#include <stepit_driver/hardware_limits.hpp>
 
 #include <rclcpp/rclcpp.hpp>
 
 namespace stepit_driver
 {
 const auto kLogger = rclcpp::get_logger("stepit_fake_driver");
+
+using hardware_limits::kTolerance;
 
 bool FakeDriver::connect()
 {
@@ -45,12 +50,40 @@ void FakeDriver::disconnect()
 
 AcknowledgeResponse FakeDriver::configure(const ConfigCommand& command) const
 {
+  // Validate everything before creating any motor, mirroring the firmware:
+  // a configuration the real controller refuses has to fail here too, or a
+  // robot description that works in simulation will fail to activate the
+  // moment it runs on hardware. The comparisons reject a NaN as well; a non
+  // positive acceleration would also divide by zero in the kinematics.
+  for (const auto& param : command.params())
+  {
+    if (param.motor_id() >= hardware_limits::kMotorCount)
+    {
+      RCLCPP_ERROR(kLogger, "Motor id %d does not exist: the controller drives %zu motors.", param.motor_id(),
+                   hardware_limits::kMotorCount);
+      return AcknowledgeResponse{ Response::Status::Failure };
+    }
+    if (!(param.acceleration() > 0.0) || param.acceleration() > hardware_limits::kMaxAcceleration * kTolerance)
+    {
+      RCLCPP_ERROR(kLogger, "Motor %d: acceleration %f rad/s^2 is not in (0, %f].", param.motor_id(),
+                   param.acceleration(), hardware_limits::kMaxAcceleration);
+      return AcknowledgeResponse{ Response::Status::Failure };
+    }
+    if (!(param.max_velocity() > 0.0) || param.max_velocity() > hardware_limits::kMaxVelocity * kTolerance)
+    {
+      RCLCPP_ERROR(kLogger, "Motor %d: max velocity %f rad/s is not in (0, %f].", param.motor_id(),
+                   param.max_velocity(), hardware_limits::kMaxVelocity);
+      return AcknowledgeResponse{ Response::Status::Failure };
+    }
+  }
+
   motors_.clear();
   for (const auto& param : command.params())
   {
     FakeMotor motor;
-    motor.set_acceleration(param.acceleration());
-    motor.set_max_velocity(param.max_velocity());
+    // Within tolerance of a limit: keep the limit itself, as the firmware does.
+    motor.set_acceleration(std::min(param.acceleration(), hardware_limits::kMaxAcceleration));
+    motor.set_max_velocity(std::min(param.max_velocity(), hardware_limits::kMaxVelocity));
     motors_.insert({ param.motor_id(), motor });
   }
 
@@ -64,12 +97,11 @@ AcknowledgeResponse FakeDriver::set_position(const rclcpp::Time& time, const Pos
     auto it = motors_.find(goal.motor_id());
     if (it == motors_.end())
     {
-      RCLCPP_ERROR(kLogger, "Motor id does not exist.");
+      // The firmware rejects the whole command in this case, so do the same.
+      RCLCPP_ERROR(kLogger, "Motor id %d does not exist.", goal.motor_id());
+      return AcknowledgeResponse{ Response::Status::Failure };
     }
-    else
-    {
-      it->second.set_target_position(time, goal.position());
-    }
+    it->second.set_target_position(time, goal.position());
   }
   return AcknowledgeResponse{ Response::Status::Success };
 }
@@ -81,12 +113,11 @@ AcknowledgeResponse FakeDriver::set_velocity(const rclcpp::Time& time, const Vel
     auto it = motors_.find(goal.motor_id());
     if (it == motors_.end())
     {
-      RCLCPP_ERROR(kLogger, "Motor id does not exist.");
+      // The firmware rejects the whole command in this case, so do the same.
+      RCLCPP_ERROR(kLogger, "Motor id %d does not exist.", goal.motor_id());
+      return AcknowledgeResponse{ Response::Status::Failure };
     }
-    else
-    {
-      it->second.set_target_velocity(time, goal.velocity());
-    }
+    it->second.set_target_velocity(time, goal.velocity());
   }
   return AcknowledgeResponse{ Response::Status::Success };
 }
@@ -107,6 +138,15 @@ StatusResponse FakeDriver::get_status(const rclcpp::Time& time) const
 
 InfoResponse FakeDriver::get_info([[maybe_unused]] const rclcpp::Time& time) const
 {
-  return InfoResponse(Response::Status::Success, "STEPIT");
+  // Report the same limits the validation above enforces, so that a host
+  // asking the simulated controller what it can do gets the same answer the
+  // real one would give.
+  std::vector<MotorLimits> limits;
+  for (std::size_t id = 0; id < hardware_limits::kMotorCount; ++id)
+  {
+    limits.emplace_back(
+        MotorLimits{ static_cast<uint8_t>(id), hardware_limits::kMaxAcceleration, hardware_limits::kMaxVelocity });
+  }
+  return InfoResponse(Response::Status::Success, "STEPIT", hardware_limits::kFirmwareVersion, limits);
 }
 }  // namespace stepit_driver

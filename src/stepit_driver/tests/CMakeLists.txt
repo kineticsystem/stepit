@@ -24,6 +24,16 @@ target_include_directories(test_default_driver
 target_link_libraries(test_default_driver stepit_driver)
 
 ###############################################################################
+# test_fake_driver
+
+ament_add_gmock(test_fake_driver
+    test_fake_driver.cpp
+)
+target_include_directories(test_fake_driver
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(test_fake_driver stepit_driver)
+
 # test_fake_motor
 
 ament_add_gmock(test_fake_motor

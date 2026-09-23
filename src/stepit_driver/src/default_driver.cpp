@@ -50,6 +50,11 @@ constexpr uint8_t kMaxConnectionTrials = 5;
 // Name reported by the firmware in response to an info query.
 constexpr auto kExpectedControllerName = "STEPIT";
 
+// Major version of the protocol this driver speaks. A controller reporting a
+// different one lays its packets out differently, so its bytes cannot be
+// trusted: see VERSION_MAJOR in src/stepit_mcu/src/main.cpp.
+constexpr uint8_t kExpectedProtocolVersion = 1;
+
 using cobs_serial::data_utils::from_float;
 using cobs_serial::data_utils::to_float;
 using cobs_serial::data_utils::to_hex;
@@ -86,9 +91,18 @@ bool DefaultDriver::connect()
                      response.info().c_str());
         break;
       }
+      if (response.version().major() != kExpectedProtocolVersion)
+      {
+        RCLCPP_ERROR(kLogger,
+                     "The StepIt controller runs firmware %s, which speaks version %d of the protocol; this driver "
+                     "speaks version %d. Flash the firmware that matches this workspace.",
+                     response.version().to_string().c_str(), response.version().major(), kExpectedProtocolVersion);
+        break;
+      }
 
       connected = true;
-      RCLCPP_INFO(kLogger, "Connection established with %s controller.", response.info().c_str());
+      RCLCPP_INFO(kLogger, "Connection established with %s controller, firmware %s.", response.info().c_str(),
+                  response.version().to_string().c_str());
     }
     catch (const std::exception& ex)
     {
@@ -229,19 +243,45 @@ InfoResponse DefaultDriver::get_info(const rclcpp::Time&) const
   // The data array contains the following information.
   //
   // status               - 1 byte
+  // version              - 3 bytes: major, minor and patch
+  // motor count          - 1 byte
+  // for each motor:
+  //     motor ID             - 1 byte
+  //     max acceleration     - 4 bytes
+  //     max velocity         - 4 bytes
   // a variable number of bytes representing a string in ASCII format - N bytes
+
+  constexpr std::size_t kBytesPerMotor = 9;
+
+  if (out.size() < 5)
+  {
+    throw std::runtime_error("Info response is too short.");
+  }
 
   std::size_t i = 0;
   Response::Status status{ out[i++] };
-  std::vector<uint8_t> data;
-  while (i < out.size())
+  const Version version{ out[i], out[i + 1], out[i + 2] };
+  i += 3;
+  const std::size_t motor_count = out[i++];
+
+  if (out.size() < i + motor_count * kBytesPerMotor)
   {
-    uint8_t ch = out[i++];
-    data.push_back(ch);
+    throw std::runtime_error("Info response does not contain the limits of every motor.");
   }
 
-  std::string info{ data.begin(), data.end() };
-  InfoResponse response{ status, info };
+  std::vector<MotorLimits> limits;
+  for (std::size_t motor = 0; motor < motor_count; ++motor)
+  {
+    uint8_t id = out[i++];
+    double max_acceleration = to_float({ out[i], out[i + 1], out[i + 2], out[i + 3] });
+    i += 4;
+    double max_velocity = to_float({ out[i], out[i + 1], out[i + 2], out[i + 3] });
+    i += 4;
+    limits.emplace_back(MotorLimits{ id, max_acceleration, max_velocity });
+  }
+
+  std::string info{ out.begin() + static_cast<std::ptrdiff_t>(i), out.end() };
+  InfoResponse response{ status, info, version, limits };
   return response;
 }
 }  // namespace stepit_driver

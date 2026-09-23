@@ -51,6 +51,16 @@ constexpr long STEPS_IN_ONE_ROTATION = 3200;
 // This is the information sent by Arduino during the connection handshake.
 constexpr char NAME[] = "STEPIT\0";
 
+// Firmware version, reported during the connection handshake.
+//
+// The major number is the wire compatibility of the protocol: bump it when
+// the layout of a request or a response changes, so that a driver talking to
+// a controller it cannot understand says so instead of misreading the bytes.
+// Bump the minor and the patch number for anything else.
+constexpr byte VERSION_MAJOR = 1;
+constexpr byte VERSION_MINOR = 0;
+constexpr byte VERSION_PATCH = 0;
+
 // The time between each execution of the run method.
 // If the interval is too large the motors will lose steps.
 // If the interval is too small the serial communication will be impacted.
@@ -92,12 +102,24 @@ std::array<AccelStepper, NUMBER_OF_MOTORS> stepper = {
   AccelStepper{ AccelStepper::DRIVER, STEPPER_STEP_PINS[4], STEPPER_DIR_PINS[4] }
 };
 
-// Stepper motors configuration:
-// acceleration (2 rotations per square second)
-// max speed (3 rotations per second)
-std::array<MotorConfig, NUMBER_OF_MOTORS> motorConfig = { MotorConfig{ 6400.0, 9600 }, MotorConfig{ 6400.0, 9600 },
-                                                          MotorConfig{ 6400.0, 9600 }, MotorConfig{ 6400.0, 9600 },
-                                                          MotorConfig{ 6400.0, 9600 } };
+// Limits of this board, found empirically: beyond these the motors lose steps
+// and, being open loop, silently drift from the position they report. The host
+// may configure anything up to them, never above.
+constexpr float MAX_ACCELERATION = 6400.0;  // 2 rotations per square second
+constexpr float MAX_SPEED = 9600.0;         // 3 rotations per second
+
+// Tolerance applied when checking a configured value against the limits above.
+// A host that asks for exactly the limit sends it in radians, and the round
+// trip through radiansToSteps() can land a hair above it.
+constexpr float CONFIG_TOLERANCE = 1.001;
+
+// Stepper motors configuration. Starts at the limits and is replaced by
+// whatever the host configures.
+std::array<MotorConfig, NUMBER_OF_MOTORS> motorConfig = { MotorConfig{ MAX_ACCELERATION, MAX_SPEED },
+                                                          MotorConfig{ MAX_ACCELERATION, MAX_SPEED },
+                                                          MotorConfig{ MAX_ACCELERATION, MAX_SPEED },
+                                                          MotorConfig{ MAX_ACCELERATION, MAX_SPEED },
+                                                          MotorConfig{ MAX_ACCELERATION, MAX_SPEED } };
 
 // This structure holds motor goals: the main thread updates the goal and the
 // ISR reads it.
@@ -254,11 +276,39 @@ void returnStatus()
 
 /**
  * Send information about the software installed on Arduino to help the client
- * identify the correct port where Arduino is connected.
+ * identify the correct port where Arduino is connected, together with the
+ * motion limits of each motor.
+ *
+ * The response carries the limits before the name so that the name stays what
+ * it has always been, the remaining bytes of the packet:
+ *
+ *   status        - 1 byte
+ *   version       - 3 bytes: major, minor and patch
+ *   motor count   - 1 byte
+ *   per motor     - id (1 byte), max acceleration (4 bytes), max speed (4
+ *                   bytes), both in rad/s^2 and rad/s
+ *   name          - the remaining bytes, in ASCII
+ *
+ * The controller is the authority on the limits: the host cannot know what
+ * these motors tolerate, and an open loop stepper pushed beyond them loses
+ * steps without anything noticing.
  */
 void returnControllerInfo()
 {
   responseBuffer.addByte(SUCCESS_MSG, BufferPosition::Tail);
+  responseBuffer.addByte(VERSION_MAJOR, BufferPosition::Tail);
+  responseBuffer.addByte(VERSION_MINOR, BufferPosition::Tail);
+  responseBuffer.addByte(VERSION_PATCH, BufferPosition::Tail);
+  responseBuffer.addByte(NUMBER_OF_MOTORS, BufferPosition::Tail);
+  for (byte i = 0; i < NUMBER_OF_MOTORS; i++)
+  {
+    // Reported per motor although the limits are the same for all of them
+    // today, so that motors with different mechanics can report different
+    // limits without changing the protocol.
+    responseBuffer.addByte(i, BufferPosition::Tail);
+    responseBuffer.addFloat(stepsToRadians(MAX_ACCELERATION), BufferPosition::Tail);
+    responseBuffer.addFloat(stepsToRadians(MAX_SPEED), BufferPosition::Tail);
+  }
   for (int i = 0; NAME[i] != '\0'; i++)
   {
     responseBuffer.addByte(NAME[i], BufferPosition::Tail);
@@ -273,7 +323,7 @@ void returnControllerInfo()
 void setMotorsEnabled(DataBuffer* cmd)
 {
   byte enabled = cmd->removeByte(BufferPosition::Head);
-  if (enabled == 0)
+  if (enabled != 0)
   {
     timer.begin(run, INTERRUPT_TIME_US);
   }
@@ -290,19 +340,66 @@ void setMotorsEnabled(DataBuffer* cmd)
  */
 void configureCommand(DataBuffer* cmd)
 {
-  // We expect at least 9 bytes (motorId, speed) or a multiple of 9.
-  if (cmd->getSize() < 9 || cmd->getSize() % 9 != 0)
+  // We expect at least 9 bytes (motorId, acceleration, max speed) or a
+  // multiple of 9, and no more entries than there are motors to configure.
+  const int size = cmd->getSize();
+  if (size < 9 || size % 9 != 0 || size / 9 > NUMBER_OF_MOTORS)
   {
     returnCommandError();
-  };
+    return;
+  }
 
-  while (cmd->getSize() > 0)
+  const int count = size / 9;
+  byte ids[NUMBER_OF_MOTORS];
+  float accelerations[NUMBER_OF_MOTORS];
+  float maxSpeeds[NUMBER_OF_MOTORS];
+
+  // First pass: parse and validate every entry before touching a motor, so a
+  // bad entry cannot leave the motors half configured.
+  for (int i = 0; i < count; i++)
   {
-    byte motorId = cmd->removeByte(BufferPosition::Head);
-    float acceleration = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
-    float max_speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
+    ids[i] = cmd->removeByte(BufferPosition::Head);
+    accelerations[i] = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
+    maxSpeeds[i] = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
 
-    // TODO: do something.
+    // Reject an id that does not name a physical motor: indexing the motor
+    // arrays with it would run past the end.
+    if (ids[i] >= NUMBER_OF_MOTORS)
+    {
+      returnCommandError();
+      return;
+    }
+
+    // Configuration happens once at start up, so a value this board cannot
+    // deliver is reported as an error rather than quietly reduced: the host
+    // would otherwise plan motions the hardware never performs and, with no
+    // encoders, never notice. Speed commands issued while running still clamp
+    // (see speedCommand): failing a control cycle is worse than slowing it.
+    // The comparisons reject a NaN too.
+    if (!(accelerations[i] > 0.0f) || accelerations[i] > MAX_ACCELERATION * CONFIG_TOLERANCE ||
+        !(maxSpeeds[i] > 0.0f) || maxSpeeds[i] > MAX_SPEED * CONFIG_TOLERANCE)
+    {
+      returnCommandError();
+      return;
+    }
+
+    // Within tolerance of the limit: keep the limit itself.
+    accelerations[i] = min(accelerations[i], MAX_ACCELERATION);
+    maxSpeeds[i] = min(maxSpeeds[i], MAX_SPEED);
+  }
+
+  // Second pass: apply. The ISR writes the stepper maximum speed too, so hold
+  // the goals guard while updating it.
+  {
+    Guard goalGuard{ writingMotorGoals };
+    for (int i = 0; i < count; i++)
+    {
+      const byte motorId = ids[i];
+      motorConfig[motorId] = MotorConfig{ accelerations[i], maxSpeeds[i] };
+      stepper[motorId].setAcceleration(accelerations[i]);
+      stepper[motorId].setMaxSpeed(maxSpeeds[i]);
+      motorGoal[motorId].setSpeed(maxSpeeds[i]);
+    }
   }
   returnCommandSuccess();
 }
@@ -317,11 +414,19 @@ void speedCommand(DataBuffer* cmd)
   if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
   {
     returnCommandError();
-  };
+    return;
+  }
 
   while (cmd->getSize() > 0)
   {
     byte motorId = cmd->removeByte(BufferPosition::Head);
+    // Reject an id that does not name a physical motor: indexing the motor
+    // arrays with it would run past the end.
+    if (motorId >= NUMBER_OF_MOTORS)
+    {
+      returnCommandError();
+      return;
+    }
     float speed = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
     float absSpeed = min(abs(speed), motorConfig[motorId].getMaxSpeed());
 
@@ -356,11 +461,19 @@ void moveCommand(DataBuffer* cmd)
   if (cmd->getSize() < 5 || cmd->getSize() % 5 != 0)
   {
     returnCommandError();
-  };
+    return;
+  }
 
   while (cmd->getSize() > 0)
   {
     byte motorId = cmd->removeByte(BufferPosition::Head);
+    // Reject an id that does not name a physical motor: indexing the motor
+    // arrays with it would run past the end.
+    if (motorId >= NUMBER_OF_MOTORS)
+    {
+      returnCommandError();
+      return;
+    }
     long position = radiansToSteps(cmd->removeFloat(BufferPosition::Head));
     float speed = motorConfig[motorId].getMaxSpeed();
 

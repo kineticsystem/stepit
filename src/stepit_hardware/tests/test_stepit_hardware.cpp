@@ -29,6 +29,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <numeric>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -58,6 +59,20 @@ using ::testing::Return;
 using ::testing::SaveArg;
 
 /**
+ * The info response of a controller reporting the limits FakeHardwareInfo
+ * declares, which is what a healthy handshake returns.
+ */
+InfoResponse handshake_info(double max_acceleration = 12.5663706143592, double max_velocity = 18.8495559215388)
+{
+  std::vector<MotorLimits> limits;
+  for (uint8_t id = 0; id < 5; id++)
+  {
+    limits.emplace_back(MotorLimits{ id, max_acceleration, max_velocity });
+  }
+  return InfoResponse{ Response::Status::Success, "STEPIT", Version{ 1, 0, 0 }, limits };
+}
+
+/**
  * A successful status response with as many motors as the joints declared
  * in FakeHardwareInfo, as returned by the controller during the handshake.
  */
@@ -75,6 +90,40 @@ StatusResponse handshake_status()
       }
   };
   // clang-format on
+}
+
+/**
+ * Build a minimal HardwareInfo with one joint per entry in ids, so tests can
+ * exercise custom motor-id assignments (e.g. a shuffled 0..N-1 order or an
+ * out-of-range id).
+ */
+hardware_interface::HardwareInfo make_hardware_info(const std::vector<int>& ids)
+{
+  hardware_interface::HardwareInfo info;
+  info.name = "StepitHardware";
+  info.type = "system";
+  info.hardware_plugin_name = "stepit_driver/StepitHardware";
+  info.hardware_parameters = {
+    { "usb_port", "/dev/ttyUSB0" },
+    { "baud_rate", "9600" },
+    { "timeout", "0.5" },
+    { "use_dummy", "true" },
+  };
+  for (std::size_t i = 0; i < ids.size(); i++)
+  {
+    hardware_interface::ComponentInfo joint;
+    joint.name = "joint" + std::to_string(i + 1);
+    joint.type = "joint";
+    hardware_interface::InterfaceInfo pos{ .name = "position", .size = 0, .parameters = {}, .enable_limits = false };
+    hardware_interface::InterfaceInfo vel{ .name = "velocity", .size = 0, .parameters = {}, .enable_limits = false };
+    joint.command_interfaces = { pos, vel };
+    joint.state_interfaces = { pos, vel };
+    joint.parameters = { { "id", std::to_string(ids[i]) },
+                         { "acceleration", "3.14159" },
+                         { "max_velocity", "6.28319" } };
+    info.joints.emplace_back(joint);
+  }
+  return info;
 }
 
 /**
@@ -229,6 +278,7 @@ TEST(TestStepitHardware, read_status)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_driver, get_status(_)).Times(2).WillRepeatedly(Return(mocked_response));
@@ -296,6 +346,7 @@ TEST(TestStepitHardware, write_velocities)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
   ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
@@ -380,6 +431,7 @@ TEST(TestStepitHardware, write_positions)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
   ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
@@ -466,6 +518,7 @@ TEST(TestStepitHardware, configuration)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
   ON_CALL(*mock_driver, get_status(_)).WillByDefault(Return(handshake_status()));
   EXPECT_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillOnce(DoAll(SaveArg<0>(&actual_request), Return(mocked_response)));
@@ -514,6 +567,7 @@ TEST(TestStepitHardware, configure_fails_when_not_connected)
 {
   auto mock_driver = std::make_unique<MockDriver>();
   EXPECT_CALL(*mock_driver, connect()).WillOnce(Return(false));
+  EXPECT_CALL(*mock_driver, get_info(_)).Times(0);
   EXPECT_CALL(*mock_driver, get_status(_)).Times(0);
   EXPECT_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_))).Times(0);
   auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
@@ -540,6 +594,7 @@ TEST(TestStepitHardware, configure_fails_when_status_fails)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_driver, get_status(_)).WillOnce(Return(mocked_response));
@@ -574,6 +629,7 @@ TEST(TestStepitHardware, configure_fails_on_motor_count_mismatch)
 
   auto mock_driver = std::make_unique<MockDriver>();
   ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
   ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
       .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
   EXPECT_CALL(*mock_driver, get_status(_)).WillOnce(Return(mocked_response));
@@ -588,6 +644,296 @@ TEST(TestStepitHardware, configure_fails_on_motor_count_mismatch)
   rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
                                         hardware_interface::lifecycle_state_names::UNCONFIGURED };
   ASSERT_EQ(hardware_interface::CallbackReturn::FAILURE, stepit_hardware->on_configure(unconfigured));
+}
+
+/**
+ * In this test the handshake sees a valid set of motors, but a later read()
+ * reports an id that is not one of the configured joints. The motor count
+ * still matches, so only the id-range check can catch this; indexing joints_
+ * with such an id would run past the end of the vector.
+ */
+TEST(TestStepitHardware, read_fails_on_out_of_range_motor_id)
+{
+  // clang-format off
+  const StatusResponse bad_status{
+      Response::Status::Success,
+      {
+          MotorState{ 0, 0, 0, 0 },
+          MotorState{ 1, 0, 0, 0 },
+          MotorState{ 2, 0, 0, 0 },
+          MotorState{ 3, 0, 0, 0 },
+          MotorState{ 99, 0, 0, 0 }  // id 99 is not a configured joint
+      }
+  };
+  // clang-format on
+
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
+  EXPECT_CALL(*mock_driver, get_status(_))
+      .WillOnce(Return(handshake_status()))  // on_configure handshake
+      .WillOnce(Return(bad_status));         // read()
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_configure(unconfigured));
+  rclcpp_lifecycle::State inactive{ lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+                                    hardware_interface::lifecycle_state_names::INACTIVE };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_activate(inactive));
+
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  EXPECT_EQ(hardware_interface::return_type::ERROR, stepit_hardware->read(time, period));
+}
+
+/**
+ * In this test a later read() reports one id twice and omits another, while
+ * the motor count still matches. Without a uniqueness check the duplicated id
+ * would overwrite one joint and leave the omitted joint stale.
+ */
+TEST(TestStepitHardware, read_fails_on_duplicate_motor_id)
+{
+  // clang-format off
+  const StatusResponse bad_status{
+      Response::Status::Success,
+      {
+          MotorState{ 0, 0, 0, 0 },
+          MotorState{ 0, 0, 0, 0 },  // id 0 reported twice
+          MotorState{ 2, 0, 0, 0 },
+          MotorState{ 3, 0, 0, 0 },
+          MotorState{ 4, 0, 0, 0 }   // id 1 never reported
+      }
+  };
+  // clang-format on
+
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
+  EXPECT_CALL(*mock_driver, get_status(_))
+      .WillOnce(Return(handshake_status()))  // on_configure handshake
+      .WillOnce(Return(bad_status));         // read()
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_configure(unconfigured));
+  rclcpp_lifecycle::State inactive{ lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+                                    hardware_interface::lifecycle_state_names::INACTIVE };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_activate(inactive));
+
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  EXPECT_EQ(hardware_interface::return_type::ERROR, stepit_hardware->read(time, period));
+}
+
+/**
+ * In this test the joints are configured with a shuffled 0..N-1 id order (a
+ * real hardware scenario: the controller reports ids 0..N-1 but a joint may
+ * own any of them) and the status reports them out of order. read() must
+ * route each state to the joint that owns the id, not to the id's position in
+ * the reported list.
+ */
+TEST(TestStepitHardware, read_routes_states_by_configured_id)
+{
+  // clang-format off
+  const StatusResponse mocked_response{
+      Response::Status::Success,
+      {
+          MotorState{ 3, 4000, 0.5, 0 },
+          MotorState{ 0, 1000, 0.5, 0 },
+          MotorState{ 4, 5000, 0.5, 0 },
+          MotorState{ 1, 2000, 0.5, 0 },
+          MotorState{ 2, 3000, 0.5, 0 }
+      }
+  };
+  // clang-format on
+
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  ON_CALL(*mock_driver, get_info(_)).WillByDefault(Return(handshake_info()));
+  ON_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_)))
+      .WillByDefault(Return(AcknowledgeResponse{ Response::Status::Success }));
+  EXPECT_CALL(*mock_driver, get_status(_)).Times(2).WillRepeatedly(Return(mocked_response));
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = make_hardware_info({ 2, 0, 4, 1, 3 });
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  auto state_interfaces = stepit_hardware->on_export_state_interfaces();
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_configure(unconfigured));
+  rclcpp_lifecycle::State inactive{ lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE,
+                                    hardware_interface::lifecycle_state_names::INACTIVE };
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_activate(inactive));
+
+  const rclcpp::Time time;
+  const rclcpp::Duration period = rclcpp::Duration::from_seconds(0);
+  ASSERT_EQ(hardware_interface::return_type::OK, stepit_hardware->read(time, period));
+
+  // Each joint holds the position of the motor whose id it was configured with.
+  ASSERT_EQ(3000, state_interfaces[0]->get_optional().value());  // joint1 (id 2)
+  ASSERT_EQ(1000, state_interfaces[2]->get_optional().value());  // joint2 (id 0)
+  ASSERT_EQ(5000, state_interfaces[4]->get_optional().value());  // joint3 (id 4)
+  ASSERT_EQ(2000, state_interfaces[6]->get_optional().value());  // joint4 (id 1)
+  ASSERT_EQ(4000, state_interfaces[8]->get_optional().value());  // joint5 (id 3)
+}
+
+/**
+ * In this test the URDF declares a motor id outside the 0..N-1 range the
+ * controller can report. on_init() must reject it with a clear error before
+ * the hardware is ever opened, rather than failing later at configure time.
+ */
+TEST(TestStepitHardware, init_fails_on_out_of_range_motor_id)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  // 5 joints, but the last has id 5 which is out of range [0, 4].
+  init_params.hardware_info = make_hardware_info({ 0, 1, 2, 3, 5 });
+  EXPECT_EQ(hardware_interface::CallbackReturn::ERROR, stepit_hardware->on_init(init_params));
+}
+
+/**
+ * In this test on_init() is called twice on the same instance. The derived
+ * id-to-joint mapping must be rebuilt from scratch: were it kept, every
+ * configured id would look like a duplicate of itself on the second call.
+ */
+TEST(TestStepitHardware, init_can_run_twice)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+  EXPECT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+}
+
+/**
+ * In this test the URDF declares an acceleration above what the controller
+ * reports it tolerates. Configuration must fail before anything is sent to
+ * the hardware: an open loop stepper pushed beyond its limit loses steps
+ * without anything noticing.
+ */
+TEST(TestStepitHardware, configure_fails_when_a_joint_exceeds_the_reported_limits)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  // FakeHardwareInfo declares acceleration 3.14159, so report half of it.
+  EXPECT_CALL(*mock_driver, get_info(_)).WillOnce(Return(handshake_info(3.14159 / 2)));
+  EXPECT_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_))).Times(0);
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::FAILURE, stepit_hardware->on_configure(unconfigured));
+}
+
+/**
+ * In this test the controller reports no limits for one of the configured
+ * motors, so the description cannot be checked against anything.
+ */
+TEST(TestStepitHardware, configure_fails_when_a_joint_has_no_reported_limits)
+{
+  // Limits for two motors only, while five joints are configured.
+  const InfoResponse partial{ Response::Status::Success,
+                              "STEPIT",
+                              Version{ 1, 0, 0 },
+                              { MotorLimits{ 0, 12.5663706143592, 18.8495559215388 },
+                                MotorLimits{ 1, 12.5663706143592, 18.8495559215388 } } };
+
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  EXPECT_CALL(*mock_driver, get_info(_)).WillOnce(Return(partial));
+  EXPECT_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_))).Times(0);
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::FAILURE, stepit_hardware->on_configure(unconfigured));
+}
+
+/**
+ * In this test the controller fails to report its limits at all.
+ */
+TEST(TestStepitHardware, configure_fails_when_limits_cannot_be_read)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  ON_CALL(*mock_driver, connect()).WillByDefault(Return(true));
+  EXPECT_CALL(*mock_driver, get_info(_)).WillOnce(Return(InfoResponse{ Response::Status::Failure, "", Version{}, {} }));
+  EXPECT_CALL(*mock_driver, configure(Matcher<const ConfigCommand&>(_))).Times(0);
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = FakeHardwareInfo{};
+  ASSERT_EQ(hardware_interface::CallbackReturn::SUCCESS, stepit_hardware->on_init(init_params));
+
+  rclcpp_lifecycle::State unconfigured{ lifecycle_msgs::msg::State::PRIMARY_STATE_UNCONFIGURED,
+                                        hardware_interface::lifecycle_state_names::UNCONFIGURED };
+  ASSERT_EQ(hardware_interface::CallbackReturn::FAILURE, stepit_hardware->on_configure(unconfigured));
+}
+
+/**
+ * In this test the URDF declares more joints than motor_states_are_valid()
+ * can track in its bitmask. on_init() must reject it rather than shift past
+ * the width of the mask.
+ */
+TEST(TestStepitHardware, init_fails_beyond_the_supported_joint_count)
+{
+  auto mock_driver = std::make_unique<MockDriver>();
+  auto mock_driver_factory = std::make_unique<MockDriverFactory>(std::move(mock_driver));
+
+  auto stepit_hardware = std::make_unique<stepit_driver::StepitHardware>(std::move(mock_driver_factory));
+
+  // 33 joints with ids 0..32: every id is in range and unique, so only the
+  // bitmask bound can reject this.
+  std::vector<int> ids(33);
+  std::iota(ids.begin(), ids.end(), 0);
+
+  hardware_interface::HardwareComponentInterfaceParams init_params;
+  init_params.hardware_info = make_hardware_info(ids);
+  EXPECT_EQ(hardware_interface::CallbackReturn::ERROR, stepit_hardware->on_init(init_params));
 }
 
 }  // namespace stepit_driver::test

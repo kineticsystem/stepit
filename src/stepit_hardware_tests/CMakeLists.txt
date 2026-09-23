@@ -39,4 +39,11 @@ add_executable(get_status
 )
 ament_target_dependencies(get_status stepit_driver cobs_serial)
 
+add_executable(get_info
+    src/get_info.cpp
+    src/command_line_utility.hpp
+    src/command_line_utility.cpp
+)
+ament_target_dependencies(get_info stepit_driver cobs_serial)
+
 ament_package()

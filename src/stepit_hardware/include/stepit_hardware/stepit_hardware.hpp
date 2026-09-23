@@ -28,8 +28,10 @@
 
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <stepit_driver/driver.hpp>
@@ -173,6 +175,24 @@ private:
 
   // Store information about current joint states and targets.
   std::vector<Joint> joints_;
+
+  // Maps a configured motor id to the index of the matching entry in joints_.
+  // Built in on_init(); read() uses it to route each reported motor state to
+  // the right joint instead of trusting the reported id as a vector index.
+  std::unordered_map<uint8_t, std::size_t> joint_index_by_id_;
+
+  // True when every joint declares an acceleration and a maximum velocity
+  // within the limits the controller reports for its motor. Logs the first
+  // joint that exceeds them.
+  bool joints_are_within_limits(const std::vector<MotorLimits>& limits) const;
+
+  // True when motor_states reports exactly the configured set of joint ids,
+  // each exactly once. A matching count alone cannot guarantee this: an
+  // out-of-range id or a duplicate id would keep the count correct while
+  // indexing out of bounds or leaving another joint stale. Logs the first
+  // problem found. Tracks the joints already reported in a bitmask, hence the
+  // limit on the number of joints checked in on_init().
+  bool motor_states_are_valid(const std::vector<MotorState>& motor_states) const;
 
   // Interface to send binary data to the hardware using the serial port.
   std::unique_ptr<Driver> driver_;

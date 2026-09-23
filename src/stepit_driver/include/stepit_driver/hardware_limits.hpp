@@ -1,4 +1,4 @@
-// Copyright 2023 Giovanni Remigi
+// Copyright 2026 Giovanni Remigi
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -26,28 +26,41 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#pragma once
+
+#include <cstddef>
+#include <numbers>
+
 #include <stepit_driver/msgs/info_response.hpp>
 
-namespace stepit_driver
+namespace stepit_driver::hardware_limits
 {
-InfoResponse::InfoResponse(Status status, const std::string& info, const Version& version,
-                           const std::vector<MotorLimits>& limits)
-  : Response{ status }, info_{ info }, version_{ version }, limits_{ limits }
-{
-}
+/**
+ * Limits of the StepIt controller. The firmware is the authority: these
+ * mirror NUMBER_OF_MOTORS, MAX_ACCELERATION, MAX_SPEED and CONFIG_TOLERANCE
+ * in src/stepit_mcu/src/main.cpp, converted from steps to radians.
+ *
+ * FakeDriver enforces them so that a configuration accepted in simulation is
+ * one the real controller accepts too. Without this, a robot description that
+ * works in simulation can fail to activate the moment it is run on hardware.
+ */
 
-Version stepit_driver::InfoResponse::version() const
-{
-  return version_;
-}
+// Number of motors the controller drives.
+constexpr std::size_t kMotorCount = 5;
 
-std::string stepit_driver::InfoResponse::info() const
-{
-  return info_;
-}
+// Maximum acceleration: 2 rotations per square second.
+constexpr double kMaxAcceleration = 4.0 * std::numbers::pi;
 
-std::vector<MotorLimits> stepit_driver::InfoResponse::limits() const
-{
-  return limits_;
-}
-}  // namespace stepit_driver
+// Maximum velocity: 3 rotations per second.
+constexpr double kMaxVelocity = 6.0 * std::numbers::pi;
+
+// Tolerance applied when comparing against the limits above, so that a value
+// stated as the limit itself is not rejected by rounding.
+constexpr double kTolerance = 1.001;
+
+// The firmware version the simulated controller reports. Its major number is
+// the protocol version this workspace speaks: see VERSION_MAJOR in
+// src/stepit_mcu/src/main.cpp.
+const Version kFirmwareVersion{ 1, 0, 0 };
+
+}  // namespace stepit_driver::hardware_limits

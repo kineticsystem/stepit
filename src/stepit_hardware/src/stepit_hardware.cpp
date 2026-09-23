@@ -26,6 +26,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <algorithm>
 #include <limits>
 #include <vector>
 #include <string>
@@ -35,6 +36,7 @@
 #include <stepit_driver/msgs/velocity_command.hpp>
 #include <stepit_driver/msgs/position_command.hpp>
 #include <stepit_driver/msgs/acknowledge_response.hpp>
+#include <stepit_driver/msgs/info_response.hpp>
 #include <stepit_driver/msgs/status_response.hpp>
 
 #include <stepit_driver/default_driver_factory.hpp>
@@ -48,6 +50,13 @@
 namespace stepit_driver
 {
 constexpr double kNaN = std::numeric_limits<double>::quiet_NaN();
+// Tolerance applied when comparing a declared value against a reported limit.
+constexpr double kLimitTolerance = 1.001;
+
+// Upper bound on the number of joints, set by the bitmask motor_states_are_valid()
+// uses to track which of them a status response has already reported.
+constexpr std::size_t kMaxJoints = 32;
+
 const auto kLogger = rclcpp::get_logger("stepit_hardware");
 
 StepitHardware::StepitHardware()
@@ -73,10 +82,21 @@ StepitHardware::on_init(const hardware_interface::HardwareComponentInterfacePara
       return CallbackReturn::ERROR;
     }
 
-    // Initialize all joints.
-    joints_.resize(info_.joints.size(), Joint{});
+    // Initialize all joints. Reset the derived state too: on a second call
+    // stale entries would make every configured id look like a duplicate.
+    const std::size_t num_joints = info_.joints.size();
+    joints_.assign(num_joints, Joint{});
+    joint_index_by_id_.clear();
 
-    for (uint i = 0; i < info_.joints.size(); i++)
+    // motor_states_are_valid() tracks the joints it has seen in a bitmask, so
+    // there cannot be more joints than the mask has bits.
+    if (num_joints > kMaxJoints)
+    {
+      RCLCPP_ERROR(kLogger, "%zu joints are declared but at most %zu are supported.", num_joints, kMaxJoints);
+      return CallbackReturn::ERROR;
+    }
+
+    for (uint i = 0; i < num_joints; i++)
     {
       joints_[i].id = static_cast<uint8_t>(std::stoi(info_.joints[i].parameters.at("id")));
       joints_[i].acceleration = std::stod(info_.joints[i].parameters.at("acceleration"));
@@ -86,6 +106,28 @@ StepitHardware::on_init(const hardware_interface::HardwareComponentInterfacePara
       joints_[i].command.position = kNaN;
       joints_[i].command.velocity = kNaN;
       RCLCPP_INFO(kLogger, "joint_id %d: %d", i, joints_[i].id);
+
+      // The controller reports one state per physical motor, indexed 0..N-1,
+      // so a configured id must fall in that range. Reject it here with a
+      // clear message instead of failing later at configure time.
+      if (static_cast<std::size_t>(joints_[i].id) >= num_joints)
+      {
+        RCLCPP_ERROR(kLogger, "joint %d has motor id %d which is out of range [0, %d] for %d joints.",
+                     static_cast<int>(i), static_cast<int>(joints_[i].id), static_cast<int>(num_joints - 1),
+                     static_cast<int>(num_joints));
+        return CallbackReturn::ERROR;
+      }
+
+      // Map the motor id to this joint's index so read() can route a reported
+      // state to the right joint. Reject a duplicate id: it would make the
+      // mapping ambiguous and is a configuration error.
+      auto [it, inserted] = joint_index_by_id_.emplace(joints_[i].id, i);
+      if (!inserted)
+      {
+        RCLCPP_ERROR(kLogger, "motor id %d is used by both joint %d and joint %d; ids must be unique.", joints_[i].id,
+                     static_cast<int>(it->second), static_cast<int>(i));
+        return CallbackReturn::ERROR;
+      }
     }
 
     driver_ = driver_factory_->create(info_);
@@ -116,6 +158,22 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
       return CallbackReturn::FAILURE;
     }
 
+    // Ask the controller what its motors tolerate and check the values the
+    // URDF declares against them. The controller is the authority: it knows
+    // the board and the mechanics, the description does not. Validating here
+    // turns what would be an opaque rejection from the firmware into a
+    // message naming the joint and the limit it exceeds.
+    const InfoResponse info = driver_->get_info(rclcpp::Time{});
+    if (info.status() != Response::Status::Success)
+    {
+      RCLCPP_ERROR(kLogger, "The StepIt controller did not report its limits.");
+      return CallbackReturn::FAILURE;
+    }
+    if (!joints_are_within_limits(info.limits()))
+    {
+      return CallbackReturn::FAILURE;
+    }
+
     // Send configuration parameters to the hardware.
     std::vector<ConfigParam> params;
     for (const auto joint : joints_)
@@ -128,20 +186,22 @@ StepitHardware::on_configure(const rclcpp_lifecycle::State& previous_state)
       return CallbackReturn::FAILURE;
     }
 
-    // Verify that the controller drives as many motors as the joints declared
-    // in the URDF, so that a mismatch is reported here rather than on every
-    // read cycle. This has to happen after configure: the fake driver only
-    // creates its motors once it has received the configuration.
+    // Verify that the controller reports exactly the motors configured above,
+    // so that a mismatch is reported here rather than on every read cycle.
+    // This has to happen after configure: the fake driver only creates its
+    // motors once it has received the configuration.
     const StatusResponse status = driver_->get_status(rclcpp::Time{});
     if (status.status() != Response::Status::Success)
     {
       RCLCPP_ERROR(kLogger, "The StepIt controller did not report its motors status.");
       return CallbackReturn::FAILURE;
     }
-    if (status.motor_states().size() != joints_.size())
+    // A matching motor count does not prove the id mapping: the controller
+    // could report an out-of-range or a duplicated id and still match the
+    // count. Verify the full set so a bad mapping fails here, not on every
+    // read cycle.
+    if (!motor_states_are_valid(status.motor_states()))
     {
-      RCLCPP_ERROR(kLogger, "The StepIt controller drives %zu motors but the URDF declares %zu joints.",
-                   status.motor_states().size(), joints_.size());
       return CallbackReturn::FAILURE;
     }
     return CallbackReturn::SUCCESS;
@@ -196,6 +256,67 @@ StepitHardware::on_deactivate([[maybe_unused]] const rclcpp_lifecycle::State& pr
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
+bool StepitHardware::joints_are_within_limits(const std::vector<MotorLimits>& limits) const
+{
+  for (const auto& joint : joints_)
+  {
+    const auto it = std::find_if(limits.cbegin(), limits.cend(),
+                                 [&joint](const MotorLimits& limit) { return limit.id() == joint.id; });
+    if (it == limits.cend())
+    {
+      RCLCPP_ERROR(kLogger, "The StepIt controller reported no limits for motor %d.", joint.id);
+      return false;
+    }
+
+    // A tolerance is applied because a description normally states the limit
+    // itself, and the round trip through the controller rounds it.
+    if (joint.acceleration > it->max_acceleration() * kLimitTolerance)
+    {
+      RCLCPP_ERROR(kLogger, "Motor %d: acceleration %f rad/s^2 exceeds the controller limit of %f rad/s^2.", joint.id,
+                   joint.acceleration, it->max_acceleration());
+      return false;
+    }
+    if (joint.max_velocity > it->max_velocity() * kLimitTolerance)
+    {
+      RCLCPP_ERROR(kLogger, "Motor %d: max velocity %f rad/s exceeds the controller limit of %f rad/s.", joint.id,
+                   joint.max_velocity, it->max_velocity());
+      return false;
+    }
+  }
+  return true;
+}
+
+bool StepitHardware::motor_states_are_valid(const std::vector<MotorState>& motor_states) const
+{
+  if (motor_states.size() != joints_.size())
+  {
+    RCLCPP_ERROR(kLogger, "status reports %zu motors but %zu joints are configured.", motor_states.size(),
+                 joints_.size());
+    return false;
+  }
+
+  // One bit per joint, so this runs without allocating on the read cycle.
+  // on_init() guarantees there are no more joints than bits.
+  uint32_t seen = 0;
+  for (const auto& state : motor_states)
+  {
+    auto it = joint_index_by_id_.find(state.id());
+    if (it == joint_index_by_id_.end())
+    {
+      RCLCPP_ERROR(kLogger, "status reports motor id %d which is not a configured joint.", state.id());
+      return false;
+    }
+    const uint32_t bit = uint32_t{ 1 } << it->second;
+    if (seen & bit)
+    {
+      RCLCPP_ERROR(kLogger, "status reports motor id %d more than once.", state.id());
+      return false;
+    }
+    seen |= bit;
+  }
+  return true;
+}
+
 hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
                                                      [[maybe_unused]] const rclcpp::Duration& period)
 {
@@ -204,17 +325,18 @@ hardware_interface::return_type StepitHardware::read(const rclcpp::Time& time,
     StatusResponse response = driver_->get_status(time);
 
     auto motor_states = response.motor_states();
-    if (motor_states.size() != joints_.size())
+    if (!motor_states_are_valid(motor_states))
     {
-      RCLCPP_ERROR(kLogger, "incorrect number of joints");
       return hardware_interface::return_type::ERROR;
     }
 
-    for (std::size_t i = 0; i < motor_states.size(); ++i)
+    for (const auto& state : motor_states)
     {
-      uint8_t motor_id = motor_states[i].id();
-      joints_[motor_id].state.position = motor_states[i].position();
-      joints_[motor_id].state.velocity = motor_states[i].velocity();
+      // motor_states_are_valid() guarantees every reported id maps to a
+      // distinct configured joint, so this lookup cannot miss or collide.
+      const std::size_t index = joint_index_by_id_.at(state.id());
+      joints_[index].state.position = state.position();
+      joints_[index].state.velocity = state.velocity();
     }
 
     return hardware_interface::return_type::OK;
