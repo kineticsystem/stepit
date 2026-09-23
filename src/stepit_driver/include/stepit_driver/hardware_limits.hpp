@@ -29,7 +29,9 @@
 #pragma once
 
 #include <cstddef>
-#include <numbers>
+// cpplint's list of C++ headers predates C++20, so it takes <numbers> for a C
+// system header and wants it before <cstddef>.
+#include <numbers>  // NOLINT(build/include_order)
 
 #include <stepit_driver/msgs/info_response.hpp>
 
