@@ -53,6 +53,9 @@ public:
   InfoResponse get_info(const rclcpp::Time& time) const override;
 
 private:
+  /** Makes every motor hold its current position, replacing the goal of a previous session. */
+  bool hold_motors() const;
+
   std::unique_ptr<cobs_serial::CobsSerial> cobs_serial_;
 };
 }  // namespace stepit_driver

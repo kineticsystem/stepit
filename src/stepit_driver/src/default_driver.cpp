@@ -111,7 +111,45 @@ bool DefaultDriver::connect()
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
-  return connected;
+  return connected && hold_motors();
+}
+
+bool DefaultDriver::hold_motors() const
+{
+  // A new session must not resume the goal that the controller kept from the
+  // previous one. Firmware before 1.1.1 stores a velocity of zero, which the
+  // hardware sends when it releases the motors, as "+infinity at speed zero",
+  // and the configuration that follows a connection restores the speed: every
+  // motor would run away until the first command. Pin each one where it is.
+  try
+  {
+    const StatusResponse status = get_status(rclcpp::Time{});
+    if (status.status() != Response::Status::Success)
+    {
+      RCLCPP_ERROR(kLogger, "The StepIt controller did not report where its motors are.");
+      return false;
+    }
+    std::vector<PositionGoal> goals;
+    for (const auto& motor : status.motor_states())
+    {
+      goals.emplace_back(PositionGoal{ motor.id(), motor.position() });
+    }
+    if (goals.empty())
+    {
+      return true;
+    }
+    if (set_position(rclcpp::Time{}, PositionCommand{ goals }).status() != Response::Status::Success)
+    {
+      RCLCPP_ERROR(kLogger, "The StepIt controller refused to hold its motors where they are.");
+      return false;
+    }
+    return true;
+  }
+  catch (const std::exception& ex)
+  {
+    RCLCPP_ERROR(kLogger, "Cannot hold the motors where they are: %s", ex.what());
+    return false;
+  }
 }
 
 void DefaultDriver::disconnect()
