@@ -59,7 +59,7 @@ constexpr char NAME[] = "STEPIT\0";
 // Bump the minor and the patch number for anything else.
 constexpr byte VERSION_MAJOR = 1;
 constexpr byte VERSION_MINOR = 1;
-constexpr byte VERSION_PATCH = 0;
+constexpr byte VERSION_PATCH = 1;
 
 // The time between each execution of the run method.
 // If the interval is too large the motors will lose steps.
@@ -413,6 +413,12 @@ void configureCommand(DataBuffer* cmd)
       motorConfig[motorId] = MotorConfig{ accelerations[i], maxSpeeds[i] };
       stepper[motorId].setAcceleration(accelerations[i]);
       stepper[motorId].setMaxSpeed(maxSpeeds[i]);
+      // A configuration starts a new session: hold the motor where it is. The
+      // goal left by the previous session must not resume with the speed
+      // restored below, e.g. the "infinity at speed 0" of a velocity of zero,
+      // which would otherwise make the motor run away until the host commands
+      // it again.
+      motorGoal[motorId].setPosition(stepper[motorId].currentPosition());
       motorGoal[motorId].setSpeed(maxSpeeds[i]);
     }
   }
@@ -459,7 +465,9 @@ void speedCommand(DataBuffer* cmd)
   }
 
   // Second pass: apply. We move the stepper at a constant speed to the
-  // maximum or the minimum possible positions.
+  // maximum or the minimum possible positions, and hold it where it is for a
+  // speed of zero: an infinite target at speed zero would run away as soon as
+  // something raised the goal speed again, e.g. a configuration.
   // LONG_MAX (0x7FFFFFFF) and LONG_MIN (-80000000) do not work, probably
   // because of inner logic in the AccelStepper library, so we chose close
   // enough values.
@@ -469,13 +477,17 @@ void speedCommand(DataBuffer* cmd)
     {
       const byte motorId = ids[i];
       const float speed = speeds[i];
-      if (speed >= 0)
+      if (speed > 0)
       {
         motorGoal[motorId].setPosition(0x7F000000);  // Move to +infinity.
       }
-      else
+      else if (speed < 0)
       {
         motorGoal[motorId].setPosition(-0x7F000000);  // Move to -infinity.
+      }
+      else
+      {
+        motorGoal[motorId].setPosition(stepper[motorId].currentPosition());  // Stay here.
       }
       motorGoal[motorId].setSpeed(min(abs(speed), motorConfig[motorId].getMaxSpeed()));
     }

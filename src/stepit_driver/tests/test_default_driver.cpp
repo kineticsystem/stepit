@@ -248,26 +248,96 @@ TEST(TestDefaultDriver, send_configure_command)
 
 /**
  * In this test we connect to a device that identifies itself as a StepIt
- * controller and we check that the connection succeeds.
+ * controller and we check that the connection succeeds, and that the driver
+ * then pins every motor where it is: a new session must not resume the goal
+ * the controller kept from the previous one.
  */
 TEST(TestDefaultDriver, connect_to_stepit_controller)
 {
-  const std::vector<uint8_t> expected_request{
+  const std::vector<uint8_t> expected_info_request{
     0x76,  // info query ID
   };
+  const std::vector<uint8_t> expected_status_request{
+    0x75,  // status query ID
+  };
+  const std::vector<uint8_t> expected_hold_request{
+    0x71,  // move command ID
+    0x00,  // motor ID
+    0x3F,  // position = 0.5 (rad), where motor 0 is
+    0x00,  // position
+    0x00,  // position
+    0x00,  // position
+    0x01,  // motor ID
+    0x3F,  // position = 0.75 (rad), where motor 1 is
+    0x40,  // position
+    0x00,  // position
+    0x00   // position
+  };
 
-  const std::vector<uint8_t> mocked_response = info_response("STEPIT");
+  const std::vector<uint8_t> status_response{
+    0x11,                    // status success
+    0x00,                    // motor ID
+    0x3F, 0x00, 0x00, 0x00,  // position = 0.5 (rad)
+    0x00, 0x00, 0x00, 0x00,  // speed = 0 (rad/s)
+    0x00, 0x00, 0x00, 0x00,  // distance to go = 0 (rad)
+    0x01,                    // motor ID
+    0x3F, 0x40, 0x00, 0x00,  // position = 0.75 (rad)
+    0x00, 0x00, 0x00, 0x00,  // speed = 0 (rad/s)
+    0x00, 0x00, 0x00, 0x00,  // distance to go = 0 (rad)
+  };
+  const std::vector<uint8_t> ack_response{
+    0x11  // status success
+  };
 
-  std::vector<uint8_t> actual_request;
+  std::vector<std::vector<uint8_t>> actual_requests;
   auto serial = std::make_unique<MockCobsSerial>();
   EXPECT_CALL(*serial, open());
-  EXPECT_CALL(*serial, write(_)).WillOnce(SaveArg<0>(&actual_request));
-  EXPECT_CALL(*serial, read()).WillOnce(Return(mocked_response));
+  EXPECT_CALL(*serial, write(_)).Times(3).WillRepeatedly([&](const std::vector<uint8_t>& request) {
+    actual_requests.push_back(request);
+  });
+  EXPECT_CALL(*serial, read())
+      .WillOnce(Return(info_response("STEPIT")))
+      .WillOnce(Return(status_response))
+      .WillOnce(Return(ack_response));
 
   auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
 
   ASSERT_TRUE(driver->connect());
-  ASSERT_THAT(to_hex(actual_request), to_hex(expected_request));
+  ASSERT_EQ(static_cast<std::size_t>(3), actual_requests.size());
+  ASSERT_THAT(to_hex(actual_requests[0]), to_hex(expected_info_request));
+  ASSERT_THAT(to_hex(actual_requests[1]), to_hex(expected_status_request));
+  ASSERT_THAT(to_hex(actual_requests[2]), to_hex(expected_hold_request));
+}
+
+/**
+ * In this test the controller identifies itself but refuses to hold its
+ * motors where they are: the connection must fail rather than leave a goal
+ * of the previous session in place.
+ */
+TEST(TestDefaultDriver, connect_fails_when_motors_cannot_be_held)
+{
+  const std::vector<uint8_t> status_response{
+    0x11,                    // status success
+    0x00,                    // motor ID
+    0x3F, 0x00, 0x00, 0x00,  // position = 0.5 (rad)
+    0x00, 0x00, 0x00, 0x00,  // speed = 0 (rad/s)
+    0x00, 0x00, 0x00, 0x00,  // distance to go = 0 (rad)
+  };
+  const std::vector<uint8_t> error_response{
+    0x12  // status error
+  };
+
+  auto serial = std::make_unique<MockCobsSerial>();
+  EXPECT_CALL(*serial, open());
+  EXPECT_CALL(*serial, write(_)).Times(3);
+  EXPECT_CALL(*serial, read())
+      .WillOnce(Return(info_response("STEPIT")))
+      .WillOnce(Return(status_response))
+      .WillOnce(Return(error_response));
+
+  auto driver = std::make_unique<stepit_driver::DefaultDriver>(std::move(serial));
+
+  ASSERT_FALSE(driver->connect());
 }
 
 /**
