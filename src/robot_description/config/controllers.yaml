@@ -38,6 +38,27 @@ position_controller:
 joint_trajectory_controller:
   ros__parameters:
     allow_partial_joints_goal: true
+
+    # Start each new trajectory from the last command rather than the measured
+    # state. The motors trail a move by about 50 ms, so a goal sent right after
+    # another one would otherwise start from a joint still turning, and the
+    # controller would carry a joint left out of the goal some 20 degrees past
+    # its target and back. The hardware starts its commands as NaN, so on
+    # activation the controller still starts from the measured position.
+    interpolate_from_desired_state: true
+
+    # A goal succeeds only once every joint has reached its target, not when the
+    # trajectory ends: otherwise a behavior that reads the positions right after
+    # a move reads them some 7 degrees short. A joint that is not within `goal`
+    # radians (0.01 rad is 5 motor steps) goal_time seconds after the end fails
+    # the goal.
+    constraints:
+      goal_time: 0.5
+      joint1: { goal: 0.01 }
+      joint2: { goal: 0.01 }
+      joint3: { goal: 0.01 }
+      joint4: { goal: 0.01 }
+      joint5: { goal: 0.01 }
     joints:
       - joint1
       - joint2
