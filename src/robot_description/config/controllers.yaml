@@ -51,9 +51,11 @@ joint_trajectory_controller:
     # trajectory ends: otherwise a behavior that reads the positions right after
     # a move reads them some 7 degrees short. A joint that is not within `goal`
     # radians (0.01 rad is 5 motor steps) goal_time seconds after the end fails
-    # the goal.
+    # the goal. The motors plan to stop at every new target, so they trail a long
+    # fast move further than a short one: the fake motor needs 0.58 s after a
+    # 5-turn move at 90% of the limits to settle, 0.70 s after a 10-turn one.
     constraints:
-      goal_time: 0.5
+      goal_time: 1.0
       joint1: { goal: 0.01 }
       joint2: { goal: 0.01 }
       joint3: { goal: 0.01 }
